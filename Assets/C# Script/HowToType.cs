@@ -13,5 +13,7 @@ public class HowToType : MonoBehaviour
                 {
                     ;
                 }
+
+        미니게임명: minigame1-10 (경찰플래닛 보스의 경우)
     */
 }
