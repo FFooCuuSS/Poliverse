@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using static Manager;
 
@@ -10,35 +11,44 @@ public class UpDown : MonoBehaviour
     public float speed;
 
     private Manager manager;
-    private bool move = false;
 
-    private void Start()
+    void Start()
     {
-        manager = ManagerObj.GetComponent<Manager>();
-    }
-
-    void Update()
-    {
-        if (move)
+        if (ManagerObj != null)
         {
-            Vector3 pos = transform.position;
-            float direction = goUp ? 1f : -1f;
-            pos.y += speed * direction * Time.deltaTime;
-            transform.position = pos;
-        }        
+            manager = ManagerObj.GetComponent<Manager>();
+        }
     }
 
     private void OnMouseDown()
     {
-        move = true;
+        if (manager.platformIsMoving) return;
 
-        Invoke(nameof(SpawnWithDelay), 1f); 
-        Destroy(gameObject, 2f); 
+        manager.randomText.HideText(); // 이전 텍스트 숨기기
+
+        manager.platformIsMoving = true;
+        manager.MovePerson(goUp);
+
+        Invoke("MoveWithDelay", 0.65f);
+        Invoke("SpawnWithDelay", 1f);
+
+        Destroy(gameObject, 2f);
+    }
+
+    private void MoveWithDelay()
+    {
+        float direction = goUp ? 1f : -1f;
+        Vector3 targetPos = transform.position + Vector3.up * direction * speed;
+
+        transform.DOMove(targetPos, 0.6f)
+                 .SetEase(Ease.OutQuad);
     }
 
     private void SpawnWithDelay()
     {
         PlatformType typeToSpawn = goUp ? PlatformType.Up : PlatformType.Down;
         manager.SpawnPlatform(typeToSpawn);
+
+        manager.platformIsMoving = false;
     }
 }

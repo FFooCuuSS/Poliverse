@@ -2,41 +2,111 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using DG.Tweening;
 
 public class Manager : MonoBehaviour
 {
+    public GameObject ScoreText;
+
     public GameObject UpPlatform;
     public GameObject DownPlatform;
     public GameObject Police;
     public GameObject Sinner;
-
+    public GameObject RandomTextObj;
     private GameObject currentPerson;
 
-    private bool sinner;
+    private Score score;
+    public RandomText randomText;
+
+    public bool spawnMan;
+    public bool platformIsMoving = false;
+
+    private bool isSinner;
 
     public enum PlatformType { Up, Down }
 
     private void Start()
     {
-        sinner = true;
+        spawnMan = true;
+
+        score = ScoreText.GetComponent<Score>();
+        randomText = RandomTextObj.GetComponent<RandomText>();
 
         SpawnPlatform(PlatformType.Up);
         SpawnPlatform(PlatformType.Down);
     }
 
+    private void Update()
+    {
+        if (spawnMan)
+        {
+            SpawnPerson();
+            spawnMan = false;
+        }
+    }
+
     public void SpawnPlatform(PlatformType type)
     {
         GameObject prefab = type == PlatformType.Up ? UpPlatform : DownPlatform;
-        UpDown upDown = prefab.GetComponent<UpDown>();
+        GameObject instance = Instantiate(prefab);
+        UpDown upDown = instance.GetComponent<UpDown>();
         upDown.ManagerObj = this.gameObject;
-        Instantiate(prefab);
 
-        SpawnPerson();
+        if (currentPerson != null)
+            Destroy(currentPerson);
+
+        spawnMan = true;
     }
 
     public void SpawnPerson()
     {
-        currentPerson = Random.Range(0, 2) == 0 ? Police : Sinner;
-        Instantiate(currentPerson);
+        bool spawnSinner = Random.Range(0, 2) == 0;
+        GameObject prefab = spawnSinner ? Sinner : Police;
+        isSinner = spawnSinner;
+        currentPerson = Instantiate(prefab);
+
+        randomText.ShowLine(!isSinner); // 경찰이면 true
+    }
+
+    public void MovePerson(bool goUp)
+    {
+        Vector2 targetPos = goUp ? new Vector2(6f, -0.37f) : new Vector2(-6f, -0.37f);
+
+        currentPerson.transform.DOMove(targetPos, 0.5f)
+            .SetEase(Ease.OutQuad)
+            .OnComplete(() =>
+            {
+                // 0.15초 후에 Y축 이동 실행
+                StartCoroutine(MoveUpOrDownAfterDelay(goUp));
+            });
+
+        // 점수 판정
+        if ((goUp && !isSinner) || (!goUp && isSinner))
+        {
+            Success();
+        }
+        else
+        {
+            Failure();
+        }
+    }
+    private IEnumerator MoveUpOrDownAfterDelay(bool goUp)
+    {
+        yield return new WaitForSeconds(0.15f);
+
+        Vector2 finalPos = currentPerson.transform.position + Vector3.up * (goUp ? 12f : -12f);
+
+        currentPerson.transform.DOMove(finalPos, 0.3f)
+            .SetEase(Ease.OutQuad);
+    }
+
+    private void Success()
+    {
+        score.nScore++;
+    }
+
+    private void Failure()
+    {
+
     }
 }
