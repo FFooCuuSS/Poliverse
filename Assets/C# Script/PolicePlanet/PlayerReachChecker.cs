@@ -4,38 +4,43 @@ using UnityEngine;
 
 public class PlayerReachChecker : MonoBehaviour
 {
-    [SerializeField] private List<BoxCollider2D> ObstacleColliders;
     [SerializeField] private BoxCollider2D goalCollider;
     private CircleCollider2D playerCollider;
+    private DragAndDrop dragAndDrop;
 
-    private bool gameEnd = false;
+    private bool isGameOver = false;
 
     private void Start()
     {
         playerCollider = GetComponent<CircleCollider2D>();
+        dragAndDrop = GetComponent<DragAndDrop>();
     }
 
     private void Update()
     {
-        if (gameEnd) return;
+        if (isGameOver) return;
 
         BoundCheck();
         GoalCheck();
     }
     private void BoundCheck()
     {
-        Bounds playerBounds = playerCollider.bounds;
+        Collider2D[] hits = Physics2D.OverlapPointAll(transform.position);
 
-        foreach (var obstacleCol in ObstacleColliders)
+        bool isOnPath = false;
+
+        foreach(var hit in hits)
         {
-            Bounds obstacleBounds = obstacleCol.bounds;
-
-            if(playerBounds.Intersects(obstacleBounds))
+            if (hit.CompareTag("Path"))
             {
-                gameEnd = true;
-                Debug.Log("게임 실패");
-                //이후 미니게임 창 꺼짐 로직 추가 예정
+                isOnPath = true;
+                break;
             }
+        }
+        if(!isOnPath)
+        {
+            isGameOver = true;
+            Debug.Log("게임오버");
         }
     }
 
@@ -46,7 +51,7 @@ public class PlayerReachChecker : MonoBehaviour
 
         if(playerBounds.Intersects(goalBounds))
         {
-            gameEnd = true;
+            isGameOver = true;
             Debug.Log("게임 성공");
             //이후 미니게임 창 꺼짐 로직 추가 예정
         }

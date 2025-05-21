@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -7,75 +8,50 @@ using UnityEngine;
 
 public class HandcuffFitChecker : MonoBehaviour
 {
-    [SerializeField] private List<Collider> handColliders;
+    [SerializeField] private List<CircleCollider2D> handColliders;
+    [SerializeField] private List<DragAndDrop> dragAndDrops;
     private CircleCollider2D cuffCollider;
+    private DragAndDrop dragAndDrop;
 
-    public float criticalPoint = 50f;
-    private float leftHandPercent;
-    private float rightHandPercent;
+    private bool isSnapped = false;
 
 
     private void Start()
     {
         cuffCollider = GetComponent<CircleCollider2D>();
+        dragAndDrop = GetComponent<DragAndDrop>();
     }
     private void Update()
     {
-        BoundCheck();
-        isAllCheck();
+        if (!isSnapped)
+        {
+            CheckAndSnap();
+        }
+        GameClearCheck();
     }
 
-    private void BoundCheck()
+    private void CheckAndSnap()
     {
-        Bounds cuffBounds = cuffCollider.bounds;
-
-        foreach (var handCol in handColliders)
+        foreach (var handcol in handColliders)
         {
-            Bounds handBounds = handCol.bounds;
-
-            if (cuffBounds.Intersects(handBounds))
+            if (cuffCollider.bounds.Intersects(handcol.bounds))
             {
-                Bounds intersect = GetIntersectionBounds(cuffBounds, handBounds);
-                float intersectVolume = intersect.size.x * intersect.size.y;
-                float handVolume = handBounds.size.x * handBounds.size.y;
-                float overlapPercent = intersectVolume * 100 / handVolume;
+                transform.position = handcol.bounds.center;
+                isSnapped = true;
 
-                if(handCol.tag == "LeftHand")
-                {
-                    leftHandPercent = overlapPercent;
-                   // Debug.Log($"left: {leftHandPercent}");
-                }
-                if(handCol.tag == "RightHand")
-                {
-                    rightHandPercent = overlapPercent;
-                   // Debug.Log($"right: {rightHandPercent}");
-
-                }
+                if (dragAndDrop != null) dragAndDrop.enabled = false;
+                Debug.Log($"수갑 {gameObject.name} 겹침, 고정 완료"); break;
             }
         }
     }
 
-    private void isAllCheck()
+    private void GameClearCheck()
     {
-        Debug.Log(leftHandPercent);
-        Debug.Log(rightHandPercent);
-
-        if ((leftHandPercent > criticalPoint) && (rightHandPercent > criticalPoint))
+        var all = FindObjectsOfType<HandcuffFitChecker>();
+        foreach (var cuff in all)
         {
-            Debug.Log("GameClear");
+            if (!cuff.isSnapped) return;
         }
+        Debug.Log("gameClear");
     }
-
-    private Bounds GetIntersectionBounds(Bounds a, Bounds b)
-    {
-        Vector3 min = Vector3.Max(a.min, b.min);
-        Vector3 max = Vector3.Min(a.max, b.max);
-        return new Bounds((min + max) / 2, max - min);
-        //두 영역의 겹치는 최소점, 최대점을 알고 중간지점 중심으로 새로운 bounds 생성
-
-    }
-
-
-
-
 }

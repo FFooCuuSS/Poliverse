@@ -6,6 +6,9 @@ TagManager:
   tags:
   - LeftHand
   - RightHand
+  - Path
+  - Goal
+  - BackGround
   layers:
   - Default
   - TransparentFX
