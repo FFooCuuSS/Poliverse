@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections;
 
 public abstract class MiniGameBase : MonoBehaviour
 {
@@ -7,6 +8,7 @@ public abstract class MiniGameBase : MonoBehaviour
     public event Action OnFail;
 
     public bool IsSuccess { get; protected set; }
+    public bool IsInputLocked { get; protected set; } = false;
 
     // 내부에서 override할 수 있게 유지
     protected virtual float TimerDuration => 10f;
@@ -19,6 +21,7 @@ public abstract class MiniGameBase : MonoBehaviour
     public virtual void StartGame()
     {
         IsSuccess = false;
+        IsInputLocked = false;
         Debug.Log($"{gameObject.name} 게임 시작!");
         Debug.Log($"설명: {MinigameExplain}");
         Debug.Log($"타이머: {TimerDuration}초");
@@ -37,6 +40,7 @@ public abstract class MiniGameBase : MonoBehaviour
         IsSuccess = true;
         Debug.Log($"{gameObject.name} 성공!");
         OnSuccess?.Invoke();
+        StartCoroutine(LockInputTemporarily(3f));
     }
 
     protected void Fail()
@@ -45,6 +49,14 @@ public abstract class MiniGameBase : MonoBehaviour
         IsSuccess = false;
         Debug.Log($"{gameObject.name} 실패!");
         OnFail?.Invoke();
+        StartCoroutine(LockInputTemporarily(3f));
+    }
+
+    protected IEnumerator LockInputTemporarily(float duration)
+    {
+        IsInputLocked = true;
+        yield return new WaitForSeconds(duration);
+        IsInputLocked = false;
     }
 }
 

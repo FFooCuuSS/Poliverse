@@ -128,6 +128,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f73d27fc91fb4414691f77cccec61f50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  BossStage: {fileID: 5036016482146621326}
   ScoreText: {fileID: 3299152267961153330}
   UpPlatform: {fileID: 6706325807068112129, guid: 42ffa58a33c5ff445830a9c8bb1a5b91, type: 3}
   DownPlatform: {fileID: 7242658782053470114, guid: c8e6c30d3c478074eaa0027baf9c4145, type: 3}
@@ -641,6 +642,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1835633290348918403}
+  - component: {fileID: 8257505951333607323}
   m_Layer: 0
   m_Name: 1-10minigame
   m_TagString: Untagged
@@ -670,6 +672,18 @@ Transform:
   - {fileID: 6135117778465451445}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8257505951333607323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5036016482146621326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2466f06d221036749ba90735137cfc7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6388568413556563299
 GameObject:
   m_ObjectHideFlags: 0

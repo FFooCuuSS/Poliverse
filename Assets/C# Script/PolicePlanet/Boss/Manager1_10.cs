@@ -6,8 +6,9 @@ using DG.Tweening;
 
 public class Manager : MonoBehaviour
 {
-    public GameObject ScoreText;
+    public GameObject BossStage;
 
+    public GameObject ScoreText;
     public GameObject UpPlatform;
     public GameObject DownPlatform;
     public GameObject Police;
@@ -16,6 +17,7 @@ public class Manager : MonoBehaviour
     private GameObject currentPerson;
 
     private Score score;
+    private Minigame_1_10 minigame_1_10;
     public RandomText randomText;
 
     public bool spawnMan;
@@ -29,6 +31,7 @@ public class Manager : MonoBehaviour
     {
         spawnMan = true;
 
+        minigame_1_10 = BossStage.GetComponent<Minigame_1_10>();
         score = ScoreText.GetComponent<Score>();
         randomText = RandomTextObj.GetComponent<RandomText>();
 
@@ -103,6 +106,7 @@ public class Manager : MonoBehaviour
     private void Success()
     {
         score.nScore++;
+        if (score.nScore >= 15) minigame_1_10.Succeed();
     }
 
     private void Failure()
