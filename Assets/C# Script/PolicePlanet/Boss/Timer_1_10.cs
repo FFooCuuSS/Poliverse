@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Timer : MonoBehaviour
+public class Timer_1_10 : MonoBehaviour
 {
     private Scrollbar scrollbar;
     public float duration = 20f;
