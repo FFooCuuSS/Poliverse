@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 73190338103616054}
   m_Layer: 0
-  m_Name: Polices
+  m_Name: 1-5Polices
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
