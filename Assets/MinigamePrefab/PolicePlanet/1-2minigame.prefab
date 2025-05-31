@@ -312,7 +312,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8278638915861064969}
   m_Layer: 0
-  m_Name: PoliceGame2
+  m_Name: 1-2minigame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
