@@ -4,23 +4,14 @@
 TagManager:
   serializedVersion: 2
   tags:
-<<<<<<< Updated upstream
-=======
-<<<<<<< HEAD
-  - LeftHand
-  - RightHand
-  - Path
-  - Goal
-  - BackGround
->>>>>>> Stashed changes
-  - Police
-  - Thief
   - Wall
+  - RightHand
+  - LeftHand
+  - Path
+  - Police
   - Bag
-<<<<<<< Updated upstream
-=======
->>>>>>> 365a2ad1f640769b23301bfe81f04ce1afddba38
->>>>>>> Stashed changes
+  - Floor
+  - Cake
   layers:
   - Default
   - TransparentFX
@@ -28,7 +19,7 @@ TagManager:
   - 
   - Water
   - UI
-  - Hole
+  - 
   - 
   - 
   - 
