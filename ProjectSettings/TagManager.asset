@@ -3,17 +3,25 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Police
+  - Wall
+  - RightHand
+  - LeftHand
+  - Path
+  - Floor
+  - Cake
+  - Thief
+  - Bag
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
   - Water
   - UI
   - 
   - 
-  - 
+  - DrawLayer
   - 
   - 
   - 
