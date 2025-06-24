@@ -2,12 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Shoot3_5 : MonoBehaviour
+public class CameraMove1_1 : MonoBehaviour
 {
     public GameObject spyTracker;
 
     private Camera mainCam;
-    public float followSpeed = 2f;
+    public float followSpeed = 1f;
     public Vector2 moveLimitMin; // 카메라 제한 범위 최소
     public Vector2 moveLimitMax; // 카메라 제한 범위 최대
 
@@ -26,12 +26,12 @@ public class Shoot3_5 : MonoBehaviour
         Vector3 mouseWorldPos = mainCam.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = mainCam.transform.position.z;
 
-        Vector3 targetPos = Vector3.Lerp(mainCam.transform.position, mouseWorldPos, followSpeed * Time.deltaTime);
+        Vector3 targetPos = Vector3.Lerp(mainCam.transform.position, mouseWorldPos, followSpeed * Time.deltaTime).normalized;
         targetPos.x = Mathf.Clamp(targetPos.x, moveLimitMin.x, moveLimitMax.x);
         targetPos.y = Mathf.Clamp(targetPos.y, moveLimitMin.y, moveLimitMax.y);
 
         mainCam.transform.position = targetPos;
-        spyTracker.transform.position=targetPos;
+        spyTracker.transform.position = targetPos;
 
         // 2. 마우스 아래 오브젝트 감지
         CheckMouseOverEnemy();
@@ -44,8 +44,8 @@ public class Shoot3_5 : MonoBehaviour
 
         if (hit.collider != null && hit.collider.CompareTag("Enemy"))
         {
-            Debug.Log("적이다");
-            hit.collider.GetComponent<CheckFalse3_5>().isSpyers = true;
+            //Debug.Log("적이다");
+            //hit.collider.GetComponent<CheckFalse1_1>().isSpyers = true;
         }
     }
 }

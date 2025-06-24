@@ -13,15 +13,17 @@ TagManager:
   - Cake
   - Thief
   - Bag
+  - Enemy
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
   - Water
+  - Water
   - UI
   - 
-  - 
   - DrawLayer
+  - 
   - 
   - 
   - 
