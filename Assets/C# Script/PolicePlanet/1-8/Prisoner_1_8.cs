@@ -1,63 +1,45 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class Prisoner_1_8 : MonoBehaviour
 {
-    public RectTransform prison;       // 감옥 Image
-    public float moveSpeed = 100f;     // UI 단위에서 속도 (px/s)
+    public float moveSpeed = 0.1f;
+    public GameObject prison;
 
-    private RectTransform rectTransform;
-    private UIDragAndDrop drag;
     private Vector2 moveDirection;
 
-    void Start()
-    {
-        rectTransform = GetComponent<RectTransform>();
-        drag = GetComponent<UIDragAndDrop>();
+    public float minX = -6.5f;
+    public float maxX = 6.5f;
+    public float minY = -4.5f;
+    public float maxY = 4.5f;
 
-        SetNewDirection();
-    }
+    public float spawnMinDistance = 3f; // 감옥으로부터 최소 거리
+
 
     void Update()
     {
-        if (drag != null && drag.IsDragging)
-            return;
+        UpdateMoveDirection();
 
-        rectTransform.anchoredPosition += moveDirection * moveSpeed * Time.deltaTime;
+        Vector2 newPosition = (Vector2)transform.position + moveDirection * moveSpeed * Time.deltaTime;
 
-        // 감옥과 겹쳤는지 확인
-        if (RectOverlaps(rectTransform, prison))
+        newPosition.x = Mathf.Clamp(newPosition.x, minX, maxX);
+        newPosition.y = Mathf.Clamp(newPosition.y, minY, maxY);
+
+        transform.position = new Vector3(newPosition.x, newPosition.y, 0f);
+    }
+
+    void UpdateMoveDirection()
+    {
+        Vector2 prisonerPos = transform.position;
+        Vector2 prisonPos = prison.transform.position;
+
+        Vector2 awayFromPrison = (prisonerPos - prisonPos).normalized;
+
+        if (awayFromPrison == Vector2.zero)
         {
-            SetNewDirection();
-        }
-    }
-
-    void SetNewDirection()
-    {
-        Vector2 fromPrison = rectTransform.anchoredPosition - prison.anchoredPosition;
-        if (fromPrison == Vector2.zero)
-        {
-            fromPrison = Random.insideUnitCircle.normalized;
+            awayFromPrison = Random.insideUnitCircle.normalized;
         }
 
-        float angle = Random.Range(-45f, 45f);
-        moveDirection = Quaternion.Euler(0, 0, angle) * fromPrison.normalized;
-    }
-
-    bool RectOverlaps(RectTransform a, RectTransform b)
-    {
-        Rect aRect = GetWorldRect(a);
-        Rect bRect = GetWorldRect(b);
-        return aRect.Overlaps(bRect);
-    }
-
-    Rect GetWorldRect(RectTransform rt)
-    {
-        Vector3[] corners = new Vector3[4];
-        rt.GetWorldCorners(corners);
-        Vector2 size = corners[2] - corners[0];
-        return new Rect(corners[0], size);
+        moveDirection = awayFromPrison;
     }
 }

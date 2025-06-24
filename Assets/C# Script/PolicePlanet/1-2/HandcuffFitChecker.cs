@@ -8,6 +8,9 @@ using UnityEngine;
 
 public class HandcuffFitChecker : MonoBehaviour
 {
+    public GameObject stage_1_2;
+    private Minigame_1_2 minigame_1_2;
+
     [SerializeField] private List<CircleCollider2D> handColliders;
     [SerializeField] private List<DragAndDrop> dragAndDrops;
     private CircleCollider2D cuffCollider;
@@ -18,6 +21,7 @@ public class HandcuffFitChecker : MonoBehaviour
 
     private void Start()
     {
+        minigame_1_2 = stage_1_2.GetComponent<Minigame_1_2>();
         cuffCollider = GetComponent<CircleCollider2D>();
         dragAndDrop = GetComponent<DragAndDrop>();
     }
@@ -52,6 +56,6 @@ public class HandcuffFitChecker : MonoBehaviour
         {
             if (!cuff.isSnapped) return;
         }
-        Debug.Log("gameClear");
+        minigame_1_2.Succeed();
     }
 }

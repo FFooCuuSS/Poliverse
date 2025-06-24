@@ -1,19 +1,27 @@
-using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Manager_1_8 : MonoBehaviour
 {
-    public GameObject prisonerPrefab;      // 프리팹
-    public RectTransform prison;           // 감옥 오브젝트
-    public RectTransform canvasTransform;  // 캔버스의 RectTransform
-    public int numberOfPrisoners = 5;
-    public float gameTime = 60f;
+    public GameObject stage_1_8;
+    public GameObject prisonerPrefab;
+    public GameObject prisonObj;
 
-    private GameObject[] prisoners;
+    private Minigame_1_8 minigame_1_8;
+    private PrisonTrigger prisonTrigger;
 
-    void Start()
+    public int numberOfPrisoners = 3;
+
+    private List<GameObject> prisonerList = new List<GameObject>(); // 생성된 죄수 관리용
+
+    private void Start()
     {
-        prisoners = new GameObject[numberOfPrisoners];
+        minigame_1_8 = stage_1_8.GetComponent<Minigame_1_8>();
+        prisonTrigger = prisonObj.GetComponent<PrisonTrigger>();
+
+        prisonTrigger.totalPrisoners = numberOfPrisoners;
+        prisonTrigger.manager = this;
+
         StartGame();
     }
 
@@ -21,71 +29,59 @@ public class Manager_1_8 : MonoBehaviour
     {
         for (int i = 0; i < numberOfPrisoners; i++)
         {
-            // 프리팹 생성하면서 canvasTransform 하위로 넣기
-            GameObject prisonerObj = Instantiate(prisonerPrefab, canvasTransform);
-            RectTransform prisonerRect = prisonerObj.GetComponent<RectTransform>();
+            Vector2 spawnPos = GetValidSpawnPosition();
 
-            // 초기 위치 설정 (랜덤하게 UI 상에서 배치)
-            prisonerRect.anchoredPosition = new Vector2(
-                Random.Range(-400f, 400f),
-                Random.Range(-200f, 200f)
+            GameObject prisonerObj = Instantiate(prisonerPrefab, spawnPos, Quaternion.identity);
+            Prisoner_1_8 prisoner_1_8 = prisonerObj.GetComponent<Prisoner_1_8>();
+
+            prisoner_1_8.prison = prisonObj;
+
+            prisonerList.Add(prisonerObj);
+        }
+    }
+
+    Vector2 GetValidSpawnPosition()
+    {
+        Vector2 spawnPos;
+
+        // x 또는 y 중 하나가 2.5f 이상이 될 때까지 반복
+        do
+        {
+            spawnPos = new Vector2(
+                Random.Range(-3f, 3f),
+                Random.Range(-3f, 3f)
             );
-
-            // 감옥 오브젝트 코드로 할당
-            Prisoner_1_8 prisonerScript = prisonerObj.GetComponent<Prisoner_1_8>();
-            if (prisonerScript != null)
-            {
-                prisonerScript.prison = prison;
-            }
-
-            prisoners[i] = prisonerObj;
         }
+        while (Mathf.Abs(spawnPos.x) < 2.5f && Mathf.Abs(spawnPos.y) < 2.5f);
 
-        StartCoroutine(GameTimer());
+        return spawnPos;
     }
 
-    IEnumerator GameTimer()
+    public void GameSuccess()
     {
-        float timer = gameTime;
+        Debug.Log("성공! 모든 죄수가 감옥 안에 있음");
+        minigame_1_8.Succeed();
 
-        while (timer > 0)
-        {
-            timer -= Time.deltaTime;
-            yield return null;
-        }
-
-        CheckPrisonersStatus();
+        DestroyAllPrisoners();
     }
 
-    void CheckPrisonersStatus()
+    public void GameFail()
     {
-        bool allInPrison = true;
+        Debug.Log("실패! 일부 죄수가 감옥 밖에 있음");
 
-        foreach (GameObject prisoner in prisoners)
+        DestroyAllPrisoners();
+    }
+
+    public void DestroyAllPrisoners()
+    {
+        foreach (GameObject prisoner in prisonerList)
         {
-            RectTransform prisonerRect = prisoner.GetComponent<RectTransform>();
-            if (!RectOverlaps(prisonerRect, prison))
+            if (prisoner != null)
             {
-                allInPrison = false;
-                break;
+                Destroy(prisoner);
             }
         }
 
-        Debug.Log(allInPrison ? " 성공! 모든 죄수가 감옥에 있음" : " 실패! 일부 죄수가 감옥 밖에 있음");
-    }
-
-    bool RectOverlaps(RectTransform a, RectTransform b)
-    {
-        Rect aRect = GetWorldRect(a);
-        Rect bRect = GetWorldRect(b);
-        return aRect.Overlaps(bRect);
-    }
-
-    Rect GetWorldRect(RectTransform rt)
-    {
-        Vector3[] corners = new Vector3[4];
-        rt.GetWorldCorners(corners);
-        Vector2 size = corners[2] - corners[0];
-        return new Rect(corners[0], size);
+        prisonerList.Clear(); // 리스트 초기화
     }
 }
