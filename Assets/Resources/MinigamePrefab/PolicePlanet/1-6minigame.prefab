@@ -9,8 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7262725317112779818}
+  - component: {fileID: 4420810102279003081}
   m_Layer: 0
-  m_Name: 1-6Minigame
+  m_Name: 1-6minigame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33,6 +34,18 @@ Transform:
   - {fileID: 7027117502976392273}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4420810102279003081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 376490131673453364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7dd7ce406a52e944d81572b793501ab0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2319316212093652378
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -85,6 +98,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 1_6Player
       objectReference: {fileID: 0}
+    - target: {fileID: 6374703250600684804, guid: 1bea1bf2deb7e0349981d4028f95c4c8, type: 3}
+      propertyPath: stage_1_6
+      value: 
+      objectReference: {fileID: 376490131673453364}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

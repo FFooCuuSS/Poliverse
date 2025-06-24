@@ -34,7 +34,7 @@ public abstract class MiniGameBase : MonoBehaviour
         OnFail = null;
     }
 
-    protected void Success()
+    protected virtual void Success()
     {
         if (IsSuccess) return;
         IsSuccess = true;
@@ -43,7 +43,7 @@ public abstract class MiniGameBase : MonoBehaviour
         StartCoroutine(LockInputTemporarily(3f));
     }
 
-    protected void Fail()
+    protected virtual void Fail()
     {
         if (IsSuccess) return;
         IsSuccess = false;

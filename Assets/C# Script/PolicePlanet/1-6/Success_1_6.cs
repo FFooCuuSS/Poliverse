@@ -3,20 +3,28 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class Success : MonoBehaviour
+public class Success_1_6 : MonoBehaviour
 {
+    public GameObject stage_1_6;
+    private Minigame_1_6 minigame_1_6;
+
     public GameObject isDefend;
     public GameObject isOffend;
     public GameObject isOfficer;
     bool isSuccessed = false;
+
+    private void Start()
+    {
+        minigame_1_6 = stage_1_6.GetComponent<Minigame_1_6>();
+    }
+
     private void Update()
     {
         if(!isSuccessed&&isSuccess())
         {
-            Debug.Log("success");
             isSuccessed = true;
+            minigame_1_6.Succeed();
         }
-
     }
     bool isSuccess()
     {
