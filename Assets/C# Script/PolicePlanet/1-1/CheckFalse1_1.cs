@@ -4,13 +4,12 @@ using UnityEngine;
 
 public class CheckFalse1_1 : MonoBehaviour
 {
-    public bool isSpyers = false;
-    // Start is called before the first frame update
-    
-
-    // Update is called once per frame
-    void Update()
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (isSpyers) Debug.Log("clear");
+        if(collision.gameObject.CompareTag("Enemy"))
+        {
+            Debug.Log("¼º°ø");
+        }
     }
+    
 }
