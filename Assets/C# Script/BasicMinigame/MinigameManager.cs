@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class MiniGameManager : MonoBehaviour
 {
+    /*
     public static int stage; // 로비씬에서 stage (0~3) 입력
 
     [SerializeField] private MinigameUImanager uiManager;
@@ -93,4 +94,5 @@ public class MiniGameManager : MonoBehaviour
 
         game.StartGame();
     }
+    */
 }

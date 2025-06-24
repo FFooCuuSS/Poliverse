@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Minigame_1_10 : MiniGameBase
 {
-    protected override float TimerDuration => 30f;
-    protected override string MinigameExplain => "구분하세요!";
+    protected override float TimerDuration => 20f;
+    protected override string MinigameExplain => "Left or Rigjt!";
 
     public override void StartGame()
     {
@@ -18,5 +18,9 @@ public class Minigame_1_10 : MiniGameBase
     public void Succeed()
     {
         Success();
+    }
+    public void Failure()
+    {
+        Fail();
     }
 }

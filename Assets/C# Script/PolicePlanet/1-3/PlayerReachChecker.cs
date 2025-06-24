@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class PlayerReachChecker : MonoBehaviour
 {
+    public GameObject stage_1_3;
+    private Minigame_1_3 minigame_1_3;
+
     [SerializeField] private BoxCollider2D goalCollider;
     private CircleCollider2D playerCollider;
     private DragAndDrop dragAndDrop;
@@ -12,6 +15,7 @@ public class PlayerReachChecker : MonoBehaviour
 
     private void Start()
     {
+        minigame_1_3 = stage_1_3.GetComponent<Minigame_1_3>();
         playerCollider = GetComponent<CircleCollider2D>();
         dragAndDrop = GetComponent<DragAndDrop>();
     }
@@ -40,7 +44,7 @@ public class PlayerReachChecker : MonoBehaviour
         if(!isOnPath)
         {
             isGameOver = true;
-            Debug.Log("게임오버");
+            minigame_1_3.Failure();
         }
     }
 
@@ -52,8 +56,7 @@ public class PlayerReachChecker : MonoBehaviour
         if(playerBounds.Intersects(goalBounds))
         {
             isGameOver = true;
-            Debug.Log("게임 성공");
-            //이후 미니게임 창 꺼짐 로직 추가 예정
+            minigame_1_3.Succeed();
         }
     }
 }

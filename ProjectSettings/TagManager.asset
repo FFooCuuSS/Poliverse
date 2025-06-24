@@ -13,7 +13,7 @@ TagManager:
   - Cake
   - Thief
   - Bag
-  - Basket
+  - Enemy
   layers:
   - Default
   - TransparentFX
