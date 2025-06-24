@@ -111,6 +111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa0034220b580ab4e85687d86d50a6e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stage_1_2: {fileID: 986953255584661475}
   handColliders:
   - {fileID: 7298549552613551797}
   - {fileID: 8679526196303475827}
@@ -311,13 +312,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8278638915861064969}
+  - component: {fileID: 5199720909162787070}
   m_Layer: 0
   m_Name: 1-2minigame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &8278638915861064969
 Transform:
   m_ObjectHideFlags: 0
@@ -337,6 +339,18 @@ Transform:
   - {fileID: 1756794166548341679}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5199720909162787070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 986953255584661475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d17c7740fc9bd41458983f18017dd34e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4959772638469472113
 GameObject:
   m_ObjectHideFlags: 0
@@ -483,6 +497,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa0034220b580ab4e85687d86d50a6e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stage_1_2: {fileID: 986953255584661475}
   handColliders:
   - {fileID: 7298549552613551797}
   - {fileID: 8679526196303475827}
