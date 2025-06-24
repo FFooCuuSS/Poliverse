@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class MouseManager : MonoBehaviour
 {
+    public int thiefCnt = 7;
     private void Update()
     {
         if(Input.GetMouseButtonDown(0))
@@ -19,12 +20,19 @@ public class MouseManager : MonoBehaviour
                 if(clickedObj.CompareTag("Thief")) 
                 {
                     Debug.Log("µµµÏÀÌ¾ß");
+                    thiefCnt--;
+                    clickedObj.SetActive(false);
                 }
                 if(clickedObj.CompareTag("Police"))
                 {
                     Debug.Log("³ª´Â °æÂû");
                 }
             }
+        }
+        if(thiefCnt<=0)
+        {
+            GetComponent<Minigame_1_5>().Succeed();
+            Debug.Log("success");
         }
     }
 }

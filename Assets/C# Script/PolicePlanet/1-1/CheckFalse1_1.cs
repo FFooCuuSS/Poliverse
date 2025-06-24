@@ -9,6 +9,7 @@ public class CheckFalse1_1 : MonoBehaviour
         if(collision.gameObject.CompareTag("Enemy"))
         {
             Debug.Log("¼º°ø");
+            GetComponent<GameManager1_1>().Succeed();
         }
     }
     
