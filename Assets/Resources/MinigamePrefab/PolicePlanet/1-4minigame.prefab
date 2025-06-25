@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 1028307615468502423}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.012009319, y: -0.29345182, z: 0}
+  m_LocalPosition: {x: 0.45, y: 0, z: 0}
   m_LocalScale: {x: 0.2001547, y: 0.20812184, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -401,7 +401,7 @@ Transform:
   m_GameObject: {fileID: 2162186985032752556}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.01601241, y: 0, z: 0}
+  m_LocalPosition: {x: 0.45, y: 0, z: 0}
   m_LocalScale: {x: 0.2001547, y: 0.20812184, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -564,12 +564,15 @@ MonoBehaviour:
   hatPrefabs:
   - {fileID: 7118407009509505417, guid: e8565623f140e90408b2a102babb71f2, type: 3}
   - {fileID: 8869995206256412075, guid: ae447dfdb91ce514f8d58c1a316fa9f6, type: 3}
+  - {fileID: 8869995206256412075, guid: ae447dfdb91ce514f8d58c1a316fa9f6, type: 3}
   mustachePrefabs:
   - {fileID: 8460299003488490843, guid: fc9dffb08fb2a6147b45ff39229be9ef, type: 3}
-  - {fileID: 4193026753446572284, guid: ae45360980816114782ec45a7d030d86, type: 3}
+  - {fileID: 1713371915770953406, guid: d31809c7937bfac49a0087eadc131b0b, type: 3}
+  - {fileID: 4674253981091788771, guid: 007ca23b3a6dc0541b1f55e4805874d3, type: 3}
   glassesPrefabs:
   - {fileID: 2011575649484946788, guid: 11bf3557ca847154c833c7cf306b3863, type: 3}
   - {fileID: 6297973329712282394, guid: 01f38ccc0d101d34ba316b2818f86ba5, type: 3}
+  - {fileID: 1059413337429869894, guid: b7406de375cfbd14b8befac4abfbed61, type: 3}
   hatSpawnPoint: {fileID: 6635954777154180258}
   mustacheSpawnPoint: {fileID: 3834884105047192256}
   glassesSpawnPoint: {fileID: 5990138557095965799}
@@ -1152,7 +1155,7 @@ Transform:
   m_GameObject: {fileID: 5399717805957066479}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.008006228, y: 0.27472082, z: 0}
+  m_LocalPosition: {x: 0.45, y: 0, z: 0}
   m_LocalScale: {x: 0.2001547, y: 0.20812184, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
