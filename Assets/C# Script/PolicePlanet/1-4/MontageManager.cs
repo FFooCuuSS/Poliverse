@@ -30,7 +30,7 @@ public class MontageManager : MonoBehaviour
         //메인 위치에 정답 프리팹 생성
         GameObject mainMontage = Instantiate(correctPrefab, mainPosition);
         mainMontage.transform.localPosition = Vector3.zero;
-        mainMontage.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f); // 비율 조정
+        mainMontage.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f); // 비율 조정
 
         //정답 포함한 3개 랜덤 선택
         List<GameObject> selectedPrefabs = new List<GameObject>();
@@ -54,7 +54,7 @@ public class MontageManager : MonoBehaviour
         {
             GameObject optionMontage = Instantiate(selectedPrefabs[i], optionParents[i]);
             optionMontage.transform.localPosition = Vector3.zero;
-            optionMontage.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            optionMontage.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
 
             
             MontageID montageScript = optionMontage.GetComponent<MontageID>();
