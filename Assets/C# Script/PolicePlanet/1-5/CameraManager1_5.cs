@@ -4,22 +4,22 @@ using UnityEngine;
 
 public class CameraManager1_5 : MonoBehaviour
 {
-    private Camera mainCam;
+    public Camera mainCam;
     public float followSpeed = 0.5f;
     public Vector2 moveLimitMin; // 카메라 제한 범위 최소
     public Vector2 moveLimitMax; // 카메라 제한 범위 최대
 
+    public bool isMoving = true;
+
     void Start()
     {
         mainCam = Camera.main;
-        if (mainCam != null)
-        {
-            mainCam.transform.SetParent(this.transform); // 카메라를 자식으로
-        }
     }
 
     void Update()
     {
+        if (!isMoving) return;
+
         Vector3 mouseWorldPos = mainCam.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = mainCam.transform.position.z;
 
@@ -28,7 +28,5 @@ public class CameraManager1_5 : MonoBehaviour
         targetPos.y = Mathf.Clamp(targetPos.y, moveLimitMin.y, moveLimitMax.y);
 
         mainCam.transform.position = targetPos;
-
-
     }
 }

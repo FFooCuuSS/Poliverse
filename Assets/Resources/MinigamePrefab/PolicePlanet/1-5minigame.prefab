@@ -167,6 +167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b596c6c0a0ffeb41a7ca6c4e207fb6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CameraManager: {fileID: 2358331931533679936}
 --- !u!1 &1575513003636254428
 GameObject:
   m_ObjectHideFlags: 0
@@ -418,7 +419,6 @@ GameObject:
   - component: {fileID: 2250732410715622455}
   - component: {fileID: 1347679260738459822}
   - component: {fileID: 5301078569516405678}
-  - component: {fileID: 7715007588177935394}
   m_Layer: 0
   m_Name: 1-5GameManager
   m_TagString: Untagged
@@ -453,6 +453,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0614c5b39589c4b40ae0cddddfa14075, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stage_1_5: {fileID: 1206191121426169458}
+  thiefCnt: 7
 --- !u!114 &5301078569516405678
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -465,21 +467,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efee1469285c5c745b8e0a299454af4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainCam: {fileID: 0}
   followSpeed: 0.5
   moveLimitMin: {x: -10, y: 0}
   moveLimitMax: {x: 10, y: 0}
---- !u!114 &7715007588177935394
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2358331931533679936}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b596c6c0a0ffeb41a7ca6c4e207fb6f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  isMoving: 1
 --- !u!1 &4710207154641997746
 GameObject:
   m_ObjectHideFlags: 0

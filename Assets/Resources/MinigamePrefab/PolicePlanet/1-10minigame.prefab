@@ -135,9 +135,40 @@ MonoBehaviour:
   Police: {fileID: 1938337618239732854, guid: acd5f0045f2e04547845ef5f9d94baaf, type: 3}
   Sinner: {fileID: 7902227361782794465, guid: 1b91e08adaa830246867c90fc7ff83a0, type: 3}
   RandomTextObj: {fileID: 3752190185182823147}
+  spawnParent: {fileID: 2764859171032426446}
   randomText: {fileID: 0}
-  spawnMan: 0
   platformIsMoving: 0
+--- !u!1 &1281042691183256108
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2764859171032426446}
+  m_Layer: 0
+  m_Name: SpawnParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2764859171032426446
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1281042691183256108}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1835633290348918403}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1591255869138098278
 GameObject:
   m_ObjectHideFlags: 0
@@ -670,6 +701,7 @@ Transform:
   - {fileID: 2529314648724848336}
   - {fileID: 6895299719716603262}
   - {fileID: 6135117778465451445}
+  - {fileID: 2764859171032426446}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8257505951333607323

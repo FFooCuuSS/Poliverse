@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using UnityEngine;
 using DG.Tweening;
 
@@ -14,13 +13,15 @@ public class Manager : MonoBehaviour
     public GameObject Police;
     public GameObject Sinner;
     public GameObject RandomTextObj;
+
+    public Transform spawnParent; 
     private GameObject currentPerson;
 
     private Score score;
     private Minigame_1_10 minigame_1_10;
     public RandomText randomText;
 
-    public bool spawnMan;
+    private bool spawnMan;
     public bool platformIsMoving = false;
 
     private bool isSinner;
@@ -51,7 +52,7 @@ public class Manager : MonoBehaviour
     public void SpawnPlatform(PlatformType type)
     {
         GameObject prefab = type == PlatformType.Up ? UpPlatform : DownPlatform;
-        GameObject instance = Instantiate(prefab);
+        GameObject instance = Instantiate(prefab, prefab.transform.position, Quaternion.identity, spawnParent);
         UpDown upDown = instance.GetComponent<UpDown>();
         upDown.ManagerObj = this.gameObject;
 
@@ -66,24 +67,24 @@ public class Manager : MonoBehaviour
         bool spawnSinner = Random.Range(0, 2) == 0;
         GameObject prefab = spawnSinner ? Sinner : Police;
         isSinner = spawnSinner;
-        currentPerson = Instantiate(prefab);
+        currentPerson = Instantiate(prefab, prefab.transform.position, Quaternion.identity, spawnParent);
 
-        randomText.ShowLine(!isSinner); // 경찰이면 true
+        randomText.ShowLine(!isSinner);
     }
 
     public void MovePerson(bool goUp)
     {
+        if (currentPerson == null) return;
+
         Vector2 targetPos = goUp ? new Vector2(6f, -0.37f) : new Vector2(-6f, -0.37f);
 
         currentPerson.transform.DOMove(targetPos, 0.5f)
             .SetEase(Ease.OutQuad)
             .OnComplete(() =>
             {
-                // 0.15초 후에 Y축 이동 실행
                 StartCoroutine(MoveUpOrDownAfterDelay(goUp));
             });
 
-        // 점수 판정
         if ((goUp && !isSinner) || (!goUp && isSinner))
         {
             Success();
@@ -93,6 +94,7 @@ public class Manager : MonoBehaviour
             Failure();
         }
     }
+
     private IEnumerator MoveUpOrDownAfterDelay(bool goUp)
     {
         yield return new WaitForSeconds(0.15f);
@@ -106,11 +108,15 @@ public class Manager : MonoBehaviour
     private void Success()
     {
         score.nScore++;
-        if (score.nScore >= 15) minigame_1_10.Succeed();
+        spawnMan = false;
+        if (score.nScore >= 15)
+        {
+            minigame_1_10.Succeed();
+        }
     }
 
     private void Failure()
     {
-
+        // 실패
     }
 }

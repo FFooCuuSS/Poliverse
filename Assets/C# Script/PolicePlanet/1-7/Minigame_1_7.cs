@@ -2,17 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Minigame_1_8 : MiniGameBase
+public class Minigame_1_7 : MiniGameBase
 {
-    public GameObject manager;
-    private Manager_1_8 manager_1_8;
+    public GameObject ProhibitSpawner;
+    private ProhibitedItemSpawner1_7 prohibitedItemSpawner1_7;
+
 
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "Get in!";
+    protected override string MinigameExplain => "Ban!";
+
 
     private void Start()
     {
-        manager_1_8 = manager.GetComponent<Manager_1_8>();
+        prohibitedItemSpawner1_7 = ProhibitSpawner.GetComponent<ProhibitedItemSpawner1_7>();
     }
 
     public override void StartGame()
@@ -23,14 +25,13 @@ public class Minigame_1_8 : MiniGameBase
         // ¿¹: instructionText.text = MinigameExplain;
     }
 
-    public void Succeed()
+    public override void Success()
     {
-        Success();
+        base.Success();
     }
 
     public override void Fail()
     {
-        manager_1_8.DestroyAllPrisoners();
         base.Fail();
     }
 }

@@ -164,6 +164,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45bda4b6e497e9f42b383b8110c681c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainCam: {fileID: 0}
   targetObj: {fileID: 4180030683262030535}
   followSpeed: 0.5
   moveLimitMin: {x: -8, y: -5}
@@ -215,6 +216,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b25bea524a2707940a7ea4a3b024b720, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CameraManager: {fileID: 7031269646049003218}
 --- !u!1 &8301458909218869241
 GameObject:
   m_ObjectHideFlags: 0
@@ -376,3 +378,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 585230994bd324a47a92a1b090a3c235, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stage_1_1: {fileID: 7431540822674238959}

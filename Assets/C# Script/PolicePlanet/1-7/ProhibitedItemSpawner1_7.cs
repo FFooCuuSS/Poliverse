@@ -16,6 +16,9 @@ public class ProhibitedItemSpawner1_7 : MonoBehaviour
     [Header("금지 아이템 매니저")]
     public ProhibitedItemManager1_7 manager;
 
+    // 생성된 오브젝트들을 관리할 부모
+    public Transform spawnParent;
+
     void Start()
     {
         SpawnRandomPrefabs();
@@ -29,11 +32,10 @@ public class ProhibitedItemSpawner1_7 : MonoBehaviour
             return;
         }
 
-        int spawnCount = Random.Range(2, spawnPoints.Length + 1);
+        int spawnCount = 4;//Random.Range(2, spawnPoints.Length + 1);
         GameObject[] shuffled = (GameObject[])spawnPoints.Clone();
         System.Array.Sort(shuffled, (a, b) => Random.Range(-1, 2)); // 간단한 셔플
 
-        // 스프라이트별 생성 수 카운트 배열
         int[] spriteCounts = new int[randomSprites.Length];
 
         for (int i = 0; i < spawnCount; i++)
@@ -41,7 +43,7 @@ public class ProhibitedItemSpawner1_7 : MonoBehaviour
             Vector3 spawnPos = shuffled[i].transform.position;
             spawnPos.z = -2f;
 
-            GameObject newObj = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
+            GameObject newObj = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity, spawnParent);
             SpriteRenderer sr = newObj.GetComponent<SpriteRenderer>();
 
             if (sr != null)
@@ -51,7 +53,6 @@ public class ProhibitedItemSpawner1_7 : MonoBehaviour
                 spriteCounts[spriteIndex]++;
             }
 
-            // 태그는 "Item"으로 설정되어 있어야 Zone에서 인식됩니다
             newObj.tag = "Item";
         }
 
