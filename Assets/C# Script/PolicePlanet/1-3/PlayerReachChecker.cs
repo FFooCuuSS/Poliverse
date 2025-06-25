@@ -8,7 +8,7 @@ public class PlayerReachChecker : MonoBehaviour
     private Minigame_1_3 minigame_1_3;
 
     [SerializeField] private BoxCollider2D goalCollider;
-    private CircleCollider2D playerCollider;
+    private CapsuleCollider playerCollider;
     private DragAndDrop dragAndDrop;
 
     private bool isGameOver = false;
@@ -16,7 +16,7 @@ public class PlayerReachChecker : MonoBehaviour
     private void Start()
     {
         minigame_1_3 = stage_1_3.GetComponent<Minigame_1_3>();
-        playerCollider = GetComponent<CircleCollider2D>();
+        playerCollider = GetComponent<CapsuleCollider>();
         dragAndDrop = GetComponent<DragAndDrop>();
     }
 
