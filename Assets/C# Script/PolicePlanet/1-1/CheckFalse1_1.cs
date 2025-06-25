@@ -4,13 +4,24 @@ using UnityEngine;
 
 public class CheckFalse1_1 : MonoBehaviour
 {
-    public bool isSpyers = false;
-    // Start is called before the first frame update
-    
+    public GameObject stage_1_1;
+    private Minigame_1_1 minigmae_1_1;
 
-    // Update is called once per frame
-    void Update()
+    private bool isChecked = false;
+
+    private void Start()
     {
-        if (isSpyers) Debug.Log("clear");
+        minigmae_1_1 = stage_1_1.GetComponent<Minigame_1_1>();
     }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.gameObject.CompareTag("Enemy") && !isChecked)
+        {
+            Debug.Log("¼º°ø");
+            isChecked = true;
+            minigmae_1_1.Success();
+        }
+    }
+    
 }

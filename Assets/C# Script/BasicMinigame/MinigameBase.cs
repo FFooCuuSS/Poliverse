@@ -34,7 +34,7 @@ public abstract class MiniGameBase : MonoBehaviour
         OnFail = null;
     }
 
-    protected virtual void Success()
+    public virtual void Success()
     {
         if (IsSuccess) return;
         IsSuccess = true;
@@ -43,7 +43,7 @@ public abstract class MiniGameBase : MonoBehaviour
         StartCoroutine(LockInputTemporarily(3f));
     }
 
-    protected virtual void Fail()
+    public virtual void Fail()
     {
         if (IsSuccess) return;
         IsSuccess = false;
@@ -59,30 +59,3 @@ public abstract class MiniGameBase : MonoBehaviour
         IsInputLocked = false;
     }
 }
-
-
-/*
-자식 클래스 예시
-
-public class MiniGame_1_10 : MiniGameBase
-{
-    protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "Space를 눌러 점프하세요!";
-
-    public override void StartGame()
-    {
-        base.StartGame(); // 부모에서 설명, 타이머 출력 등 실행
-
-        // 추가 초기화
-        // 예: instructionText.text = MinigameExplain;
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Success();
-        }
-    }
-}
-*/

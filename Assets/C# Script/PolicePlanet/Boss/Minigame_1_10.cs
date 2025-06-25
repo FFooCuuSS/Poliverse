@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Minigame_1_10 : MiniGameBase
 {
-    protected override float TimerDuration => 20f;
-    protected override string MinigameExplain => "Left or Rigjt!";
+    protected override float TimerDuration => 30f;
+    protected override string MinigameExplain => "Left or Right!";
 
     public override void StartGame()
     {
