@@ -1,9 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Net.WebSockets;
-using System.Runtime.CompilerServices;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 
 public class HandcuffFitChecker : MonoBehaviour
@@ -17,7 +12,8 @@ public class HandcuffFitChecker : MonoBehaviour
     private DragAndDrop dragAndDrop;
 
     private bool isSnapped = false;
-
+    private CircleCollider2D snappedHand = null;
+    private static bool isGameEnded = false;
 
     private void Start()
     {
@@ -25,13 +21,13 @@ public class HandcuffFitChecker : MonoBehaviour
         cuffCollider = GetComponent<CircleCollider2D>();
         dragAndDrop = GetComponent<DragAndDrop>();
     }
+
     private void Update()
     {
-        if (!isSnapped)
+        if (!isSnapped && !isGameEnded)
         {
             CheckAndSnap();
         }
-        GameClearCheck();
     }
 
     private void CheckAndSnap()
@@ -42,20 +38,39 @@ public class HandcuffFitChecker : MonoBehaviour
             {
                 transform.position = handcol.bounds.center;
                 isSnapped = true;
+                snappedHand = handcol;
 
                 if (dragAndDrop != null) dragAndDrop.enabled = false;
-                Debug.Log($"수갑 {gameObject.name} 겹침, 고정 완료"); break;
+
+                Debug.Log($"수갑 {gameObject.name} 겹침, 고정 완료");
+
+                GameClearCheck();
+                break;
             }
         }
     }
 
     private void GameClearCheck()
     {
+        if (isGameEnded) return;
+
         var all = FindObjectsOfType<HandcuffFitChecker>();
+
         foreach (var cuff in all)
         {
-            if (!cuff.isSnapped) return;
+            if (!cuff.isSnapped)
+                return;
         }
-        minigame_1_2.Succeed();
+
+        isGameEnded = true;
+
+        if (all[0].snappedHand != all[1].snappedHand)
+        {
+            minigame_1_2.Succeed();
+        }
+        else
+        {
+            minigame_1_2.Fail();
+        }
     }
 }

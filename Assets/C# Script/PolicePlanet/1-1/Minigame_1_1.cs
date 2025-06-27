@@ -8,7 +8,7 @@ public class Minigame_1_1 : MiniGameBase
     private CameraController1_1 cameraController1_1;
 
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "Arrest!";
+    protected override string MinigameExplain => "Find!";
 
     private void Start()
     {
@@ -26,14 +26,14 @@ public class Minigame_1_1 : MiniGameBase
     public override void Success()
     {
         cameraController1_1.isMoving = false;
-        cameraController1_1.mainCam.transform.position = new Vector3(0f, 0f, -10f);
+        //cameraController1_1.mainCam.transform.position = new Vector3(0f, 0f, -10f);
         base.Success();
     }
 
     public override void Fail()
     {
         cameraController1_1.isMoving = false;
-        cameraController1_1.mainCam.transform.position = new Vector3(0f, 0f, -10f);
+        //cameraController1_1.mainCam.transform.position = new Vector3(0f, 0f, -10f);
         base.Fail();
     }
 }

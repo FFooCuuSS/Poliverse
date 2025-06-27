@@ -12,19 +12,21 @@ public class Manager : MonoBehaviour
     public GameObject DownPlatform;
     public GameObject Police;
     public GameObject Sinner;
-    public GameObject RandomTextObj;
+    //public GameObject RandomTextObj;
 
     public Transform spawnParent; 
     private GameObject currentPerson;
 
     private Score score;
     private Minigame_1_10 minigame_1_10;
-    public RandomText randomText;
+    //public RandomText randomText;
 
-    private bool spawnMan;
+    public bool spawnMan;
     public bool platformIsMoving = false;
 
     private bool isSinner;
+    private GameObject upPlatformInstance;
+    private GameObject downPlatformInstance;
 
     public enum PlatformType { Up, Down }
 
@@ -34,7 +36,7 @@ public class Manager : MonoBehaviour
 
         minigame_1_10 = BossStage.GetComponent<Minigame_1_10>();
         score = ScoreText.GetComponent<Score>();
-        randomText = RandomTextObj.GetComponent<RandomText>();
+        //randomText = RandomTextObj.GetComponent<RandomText>();
 
         SpawnPlatform(PlatformType.Up);
         SpawnPlatform(PlatformType.Down);
@@ -69,14 +71,15 @@ public class Manager : MonoBehaviour
         isSinner = spawnSinner;
         currentPerson = Instantiate(prefab, prefab.transform.position, Quaternion.identity, spawnParent);
 
-        randomText.ShowLine(!isSinner);
+        //randomText.ShowLine(!isSinner);
     }
 
     public void MovePerson(bool goUp)
     {
         if (currentPerson == null) return;
 
-        Vector2 targetPos = goUp ? new Vector2(6f, -0.37f) : new Vector2(-6f, -0.37f);
+        float targetX = goUp ? 5f : -5f;
+        Vector2 targetPos = new Vector2(targetX, currentPerson.transform.position.y);
 
         currentPerson.transform.DOMove(targetPos, 0.5f)
             .SetEase(Ease.OutQuad)

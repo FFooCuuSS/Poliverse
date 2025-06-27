@@ -26,13 +26,13 @@ public class Minigame_1_5 : MiniGameBase
     public void Succeed()
     {
         cameraManager1_5.isMoving = false;
-        cameraManager1_5.mainCam.transform.position = new Vector3(0f, 0f, -10f);
+        //cameraManager1_5.mainCam.transform.position = new Vector3(0f, 0f, -10f);
         Success();
     }
     public override void Fail()
     {
         cameraManager1_5.isMoving = false;
-        cameraManager1_5.mainCam.transform.position = new Vector3(0f, 0f, -10f);
+        //cameraManager1_5.mainCam.transform.position = new Vector3(0f, 0f, -10f);
         base.Fail();
     }
 }

@@ -4,18 +4,26 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using DG.Tweening;
 
 public class MinigameUImanager : MonoBehaviour
 {
-    // ¿ÜºÎ ÂüÁ¶
+    // ì™¸ë¶€ì°¸ì¡°
     [SerializeField] private TMP_Text guideText;
     [SerializeField] private TMP_Text stageText;
     [SerializeField] private Slider timerSlider;
-    [SerializeField] private GameObject blockInputPanel; // ÀÔ·Â ¸·´Â ÆÐ³Î
+    [SerializeField] private GameObject blockInputPanel;
     [SerializeField] private GameObject gameplayPanel;
     [SerializeField] private GameObject lifeManager;
+    [SerializeField] private GameObject mainCamera;
+    [SerializeField] private GameObject standingArea;
 
-    // °ü¸®¿ë º¯¼ö
+    [Header("Standing Sprites")]
+    [SerializeField] private Sprite playerStandingSprite;
+    [SerializeField] private Sprite[] enemyStandingSprites;
+    [SerializeField] private Sprite[] enemyVictorySprites;
+
+    // ë‚´ë¶€ ë³€ìˆ˜
     private int selectedPlanet = 1;
     private float loadingTime = 2f;
     private float timerDuration;
@@ -25,8 +33,13 @@ public class MinigameUImanager : MonoBehaviour
     private int bossStageIndex = 0;
     private string bossMinigamePath = "";
     private Coroutine failCoroutine;
+    private SpriteRenderer playerRenderer;
+    private SpriteRenderer enemyRenderer;
+    private Sprite originalEnemySprite;
+    private Sprite originalPlayerSprite;
 
-    // ÀÚÁÖ »ç¿ëµÇ´Â Áö¿ª º¯¼ö
+
+    // ê¸°íƒ€ ë¯¸ë‹ˆê²Œìž„ ê´€ë¦¬
     private MiniGameBase currentMinigame;
     private LifeNumber lifeNumber;
     private Queue<string> minigameQueue = new Queue<string>();
@@ -43,6 +56,13 @@ public class MinigameUImanager : MonoBehaviour
         gameplayPanel.SetActive(false);
         timerSlider.value = 0f;
         lifeNumber = lifeManager.GetComponent<LifeNumber>();
+
+        playerRenderer = standingArea.transform.GetChild(0).GetComponent<SpriteRenderer>();
+        enemyRenderer = standingArea.transform.GetChild(1).GetComponent<SpriteRenderer>();
+        playerRenderer.sprite = playerStandingSprite;
+        enemyRenderer.sprite = enemyStandingSprites[selectedPlanet - 1];
+        PlayBounceAnimation(playerRenderer.transform);
+        PlayBounceAnimation(enemyRenderer.transform);
 
         switch (selectedPlanet)
         {
@@ -89,7 +109,7 @@ public class MinigameUImanager : MonoBehaviour
         failCoroutine = null;
     }
 
-    // ¹Ì´Ï°ÔÀÓ Çà¼ºº° ¼¼ÆÃ
+    // ë¯¸ë‹ˆê²Œìž„ ì„¸íŒ…
     private void SetMinigameQueue(string planetName, int minigameCount)
     {
         List<int> minigameIndexes = new List<int>();
@@ -104,7 +124,7 @@ public class MinigameUImanager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"¹Ì´Ï°ÔÀÓÀÌ Á¸ÀçÇÏÁö ¾ÊÀ½: {path} -> °Ç³Ê¶Ü");
+                Debug.LogWarning($"ï¿½Ì´Ï°ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½: {path} -> ï¿½Ç³Ê¶ï¿½");
             }
         }
 
@@ -130,16 +150,16 @@ public class MinigameUImanager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"º¸½º ¹Ì´Ï°ÔÀÓÀÌ Á¸ÀçÇÏÁö ¾ÊÀ½: {bossPath} -> Å¥¿¡ Ãß°¡ ¾ÈµÊ");
+            Debug.LogWarning($"ï¿½ï¿½ï¿½ï¿½ ï¿½Ì´Ï°ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½: {bossPath} -> Å¥ï¿½ï¿½ ï¿½ß°ï¿½ ï¿½Èµï¿½");
         }
     }
 
-    // ¹Ì´Ï°ÔÀÓ ½ÃÀÛ ·çÆ¾
+    // ë””ìŒ ë¯¸ë‹ˆê²Œìž„ ì½”ë£¨í‹´
     private IEnumerator LoadNextMinigameRoutine()
     {
         if (minigameQueue.Count == 0)
         {
-            Debug.Log("¸ðµç ¹Ì´Ï°ÔÀÓ Á¾·á");
+            Debug.Log("ï¿½ï¿½ï¿½ ï¿½Ì´Ï°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
             gameplayPanel.SetActive(false);
             yield return new WaitForSeconds(2f);
             SceneManager.LoadScene("LobbyScene");
@@ -162,7 +182,7 @@ public class MinigameUImanager : MonoBehaviour
         StartMinigame();
     }
 
-    // ÀÌº¥Æ® ¹× Á¦ÇÑ½Ã°£ ÃÊ±âÈ­
+    // ë¯¸ë‹ˆê²Œìž„ ìƒíƒœ ë° ì‹œê°„ ì´ˆê¸°í™”
     private void StartMinigame()
     {
         currentMinigame.OnSuccess += OnMinigameSuccess;
@@ -174,7 +194,7 @@ public class MinigameUImanager : MonoBehaviour
         currentMinigame.StartGame();
     }
 
-    // °ÔÀÓ¼³¸í
+    // ê°€ì´ë“œ
     public void ShowGuide(string text, float duration)
     {
         StartCoroutine(ShowGuideCoroutine(text, duration));
@@ -188,7 +208,7 @@ public class MinigameUImanager : MonoBehaviour
         guideText.gameObject.SetActive(false);
     }
 
-    // Á¦ÇÑ½Ã°£
+    // ì œí•œì‹œê°„ ê´€ë¦¬
     public void StartTimer(float duration)
     {
         timerDuration = duration;
@@ -197,17 +217,18 @@ public class MinigameUImanager : MonoBehaviour
         timerSlider.value = 1f;
     }
 
-    // °ÔÀÓ Á¾·á ÀÌÈÄ ÆÇÁ¤ ¹× ´ÙÀ½ È¸Â÷ Áö¼Ó
+    // ë¯¸ë‹ˆê²Œìž„ ì„±ê³µ/ì‹¤íŒ¨
     private void OnMinigameSuccess()
     {
         isTimerActive = false;
 
-        // ½ÇÆÐ ÄÚ·çÆ¾ °­Á¦ Á¾·á
         if (failCoroutine != null)
         {
             StopCoroutine(failCoroutine);
             failCoroutine = null;
         }
+
+        Invoke("PlayWinEffect",1f);
 
         currentStage++;
         if (currentStage >= bossStageIndex) currentStage = bossStageIndex;
@@ -220,6 +241,8 @@ public class MinigameUImanager : MonoBehaviour
         life--;
         lifeNumber.LoseLife();
 
+        Invoke("PlayLoseEffect", 1f);
+
         if (currentStage == bossStageIndex)
         {
             if (life <= 0)
@@ -227,8 +250,6 @@ public class MinigameUImanager : MonoBehaviour
                 Invoke("GameOver", 1f);
                 return;
             }
-
-            Debug.Log("º¸½º ÀçµµÀü");
 
             StartCoroutine(RetryCurrentMinigame());
         }
@@ -239,7 +260,21 @@ public class MinigameUImanager : MonoBehaviour
             StartCoroutine(DelayAndEndMinigame());
         }
     }
+    // ìŠ¹ë¦¬ ì‹¤íŒ¨ ì—°ì¶œ
+    private void PlayWinEffect()
+    {
+        if (originalPlayerSprite == null)
+            originalPlayerSprite = playerRenderer.sprite;
 
+        StartCoroutine(PlayStandingEffect(playerRenderer, originalPlayerSprite, originalPlayerSprite, -5f, 1.5f));
+    }
+    private void PlayLoseEffect()
+    {
+        if (originalEnemySprite == null)
+            originalEnemySprite = enemyRenderer.sprite;
+
+        StartCoroutine(PlayStandingEffect(enemyRenderer, enemyVictorySprites[selectedPlanet - 1], originalEnemySprite, 5f, -1.5f));
+    }
     void GameOver()
     {
         SceneManager.LoadScene("LobbyScene");
@@ -248,25 +283,26 @@ public class MinigameUImanager : MonoBehaviour
     private IEnumerator DelayAndEndMinigame()
     {
         UpdateStageText();
-        blockInputPanel.SetActive(true); // ÀÔ·Â ¸·±â
+        blockInputPanel.SetActive(true);
         yield return new WaitForSeconds(1f);
 
         if (currentMinigame != null)
         {
             currentMinigame.OnSuccess -= OnMinigameSuccess;
             currentMinigame.OnFail -= OnMinigameFail;
+            mainCamera.transform.position = new Vector3(0f, 0f, -10f);
             Destroy(currentMinigame.gameObject);
         }
 
         gameplayPanel.SetActive(false);
-        blockInputPanel.SetActive(false); // ÀÔ·Â ÇØÁ¦
+        blockInputPanel.SetActive(false);
         timerSlider.gameObject.SetActive(false);
         StartCoroutine(WaitAndLoadNext());
     }
 
     private IEnumerator RetryCurrentMinigame()
     {
-        blockInputPanel.SetActive(true); // ÀÔ·Â ¸·±â
+        blockInputPanel.SetActive(true);
         yield return new WaitForSeconds(1f);
 
         if (currentMinigame != null)
@@ -277,12 +313,11 @@ public class MinigameUImanager : MonoBehaviour
         }
 
         gameplayPanel.SetActive(false);
-        blockInputPanel.SetActive(false); // ÀÔ·Â ÇØÁ¦
+        blockInputPanel.SetActive(false);
         timerSlider.gameObject.SetActive(false);
 
         yield return new WaitForSeconds(loadingTime);
 
-        // ¿©±â¼­ ¹Ù·Î ¹Ì´Ï°ÔÀÓ Àç·Îµå
         timerSlider.gameObject.SetActive(true);
         gameplayPanel.SetActive(true);
 
@@ -306,13 +341,86 @@ public class MinigameUImanager : MonoBehaviour
         }
         else
         {
-            Debug.Log("°ÔÀÓ ¿À¹ö");
+
         }
     }
 
-    // Ãß°¡ UI °ü¸®
+    // UI ì¶”ê°€ ê´€ë¦¬
     private void UpdateStageText()
     {
         stageText.text = $"{currentStage}";
     }
+
+    private void PlayBounceAnimation(Transform target)
+    {
+        Sequence seq = DOTween.Sequence();
+
+        float scaleX = 1.05f; 
+        float scaleY = 0.95f; 
+        float moveY = -0.05f; 
+        float duration = 0.15f; 
+
+        Vector3 originalScale = target.localScale;
+        Vector3 squashedScale = new Vector3(originalScale.x * scaleX, originalScale.y * scaleY, originalScale.z);
+        Vector3 stretchedScale = new Vector3(originalScale.x * 0.95f, originalScale.y * 1.05f, originalScale.z);
+        Vector3 originalPosition = target.localPosition;
+
+        seq.Append(target.DOScale(squashedScale, duration).SetEase(Ease.OutQuad));
+        seq.Join(target.DOLocalMoveY(originalPosition.y + moveY, duration).SetEase(Ease.OutQuad));
+
+        seq.Append(target.DOScale(stretchedScale, duration).SetEase(Ease.OutQuad));
+        seq.Join(target.DOLocalMoveY(originalPosition.y - moveY, duration).SetEase(Ease.OutQuad));
+
+        seq.Append(target.DOScale(originalScale, duration).SetEase(Ease.OutQuad));
+        seq.Join(target.DOLocalMoveY(originalPosition.y, duration).SetEase(Ease.OutQuad));
+
+        seq.SetLoops(-1); // ë¬´í•œ ë°˜ë³µ
+    }
+
+    private IEnumerator PlayStandingEffect(SpriteRenderer targetRenderer, Sprite victorySprite, Sprite originalSprite, float rotationAmount, float moveXAmount)
+    {
+        Vector3 originalPos = targetRenderer.transform.localPosition;
+        Vector3 originalRotation = targetRenderer.transform.localEulerAngles;
+        Vector3 originalScale = targetRenderer.transform.localScale;
+
+        // ê¸°ì¡´ ì í”„
+        targetRenderer.transform.DOLocalMoveY(originalPos.y + 0.15f, 0.15f).SetEase(Ease.OutQuad);
+        yield return new WaitForSeconds(0.15f);
+        targetRenderer.transform.DOLocalMoveY(originalPos.y, 0.15f).SetEase(Ease.InQuad);
+        yield return new WaitForSeconds(0.15f);
+
+        // ìŠ¤í”„ë¼ì´íŠ¸ êµì²´ (ë°”ê¾¸ëŠ” ìˆœê°„)
+        if (victorySprite != null)
+        {
+            targetRenderer.sprite = victorySprite;
+
+            // Yì¶• + Xì¶• + íšŒì „ + ìŠ¤ì¼€ì¼ í‚¤ìš°ê¸°
+            Sequence seq = DOTween.Sequence();
+
+            Vector3 targetPos = new Vector3(originalPos.x + moveXAmount, originalPos.y + 0.2f, originalPos.z);
+
+            seq.Append(targetRenderer.transform.DOLocalMove(targetPos, 0.1f).SetEase(Ease.OutQuad));
+            seq.Join(targetRenderer.transform.DOLocalRotate(new Vector3(0f, 0f, rotationAmount), 0.1f).SetEase(Ease.OutQuad));
+            seq.Join(targetRenderer.transform.DOScale(originalScale * 1.3f, 0.1f).SetEase(Ease.OutQuad)); // 30% í™•ëŒ€
+
+            yield return seq.WaitForCompletion();
+
+            // ìœ ì§€ ì‹œê°„
+            yield return new WaitForSeconds(2f);
+
+            // Yì¶• + Xì¶• + íšŒì „ + ìŠ¤ì¼€ì¼ ì›ìƒë³µê·€
+            Sequence resetSeq = DOTween.Sequence();
+
+            resetSeq.Append(targetRenderer.transform.DOLocalMove(originalPos, 0.1f).SetEase(Ease.InQuad));
+            resetSeq.Join(targetRenderer.transform.DOLocalRotate(originalRotation, 0.1f).SetEase(Ease.InQuad));
+            resetSeq.Join(targetRenderer.transform.DOScale(originalScale, 0.1f).SetEase(Ease.InQuad));
+
+            yield return resetSeq.WaitForCompletion();
+
+            targetRenderer.sprite = originalSprite;
+        }
+    }
+
+
+
 }
