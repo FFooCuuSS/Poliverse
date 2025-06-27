@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 public class LobbyButton : MonoBehaviour
 {
@@ -26,7 +27,7 @@ public class LobbyButton : MonoBehaviour
     public void planetButtonClick()
     {
         robbyCanvas.SetActive(false);
-        loadingCanvas.SetActive(true);
+        loadingCanvas.SetActive(false);
         settingsCanvas.SetActive(false);
 
         Invoke("DelayedLoading", 1f);

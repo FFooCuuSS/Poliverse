@@ -148,10 +148,6 @@ public class MinigameUImanager : MonoBehaviour
             bossStageIndex = minigameIndexes.Count + 1;
             bossMinigamePath = bossPath;
         }
-        else
-        {
-            Debug.LogWarning($"���� �̴ϰ����� �������� ����: {bossPath} -> ť�� �߰� �ȵ�");
-        }
     }
 
     // 디음 미니게임 코루틴
@@ -175,7 +171,7 @@ public class MinigameUImanager : MonoBehaviour
         GameObject minigameObj = Instantiate(Resources.Load<GameObject>(minigamePath));
         currentMinigame = minigameObj.GetComponent<MiniGameBase>();
 
-        ShowGuide(currentMinigame.GetMinigameExplain, 2f);
+        ShowGuide(currentMinigame.GetMinigameExplain, 1f);
 
         yield return new WaitForSeconds(0.5f);
 
@@ -290,6 +286,8 @@ public class MinigameUImanager : MonoBehaviour
 
         if (currentMinigame != null)
         {
+            DOTween.Kill(currentMinigame.transform);
+
             currentMinigame.OnSuccess -= OnMinigameSuccess;
             currentMinigame.OnFail -= OnMinigameFail;
             mainCamera.transform.position = new Vector3(0f, 0f, -10f);
@@ -326,7 +324,7 @@ public class MinigameUImanager : MonoBehaviour
         GameObject minigameObj = Instantiate(Resources.Load<GameObject>(bossMinigamePath));
         currentMinigame = minigameObj.GetComponent<MiniGameBase>();
 
-        ShowGuide(currentMinigame.GetMinigameExplain, 2f);
+        ShowGuide(currentMinigame.GetMinigameExplain, 1f);
 
         yield return new WaitForSeconds(0.5f);
 

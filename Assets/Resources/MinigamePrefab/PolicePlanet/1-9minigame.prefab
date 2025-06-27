@@ -84,7 +84,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1 &5748732787075618685
+--- !u!1 &5922741785422673140
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -92,22 +92,22 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 733106018720610316}
-  - component: {fileID: 5183197989176078307}
+  - component: {fileID: 7487312393201182836}
+  - component: {fileID: 7186973322647701055}
   m_Layer: 0
-  m_Name: "1-9\uBC1D\uC740 \uBC30\uACBD"
+  m_Name: "1-9 \u1107\u1161\u11B0\u110B\u1173\u11AB\u1107\u1162\u1100\u1167\u11BC"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!4 &733106018720610316
+--- !u!4 &7487312393201182836
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5748732787075618685}
+  m_GameObject: {fileID: 5922741785422673140}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -116,13 +116,13 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8061461197510778090}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &5183197989176078307
+--- !u!212 &7186973322647701055
 SpriteRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5748732787075618685}
+  m_GameObject: {fileID: 5922741785422673140}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -157,7 +157,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: fb34eb96fba10c341ac2cf76d02a6551, type: 3}
+  m_Sprite: {fileID: 21300000, guid: ff427c68c1e9b1846b93879c898b20da, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -168,7 +168,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1 &6612322363083929418
+--- !u!1 &6077821267129723122
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -176,22 +176,22 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6507282394237674122}
-  - component: {fileID: 1131636141444645064}
+  - component: {fileID: 7636079375380036467}
+  - component: {fileID: 7236658579111571877}
   m_Layer: 0
-  m_Name: "1-9\uC5B4\uB450\uC6B4 \uBC30\uACBD"
+  m_Name: "1-9 \u110B\u1165\u1103\u116E\u110B\u116E\u11AB\u1107\u1162\u1100\u1167\u11BC"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6507282394237674122
+--- !u!4 &7636079375380036467
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6612322363083929418}
+  m_GameObject: {fileID: 6077821267129723122}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -200,13 +200,13 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8061461197510778090}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &1131636141444645064
+--- !u!212 &7236658579111571877
 SpriteRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6612322363083929418}
+  m_GameObject: {fileID: 6077821267129723122}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -241,7 +241,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -1
-  m_Sprite: {fileID: 21300000, guid: f793892d0f4dccb48a55e4b5b442e8d2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 22f3c730acddd174586234bbea34bbf7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -369,8 +369,8 @@ Transform:
   - {fileID: 3428697738223143812}
   - {fileID: 8271544244074868646}
   - {fileID: 8834836149930506080}
-  - {fileID: 733106018720610316}
-  - {fileID: 6507282394237674122}
+  - {fileID: 7487312393201182836}
+  - {fileID: 7636079375380036467}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4846683793363226796
@@ -575,7 +575,7 @@ MonoBehaviour:
   stage_1_9: {fileID: 8431097277835563127}
   distanceThreshold: 50
   movingObject: {fileID: 5052963048036772908}
-  activateObject: {fileID: 5748732787075618685}
+  activateObject: {fileID: 5922741785422673140}
 --- !u!120 &9036551136452257435
 LineRenderer:
   serializedVersion: 2

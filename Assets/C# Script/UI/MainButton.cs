@@ -11,6 +11,7 @@ public class MainButton : MonoBehaviour
     [SerializeField] private Button newGamePanel;
 
     [SerializeField] private GameObject newGameScene;
+    [SerializeField] private GameObject tempObject;
 
     private void Start()
     {
@@ -26,5 +27,10 @@ public class MainButton : MonoBehaviour
     public void newGamePanelClick()
     {
         //newGameScene.SetActive(false);
+    }
+
+    public void tempClick()
+    {
+        tempObject.SetActive(false);
     }
 }

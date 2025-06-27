@@ -72,7 +72,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_Sprite: {fileID: 21300000, guid: 489498412b492a54b840171e4694ec04, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -188,7 +188,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -5
+  m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: bcb83e1bda9bad74186eb7ba495df4ff, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -211,7 +211,7 @@ GameObject:
   - component: {fileID: 4711020249615297502}
   - component: {fileID: 818678389581614215}
   m_Layer: 0
-  m_Name: "\uCE90\uB9AD\uD130_\uC190\uC804\uB4F1\uBC84\uC804 (1) (1)"
+  m_Name: r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -226,9 +226,9 @@ Transform:
   m_GameObject: {fileID: 6270412193903109152}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.34665728, y: 0.035676718, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 2.55, y: 0.035676718, z: 0}
+  m_LocalScale: {x: 0.76, y: 0.76, z: 0.76}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 3017125873714289458}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -272,7 +272,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_Sprite: {fileID: 21300000, guid: b87f1b4017a8e2943ad76f1d94850961, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -358,7 +358,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_Sprite: {fileID: -9095717837082945937, guid: 207ee8102dd4143d288186ef0be518ee, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -402,8 +402,8 @@ CapsuleCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Offset: {x: 1.92115, y: 0.035576463}
+  m_Size: {x: 1.4269223, y: 3.205764}
   m_Direction: 0
 --- !u!1 &7031269646049003218
 GameObject:

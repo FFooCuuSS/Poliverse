@@ -42,18 +42,10 @@ public class Manager_1_8 : MonoBehaviour
 
     Vector2 GetValidSpawnPosition()
     {
-        Vector2 spawnPos;
+        float spawnRadiusMin = 4f;
+        float spawnRadiusMax = 6f;
 
-        // x 또는 y 중 하나가 2.5f 이상이 될 때까지 반복
-        do
-        {
-            spawnPos = new Vector2(
-                Random.Range(-3f, 3f),
-                Random.Range(-3f, 3f)
-            );
-        }
-        while (Mathf.Abs(spawnPos.x) < 2.5f && Mathf.Abs(spawnPos.y) < 2.5f);
-
+        Vector2 spawnPos = Random.insideUnitCircle.normalized * Random.Range(spawnRadiusMin, spawnRadiusMax);
         return spawnPos;
     }
 

@@ -15,6 +15,10 @@ public class Prisoner_1_8 : MonoBehaviour
 
     public float spawnMinDistance = 3f; // 감옥으로부터 최소 거리
 
+    [Header("스프라이트")]
+    public SpriteRenderer spriteRenderer;
+    public Sprite leftSprite;
+    public Sprite rightSprite;
 
     void Update()
     {
@@ -26,6 +30,15 @@ public class Prisoner_1_8 : MonoBehaviour
         newPosition.y = Mathf.Clamp(newPosition.y, minY, maxY);
 
         transform.position = new Vector3(newPosition.x, newPosition.y, 0f);
+
+        if (moveDirection.x < 0)
+        {
+            spriteRenderer.sprite = leftSprite;
+        }
+        else
+        {
+            spriteRenderer.sprite = rightSprite;
+        }
     }
 
     void UpdateMoveDirection()
