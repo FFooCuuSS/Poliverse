@@ -8,7 +8,7 @@ public class Minigame_1_8 : MiniGameBase
     private Manager_1_8 manager_1_8;
 
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "Get in!";
+    protected override string MinigameExplain => "°¡µÖ¶ó!";
 
     private void Start()
     {

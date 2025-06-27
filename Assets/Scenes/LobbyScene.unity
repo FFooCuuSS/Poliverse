@@ -187,14 +187,14 @@ RectTransform:
   m_GameObject: {fileID: 21588319}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 0.2675657, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 836733400}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1.809, y: 15.698}
+  m_AnchoredPosition: {x: -1.809, y: 58.669697}
   m_SizeDelta: {x: 538.048, y: 539.5793}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &71574463
@@ -2139,17 +2139,17 @@ RectTransform:
   m_GameObject: {fileID: 836733396}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 3.7374, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 21588322}
   - {fileID: 1755197030}
+  - {fileID: 21588322}
   m_Father: {fileID: 1047369186}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0.534, y: 5.664}
-  m_SizeDelta: {x: 603.794, y: 193.021}
+  m_SizeDelta: {x: 615.92, y: 750}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &907866392
 GameObject:
@@ -4078,17 +4078,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1755197027}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 2.78, y: 2.78, z: 2.78}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 836733400}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1.8086, y: -78.65303}
-  m_SizeDelta: {x: 538.05, y: 22.6185}
+  m_AnchoredPosition: {x: -1.8086, y: -293.95786}
+  m_SizeDelta: {x: 300, y: 22.6185}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1807277474
 GameObject:

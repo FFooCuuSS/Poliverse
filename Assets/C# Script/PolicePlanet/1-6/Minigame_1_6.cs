@@ -5,7 +5,7 @@ using UnityEngine;
 public class Minigame_1_6 : MiniGameBase
 {
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "Place it!";
+    protected override string MinigameExplain => "배치해라!";
 
     public override void StartGame()
     {

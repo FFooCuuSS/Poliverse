@@ -1,9 +1,16 @@
 using UnityEngine;
+using DG.Tweening;
 
 public class DragDistanceJudge : MonoBehaviour
 {
     [SerializeField] private GameObject stage_1_9;
-    [SerializeField] private float distanceThreshold = 5f; // 성공 기준 총 이동 거리
+    [SerializeField] private float distanceThreshold = 5f;
+
+    [Header("성공 시 움직일 오브젝트")]
+    [SerializeField] private GameObject movingObject;
+
+    [Header("성공 시 활성화할 오브젝트")]
+    [SerializeField] private GameObject activateObject;
 
     private Minigame_1_9 minigmae_1_9;
     private Vector3 lastPosition;
@@ -42,7 +49,30 @@ public class DragDistanceJudge : MonoBehaviour
             if (totalDistance >= distanceThreshold)
             {
                 minigmae_1_9.Succeed();
+                StartShaking();              // 오브젝트 이동
+                ActivateObject();          // 오브젝트 활성화
             }
+        }
+    }
+
+    private void StartShaking()
+    {
+        movingObject.transform.DOShakePosition(
+            duration: 1f,       // 진동 시간 (반복 주기)
+            strength: 0.1f,     // 진동 폭
+            vibrato: 20,        // 진동 빈도
+            randomness: 90,     // 무작위 진동 각도
+            snapping: false,
+            fadeOut: false      // 페이드 아웃 비활성화 (계속 강하게 진동)
+        )
+        .SetLoops(-1);         // 무한 반복
+    }
+
+    private void ActivateObject()
+    {
+        if (activateObject != null)
+        {
+            activateObject.SetActive(true);
         }
     }
 }

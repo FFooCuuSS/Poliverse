@@ -8,7 +8,7 @@ public class Minigame_1_1 : MiniGameBase
     private CameraController1_1 cameraController1_1;
 
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "Find!";
+    protected override string MinigameExplain => "Ã£¾Æ¶ó!";
 
     private void Start()
     {

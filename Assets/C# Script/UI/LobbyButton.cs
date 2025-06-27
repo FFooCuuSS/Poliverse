@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class LobbyButton : MonoBehaviour
 {
@@ -27,6 +28,13 @@ public class LobbyButton : MonoBehaviour
         robbyCanvas.SetActive(false);
         loadingCanvas.SetActive(true);
         settingsCanvas.SetActive(false);
+
+        Invoke("DelayedLoading", 1f);
+    }
+
+    void DelayedLoading()
+    {
+        SceneManager.LoadScene("MinigameLoad");
     }
 
     public void settingsButtonClick()
