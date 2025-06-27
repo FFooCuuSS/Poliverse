@@ -28,7 +28,7 @@ public class Minigame_1_8 : MiniGameBase
         Success();
     }
 
-    protected override void Fail()
+    public override void Fail()
     {
         manager_1_8.DestroyAllPrisoners();
         base.Fail();

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class MainButton : MonoBehaviour
 {
@@ -18,11 +19,12 @@ public class MainButton : MonoBehaviour
 
     public void newGameClick()
     {
-        newGameScene.SetActive(true);
+        //newGameScene.SetActive(true);
+        SceneManager.LoadScene("LobbyScene");
     }
 
     public void newGamePanelClick()
     {
-        newGameScene.SetActive(false);
+        //newGameScene.SetActive(false);
     }
 }

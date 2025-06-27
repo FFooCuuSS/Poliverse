@@ -4,8 +4,16 @@ using UnityEngine;
 
 public class Minigame_1_5 : MiniGameBase
 {
-    protected override float TimerDuration => 5f;
+    public GameObject CameraManager;
+    private CameraManager1_5 cameraManager1_5;
+
+    protected override float TimerDuration => 8f;
     protected override string MinigameExplain => "Find them!";
+
+    private void Start()
+    {
+        cameraManager1_5 = CameraManager.GetComponent<CameraManager1_5>();
+    }
 
     public override void StartGame()
     {
@@ -17,10 +25,14 @@ public class Minigame_1_5 : MiniGameBase
 
     public void Succeed()
     {
+        cameraManager1_5.isMoving = false;
+        //cameraManager1_5.mainCam.transform.position = new Vector3(0f, 0f, -10f);
         Success();
     }
-    public void Failure()
+    public override void Fail()
     {
-        Fail();
+        cameraManager1_5.isMoving = false;
+        //cameraManager1_5.mainCam.transform.position = new Vector3(0f, 0f, -10f);
+        base.Fail();
     }
 }

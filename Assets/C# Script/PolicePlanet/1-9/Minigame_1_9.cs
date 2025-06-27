@@ -5,7 +5,7 @@ using UnityEngine;
 public class Minigame_1_9 : MiniGameBase
 {
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "Turn it on!";
+    protected override string MinigameExplain => "Keep Dragging";
 
     public override void StartGame()
     {

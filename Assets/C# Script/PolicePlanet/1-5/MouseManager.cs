@@ -4,7 +4,16 @@ using UnityEngine;
 
 public class MouseManager : MonoBehaviour
 {
+    public GameObject stage_1_5;
+    private Minigame_1_5 minigame_1_5;
+
     public int thiefCnt = 7;
+
+    private void Start()
+    {
+        minigame_1_5 = stage_1_5.GetComponent<Minigame_1_5>();
+    }
+
     private void Update()
     {
         if(Input.GetMouseButtonDown(0))
@@ -31,8 +40,7 @@ public class MouseManager : MonoBehaviour
         }
         if(thiefCnt<=0)
         {
-            GetComponent<Minigame_1_5>().Succeed();
-            Debug.Log("success");
+            minigame_1_5.Succeed();
         }
     }
 }

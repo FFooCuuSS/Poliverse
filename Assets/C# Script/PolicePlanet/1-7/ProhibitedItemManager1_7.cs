@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class ProhibitedItemManager1_7 : MonoBehaviour
 {
+    public GameObject stage_1_7;
+    private Minigame_1_7 minigame_1_7;
+
     [Header("금지 물품 스프라이트 리스트")]
     [SerializeField] public List<Sprite> prohibitedSprites;
 
@@ -23,6 +26,7 @@ public class ProhibitedItemManager1_7 : MonoBehaviour
     void Start()
     {
         collectedCounts = new List<int>(new int[prohibitedSprites.Count]);
+        minigame_1_7 = stage_1_7.GetComponent<Minigame_1_7>();
 
         //// 금지 마크를 랜덤 선택
         //targetIndex = Random.Range(0, prohibitedMarkSprites.Count);
@@ -73,7 +77,7 @@ public class ProhibitedItemManager1_7 : MonoBehaviour
 
         if (currentZoneCounts[targetIndex] == prefabCounts[targetIndex])
         {
-            Debug.Log("성공! 금지된 물품이 존 안에 모두 들어와 있습니다.");
+            minigame_1_7.Success();
         }
     }
 }

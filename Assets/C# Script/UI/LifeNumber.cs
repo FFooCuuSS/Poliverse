@@ -14,6 +14,7 @@ public class LifeNumber : MonoBehaviour
         UpdateLivesUI();
     }
 
+
     public void LoseLife()
     {
         if (currentLives <= 0)

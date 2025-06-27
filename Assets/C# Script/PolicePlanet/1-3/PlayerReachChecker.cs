@@ -8,25 +8,40 @@ public class PlayerReachChecker : MonoBehaviour
     private Minigame_1_3 minigame_1_3;
 
     [SerializeField] private BoxCollider2D goalCollider;
-    private CircleCollider2D playerCollider;
+    private CapsuleCollider playerCollider;
     private DragAndDrop dragAndDrop;
 
     private bool isGameOver = false;
+    private Vector3 fixedPosition;
 
     private void Start()
     {
         minigame_1_3 = stage_1_3.GetComponent<Minigame_1_3>();
-        playerCollider = GetComponent<CircleCollider2D>();
+        playerCollider = GetComponent<CapsuleCollider>();
         dragAndDrop = GetComponent<DragAndDrop>();
+
+        Vector3 pos = transform.position;
+        pos.z = 0f;
+        transform.position = pos;
     }
 
     private void Update()
     {
-        if (isGameOver) return;
+        if (isGameOver)
+        {
+            transform.position = fixedPosition; // 위치 고정
+            return;
+        }
 
         BoundCheck();
         GoalCheck();
     }
+
+    private void OnMouseDown()
+    {
+        Debug.Log("나여기");
+    }
+
     private void BoundCheck()
     {
         Collider2D[] hits = Physics2D.OverlapPointAll(transform.position);
@@ -41,9 +56,10 @@ public class PlayerReachChecker : MonoBehaviour
                 break;
             }
         }
-        if(!isOnPath)
+        if (!isOnPath && !isGameOver)
         {
             isGameOver = true;
+            fixedPosition = transform.position; // 현재 위치 저장
             minigame_1_3.Failure();
         }
     }
@@ -53,9 +69,10 @@ public class PlayerReachChecker : MonoBehaviour
         Bounds goalBounds = goalCollider.bounds;
         Bounds playerBounds = playerCollider.bounds;
 
-        if(playerBounds.Intersects(goalBounds))
+        if (playerBounds.Intersects(goalBounds) && !isGameOver)
         {
             isGameOver = true;
+            fixedPosition = transform.position; // 현재 위치 저장
             minigame_1_3.Succeed();
         }
     }
