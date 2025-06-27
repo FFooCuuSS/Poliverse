@@ -5,7 +5,7 @@ using UnityEngine;
 public class Minigame_1_10 : MiniGameBase
 {
     protected override float TimerDuration => 30f;
-    protected override string MinigameExplain => "Left or Right!";
+    protected override string MinigameExplain => "분류해라!";
 
     public override void StartGame()
     {

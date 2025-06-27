@@ -9,7 +9,7 @@ public class Minigame_1_7 : MiniGameBase
 
 
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "Ban!";
+    protected override string MinigameExplain => "±İÁö¾ß!";
 
 
     private void Start()

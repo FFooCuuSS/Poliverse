@@ -267,6 +267,7 @@ public class MinigameUImanager : MonoBehaviour
             originalPlayerSprite = playerRenderer.sprite;
 
         StartCoroutine(PlayStandingEffect(playerRenderer, originalPlayerSprite, originalPlayerSprite, -5f, 1.5f));
+        StartCoroutine(PlayDefeatedEffect(enemyRenderer, -10f, 1.0f));
     }
     private void PlayLoseEffect()
     {
@@ -274,6 +275,7 @@ public class MinigameUImanager : MonoBehaviour
             originalEnemySprite = enemyRenderer.sprite;
 
         StartCoroutine(PlayStandingEffect(enemyRenderer, enemyVictorySprites[selectedPlanet - 1], originalEnemySprite, 5f, -1.5f));
+        StartCoroutine(PlayDefeatedEffect(playerRenderer, 10f, -1.0f));
     }
     void GameOver()
     {
@@ -421,6 +423,40 @@ public class MinigameUImanager : MonoBehaviour
         }
     }
 
+    private IEnumerator PlayDefeatedEffect(SpriteRenderer targetRenderer, float rotationAmount, float moveXAmount)
+    {
+        Vector3 originalPos = targetRenderer.transform.localPosition;
+        Vector3 originalRotation = targetRenderer.transform.localEulerAngles;
+        Vector3 originalScale = targetRenderer.transform.localScale;
 
+        // 기존 점프 (승자와 타이밍 통일)
+        targetRenderer.transform.DOLocalMoveY(originalPos.y + 0.15f, 0.15f).SetEase(Ease.OutQuad);
+        yield return new WaitForSeconds(0.15f);
+        targetRenderer.transform.DOLocalMoveY(originalPos.y, 0.15f).SetEase(Ease.InQuad);
+        yield return new WaitForSeconds(0.15f);
+
+        // Y축 + X축 + 회전 + 스케일 연출
+        Sequence seq = DOTween.Sequence();
+
+        Vector3 targetPos = new Vector3(originalPos.x + moveXAmount, originalPos.y + 0.2f, originalPos.z);
+
+        seq.Append(targetRenderer.transform.DOLocalMove(targetPos, 0.1f).SetEase(Ease.OutQuad));
+        seq.Join(targetRenderer.transform.DOLocalRotate(new Vector3(0f, 0f, rotationAmount), 0.1f).SetEase(Ease.OutQuad));
+        seq.Join(targetRenderer.transform.DOScale(originalScale * 0.9f, 0.1f).SetEase(Ease.OutQuad)); // 패배 시 살짝 축소 (네가 수치 바꿔도 됨)
+
+        yield return seq.WaitForCompletion();
+
+        // 유지 시간
+        yield return new WaitForSeconds(2f);
+
+        // 원상복귀
+        Sequence resetSeq = DOTween.Sequence();
+
+        resetSeq.Append(targetRenderer.transform.DOLocalMove(originalPos, 0.1f).SetEase(Ease.InQuad));
+        resetSeq.Join(targetRenderer.transform.DOLocalRotate(originalRotation, 0.1f).SetEase(Ease.InQuad));
+        resetSeq.Join(targetRenderer.transform.DOScale(originalScale, 0.1f).SetEase(Ease.InQuad));
+
+        yield return resetSeq.WaitForCompletion();
+    }
 
 }
