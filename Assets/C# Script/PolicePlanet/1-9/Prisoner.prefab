@@ -29,9 +29,9 @@ Transform:
   m_GameObject: {fileID: 2674854900296907583}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4, y: 3, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.85, y: 0.85, z: 0.85}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -76,8 +76,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 10
-  m_Sprite: {fileID: -9095717837082945937, guid: 207ee8102dd4143d288186ef0be518ee, type: 3}
-  m_Color: {r: 0.6289307, g: 0.20766573, b: 0.20766573, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 3eb9c2a8fc0f38e499225ed739e0b441, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -106,6 +106,9 @@ MonoBehaviour:
   minY: -3.5
   maxY: 3.5
   spawnMinDistance: 3
+  spriteRenderer: {fileID: 5734617014552375229}
+  leftSprite: {fileID: 21300000, guid: 26b2dc0f803f0a3438336bc1724bf08b, type: 3}
+  rightSprite: {fileID: 21300000, guid: 3eb9c2a8fc0f38e499225ed739e0b441, type: 3}
 --- !u!114 &8017291540900308318
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -150,6 +153,6 @@ CapsuleCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Offset: {x: 0.12851691, y: -0.13680768}
+  m_Size: {x: 1.7213523, y: 3.1856694}
   m_Direction: 0

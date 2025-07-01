@@ -10,7 +10,6 @@ public class MontageManager : MonoBehaviour
 
     public GameObject[] montagePrefabs;        // 프리팹 리스트
     public Transform mainPosition;             // 정답 몽타주 생성 위치
-    public Transform[] optionParents;          // Option 자식 위치 (3개)
 
     public int correctMontageId;
 
@@ -46,40 +45,10 @@ public class MontageManager : MonoBehaviour
             selectedPrefabs.Add(montagePrefabs[remainingIndices[rand]]);
             remainingIndices.RemoveAt(rand);
         }
-
-        //셔플 후 옵션 자식에 생성
-        Shuffle(selectedPrefabs);
-
-        for (int i = 0; i < optionParents.Length; i++)
-        {
-            GameObject optionMontage = Instantiate(selectedPrefabs[i], optionParents[i]);
-            optionMontage.transform.localPosition = Vector3.zero;
-            optionMontage.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-
-            
-            MontageID montageScript = optionMontage.GetComponent<MontageID>();
-            if (montageScript == null)
-            {
-                Debug.LogError("MontageID 스크립트 없음");
-                continue;
-            }
-
-            Debug.Log($"생성된 옵션 {i}의 ID: {montageScript.montageID}");
-
-            // Option 부모에 OptionClickHandler 연결
-            OptionClickHandler clickHandler = optionParents[i].GetComponent<OptionClickHandler>();
-            if (clickHandler != null)
-            {
-                clickHandler.optionIndex = i;
-                clickHandler.manager = this;
-            }
-        }
     }
     public void CheckAnswer(int optionIndex)
     {
-        Transform child = optionParents[optionIndex].GetChild(1);
-        MontageID selected = child.GetComponent<MontageID>();
-        if (selected.montageID == correctMontageId)
+        if (optionIndex == correctMontageId)
         {
             Debug.Log("정답");
             minigame_1_4.Succeed();
@@ -89,6 +58,7 @@ public class MontageManager : MonoBehaviour
             Debug.Log("오답");
             minigame_1_4.Failure();
         }
+        Debug.Log($"{optionIndex}, {correctMontageId}");
     }
 
     void Shuffle<T>(List<T> list)
