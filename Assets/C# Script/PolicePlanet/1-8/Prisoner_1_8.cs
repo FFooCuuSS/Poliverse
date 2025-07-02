@@ -46,13 +46,18 @@ public class Prisoner_1_8 : MonoBehaviour
         Vector2 prisonerPos = transform.position;
         Vector2 prisonPos = prison.transform.position;
 
+        // 감옥에서의 방향 계산
         Vector2 awayFromPrison = (prisonerPos - prisonPos).normalized;
+
+        //  y축 제거: x축 방향만 유지
+        awayFromPrison.y = 0f;
 
         if (awayFromPrison == Vector2.zero)
         {
-            awayFromPrison = Random.insideUnitCircle.normalized;
+            //  랜덤 x축 방향 보정
+            awayFromPrison = new Vector2(Random.value < 0.5f ? -1f : 1f, 0f);
         }
 
-        moveDirection = awayFromPrison;
+        moveDirection = awayFromPrison.normalized;
     }
 }
