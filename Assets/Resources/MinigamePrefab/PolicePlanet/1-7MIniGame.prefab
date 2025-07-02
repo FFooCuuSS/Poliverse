@@ -167,7 +167,7 @@ Transform:
   m_GameObject: {fileID: 1035014962230817761}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.6, y: 1.91, z: -0.5}
+  m_LocalPosition: {x: 7.82, y: -2.45, z: -0.5}
   m_LocalScale: {x: 1.5167, y: 1.1083, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -286,7 +286,7 @@ Transform:
   m_GameObject: {fileID: 2029333557995429627}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.06, y: 1.91, z: -0.5}
+  m_LocalPosition: {x: -7, y: -2.4, z: -0.5}
   m_LocalScale: {x: 1.5167, y: 1.1083, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -454,7 +454,7 @@ Transform:
   m_GameObject: {fileID: 5328878213619531866}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.53, y: 1.91, z: -0.5}
+  m_LocalPosition: {x: 0.71, y: -2.31, z: -0.5}
   m_LocalScale: {x: 1.5167, y: 1.1083, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -523,7 +523,7 @@ GameObject:
   - component: {fileID: 8365502144768819593}
   - component: {fileID: 8921214434987760622}
   m_Layer: 0
-  m_Name: "\u1100\u1167\u11BC\u110E\u1161\u11AF\u1109\u1165 \u1103\u1161\u11BC\u110C\u1175\u11A8\u1109\u1175\u11AF"
+  m_Name: BackGround
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -764,11 +764,10 @@ MonoBehaviour:
   - {fileID: 5328878213619531866}
   - {fileID: 7605637778076588756}
   - {fileID: 1035014962230817761}
-  prefabToSpawn: {fileID: 6337323350657785496, guid: d81bd66c23e1da4438cb42506febf224, type: 3}
-  randomSprites:
-  - {fileID: 21300000, guid: 08015717516dee54eb1fba9a4dc6b95a, type: 3}
-  - {fileID: 21300000, guid: 2c752c45e3152334380d6845cca4ff79, type: 3}
-  - {fileID: 21300000, guid: 50b9a54deb71ed44fb6d5071d073f508, type: 3}
+  prefabVariants:
+  - {fileID: 7415903241554462921, guid: f9c31bebe91e03b49b40111eaf9ab4d7, type: 3}
+  - {fileID: 4731672210868383541, guid: 26668b744df1c8347bdf1cebf1092f3d, type: 3}
+  - {fileID: 8748065943933323845, guid: 5c69b2551f0f08f4c9863c95b46652d6, type: 3}
   manager: {fileID: 1696547736843204279}
   spawnParent: {fileID: 1116676132617148460}
 --- !u!1 &7605637778076588756
@@ -797,7 +796,7 @@ Transform:
   m_GameObject: {fileID: 7605637778076588756}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.19, y: 1.91, z: -0.5}
+  m_LocalPosition: {x: 0.05, y: -2.4, z: -0.5}
   m_LocalScale: {x: 1.5167, y: 1.1083, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
