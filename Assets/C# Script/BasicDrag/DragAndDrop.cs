@@ -2,7 +2,11 @@ using UnityEngine;
 
 public class DragAndDrop : MonoBehaviour
 {
-    protected bool isDragging = false;
+    [SerializeField] private float maxX = 7f;
+    [SerializeField] private float maxY = 4f;
+
+    public bool isDragging = false;
+    public bool banDragging = false;
     protected Vector3 offset;
 
     protected virtual void OnMouseDown()
@@ -19,7 +23,7 @@ public class DragAndDrop : MonoBehaviour
 
     protected virtual void Update()
     {
-        if (!isDragging) return;
+        if (!isDragging || banDragging) return;
 
         Vector3 mouseWorldPos = GetMouseWorldPos();
         Vector3 targetPos = mouseWorldPos + offset;
@@ -28,7 +32,9 @@ public class DragAndDrop : MonoBehaviour
 
     protected virtual Vector3 GetConstrainedPosition(Vector3 current, Vector3 target)
     {
-        return target; // 기본: 아무 제약 없음
+        float clampedX = Mathf.Clamp(target.x, -maxX, maxX);
+        float clampedY = Mathf.Clamp(target.y, -maxY, maxY);
+        return new Vector3(clampedX, clampedY, target.z);
     }
 
     protected Vector3 GetMouseWorldPos()
