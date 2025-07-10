@@ -6,6 +6,10 @@ public class HandcuffFitChecker : MonoBehaviour
     public GameObject stage_1_2;
     private Minigame_1_2 minigame_1_2;
 
+    [SerializeField] private GameObject objectToDestroy;
+    [SerializeField] private GameObject objectToSpawn;
+
+
     [SerializeField] private List<CircleCollider2D> handColliders;
     [SerializeField] private List<DragAndDrop> dragAndDrops;
     private CircleCollider2D cuffCollider;
@@ -42,8 +46,6 @@ public class HandcuffFitChecker : MonoBehaviour
 
                 if (dragAndDrop != null) dragAndDrop.enabled = false;
 
-                Debug.Log($"수갑 {gameObject.name} 겹침, 고정 완료");
-
                 GameClearCheck();
                 break;
             }
@@ -66,6 +68,9 @@ public class HandcuffFitChecker : MonoBehaviour
 
         if (all[0].snappedHand != all[1].snappedHand)
         {
+            if (objectToDestroy != null)    objectToDestroy.SetActive(false);
+            if (objectToSpawn != null)      objectToSpawn.SetActive(true);
+
             minigame_1_2.Succeed();
         }
         else
@@ -73,4 +78,5 @@ public class HandcuffFitChecker : MonoBehaviour
             minigame_1_2.Fail();
         }
     }
+
 }
