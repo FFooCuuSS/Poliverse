@@ -4,24 +4,24 @@ using UnityEngine;
 
 public class Shoot3_5 : MonoBehaviour
 {
-    public GameObject spyTracker;
+    public Transform spyTracker;
+    public Transform scope;
 
     private Camera mainCam;
-    public float followSpeed = 2f;
+    public float followSpeed = 1f;
     public Vector2 moveLimitMin; // 카메라 제한 범위 최소
     public Vector2 moveLimitMax; // 카메라 제한 범위 최대
 
+    public bool isMoving = true;
     void Start()
     {
         mainCam = Camera.main;
-        if (mainCam != null)
-        {
-            mainCam.transform.SetParent(this.transform); // 카메라를 자식으로
-        }
+       
     }
 
     void Update()
     {
+        if (!isMoving) return;
         // 1. 마우스 위치로 카메라 이동
         Vector3 mouseWorldPos = mainCam.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = mainCam.transform.position.z;
@@ -31,10 +31,10 @@ public class Shoot3_5 : MonoBehaviour
         targetPos.y = Mathf.Clamp(targetPos.y, moveLimitMin.y, moveLimitMax.y);
 
         mainCam.transform.position = targetPos;
-        spyTracker.transform.position=targetPos;
-
+        spyTracker.position = new Vector3(mainCam.transform.position.x, mainCam.transform.position.y, 0f);
+        scope.position = new Vector3(mainCam.transform.position.x, mainCam.transform.position.y, 0f);
         // 2. 마우스 아래 오브젝트 감지
-        CheckMouseOverEnemy();
+        //CheckMouseOverEnemy();
     }
 
     void CheckMouseOverEnemy()

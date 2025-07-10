@@ -371,7 +371,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &1206191121426169458
 GameObject:
@@ -627,7 +627,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &1629159196882067456
 GameObject:
@@ -832,7 +832,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &2018514359082367041
 GameObject:
@@ -953,7 +953,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &2256085404429613859
 GameObject:
@@ -1390,7 +1390,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &4884782229392288649
 GameObject:
@@ -1511,7 +1511,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &4894735890904993667
 GameObject:
@@ -1632,7 +1632,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &4965849518784185386
 GameObject:
@@ -1877,7 +1877,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &5811731026604087457
 GameObject:
@@ -1998,7 +1998,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &5861528746642033051
 GameObject:
@@ -2287,7 +2287,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &6399107977704481288
 GameObject:
@@ -2530,7 +2530,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &6551437017979456123
 GameObject:
@@ -2819,7 +2819,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &7272274951195783109
 GameObject:
@@ -2940,7 +2940,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &7458606394627226349
 GameObject:
@@ -3061,7 +3061,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &7909363480588443892
 GameObject:
@@ -3350,7 +3350,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &8688864460944648081
 GameObject:
@@ -3471,7 +3471,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 0.5, y: 2.3}
   m_Direction: 0
 --- !u!1 &8692474628882193717
 GameObject:
@@ -3484,7 +3484,7 @@ GameObject:
   - component: {fileID: 2704319452634931995}
   - component: {fileID: 4274065603580140975}
   m_Layer: 0
-  m_Name: "1-5 \u1107\u1162\u1100\u1167\u11BC"
+  m_Name: 1-5 BackGround
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
