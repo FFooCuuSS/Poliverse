@@ -1,69 +1,56 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ProhibitedItemSpawner1_7 : MonoBehaviour
 {
-    [Header("랜덤 위치 대상 오브젝트들")]
-    public GameObject[] spawnPoints;
-
-    [Header("생성할 프리팹들 (각기 다른 금지 물품 프리팹)")]
-    public List<GameObject> prefabVariants;
-
-    [Header("금지 아이템 매니저")]
-    public ProhibitedItemManager1_7 manager;
-
+    public List<GameObject> prohibitedItemPrefabs;
+    public List<Sprite> prohibitedMarkSprites;
     public Transform spawnParent;
 
-    void Start()
+    public void SpawnItemsForPrisoner(GameObject prisoner, int index)
     {
-        SpawnRandomPrefabs();
-    }
-
-    void SpawnRandomPrefabs()
-    {
-        if (prefabVariants.Count == 0 || spawnPoints.Length == 0)
+        if (index < 0 || index >= prohibitedItemPrefabs.Count || index >= prohibitedMarkSprites.Count)
         {
-            Debug.LogWarning("프리팹 목록 또는 스폰 위치가 비어 있습니다.");
+            Debug.LogError(" 잘못된 인덱스 접근");
             return;
         }
 
-        int spawnCount =  Random.Range(2, spawnPoints.Length + 1);
-        GameObject[] shuffled = (GameObject[])spawnPoints.Clone();
-        System.Array.Sort(shuffled, (a, b) => Random.Range(-1, 2)); // 셔플
+        //// 1) 금지 마크 생성 (죄수 머리 위에 표시)
+        //GameObject markObj = new GameObject("ProhibitedMark");
+        //SpriteRenderer markSr = markObj.AddComponent<SpriteRenderer>();
+        //markSr.sprite = prohibitedMarkSprites[index];
+        //markObj.transform.SetParent(prisoner.transform);
+        //markObj.transform.localPosition = new Vector3(0, 1.2f, 0);
 
-        int[] spriteCounts = new int[manager.prohibitedSprites.Count];
+        // 2) 죄수 안의 "ProhibitedItems" 하위에서 item 위치 찾기
+        string itemName = prohibitedItemPrefabs[index].name.Replace("(Clone)", "").Trim();
 
-        for (int i = 0; i < spawnCount; i++)
+        Transform prohibitedItemsParent = prisoner.transform.Find("ProhibitedItems");
+        if (prohibitedItemsParent == null)
         {
-            int prefabIndex = Random.Range(0, prefabVariants.Count);
-            GameObject selectedPrefab = prefabVariants[prefabIndex];
-
-            Vector3 spawnPos = shuffled[i].transform.position;
-            spawnPos.z += -3f;
-
-            GameObject newObj = Instantiate(selectedPrefab, spawnPos, Quaternion.identity, spawnParent);
-            newObj.tag = "Item";
-
-            // 생성된 프리팹의 스프라이트로 인덱스 매핑
-            SpriteRenderer sr = newObj.GetComponent<SpriteRenderer>();
-            if (sr != null)
-            {
-                int index = manager.prohibitedSprites.IndexOf(sr.sprite);
-                if (index != -1)
-                {
-                    spriteCounts[index]++;
-                }
-                else
-                {
-                    Debug.LogWarning($"생성된 프리팹의 스프라이트 {sr.sprite.name}가 manager.prohibitedSprites에 없습니다!");
-                }
-            }
+            Debug.LogWarning(" 'ProhibitedItems' 오브젝트를 찾을 수 없습니다.");
+            return;
         }
 
-        if (manager != null)
+        Transform targetPoint = prohibitedItemsParent.Find(itemName);
+        if (targetPoint == null)
         {
-            manager.SetPrefabCounts(spriteCounts);
+            Debug.LogWarning($" '{itemName}' 이름의 자식이 'ProhibitedItems' 안에 없습니다.");
+            return;
+        }
+
+        // 3) 아이템 생성
+        GameObject prohibitedItem = Instantiate(prohibitedItemPrefabs[index], prisoner.transform);
+        prohibitedItem.transform.localPosition = targetPoint.localPosition;
+        prohibitedItem.tag = "Item";
+
+        // 4) 죄수 컨트롤러에 등록
+        PrisonerController1_7 controller = prisoner.GetComponent<PrisonerController1_7>();
+        if (controller != null)
+        {
+            controller.SetProhibitedItem(prohibitedItem);
         }
     }
+
+
 }

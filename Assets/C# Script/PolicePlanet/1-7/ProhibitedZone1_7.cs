@@ -1,54 +1,39 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ProhibitedZone1_7 : MonoBehaviour
 {
-    public ProhibitedItemManager1_7 manager;
-
-    private List<GameObject> itemsInZone = new List<GameObject>();
-
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Item") && !itemsInZone.Contains(other.gameObject))
-        {
-            itemsInZone.Add(other.gameObject);
-        }
-    }
-
-    void OnTriggerExit2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Item"))
         {
-            Debug.Log($"Item Entered Zone: {other.name}");
-            if (!itemsInZone.Contains(other.gameObject))
-                itemsInZone.Add(other.gameObject);
-        }
-    }
-
-    void Update()
-    {
-        if (manager == null || manager.prefabCounts == null) return;
-
-        // 카운트 리셋
-        int[] currentCounts = new int[manager.prohibitedSprites.Count];
-
-        foreach (GameObject item in itemsInZone)
-        {
-            if (item == null) continue;
-
-            SpriteRenderer sr = item.GetComponent<SpriteRenderer>();
-            if (sr == null) continue;
-
-            int index = manager.prohibitedSprites.IndexOf(sr.sprite);
-            if (index >= 0 && index < currentCounts.Length)
+            // SpriteRenderer는 금지 아이템의 부모에 존재
+            SpriteRenderer sr = other.GetComponentInParent<SpriteRenderer>();
+            if (sr != null)
             {
-                currentCounts[index]++;
+                ProhibitedItemManager1_7 manager = FindObjectOfType<ProhibitedItemManager1_7>();
+                if (manager == null) return;
+
+                int index = manager.prohibitedSprites.IndexOf(sr.sprite);
+                if (index != -1)
+                {
+                    Debug.Log("금지 아이템이 존에 들어옴");
+                    GameManager1_7.instance.IncreaseSuccessCount();
+
+
+                    // 부모의 부모인 죄수 오브젝트에서 PrisonerController1_7 호출
+                    Transform prisoner = sr.transform.parent;
+                    if (prisoner != null)
+                    {
+                        PrisonerController1_7 controller = prisoner.GetComponent<PrisonerController1_7>();
+                        if (controller != null)
+                        {
+                            controller.StartSuccessEscape();
+                            Debug.Log("죄수 보내기");
+                        }
+                    }
+                    Destroy(sr.gameObject);
+                }
             }
         }
-
-        // Update 된 값으로 체크 (지속 체크 구조)
-        manager.UpdateZoneCount(currentCounts);
-        
-        
     }
 }

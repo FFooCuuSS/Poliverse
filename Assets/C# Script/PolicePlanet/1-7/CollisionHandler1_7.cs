@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CollisionHandler1_7 : MonoBehaviour
@@ -20,8 +18,6 @@ public class CollisionHandler1_7 : MonoBehaviour
             {
                 manager.RegisterCollision(sr.sprite);
             }
-
-            
         }
         Debug.Log("Á¸¿¡ µé¾î¿È: " + other.name);
     }
