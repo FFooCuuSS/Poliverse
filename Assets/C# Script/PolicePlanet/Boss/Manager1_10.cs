@@ -13,6 +13,7 @@ public class Manager : MonoBehaviour
     public GameObject Police;
     public GameObject Sinner;
     //public GameObject RandomTextObj;
+    [SerializeField] private Sprite[] sinnerSprites;
 
     public Transform spawnParent; 
     private GameObject currentPerson;
@@ -69,10 +70,41 @@ public class Manager : MonoBehaviour
         bool spawnSinner = Random.Range(0, 2) == 0;
         GameObject prefab = spawnSinner ? Sinner : Police;
         isSinner = spawnSinner;
+
         currentPerson = Instantiate(prefab, prefab.transform.position, Quaternion.identity, spawnParent);
+
+        SpriteRenderer sr = currentPerson.GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            if (isSinner && sinnerSprites.Length > 0)
+            {
+                int randIndex = Random.Range(0, sinnerSprites.Length);
+                sr.sprite = sinnerSprites[randIndex];
+            }
+
+            Color c = sr.color;
+            c.a = 0f;
+            sr.color = c;
+            StartCoroutine(FadeIn(sr, 0.1f));
+        }
 
         //randomText.ShowLine(!isSinner);
     }
+
+    private IEnumerator FadeIn(SpriteRenderer sr, float duration)
+    {
+        float timer = 0f;
+        Color originalColor = sr.color;
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            float alpha = Mathf.Clamp01(timer / duration);
+            sr.color = new Color(originalColor.r, originalColor.g, originalColor.b, alpha);
+            yield return null;
+        }
+        sr.color = new Color(originalColor.r, originalColor.g, originalColor.b, 1f); // º¸Á¤
+    }
+
 
     public void MovePerson(bool goUp)
     {

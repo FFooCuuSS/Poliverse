@@ -12,10 +12,11 @@ EditorBuildSettings:
     path: Assets/Scenes/MinigameLoad.unity
     guid: c12687692575fd947940a22259afc381
   - enabled: 1
-    path: Assets/Scenes/MainScene.unity
-    guid: 1d0a54c257d0aae4eac5659cabd27c18
-  - enabled: 1
     path: Assets/Scenes/StageEnd.unity
     guid: 01664a79cd4f80c4f8ccaf1710669342
+  - enabled: 1
+    path: Assets/Scenes/MainScene.unity
+    guid: 1d0a54c257d0aae4eac5659cabd27c18
   m_configObjects:
+    com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 625beb70c70ea984993ba0feb1cc473a, type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 59d7ab21642657240b87afec04891bbb, type: 2}

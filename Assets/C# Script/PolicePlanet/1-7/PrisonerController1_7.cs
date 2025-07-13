@@ -1,8 +1,11 @@
+using DG.Tweening;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class PrisonerController1_7 : MonoBehaviour
 {
     public float moveSpeed = 2f;
+    private Tween moveTween;
     private bool isSuccess = false;
     private Collider2D[] childColliders;
     public PrisonerSpawner1_7 prisonerSpawner;
@@ -13,16 +16,21 @@ public class PrisonerController1_7 : MonoBehaviour
     {
         prohibitedItem = item;
     }
-    private void Start()
+    void Start()
     {
-        childColliders = GetComponentsInChildren<Collider2D>();
+        float targetX = 0; // 도달하면 Destroy 시킬 목표 위치
+        float distance = transform.position.x - targetX;
+        float duration = distance / moveSpeed;
+
+        transform.DOMoveX(targetX, duration)
+        .SetEase(Ease.InOutSine);
     }
 
+    /*
     void Update()
     {
         if (isSuccess)
         {
-            Debug.Log("...");
             transform.Translate(Vector2.left * moveSpeed * Time.deltaTime);
 
             if (transform.position.x < -15f)
@@ -43,12 +51,13 @@ public class PrisonerController1_7 : MonoBehaviour
             SetChildCollidersActive(true);
         }
     }
+    */
 
     public void StartSuccessEscape()
     {
         isSuccess = true;
-        Debug.Log("...");
     }
+
     private void SetChildCollidersActive(bool isActive)
     {
         foreach (Collider2D col in childColliders)

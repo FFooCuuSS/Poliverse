@@ -16,7 +16,6 @@ public class ProhibitedZone1_7 : MonoBehaviour
                 int index = manager.prohibitedSprites.IndexOf(sr.sprite);
                 if (index != -1)
                 {
-                    Debug.Log("금지 아이템이 존에 들어옴");
                     GameManager1_7.instance.IncreaseSuccessCount();
 
 
@@ -27,11 +26,10 @@ public class ProhibitedZone1_7 : MonoBehaviour
                         PrisonerController1_7 controller = prisoner.GetComponent<PrisonerController1_7>();
                         if (controller != null)
                         {
-                            controller.StartSuccessEscape();
-                            Debug.Log("죄수 보내기");
+                            return;
+                            //controller.StartSuccessEscape();
                         }
                     }
-                    Destroy(sr.gameObject);
                 }
             }
         }

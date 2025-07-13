@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Success_1_6 : MonoBehaviour
@@ -11,7 +10,18 @@ public class Success_1_6 : MonoBehaviour
     public GameObject isDefend;
     public GameObject isOffend;
     public GameObject isOfficer;
-    bool isSuccessed = false;
+
+    public GameObject defend;
+    public GameObject offend;
+    public GameObject officer;
+
+
+    // 각 오브젝트의 상태별 스프라이트 배열 (index 0: 성공, 1: 실패 등)
+    [SerializeField] private Sprite[] defendSprites;
+    [SerializeField] private Sprite[] offendSprites;
+    [SerializeField] private Sprite[] officerSprites;
+
+    private bool isSuccessed = false;
 
     private void Start()
     {
@@ -20,47 +30,33 @@ public class Success_1_6 : MonoBehaviour
 
     private void Update()
     {
-        if(!isSuccessed&&isSuccess())
+        if (!isSuccessed && isSuccess())
         {
             isSuccessed = true;
             minigame_1_6.Succeed();
+            ApplySuccessSprites(); // 스프라이트 변경
         }
     }
+
     bool isSuccess()
     {
         var defend = isDefend.GetComponent<DefendBox>();
         var offend = isOffend.GetComponent<OffendBox>();
         var officer = isOfficer.GetComponent<OfficeBox>();
-        if(defend.isDefense&&offend.isOffend&&officer.isOfficer)
-        {
-            return true;
-        }
-        return false;
+        return defend.isDefense && offend.isOffend && officer.isOfficer;
     }
-    /*public GameObject Defend;
-    public GameObject Offend;
-    public GameObject Officer;
-    public GameObject Enemy;
-    bool isSuccess = false;
 
-    private void Update()
+    void ApplySuccessSprites()
     {
+        defend.GetComponent<SpriteRenderer>().sprite = defendSprites[0];
+        offend.GetComponent<SpriteRenderer>().sprite = offendSprites[0];
+        officer.GetComponent<SpriteRenderer>().sprite = officerSprites[0];
+    }
 
-        float yDefend =Defend.transform.position.y;
-        float yOffend=Offend.transform.position.y;
-        float yOfficer=Officer.transform.position.y;
-        //var DefendScript = Defend.GetComponent<DragMouseIngame>();
-        //DefendScript.
-        if (!isSuccess)
-        {
-            if (yDefend > yOffend && yOffend > yOfficer)
-            {
-                isSuccess = true;
-                Debug.Log("success");
-            }
-        }
-            
-        
-    }*/
-
+    public void ApplyFailureSprites()
+    {
+        defend.GetComponent<SpriteRenderer>().sprite = defendSprites[1];
+        offend.GetComponent<SpriteRenderer>().sprite = offendSprites[1];
+        officer.GetComponent<SpriteRenderer>().sprite = officerSprites[1];
+    }
 }
