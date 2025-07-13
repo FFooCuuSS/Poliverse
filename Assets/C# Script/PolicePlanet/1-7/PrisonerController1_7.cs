@@ -33,7 +33,7 @@ public class PrisonerController1_7 : MonoBehaviour
                 
             }
         }
-        else if (transform.position.x > 0f)
+        else if (transform.position.x > -0f)
         {
             transform.Translate(Vector2.left * moveSpeed * Time.deltaTime);
             SetChildCollidersActive(false);
