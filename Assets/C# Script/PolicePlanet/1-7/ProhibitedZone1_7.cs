@@ -21,7 +21,7 @@ public class ProhibitedZone1_7 : MonoBehaviour
 
 
                     // 부모의 부모인 죄수 오브젝트에서 PrisonerController1_7 호출
-                    Transform prisoner = sr.transform.parent;
+                    Transform prisoner = sr.transform.parent?.parent;
                     if (prisoner != null)
                     {
                         PrisonerController1_7 controller = prisoner.GetComponent<PrisonerController1_7>();

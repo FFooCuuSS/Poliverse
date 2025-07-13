@@ -40,7 +40,12 @@ public class ProhibitedItemSpawner1_7 : MonoBehaviour
         }
 
         // 3) 아이템 생성
-        GameObject prohibitedItem = Instantiate(prohibitedItemPrefabs[index], prisoner.transform);
+        GameObject prohibitedItem = Instantiate(
+            prohibitedItemPrefabs[index],
+            targetPoint.position,           // 월드 좌표 위치 (targetPoint 기준)
+            targetPoint.rotation,           // targetPoint의 회전값 그대로 사용
+            prohibitedItemsParent           // 부모 transform 지정
+            );
         prohibitedItem.transform.localPosition = targetPoint.localPosition;
         prohibitedItem.tag = "Item";
 
