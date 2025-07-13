@@ -5,10 +5,41 @@ using UnityEngine.UI;
 
 public class SettingPopup : MonoBehaviour
 {
-    [SerializeField] private GameObject setting;
+    [Header("연결할 패널")]
+    public GameObject settingPanel;
+    public GameObject panel3;
 
-    public void closePopup()
+    void Start()
     {
-        setting.SetActive(false);
+        if (settingPanel != null)
+        {
+            settingPanel.SetActive(false);
+        }  
+    }
+
+    public void OpenSetting()
+    {
+        if (settingPanel != null)
+        {
+            settingPanel.SetActive(true);
+        }
+            
+        if (panel3 != null)
+        {
+            panel3.SetActive(false);
+        } 
+    }
+
+    public void CloseSetting()
+    {
+        if (settingPanel != null)
+        {
+            settingPanel.SetActive(false);
+        }
+            
+        if (panel3 != null)
+        {
+            panel3.SetActive(true);
+        }
     }
 }
