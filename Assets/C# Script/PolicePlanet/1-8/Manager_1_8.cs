@@ -1,10 +1,11 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Manager_1_8 : MonoBehaviour
 {
     public GameObject stage_1_8;
-    public GameObject prisonerPrefab;
+    public GameObject[] prisonerPrefab;
     public GameObject prisonObj;
 
     private Minigame_1_8 minigame_1_8;
@@ -31,9 +32,9 @@ public class Manager_1_8 : MonoBehaviour
     {
         for (int i = 0; i < numberOfPrisoners; i++)
         {
-            Vector2 spawnPos = GetValidSpawnPosition(prisonPos, prisonPos.y);
+            Vector2 spawnPos = GetValidSpawnPosition(prisonPos, -1f);
 
-            GameObject prisonerObj = Instantiate(prisonerPrefab, spawnPos, Quaternion.identity);
+            GameObject prisonerObj = Instantiate(prisonerPrefab[i], spawnPos, Quaternion.identity);
             Prisoner_1_8 prisoner_1_8 = prisonerObj.GetComponent<Prisoner_1_8>();
 
             prisoner_1_8.prison = prisonObj;
@@ -57,7 +58,6 @@ public class Manager_1_8 : MonoBehaviour
 
     public void GameSuccess()
     {
-        Debug.Log("성공! 모든 죄수가 감옥 안에 있음");
         minigame_1_8.Succeed();
 
         DestroyAllPrisoners();
@@ -65,8 +65,6 @@ public class Manager_1_8 : MonoBehaviour
 
     public void GameFail()
     {
-        Debug.Log("실패! 일부 죄수가 감옥 밖에 있음");
-
         DestroyAllPrisoners();
     }
 
@@ -76,10 +74,34 @@ public class Manager_1_8 : MonoBehaviour
         {
             if (prisoner != null)
             {
-                Destroy(prisoner);
+                StartCoroutine(FadeAndDestroy(prisoner, 0.3f));
             }
         }
 
         prisonerList.Clear(); // 리스트 초기화
+    }
+
+    private IEnumerator FadeAndDestroy(GameObject obj, float duration)
+    {
+        SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
+        if (sr == null)
+        {
+            Destroy(obj);
+            yield break;
+        }
+
+        float timer = 0f;
+        Color startColor = sr.color;
+        Color endColor = new Color(startColor.r, startColor.g, startColor.b, 0f);
+
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            sr.color = Color.Lerp(startColor, endColor, timer / duration);
+            yield return null;
+        }
+
+        sr.color = endColor;
+        Destroy(obj);
     }
 }

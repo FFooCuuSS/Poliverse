@@ -15,8 +15,6 @@ public class UIDrawBrush : MonoBehaviour
     private Minigame_3_7 minigame_3_7;
     private Vector2 lastPos;
     private bool isDrawing = false;
-    private int totalBrushes = 0;
-    private int brushesInsideTarget = 0;
     private HashSet<Vector2Int> coveredCells = new HashSet<Vector2Int>();
     private int totalCells;
     public float cellSize = 20f;
@@ -122,9 +120,5 @@ public class UIDrawBrush : MonoBehaviour
         {
             Destroy(brush);
         }
-
-        // 카운터도 초기화
-        totalBrushes = 0;
-        brushesInsideTarget = 0;
     }
 }

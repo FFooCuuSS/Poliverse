@@ -11,6 +11,11 @@ public class DragDistanceJudge : MonoBehaviour
 
     [Header("성공 시 활성화할 오브젝트")]
     [SerializeField] private GameObject activateObject;
+    [SerializeField] private GameObject lightEffect;
+
+    [Header("성공 시 바꿀 스프라이트 설정")]
+    [SerializeField] private SpriteRenderer targetSpriteRenderer;
+    [SerializeField] private Sprite successSprite;
 
     private Minigame_1_9 minigmae_1_9;
     private Vector3 lastPosition;
@@ -38,7 +43,6 @@ public class DragDistanceJudge : MonoBehaviour
             float delta = Vector3.Distance(currentPos, lastPosition);
 
             totalDistance += delta;
-
             lastPosition = currentPos;
         }
 
@@ -49,8 +53,9 @@ public class DragDistanceJudge : MonoBehaviour
             if (totalDistance >= distanceThreshold)
             {
                 minigmae_1_9.Succeed();
-                StartShaking();              // 오브젝트 이동
-                ActivateObject();          // 오브젝트 활성화
+                StartShaking();
+                ActivateObject();
+                ChangeSprite();
             }
         }
     }
@@ -58,14 +63,14 @@ public class DragDistanceJudge : MonoBehaviour
     private void StartShaking()
     {
         movingObject.transform.DOShakePosition(
-            duration: 1f,       // 진동 시간 (반복 주기)
-            strength: 0.1f,     // 진동 폭
-            vibrato: 20,        // 진동 빈도
-            randomness: 90,     // 무작위 진동 각도
+            duration: 1f,
+            strength: 0.1f,
+            vibrato: 20,
+            randomness: 90,
             snapping: false,
-            fadeOut: false      // 페이드 아웃 비활성화 (계속 강하게 진동)
+            fadeOut: false
         )
-        .SetLoops(-1);         // 무한 반복
+        .SetLoops(-1);
     }
 
     private void ActivateObject()
@@ -73,6 +78,13 @@ public class DragDistanceJudge : MonoBehaviour
         if (activateObject != null)
         {
             activateObject.SetActive(true);
+            lightEffect.SetActive(true);
         }
+    }
+
+    private void ChangeSprite()
+    {
+        if (targetSpriteRenderer != null && successSprite != null)
+            targetSpriteRenderer.sprite = successSprite;
     }
 }

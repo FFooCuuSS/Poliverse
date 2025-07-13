@@ -6,14 +6,14 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
 
-public class MinigameUImanager : MonoBehaviour
+public class MinigameUIManager : MonoBehaviour
 {
     // 외부참조
     [SerializeField] private TMP_Text guideText;
     [SerializeField] private TMP_Text stageText;
     [SerializeField] private Slider timerSlider;
     [SerializeField] private GameObject blockInputPanel;
-    [SerializeField] private GameObject gameplayPanel;
+    [SerializeField] private GameObject resultPanel;
     [SerializeField] private GameObject lifeManager;
     [SerializeField] private GameObject mainCamera;
     [SerializeField] private GameObject standingArea;
@@ -37,7 +37,7 @@ public class MinigameUImanager : MonoBehaviour
     private SpriteRenderer enemyRenderer;
     private Sprite originalEnemySprite;
     private Sprite originalPlayerSprite;
-
+    private SuccessFailPanel successFailPanel;
 
     // 기타 미니게임 관리
     private MiniGameBase currentMinigame;
@@ -49,14 +49,15 @@ public class MinigameUImanager : MonoBehaviour
     void Start()
     {
         UpdateStageText();
+
+        resultPanel.SetActive(false);
         timerSlider.gameObject.SetActive(false);
-        timerSlider.value = 0f;
         guideText.gameObject.SetActive(false);
         blockInputPanel.SetActive(false);
-        gameplayPanel.SetActive(false);
         timerSlider.value = 0f;
-        lifeNumber = lifeManager.GetComponent<LifeNumber>();
 
+        successFailPanel = resultPanel.GetComponent<SuccessFailPanel>();
+        lifeNumber = lifeManager.GetComponent<LifeNumber>();
         playerRenderer = standingArea.transform.GetChild(0).GetComponent<SpriteRenderer>();
         enemyRenderer = standingArea.transform.GetChild(1).GetComponent<SpriteRenderer>();
         playerRenderer.sprite = playerStandingSprite;
@@ -122,10 +123,6 @@ public class MinigameUImanager : MonoBehaviour
             {
                 minigameIndexes.Add(i);
             }
-            else
-            {
-                Debug.LogWarning($"�̴ϰ����� �������� ����: {path} -> �ǳʶ�");
-            }
         }
 
         for (int i = 0; i < minigameIndexes.Count; i++)
@@ -155,8 +152,6 @@ public class MinigameUImanager : MonoBehaviour
     {
         if (minigameQueue.Count == 0)
         {
-            Debug.Log("��� �̴ϰ��� ����");
-            gameplayPanel.SetActive(false);
             yield return new WaitForSeconds(2f);
             SceneManager.LoadScene("LobbyScene");
 
@@ -166,7 +161,6 @@ public class MinigameUImanager : MonoBehaviour
         yield return new WaitForSeconds(loadingTime);
 
         timerSlider.gameObject.SetActive(true);
-        gameplayPanel.SetActive(true);
         string minigamePath = minigameQueue.Dequeue();
         GameObject minigameObj = Instantiate(Resources.Load<GameObject>(minigamePath));
         currentMinigame = minigameObj.GetComponent<MiniGameBase>();
@@ -224,6 +218,8 @@ public class MinigameUImanager : MonoBehaviour
             failCoroutine = null;
         }
 
+        resultPanel.SetActive(true);
+        successFailPanel.SuccessPanel();
         Invoke("PlayWinEffect",1f);
 
         currentStage++;
@@ -237,6 +233,8 @@ public class MinigameUImanager : MonoBehaviour
         life--;
         lifeNumber.LoseLife();
 
+        resultPanel.SetActive(true);
+        successFailPanel.FailurePanel();
         Invoke("PlayLoseEffect", 1f);
 
         if (currentStage == bossStageIndex)
@@ -256,6 +254,7 @@ public class MinigameUImanager : MonoBehaviour
             StartCoroutine(DelayAndEndMinigame());
         }
     }
+
     // 승리 실패 연출
     private void PlayWinEffect()
     {
@@ -282,6 +281,7 @@ public class MinigameUImanager : MonoBehaviour
     {
         UpdateStageText();
         blockInputPanel.SetActive(true);
+
         yield return new WaitForSeconds(1f);
 
         if (currentMinigame != null)
@@ -292,9 +292,9 @@ public class MinigameUImanager : MonoBehaviour
             currentMinigame.OnFail -= OnMinigameFail;
             mainCamera.transform.position = new Vector3(0f, 0f, -10f);
             Destroy(currentMinigame.gameObject);
+            successFailPanel.hideResultPanel();
         }
 
-        gameplayPanel.SetActive(false);
         blockInputPanel.SetActive(false);
         timerSlider.gameObject.SetActive(false);
         StartCoroutine(WaitAndLoadNext());
@@ -312,14 +312,12 @@ public class MinigameUImanager : MonoBehaviour
             Destroy(currentMinigame.gameObject);
         }
 
-        gameplayPanel.SetActive(false);
         blockInputPanel.SetActive(false);
         timerSlider.gameObject.SetActive(false);
 
         yield return new WaitForSeconds(loadingTime);
 
         timerSlider.gameObject.SetActive(true);
-        gameplayPanel.SetActive(true);
 
         GameObject minigameObj = Instantiate(Resources.Load<GameObject>(bossMinigamePath));
         currentMinigame = minigameObj.GetComponent<MiniGameBase>();
@@ -334,6 +332,8 @@ public class MinigameUImanager : MonoBehaviour
     private IEnumerator WaitAndLoadNext()
     {
         yield return new WaitForSeconds(2f);
+        resultPanel.SetActive(false);
+
 
         if (life > 0)
         {
@@ -351,13 +351,14 @@ public class MinigameUImanager : MonoBehaviour
         stageText.text = $"{currentStage}";
     }
 
+    // idle 모션
     private void PlayBounceAnimation(Transform target)
     {
         Sequence seq = DOTween.Sequence();
 
-        float scaleX = 1.05f; 
-        float scaleY = 0.95f; 
-        float moveY = -0.05f; 
+        float scaleX = 1.01f; 
+        float scaleY = 0.99f; 
+        float moveY = -0.01f; 
         float duration = 0.15f; 
 
         Vector3 originalScale = target.localScale;
@@ -374,14 +375,16 @@ public class MinigameUImanager : MonoBehaviour
         seq.Append(target.DOScale(originalScale, duration).SetEase(Ease.OutQuad));
         seq.Join(target.DOLocalMoveY(originalPosition.y, duration).SetEase(Ease.OutQuad));
 
+        seq.AppendInterval(0.15f);
+
         seq.SetLoops(-1); // 무한 반복
     }
 
+    // 승리 모션
     private IEnumerator PlayStandingEffect(SpriteRenderer targetRenderer, Sprite victorySprite, Sprite originalSprite, float rotationAmount, float moveXAmount)
     {
         Vector3 originalPos = targetRenderer.transform.localPosition;
         Vector3 originalRotation = targetRenderer.transform.localEulerAngles;
-        Vector3 originalScale = targetRenderer.transform.localScale;
 
         // 기존 점프
         targetRenderer.transform.DOLocalMoveY(originalPos.y + 0.15f, 0.15f).SetEase(Ease.OutQuad);
@@ -389,31 +392,23 @@ public class MinigameUImanager : MonoBehaviour
         targetRenderer.transform.DOLocalMoveY(originalPos.y, 0.15f).SetEase(Ease.InQuad);
         yield return new WaitForSeconds(0.15f);
 
-        // 스프라이트 교체 (바꾸는 순간)
         if (victorySprite != null)
         {
             targetRenderer.sprite = victorySprite;
 
-            // Y축 + X축 + 회전 + 스케일 키우기
             Sequence seq = DOTween.Sequence();
-
             Vector3 targetPos = new Vector3(originalPos.x + moveXAmount, originalPos.y + 0.2f, originalPos.z);
 
             seq.Append(targetRenderer.transform.DOLocalMove(targetPos, 0.1f).SetEase(Ease.OutQuad));
             seq.Join(targetRenderer.transform.DOLocalRotate(new Vector3(0f, 0f, rotationAmount), 0.1f).SetEase(Ease.OutQuad));
-            seq.Join(targetRenderer.transform.DOScale(originalScale * 1.3f, 0.1f).SetEase(Ease.OutQuad)); // 30% 확대
 
             yield return seq.WaitForCompletion();
 
-            // 유지 시간
             yield return new WaitForSeconds(2f);
 
-            // Y축 + X축 + 회전 + 스케일 원상복귀
             Sequence resetSeq = DOTween.Sequence();
-
             resetSeq.Append(targetRenderer.transform.DOLocalMove(originalPos, 0.1f).SetEase(Ease.InQuad));
             resetSeq.Join(targetRenderer.transform.DOLocalRotate(originalRotation, 0.1f).SetEase(Ease.InQuad));
-            resetSeq.Join(targetRenderer.transform.DOScale(originalScale, 0.1f).SetEase(Ease.InQuad));
 
             yield return resetSeq.WaitForCompletion();
 
@@ -421,40 +416,33 @@ public class MinigameUImanager : MonoBehaviour
         }
     }
 
+    // 패배 모션
     private IEnumerator PlayDefeatedEffect(SpriteRenderer targetRenderer, float rotationAmount, float moveXAmount)
     {
         Vector3 originalPos = targetRenderer.transform.localPosition;
         Vector3 originalRotation = targetRenderer.transform.localEulerAngles;
-        Vector3 originalScale = targetRenderer.transform.localScale;
 
-        // 기존 점프 (승자와 타이밍 통일)
         targetRenderer.transform.DOLocalMoveY(originalPos.y + 0.15f, 0.15f).SetEase(Ease.OutQuad);
         yield return new WaitForSeconds(0.15f);
         targetRenderer.transform.DOLocalMoveY(originalPos.y, 0.15f).SetEase(Ease.InQuad);
         yield return new WaitForSeconds(0.15f);
 
-        // Y축 + X축 + 회전 + 스케일 연출
         Sequence seq = DOTween.Sequence();
-
         Vector3 targetPos = new Vector3(originalPos.x + moveXAmount, originalPos.y + 0.2f, originalPos.z);
 
         seq.Append(targetRenderer.transform.DOLocalMove(targetPos, 0.1f).SetEase(Ease.OutQuad));
         seq.Join(targetRenderer.transform.DOLocalRotate(new Vector3(0f, 0f, rotationAmount), 0.1f).SetEase(Ease.OutQuad));
-        seq.Join(targetRenderer.transform.DOScale(originalScale * 0.9f, 0.1f).SetEase(Ease.OutQuad)); // 패배 시 살짝 축소 (네가 수치 바꿔도 됨)
 
         yield return seq.WaitForCompletion();
 
-        // 유지 시간
         yield return new WaitForSeconds(2f);
 
-        // 원상복귀
         Sequence resetSeq = DOTween.Sequence();
-
         resetSeq.Append(targetRenderer.transform.DOLocalMove(originalPos, 0.1f).SetEase(Ease.InQuad));
         resetSeq.Join(targetRenderer.transform.DOLocalRotate(originalRotation, 0.1f).SetEase(Ease.InQuad));
-        resetSeq.Join(targetRenderer.transform.DOScale(originalScale, 0.1f).SetEase(Ease.InQuad));
 
         yield return resetSeq.WaitForCompletion();
     }
+
 
 }

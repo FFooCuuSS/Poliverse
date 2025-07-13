@@ -43,9 +43,9 @@ public class LifeNumber : MonoBehaviour
     {
         Sequence seq = DOTween.Sequence();
 
-        float scaleX = 1.05f;
-        float scaleY = 0.95f;
-        float moveY = -0.05f;
+        float scaleX = 1.02f;
+        float scaleY = 0.98f;
+        float moveY = -0.02f;
         float duration = 0.15f;
 
         Vector3 originalScale = target.localScale;
@@ -61,6 +61,8 @@ public class LifeNumber : MonoBehaviour
 
         seq.Append(target.DOScale(originalScale, duration).SetEase(Ease.OutQuad));
         seq.Join(target.DOLocalMoveY(originalPosition.y, duration).SetEase(Ease.OutQuad));
+
+        seq.AppendInterval(0.15f);
 
         seq.SetLoops(-1); // 무한 반복
     }

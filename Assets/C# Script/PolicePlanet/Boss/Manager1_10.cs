@@ -112,7 +112,7 @@ public class Manager : MonoBehaviour
     {
         score.nScore++;
         spawnMan = false;
-        if (score.nScore >= 15)
+        if (score.nScore >= 10)
         {
             minigame_1_10.Succeed();
         }
