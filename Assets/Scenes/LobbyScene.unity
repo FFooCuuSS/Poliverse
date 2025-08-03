@@ -542,7 +542,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uACBD\uCC30\uD50C\uB798\uB2DB"
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: e5a57774f033c7541aabc4ebca5c0b28, type: 2}
   m_sharedMaterial: {fileID: 3960814253557445505, guid: e5a57774f033c7541aabc4ebca5c0b28, type: 2}
@@ -1784,7 +1784,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1ca69e60c5e868b438a1d920dd2c5e0e, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2542,6 +2542,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c3fe9afd4214aa41bde86fc74ec4b4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sets:
+  - icon: {fileID: 21300000, guid: 1ca69e60c5e868b438a1d920dd2c5e0e, type: 3}
+    text: "\uACBD\uCC30\uD50C\uB798\uB2DB"
+  - icon: {fileID: 21300000, guid: 1ca69e60c5e868b438a1d920dd2c5e0e, type: 3}
+    text: "\uCE94\uB514\uD50C\uB798\uB2DB"
+  - icon: {fileID: 21300000, guid: 1ca69e60c5e868b438a1d920dd2c5e0e, type: 3}
+    text: "\uB9C8\uD53C\uC544\uD50C\uB798\uB2DB"
+  - icon: {fileID: 21300000, guid: 1ca69e60c5e868b438a1d920dd2c5e0e, type: 3}
+    text: "\uC74C\uC545\uD50C\uB798\uB2DB"
+  planeticonImage: {fileID: 699328042}
+  planettextUI: {fileID: 193791205}
 --- !u!224 &1033379179
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4607,7 +4618,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
