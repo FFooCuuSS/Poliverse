@@ -4,15 +4,16 @@ using UnityEngine;
 
 public class MovingIconController2_3 : MonoBehaviour
 {
-    public RectTransform barRect;      // 바 전체 영역
-    public float speed = 100f;         // 움직임 속도 (px/초)
+    public Transform barTransform;   // 바 전체 영역의 Transform
+    public float barWidth = 5f;       // 바의 가로 폭 (월드 단위)
+    public float speed = 2f;          // 움직임 속도 (유닛/초)
 
-    private RectTransform rectTransform;
+    private Transform tf;
     private bool movingRight = true;
 
     void Start()
     {
-        rectTransform = GetComponent<RectTransform>();
+        tf = GetComponent<Transform>();
     }
 
     void Update()
@@ -21,14 +22,14 @@ public class MovingIconController2_3 : MonoBehaviour
 
         if (movingRight)
         {
-            rectTransform.anchoredPosition += new Vector2(delta, 0);
-            if (rectTransform.anchoredPosition.x >= barRect.rect.width / 2)
+            tf.position += new Vector3(delta, 0, 0);
+            if (tf.position.x >= barTransform.position.x + barWidth / 2)
                 movingRight = false;
         }
         else
         {
-            rectTransform.anchoredPosition -= new Vector2(delta, 0);
-            if (rectTransform.anchoredPosition.x <= -barRect.rect.width / 2)
+            tf.position -= new Vector3(delta, 0, 0);
+            if (tf.position.x <= barTransform.position.x - barWidth / 2)
                 movingRight = true;
         }
     }
