@@ -7,6 +7,14 @@ public class Minigame_1_6 : MiniGameBase
     protected override float TimerDuration => 5f;
     protected override string MinigameExplain => "배치해라!";
 
+    public GameObject manager_1_6;
+    Success_1_6 success_1_6;
+
+    private void Start()
+    {
+        success_1_6 = manager_1_6.GetComponent<Success_1_6>();
+    }
+
     public override void StartGame()
     {
         
@@ -19,8 +27,9 @@ public class Minigame_1_6 : MiniGameBase
     {
         Success();
     }
-    public void Failure()
+    public override void Fail()
     {
-        Fail();
+        base.Fail();
+        success_1_6.ApplyFailureSprites();
     }
 }

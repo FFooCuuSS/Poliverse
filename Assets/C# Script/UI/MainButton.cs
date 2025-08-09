@@ -1,36 +1,36 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainButton : MonoBehaviour
 {
-    //[SerializeField] private Button newGame;
-    //[SerializeField] private Button loadGame;
-    //[SerializeField] private Button newGamePanel;
+    [SerializeField] private Camera mainCamera;   // 씬에서 카메라를 드래그하여 할당
+    [SerializeField] private float moveAmount = 10f;   // 카메라가 이동할 Y 거리
+    [SerializeField] private float moveDuration = 2f;
 
-    //[SerializeField] private GameObject newGameScene;
-    //[SerializeField] private GameObject tempObject;
+    [SerializeField] private Button newGame;
+    [SerializeField] private Button loadGame;
 
-    //private void Start()
-    //{
-    //    newGameScene.SetActive(false);
-    //}
 
-    //public void newGameClick()
-    //{
-    //    //newGameScene.SetActive(true);
-    //    SceneManager.LoadScene("LobbyScene");
-    //}
+    public void newGameClick()
+    {
+        if (mainCamera == null)
+        {
+            return;
+        }
 
-    //public void newGamePanelClick()
-    //{
-    //    //newGameScene.SetActive(false);
-    //}
+        // 현재 위치 기준으로 Y값만 증가
+        Vector3 targetPos = mainCamera.transform.position + Vector3.up * moveAmount;
 
-    //public void tempClick()
-    //{
-    //    tempObject.SetActive(false);
-    //}
+        mainCamera.transform.DOMoveY(targetPos.y, moveDuration)
+            .SetEase(Ease.InOutQuad);
+    }
+
+    public void newGamePanelClick()
+    {
+        //newGameScene.SetActive(false);
+    }
 }

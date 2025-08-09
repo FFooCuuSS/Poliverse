@@ -17,6 +17,7 @@ public class GameManager1_7 : MonoBehaviour
         else Destroy(gameObject);
 
         minigame_1_7 = stage_1_7.GetComponent<Minigame_1_7>();
+        SpawnPrisonerAndItems();
     }
 
     public void SpawnPrisonerAndItems()
@@ -30,7 +31,7 @@ public class GameManager1_7 : MonoBehaviour
         successCount++;
         Debug.Log("성공 카운트: " + successCount);
 
-        if (successCount >= 5)
+        if (successCount >= 1)
         {
             minigame_1_7.Success();
         }

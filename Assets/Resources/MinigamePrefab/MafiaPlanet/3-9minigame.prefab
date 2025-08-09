@@ -1060,7 +1060,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7592371721527135998}
   m_Layer: 0
-  m_Name: 3-9MinigamePrefab
+  m_Name: 3-9minigame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

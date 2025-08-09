@@ -29,7 +29,7 @@ public class MontageManager : MonoBehaviour
         //메인 위치에 정답 프리팹 생성
         GameObject mainMontage = Instantiate(correctPrefab, mainPosition);
         mainMontage.transform.localPosition = Vector3.zero;
-        mainMontage.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f); // 비율 조정
+        mainMontage.transform.localScale = new Vector3(0.15f, 0.15f, 0.15f); // 비율 조정
 
         //정답 포함한 3개 랜덤 선택
         List<GameObject> selectedPrefabs = new List<GameObject>();
@@ -50,12 +50,10 @@ public class MontageManager : MonoBehaviour
     {
         if (optionIndex == correctMontageId)
         {
-            Debug.Log("정답");
             minigame_1_4.Succeed();
         }
         else
         {
-            Debug.Log("오답");
             minigame_1_4.Failure();
         }
         Debug.Log($"{optionIndex}, {correctMontageId}");

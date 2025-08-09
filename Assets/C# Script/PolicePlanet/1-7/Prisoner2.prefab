@@ -338,7 +338,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0777762eef606a145b0a2e590a775e1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 25
   prisonerSpawner: {fileID: 0}
 --- !u!1 &1136837349314751266
 GameObject:

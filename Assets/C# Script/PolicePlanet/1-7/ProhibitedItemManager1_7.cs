@@ -30,8 +30,6 @@ public class ProhibitedItemManager1_7 : MonoBehaviour
         int index = prohibitedSprites.IndexOf(collidedSprite);
         if (index != -1)
         {
-            // 충돌 처리 예)
-            Debug.Log("금지 물품 충돌 감지");
             gameManager.IncreaseSuccessCount();
         }
     }

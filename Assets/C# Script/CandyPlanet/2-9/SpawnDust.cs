@@ -8,11 +8,11 @@ public class SpawnDust : MonoBehaviour
     [SerializeField] private GameObject dustPrefab;
     [SerializeField] private GameObject spawner;
 
-    private void OnMouseDown()
+    void OnMouseDown()
     {
+        Debug.Log("Å¬¸¯");
         SpawnDustInCloudArea();
     }
-
     public void SpawnDustInCloudArea()
     {
         Vector3 cloudPos = transform.position;
@@ -24,7 +24,8 @@ public class SpawnDust : MonoBehaviour
             float offsetY = Random.Range(-cloudScale.y / 2f, cloudScale.y / 2f);
 
             Vector3 spawnPos = cloudPos + new Vector3(offsetX, offsetY, 0);
-            Instantiate(dustPrefab, spawnPos, Quaternion.identity);
+            GameObject dust = Instantiate(dustPrefab, spawnPos, Quaternion.identity);
+            Destroy(dust, 2f);
         }
     }
 }

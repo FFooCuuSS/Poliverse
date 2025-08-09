@@ -1,9 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class CameraScrollController : MonoBehaviour
 {
+    public GameObject planetMove;
+    private UpDownMove upDownMove;
+
     [Header("패널 위치들")]
     public Transform[] panels;
 
@@ -11,7 +18,15 @@ public class CameraScrollController : MonoBehaviour
     public float smoothSpeed = 5f;
 
     [Header("Panel 2에서 자동 이동까지 대기 시간")]
-    public float autoMoveDelay = 3f;      // 인스펙터에서 조절 가능
+    public float autoMoveDelay = 3f;
+
+    [Header("선택된 플래닛 오브젝트")]
+    public GameObject selectedPlanet;
+
+    [Header("페이드 타겟 (CanvasGroup)")]
+    public GameObject fadeTarget;
+
+    private Image fadeImage;
 
     private Vector3 targetPosition;
     private int currentPanelIndex = 0;
@@ -19,7 +34,9 @@ public class CameraScrollController : MonoBehaviour
 
     void Start()
     {
-        // 시작 위치 설정
+        upDownMove = planetMove.GetComponent<UpDownMove>();
+        fadeImage = fadeTarget.GetComponent<Image>();
+
         if (panels.Length > 0)
         {
             targetPosition = transform.position;
@@ -28,11 +45,9 @@ public class CameraScrollController : MonoBehaviour
 
     void Update()
     {
-        // 카메라를 부드럽게 목표 위치로 이동
         transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * smoothSpeed);
     }
 
-    // 외부(버튼)에서 호출하는 이동 함수
     public void MoveToPanel(int index)
     {
         if (index >= 0 && index < panels.Length)
@@ -41,7 +56,6 @@ public class CameraScrollController : MonoBehaviour
             Vector3 panelPos = panels[index].position;
             targetPosition = new Vector3(transform.position.x, panelPos.y, transform.position.z);
 
-            // Panel 2에 진입하면 자동 이동 코루틴 시작
             if (index == 1 && !isAutoMoving)
             {
                 StartCoroutine(AutoMoveToNextPanelAfterDelay());
@@ -54,10 +68,60 @@ public class CameraScrollController : MonoBehaviour
         isAutoMoving = true;
         yield return new WaitForSeconds(autoMoveDelay);
 
-        // 현재가 여전히 Panel 2면 → Panel 3로 이동
         if (currentPanelIndex == 1 && panels.Length > 2)
         {
             MoveToPanel(2);
         }
+    }
+
+    // 매개변수 없이 실행 가능한 버튼용 함수
+    public void planetButtonClick()
+    {
+        upDownMove.StopMoving();
+        GameObject clickedButton = EventSystem.current.currentSelectedGameObject;
+        if (clickedButton != null)
+        {
+            Transform child = clickedButton.transform.Find("planetResource");
+            if (child != null)
+            {
+                // 예: 100만큼 아래로 이동 (anchoredPosition 기준)
+                RectTransform rect = child.GetComponent<RectTransform>();
+                if (rect != null)
+                {
+                    rect.DOAnchorPos(rect.anchoredPosition + new Vector2(0, -350f), 1f).SetEase(Ease.InOutQuad);
+                }
+            }
+        }
+
+        MovingCamera(1);
+
+        // 2. 연출 코루틴 시작
+        StartCoroutine(PlanetSelectionSequence());
+    }
+
+    public void MovingCamera(int index)
+    {
+        if (index < 0 || index >= panels.Length) return;
+
+        Vector3 targetPos = new Vector3(transform.position.x, panels[index].position.y, transform.position.z);
+        transform.DOMove(targetPos, 1f).SetEase(Ease.InOutQuad);
+
+        // Lerp 대상도 바꿔줌
+        targetPosition = targetPos;
+    }
+
+
+    private IEnumerator PlanetSelectionSequence()
+    {
+        yield return new WaitForSeconds(2f);
+
+        fadeTarget.SetActive(true);
+        // 알파값 0 → 1 (1초간)
+        fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, 0f);
+        fadeImage.DOFade(1f, 1f);
+
+        yield return new WaitForSeconds(1f); // (페이드 완료 + 대기 포함)
+
+        SceneManager.LoadScene("MinigameLoad");
     }
 }

@@ -15,6 +15,7 @@ public class PrisonerSpawner1_7 : MonoBehaviour
         return prisoner;  // 반환 추가
     }
 
+    /*
     private void Update()
     {
         if(isSpawning)
@@ -28,4 +29,5 @@ public class PrisonerSpawner1_7 : MonoBehaviour
             Debug.Log("자식이 없으므로 isSpawning을 true로 설정했습니다.");
         }
     }
+    */
 }
