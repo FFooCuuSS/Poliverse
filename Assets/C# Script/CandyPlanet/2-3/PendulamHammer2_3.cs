@@ -7,9 +7,12 @@ public class PendulamHammer2_3 : MonoBehaviour
     [Header("Pendulum Settings")]
     public float swingAngle = 45f; // 최대 각도 (도 단위)
     public float swingSpeed = 1f;  // 흔들림 속도
-
+    public float startAngle = 0f;
     private float time;
-
+    private void Start()
+    {
+        time = startAngle;
+    }
     void Update()
     {
         time += Time.deltaTime * swingSpeed;

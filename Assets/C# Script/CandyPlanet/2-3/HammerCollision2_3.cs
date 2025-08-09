@@ -4,32 +4,22 @@ using UnityEngine;
 
 public class HammerCollision2_3 : MonoBehaviour
 {
-    public RectTransform playerRect;
+    public GameObject stage_2_5;
+    private Minigame_2_3 minigame_2_3;
 
-    void Update()
+
+    private void Awake()
     {
-        if (IsOverlapping(transform as RectTransform, playerRect))
+        minigame_2_3 = FindAnyObjectByType<Minigame_2_3>();
+    }
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        Debug.Log("...");
+        if (collision.gameObject.CompareTag("Player"))
         {
-            Debug.Log("UI 망치 머리가 플레이어와 충돌했습니다!");
+            Debug.Log("망치와 충돌하였습니다");
+            minigame_2_3.Failure();
         }
     }
 
-    bool IsOverlapping(RectTransform rect1, RectTransform rect2)
-    {
-        Rect r1 = GetWorldRect(rect1);
-        Rect r2 = GetWorldRect(rect2);
-        return r1.Overlaps(r2);
-    }
-
-    Rect GetWorldRect(RectTransform rectTransform)
-    {
-        Vector3[] corners = new Vector3[4];
-        rectTransform.GetWorldCorners(corners);
-        Vector3 bottomLeft = corners[0];
-        Vector2 size = new Vector2(
-            corners[2].x - corners[0].x,
-            corners[2].y - corners[0].y
-        );
-        return new Rect(bottomLeft, size);
-    }
 }

@@ -4,11 +4,17 @@ using UnityEngine;
 
 public class IceCream2_5 : MonoBehaviour
 {
-    public float fallSpeed = 5f; // 떨어지는 속도
+    public float fallSpeed = 10f; // 떨어지는 속도
     private bool isStopped = false;
-    
-    
+    public GameObject stage_2_5;
+    private Minigame_2_5 minigame_2_5;
 
+    void Awake()
+    {
+        
+        minigame_2_5 = FindAnyObjectByType<Minigame_2_5>();
+
+    }
     void Update()
     {
         if (isStopped)
@@ -28,7 +34,8 @@ public class IceCream2_5 : MonoBehaviour
         }
         if(other.CompareTag("Floor"))
         {
-
+            minigame_2_5.Failure();
+            
         }
     }
 }
