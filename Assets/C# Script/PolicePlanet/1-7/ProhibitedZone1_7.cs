@@ -31,7 +31,7 @@ public class ProhibitedZone1_7 : MonoBehaviour
                             Debug.Log("죄수 보내기");
                         }
                     }
-                    Destroy(sr.gameObject);
+                    //Destroy(sr.gameObject);
                 }
             }
         }
