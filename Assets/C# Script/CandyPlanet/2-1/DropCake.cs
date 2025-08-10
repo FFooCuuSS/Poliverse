@@ -8,6 +8,7 @@ public class DropCake : MonoBehaviour
     public float targetY;
     public float delay = 5f;
     public float duration = 3f; //내려오는데 걸리는 시간
+    public GameObject destroyObj;
 
     private void Start()
     {
@@ -23,21 +24,24 @@ public class DropCake : MonoBehaviour
 
     private IEnumerator MoveOverTime()
     {
-        Vector3 startPos = transform.position;
-        Vector3 endPos = new Vector3(startPos.x, targetY, startPos.z);
+        /* Vector3 startPos = transform.position;
+         Vector3 endPos = new Vector3(startPos.x, targetY, startPos.z);
 
-        float elapsed = 0f;
+         float elapsed = 0f;
 
-        while (elapsed < duration)
-        {
-            float t = elapsed / duration;
-            transform.position = Vector3.Lerp(startPos, endPos, t);
-            elapsed += Time.deltaTime;
+         while (elapsed < duration)
+         {
+             float t = elapsed / duration;
+             transform.position = Vector3.Lerp(startPos, endPos, t);
+             elapsed += Time.deltaTime;
 
-            yield return null; 
-        }
+             yield return null; 
+         }
 
-        transform.position = endPos;
+         transform.position = endPos; */
+        Destroy(destroyObj);
+        yield return new WaitForSeconds(duration);
+
     }
 
     

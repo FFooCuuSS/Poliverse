@@ -347,7 +347,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IciclePrefab: {fileID: 5171719129144892335, guid: d683809d94d67e14d86ec9951e227269, type: 3}
-  spawnInterval: 2
+  spawnInterval: 1
 --- !u!1 &9076018591092794289
 GameObject:
   m_ObjectHideFlags: 0
@@ -482,6 +482,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8725f7aabbc2d141bd7ae8043cf5147, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxX: 7
+  maxY: 4
+  isDragging: 0
+  banDragging: 0
 --- !u!114 &9119515501086213222
 MonoBehaviour:
   m_ObjectHideFlags: 0
