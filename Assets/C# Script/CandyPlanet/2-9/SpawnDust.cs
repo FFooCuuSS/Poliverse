@@ -21,7 +21,7 @@ public class SpawnDust : MonoBehaviour
         for (int i = 0; i < 5; i++)
         {
             float offsetX = Random.Range(-cloudScale.x / 2f, cloudScale.x / 2f);
-            float offsetY = Random.Range(-cloudScale.y / 2f, cloudScale.y / 2f);
+            float offsetY = Random.Range(-cloudScale.y / 4f, cloudScale.y / 4f);
 
             Vector3 spawnPos = cloudPos + new Vector3(offsetX, offsetY, 0);
             GameObject dust = Instantiate(dustPrefab, spawnPos, Quaternion.identity);
