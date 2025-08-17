@@ -124,6 +124,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8454373390283149279}
+  - component: {fileID: 5878646665017938942}
   m_Layer: 0
   m_Name: 3-4minigame
   m_TagString: Untagged
@@ -150,6 +151,18 @@ Transform:
   - {fileID: 2421233655167819382}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5878646665017938942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6176092377696615717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b6baeccffc575c4097a97788ad21cd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6630037409909465813
 GameObject:
   m_ObjectHideFlags: 0
@@ -217,6 +230,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a8a6ed217557f348baa2a94910a88eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Stage_3_4: {fileID: 6176092377696615717}
+  start: 0
+  isSuccess: 0
+  isFailure: 0
 --- !u!1 &8117973877689743537
 GameObject:
   m_ObjectHideFlags: 0

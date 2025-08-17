@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HandControler : MiniGameBase
+public class HandControler : MonoBehaviour
 {
     //public float speed = 2f;
     //int changeDirection=1;
 
     // Update is called once per frame
+    public GameObject stage_3_2;
+    Minigame_3_2 minigame_3_2;
     
     public float leftLimit = -2.3f;   // 哭率 场
     public float rightLimit = 7f;  // 坷弗率 场
@@ -30,6 +32,7 @@ public class HandControler : MiniGameBase
         bagFail = false;
         missionFail = false;
         success = false;
+        minigame_3_2=stage_3_2.GetComponent<Minigame_3_2>();
 
 
     }
@@ -85,12 +88,14 @@ public class HandControler : MiniGameBase
             if(bagFail)
             {
                 missionFail = true;
-                base.Fail();
+                minigame_3_2.MinigameFailed();
             }
             else
             {
-                base.Success();
+                success = true;
+                minigame_3_2.Succeed();
             }
+            
 
         }
         yPos.y -= verticalSpeed * Time.deltaTime;

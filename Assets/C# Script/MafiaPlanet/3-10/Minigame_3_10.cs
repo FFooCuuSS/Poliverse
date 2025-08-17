@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Minigame_3_2 : MiniGameBase
+public class Minigame_3_10 : MiniGameBase
 {
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "가방을 뽑으세요";
+    protected override string MinigameExplain => "자동차를 이동하세요";
 
     public override void StartGame()
     {

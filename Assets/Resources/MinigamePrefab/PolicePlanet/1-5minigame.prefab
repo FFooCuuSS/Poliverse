@@ -194,7 +194,7 @@ Transform:
   m_GameObject: {fileID: 789474999450310167}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.24, y: 0, z: 22.885237}
+  m_LocalPosition: {x: 0.2, y: 0, z: 22.885237}
   m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -407,6 +407,7 @@ Transform:
   - {fileID: 2257548854653033457}
   - {fileID: 4550463262534897699}
   - {fileID: 2704319452634931995}
+  - {fileID: 346687336656419099}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3812385719121061386
@@ -627,6 +628,59 @@ CapsuleCollider2D:
   m_Offset: {x: -0.4477568, y: 0}
   m_Size: {x: 0.65888155, y: 2.3}
   m_Direction: 0
+--- !u!1 &1595989744072096778
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 346687336656419099}
+  - component: {fileID: 7131288653423348454}
+  m_Layer: 0
+  m_Name: instantiate1-5
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &346687336656419099
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1595989744072096778}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1.1608431, y: -0.65111804, z: 7.2422}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 615513483895283931}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7131288653423348454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1595989744072096778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48c4b5a14d7fd81479283426d9b98dce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyPrefab: {fileID: 7214291221095591547, guid: f2863c50b971c5c42b7e82ed2fbb011c, type: 3}
+  policePrefab: {fileID: 6729376154327250426, guid: b6a16187fecc2f34aa68c12e574763ec, type: 3}
+  parentTransform: {fileID: 346687336656419099}
+  totalSpawnCount: 15
+  yValue: -1.779531
+  zValue: 0
+  xStart: -5.573807
+  xEnd: 10.5
+  xStep: 1
 --- !u!1 &1629159196882067456
 GameObject:
   m_ObjectHideFlags: 0

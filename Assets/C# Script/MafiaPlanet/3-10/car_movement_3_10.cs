@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class car_movement_3_10 : MiniGameBase
+public class car_movement_3_10 : MonoBehaviour
 {
     private Vector3[] lanes = new Vector3[3] { new Vector3(-4, -3.2f, 0), new Vector3(-4, 0, 0), new Vector3(-4, 3.2f, 0) };
     private int currentLane = 1;
@@ -15,10 +15,14 @@ public class car_movement_3_10 : MiniGameBase
 
     private bool isFail;
 
+    public GameObject Stage_3_10;
+    Minigame_3_10 minigame_3_10;
+
     void Start()
     {
         targetPosition = lanes[currentLane];
         isFail = false;
+        minigame_3_10 = Stage_3_10.GetComponent<Minigame_3_10>();
     }
 
     void Update()
@@ -59,7 +63,7 @@ public class car_movement_3_10 : MiniGameBase
         if(collision.CompareTag("Enemy"))
         {
             isFail = true;
-            base.Fail();
+            minigame_3_10.MinigameFailed();
             Debug.Log("Fail");
         }
     }

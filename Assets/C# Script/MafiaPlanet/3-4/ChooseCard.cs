@@ -2,13 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ChooseCard : MiniGameBase
+public class ChooseCard : MonoBehaviour
 {
+    public GameObject Stage_3_4;
+    Minigame_3_4 minigame_3_4;
     public bool start;
     public bool isSuccess;
     public bool isFailure;
     void Start()
     {
+        minigame_3_4=Stage_3_4.GetComponent<Minigame_3_4>();
         start = false;
         isSuccess = false;
         isFailure = false;
@@ -37,11 +40,11 @@ public class ChooseCard : MiniGameBase
                 if (clickedObj.GetComponent<CardColor>().isTrapCard)
                 {
                     isSuccess = true;
-                    base.Success();
+                    minigame_3_4.Succeed();
 
                 }
                 else { isFailure = true;
-                    base.Fail();
+                    minigame_3_4.MinigameFailed();
                 }
                 clickedObj.SetActive(false);
             }

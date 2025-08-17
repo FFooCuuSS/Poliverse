@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class EnemySpawner_3_5 : MonoBehaviour
 {
-    public GameObject enemyPrefab; // 소환할 프리팹 (3_5enemy)
-    public float zPosition = 0f;   // 소환 위치의 Z 값(2D면 0)
-    public Transform parentTransform; // 소환된 오브젝트 부모 (선택)
+    public GameObject enemyPrefab; 
+    public float zPosition = 0f;   
+    public Transform parentTransform; 
 
     public bool noReuseAcrossStages = false; // 여러 단계 연속 소환 시 같은 위치 재사용 방지 여부
 
@@ -66,7 +66,7 @@ public class EnemySpawner_3_5 : MonoBehaviour
             spawnCount = availableIndexes.Count;
         }
 
-        // Fisher-Yates 셔플
+        // 셔플
         for (int i = availableIndexes.Count - 1; i > 0; i--)
         {
             int randomIndex = Random.Range(0, i + 1);
