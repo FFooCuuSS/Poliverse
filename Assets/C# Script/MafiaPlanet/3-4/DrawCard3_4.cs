@@ -13,9 +13,9 @@ public class DrawCard3_4 : MonoBehaviour
     public GameObject normalFace;
     bool isCardSet = false;
     bool isCardMoving = false;
-    float movingCardSpeed=4f;
+    float movingCardSpeed=13f;
     int moveCardTurn=0;
-    int CardPos = -7;
+    int CardPos = -4;
 
     void Start()
     {
@@ -28,6 +28,10 @@ public class DrawCard3_4 : MonoBehaviour
         {
             MoveCard(moveCardTurn);
         }
+        else
+        {
+            GetComponent<ChooseCard>().start=true;
+        }
 
     }
     void MoveCard(int cardNum)
@@ -36,7 +40,7 @@ public class DrawCard3_4 : MonoBehaviour
         
         GameObject card = spawnedCards[cardNum];
         Vector3 currentPos = card.transform.position;
-        Vector3 targetPos = new Vector3(CardPos, 0, 0); // 목표 위치 (-7, 0)
+        Vector3 targetPos = new Vector3(CardPos, -1.5f, 0); // 목표 위치 (-7, 0)
         if (spawnedCards[cardNum].GetComponent<CardColor>().isTrapCard)
         {
             ChangeSuspicious();
@@ -79,7 +83,7 @@ public class DrawCard3_4 : MonoBehaviour
         }
         spawnedCards.Clear();
         Vector3 pos = transform.position;
-        pos.x = 7; pos.y = 0;
+        pos.x = 7; pos.y = -1.8f;
         int trapIndex = Random.Range(0, 5);
         for (int i = 0; i < 5; i++)
         {

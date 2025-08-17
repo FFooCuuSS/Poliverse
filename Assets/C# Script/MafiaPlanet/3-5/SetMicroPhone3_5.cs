@@ -2,15 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SetMicroPhone3_5 : MonoBehaviour
+public class SetMicroPhone3_5 : MiniGameBase
 {
-    int attatchCnt=7;
+    int attatchCnt;
 
+    GameObject EnemySpawnObj;
+
+    private void Start()
+    {
+        EnemySpawnObj = GameObject.Find("EnemySpawn");
+        attatchCnt = EnemySpawnObj.GetComponent<EnemySpawner_3_5>().spawnCount;
+
+    }
     private void Update()
     {
         if (attatchCnt <= 0)
         {
             Debug.Log("success");
+            base.Success();
         }
     }
     private void OnCollisionStay2D(Collision2D collision)

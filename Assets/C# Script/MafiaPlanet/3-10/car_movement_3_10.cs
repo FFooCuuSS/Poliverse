@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class car_movement_3_10 : MonoBehaviour
+public class car_movement_3_10 : MiniGameBase
 {
     private Vector3[] lanes = new Vector3[3] { new Vector3(-4, -3.2f, 0), new Vector3(-4, 0, 0), new Vector3(-4, 3.2f, 0) };
     private int currentLane = 1;
@@ -59,6 +59,7 @@ public class car_movement_3_10 : MonoBehaviour
         if(collision.CompareTag("Enemy"))
         {
             isFail = true;
+            base.Fail();
             Debug.Log("Fail");
         }
     }
