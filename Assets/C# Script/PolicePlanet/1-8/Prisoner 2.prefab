@@ -160,4 +160,4 @@ MonoBehaviour:
   maxY: 4
   isDragging: 0
   banDragging: 0
-  angleInDegrees: 90
+  angleInDegrees: 0

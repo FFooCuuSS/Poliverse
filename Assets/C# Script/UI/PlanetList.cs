@@ -14,7 +14,6 @@ public class PlanetIconTextSet
 public class PlanetList : MonoBehaviour
 {
     [SerializeField] private PlanetIconTextSet[] sets;
-
     [SerializeField] private Image planeticonImage;
     [SerializeField] private TMP_Text planettextUI;
 
@@ -47,5 +46,10 @@ public class PlanetList : MonoBehaviour
     {
         planeticonImage.sprite = sets[currentIndex].icon;
         planettextUI.text = sets[currentIndex].text;
+    }
+
+    public int CallingCurrentIndex()
+    {
+        return currentIndex;
     }
 }

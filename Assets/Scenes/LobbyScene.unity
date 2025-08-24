@@ -2678,6 +2678,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   planetMove: {fileID: 699328040}
+  planetListObj: {fileID: 1033379177}
   panels:
   - {fileID: 1411796451}
   - {fileID: 1860611474}

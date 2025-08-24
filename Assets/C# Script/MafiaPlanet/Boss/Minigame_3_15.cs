@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Minigame_3_1 : MiniGameBase
+public class Minigame_3_15 : MiniGameBase
 {
-    protected override float TimerDuration => 3f;
-    protected override string MinigameExplain => "ÃÑÀ» »ÌÀ¸¼¼¿ä!";
+    protected override float TimerDuration => 500f;
+    protected override string MinigameExplain => "¹«±â¸¦ ÆÄ±«ÇÏ¼¼¿ä!";
 
     public override void StartGame()
     {
@@ -17,5 +17,10 @@ public class Minigame_3_1 : MiniGameBase
     public void Succeed()
     {
         Success();
+    }
+
+    public void Failure()
+    {
+        Fail();
     }
 }

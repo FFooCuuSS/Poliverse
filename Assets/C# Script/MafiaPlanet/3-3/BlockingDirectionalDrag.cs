@@ -13,9 +13,13 @@ public class BlockingDirectionalDrag : DirectionalDrag
     private Vector3 lastValidPosition;
     private bool isBlocked = false;
 
-    protected override void OnMouseDown()
+    private void Start()
     {
         minigame_3_3 = stage_3_3.GetComponent<Minigame_3_3>();
+    }
+
+    protected override void OnMouseDown()
+    {
         base.OnMouseDown();
         lastValidPosition = transform.position;
         isBlocked = false;
@@ -23,10 +27,22 @@ public class BlockingDirectionalDrag : DirectionalDrag
 
     protected override void Update()
     {
-        base.Update();
+        if (!isDragging || banDragging || isBlocked) return;
 
-        // 성공 트리거 조건
-        if (!hasTriggered && transform.position.x >= successXThreshold)
+        Vector3 mouseWorldPos = GetMouseWorldPos();
+        Vector3 targetPos = mouseWorldPos + offset;
+
+        // 위치 제한 계산
+        Vector3 constrainedTarget = GetConstrainedPosition(transform.position, targetPos);
+
+        // 느리게 따라오기
+        float followSpeed = 10f;
+        transform.position = Vector3.Lerp(transform.position, constrainedTarget, followSpeed * Time.deltaTime);
+    }
+
+    void FixedUpdate()
+    {
+        if (!hasTriggered && !isBlocked && transform.position.x >= successXThreshold)
         {
             hasTriggered = true;
             minigame_3_3.Succeed();
@@ -40,16 +56,10 @@ public class BlockingDirectionalDrag : DirectionalDrag
             return lastValidPosition;
         }
 
-        float angleRad = (angleInDegrees + 90f) * Mathf.Deg2Rad;
-        Vector2 dir = new Vector2(Mathf.Cos(angleRad), Mathf.Sin(angleRad)).normalized;
+        Vector3 constrained = base.GetConstrainedPosition(current, target);
 
-        Vector3 delta = target - current;
-        float projection = Vector2.Dot(delta, dir);
-        Vector3 constrainedDelta = new Vector3(dir.x, dir.y, 0f) * projection;
-        Vector3 constrainedTarget = current + constrainedDelta;
-
-        lastValidPosition = constrainedTarget;
-        return constrainedTarget;
+        lastValidPosition = constrained;
+        return constrained;
     }
 
     private void OnTriggerEnter2D(Collider2D other)

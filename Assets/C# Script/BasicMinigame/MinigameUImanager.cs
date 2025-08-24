@@ -24,7 +24,7 @@ public class MinigameUIManager : MonoBehaviour
     [SerializeField] private Sprite[] enemyVictorySprites;
 
     // 내부 변수
-    private int selectedPlanet = 1;
+    private int selectedPlanet;
     private float loadingTime = 2f;
     private float timerDuration;
     private float timerElapsed;
@@ -45,6 +45,11 @@ public class MinigameUIManager : MonoBehaviour
     private Queue<string> minigameQueue = new Queue<string>();
 
     private int life = 4;
+
+    void Awake()
+    {
+        selectedPlanet = CameraScrollController.selectedPlanetIndex + 1;
+    }
 
     void Start()
     {
@@ -274,6 +279,7 @@ public class MinigameUIManager : MonoBehaviour
     }
     void GameOver()
     {
+        CameraScrollController.selectedPlanetIndex = 0;
         SceneManager.LoadScene("LobbyScene");
     }
 

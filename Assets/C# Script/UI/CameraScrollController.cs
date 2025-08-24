@@ -9,7 +9,9 @@ using UnityEngine.UI;
 public class CameraScrollController : MonoBehaviour
 {
     public GameObject planetMove;
+    public GameObject planetListObj;
     private UpDownMove upDownMove;
+    private PlanetList planetList;
 
     [Header("패널 위치들")]
     public Transform[] panels;
@@ -22,6 +24,7 @@ public class CameraScrollController : MonoBehaviour
 
     [Header("선택된 플래닛 오브젝트")]
     public GameObject selectedPlanet;
+    public static int selectedPlanetIndex;
 
     [Header("페이드 타겟 (CanvasGroup)")]
     public GameObject fadeTarget;
@@ -36,6 +39,7 @@ public class CameraScrollController : MonoBehaviour
     {
         upDownMove = planetMove.GetComponent<UpDownMove>();
         fadeImage = fadeTarget.GetComponent<Image>();
+        planetList = planetListObj.GetComponent<PlanetList>();
 
         if (panels.Length > 0)
         {
@@ -78,6 +82,7 @@ public class CameraScrollController : MonoBehaviour
     public void planetButtonClick()
     {
         upDownMove.StopMoving();
+        selectedPlanetIndex = planetList.CallingCurrentIndex();
         GameObject clickedButton = EventSystem.current.currentSelectedGameObject;
         if (clickedButton != null)
         {

@@ -1381,10 +1381,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77c269ac15685d14cb59794c19c94953, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  angleInDegrees: 90
+  maxX: 7
+  maxY: 4
+  isDragging: 0
+  banDragging: 0
+  angleInDegrees: 0
   stage_3_3: {fileID: 4390961337762156763}
   matchCollider: {fileID: 3567135436269473663}
-  successXThreshold: -3.3
+  successXThreshold: -1.2
 --- !u!50 &164101453392104849
 Rigidbody2D:
   serializedVersion: 4
@@ -1410,7 +1414,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0
 --- !u!1 &6008278917094485983
 GameObject:
