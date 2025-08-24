@@ -5,7 +5,11 @@ using UnityEngine;
 public class OffendBox : MonoBehaviour
 {
     public bool isOffend = false;
-    
+    private void Update()
+    {
+        isOffend = false;
+    }
+
     private void OnTriggerStay2D(Collider2D collision)
     {
 
@@ -13,6 +17,10 @@ public class OffendBox : MonoBehaviour
         {
             isOffend = true;
             Debug.Log("offendSuccess");
+        }
+        else
+        {
+            isOffend=false;
         }
        
 

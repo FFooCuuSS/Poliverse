@@ -5,20 +5,21 @@ public class SpawnPolice1_5 : MonoBehaviour
 {
     public GameObject enemyPrefab;   // enemy1_5 프리팹
     public GameObject policePrefab;  // police1_5 프리팹
-    public Transform parentTransform; // 소환될 부모 트랜스폼
+    public Transform parentTransform; // 소환될 부모 위치
 
     public int totalSpawnCount = 15;   // 총 소환 수 (항상 15)
-    public float yValue = -1.779531f;  // y 고정 (0 + -1.779531)
-    public float zValue = 0f;          // z 고정
-    public float xStart = -5.573807f;  // 시작 x 좌표 (-4.5 + -1.073807)
+    public float yValue = 0f;
+    public float zValue = 0f;          
+    public float xStart = -4.5f;
     public float xEnd = 10.5f;         // 끝 x 좌표 (변경 없음)
-    public float xStep = 1.0f;         // x 간격
+    public float xStep = 1.0f;
+    public int enemyCnt;
 
-    private List<Vector3> candidatePositions; // 가능한 소환 위치들
+    private List<Vector3> candidatePositions; // 소환 위치들
 
     private void Awake()
     {
-        // x 좌표 후보 위치 생성
+        // x 좌표 위치 생성
         candidatePositions = new List<Vector3>();
         float xPosition = xStart;
         while (xPosition <= xEnd + 0.0001f)
@@ -52,6 +53,7 @@ public class SpawnPolice1_5 : MonoBehaviour
             Debug.LogWarning("잘못된 stage 값입니다: " + stage);
             return;
         }
+        enemyCnt = enemyCount;
 
         // 총 개수에서 police 개수 계산
         if (enemyCount > totalSpawnCount) enemyCount = totalSpawnCount;

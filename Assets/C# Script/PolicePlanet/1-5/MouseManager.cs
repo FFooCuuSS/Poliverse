@@ -6,12 +6,16 @@ public class MouseManager : MonoBehaviour
 {
     public GameObject stage_1_5;
     private Minigame_1_5 minigame_1_5;
+    public GameObject instantiater;
+    private SpawnPolice1_5 spawnPolice1_5;
 
-    public int thiefCnt = 7;
+    int thiefCnt;
 
     private void Start()
     {
         minigame_1_5 = stage_1_5.GetComponent<Minigame_1_5>();
+        spawnPolice1_5 = instantiater.GetComponent<SpawnPolice1_5>();
+        thiefCnt = spawnPolice1_5.enemyCnt;
     }
 
     private void Update()
@@ -35,6 +39,7 @@ public class MouseManager : MonoBehaviour
                 if(clickedObj.CompareTag("Police"))
                 {
                     Debug.Log("³ª´Â °æÂû");
+                    minigame_1_5.Fail();
                 }
             }
         }

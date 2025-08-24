@@ -5,7 +5,11 @@ using UnityEngine;
 public class OfficeBox : MonoBehaviour
 {
     public bool isOfficer = false;
-    
+    private void Update()
+    {
+        isOfficer = false;
+    }
+
     private void OnTriggerStay2D(Collider2D collision)
     {
 
@@ -13,6 +17,10 @@ public class OfficeBox : MonoBehaviour
         {
             isOfficer = true;
             Debug.Log("OfficerSuccess");
+        }
+        else
+        {
+            isOfficer = false ;
         }
         
 
