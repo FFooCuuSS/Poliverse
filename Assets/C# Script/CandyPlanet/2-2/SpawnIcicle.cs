@@ -7,6 +7,8 @@ public class SpawnIcicle : MonoBehaviour
     public GameObject IciclePrefab;
     [SerializeField] private float spawnInterval = 2f;
 
+
+  
     private void Start()
     {
         StartCoroutine(SpawnLoop());
@@ -23,7 +25,7 @@ public class SpawnIcicle : MonoBehaviour
 
     private void SpawnPrefab()
     {
-        float randomX = Random.Range(-6f, 10f);
+        float randomX = Random.Range(-7f, 7f);
         Vector3 spawnPos = new Vector3(randomX, transform.position.y, transform.position.z);
         Instantiate(IciclePrefab, spawnPos, Quaternion.identity);
     }
