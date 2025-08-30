@@ -17,6 +17,7 @@ TagManager:
   - Basket
   - Item
   - Dust
+  - Icicle
   layers:
   - Default
   - TransparentFX
