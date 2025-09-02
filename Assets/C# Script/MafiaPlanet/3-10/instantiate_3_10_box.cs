@@ -2,26 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NewBehaviourScript : MonoBehaviour
+public class instantiate_3_10_box : MonoBehaviour
 {
     private GameObject boxPrefab;
     private float[] spawnYPositions = new float[] { 3.2f, 0f, -3.2f };
-    public float spawnX = 10f; // 생성될 x 좌표 위치
-    public float spawnZ = 0f;  // 2D라면 보통 0
+    public float spawnX = 10f;
+    public float spawnZ = 0f;
+
+    private Coroutine spawnRoutine;
 
     void Start()
     {
-        // Resources 폴더에서 프리팹 로드
         boxPrefab = Resources.Load<GameObject>("MinigamePrefab/MafiaPlanet/TempPrefab/3_10box");
-
         if (boxPrefab == null)
         {
-            Debug.LogError("프리팹을 찾을 수 없습니다: MinigamePrefab/MafiaPlanet/3_10box");
+            Debug.LogError("Prefab not found: MinigamePrefab/MafiaPlanet/TempPrefab/3_10box");
             return;
         }
 
-        // 1초마다 박스 생성
-        StartCoroutine(SpawnBoxesEverySecond());
+        spawnRoutine = StartCoroutine(SpawnBoxesEverySecond());
     }
 
     IEnumerator SpawnBoxesEverySecond()
@@ -39,6 +38,22 @@ public class NewBehaviourScript : MonoBehaviour
         float y = spawnYPositions[randIndex];
         Vector3 spawnPos = new Vector3(spawnX, y, spawnZ);
 
-        Instantiate(boxPrefab, spawnPos, Quaternion.identity);
+        GameObject enemy = Instantiate(boxPrefab, spawnPos, Quaternion.identity);
+        enemy.tag = "Enemy"; // 혹시 prefab에 태그 안 달려 있으면 보정
+    }
+
+    public void StopSpawning()
+    {
+        if (spawnRoutine != null)
+        {
+            StopCoroutine(spawnRoutine);
+            spawnRoutine = null;
+        }
+    }
+
+    public void StartSpawning() // 필요 시 재시작용
+    {
+        if (spawnRoutine == null)
+            spawnRoutine = StartCoroutine(SpawnBoxesEverySecond());
     }
 }

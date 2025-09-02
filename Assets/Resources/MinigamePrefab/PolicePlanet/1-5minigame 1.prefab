@@ -137,6 +137,7 @@ MonoBehaviour:
   xStart: -5.573807
   xEnd: 10.5
   xStep: 1
+  enemyCnt: 0
 --- !u!1 &6683186804366204826
 GameObject:
   m_ObjectHideFlags: 0
@@ -231,7 +232,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stage_1_5: {fileID: 6683186804366204826}
-  thiefCnt: 7
+  instantiater: {fileID: 6495363451178720738}
 --- !u!114 &401669521002426950
 MonoBehaviour:
   m_ObjectHideFlags: 0

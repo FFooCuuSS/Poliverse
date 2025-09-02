@@ -276,7 +276,7 @@ GameObject:
   - component: {fileID: 931859770949871489}
   - component: {fileID: 5606682379664287996}
   - component: {fileID: 4706152626063730406}
-  - component: {fileID: 3839284954673179663}
+  - component: {fileID: 7952473911888424094}
   m_Layer: 0
   m_Name: car
   m_TagString: Untagged
@@ -365,6 +365,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 10
   Stage_3_10: {fileID: 3223204280677463766}
+  spawner: {fileID: 7044415924900492815}
 --- !u!50 &4706152626063730406
 Rigidbody2D:
   serializedVersion: 4
@@ -392,8 +393,8 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!58 &3839284954673179663
-CircleCollider2D:
+--- !u!70 &7952473911888424094
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -424,9 +425,9 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
-  m_Radius: 0.5
+  m_Offset: {x: -0.00000011920929, y: 0}
+  m_Size: {x: 1, y: 1}
+  m_Direction: 1
 --- !u!1 &7423018738496532384
 GameObject:
   m_ObjectHideFlags: 0
