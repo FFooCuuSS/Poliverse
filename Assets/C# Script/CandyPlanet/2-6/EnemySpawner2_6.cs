@@ -4,42 +4,37 @@ using UnityEngine;
 
 public class EnemySpawner2_6 : MonoBehaviour
 {
-    public GameObject prefabToSpawn;       // 생성할 프리팹 (UI용)
-    public Transform spawnParent;          // 캔버스 아래의 빈 오브젝트 (ex: "UIContainer")
-    public Vector2 spawnPosition;          // anchoredPosition (UI 위치)
+    [Header("Prefab to Spawn")]
+    public GameObject prefab; // 생성할 프리팹
 
-    public float minSpawnTime = 1f;  // 최소 시간
-    public float maxSpawnTime = 5f;  // 최대 시간
+    [Header("Spawn Range (Local X)")]
+    public float leftOffset = -5f;   // 왼쪽 끝
+    public float rightOffset = 5f;   // 오른쪽 끝
+
+    [Header("Spawn Interval")]
+    public float minInterval = 1f;   // 최소 생성 주기
+    public float maxInterval = 2f;   // 최대 생성 주기
 
     void Start()
     {
+        // 실행 시작 시 스폰 루프 시작
         StartCoroutine(SpawnLoop());
     }
 
-    void Spawn()
-    {
-        if (prefabToSpawn != null && spawnParent != null)
-        {
-            // 프리팹을 spawnParent 하위에 생성
-            GameObject spawned = Instantiate(prefabToSpawn, spawnParent);
-
-            // anchoredPosition 조정 (UI 전용 좌표계)
-            RectTransform rect = spawned.GetComponent<RectTransform>();
-            rect.anchoredPosition = spawnPosition;
-        }
-        else
-        {
-            Debug.LogWarning("프리팹 또는 부모 Transform이 설정되지 않았습니다.");
-        }
-    }
     IEnumerator SpawnLoop()
     {
         while (true)
         {
-            float waitTime = Random.Range(minSpawnTime, maxSpawnTime);
+            // 랜덤 대기 (1초~2초)
+            float waitTime = Random.Range(minInterval, maxInterval);
             yield return new WaitForSeconds(waitTime);
 
-            Spawn();
+            // 랜덤 위치 (Spawner 기준 좌우 범위)
+            float randomX = Random.Range(leftOffset, rightOffset);
+            Vector3 spawnPos = transform.position + new Vector3(randomX, 0f, -2f);
+
+            // 프리팹 생성
+            Instantiate(prefab, spawnPos, Quaternion.identity);
         }
     }
 }
