@@ -1,36 +1,54 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Enemy2_6 : MonoBehaviour
 {
-    [SerializeField]private float speed = 1000f; // 픽셀/초 속도
-
-    private RectTransform rectTransform;
-    private float screenLeftEdge;
+    public MiniGame2_6 _minigame2_6;
+    public string _minigameName = "2-6minigame";
+    public string targetName = "TargetObject"; // 씬 안에서 찾을 타겟 오브젝트 이름
+    private Transform target;
+    public float speed = 5f;   // 이동 속도
 
     void Start()
     {
-        rectTransform = GetComponent<RectTransform>();
-        screenLeftEdge = -1000f; // 스크린 왼쪽 끝 (x = 0)
+        GameObject found = GameObject.Find(targetName);
+        if (found != null)
+        {
+            target = found.transform;
+        }
+        else
+        {
+            Debug.LogWarning($"씬 안에서 '{targetName}' 오브젝트를 찾지 못했습니다.");
+        }
+        GameObject game = GameObject.Find(_minigameName);
+        if (found != null)
+        {
+            _minigame2_6 = game.GetComponent<MiniGame2_6>();
+        }
+        else
+        {
+            Debug.LogWarning($"씬 안에서 '{_minigameName}' 오브젝트를 찾지 못했습니다.");
+        }
+
     }
 
     void Update()
     {
-        // 왼쪽 방향으로 이동
-        rectTransform.anchoredPosition += Vector2.left * speed * Time.deltaTime;
-
-        // 화면 왼쪽 밖으로 나가면 삭제
-        if (rectTransform.anchoredPosition.x + rectTransform.rect.width < screenLeftEdge)
+        if (target != null)
         {
-            Destroy(gameObject);
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                target.position,
+                speed * Time.deltaTime
+            );
         }
     }
-    private void OnTriggerEnter2D(Collider2D other)
+
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (other.CompareTag("Cake"))
+        if (collision.CompareTag("Player"))
         {
-            Debug.Log("GameOver");
+            Destroy(gameObject); // 자기 자신 삭제
+            _minigame2_6.Fail();
         }
     }
 }
