@@ -4,11 +4,19 @@ using UnityEngine;
 
 public class RotateFood : MonoBehaviour
 {
-    public Transform center;
-    public float speed = 50f;
+    public float rotationSpeed = 30f;
+    private Material donutMaterial;
+
+    private void Start()
+    {
+        donutMaterial = GetComponent<Renderer>().material;
+    }
 
     private void Update()
     {
-        transform.RotateAround(center.position, Vector3.forward, speed * Time.deltaTime);
+        transform.Rotate(0, 0, rotationSpeed * Time.deltaTime);
+
+        float currentRotation = transform.eulerAngles.z;
+        donutMaterial.SetFloat("_Rotation", currentRotation);
     }
 }

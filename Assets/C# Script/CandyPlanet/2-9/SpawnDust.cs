@@ -10,7 +10,6 @@ public class SpawnDust : MonoBehaviour
 
     void OnMouseDown()
     {
-        Debug.Log("Å¬¸¯");
         SpawnDustInCloudArea();
     }
     public void SpawnDustInCloudArea()

@@ -65,15 +65,15 @@ Shader "Unlit/DonutSliceShader"
 
                 // 현재 조각 인덱스
                 float sliceAngle = 360.0 / _SliceCount;
-                int sliceIndex = int(fixedAngle / sliceAngle);
+                int sliceIndex = (int)(fixedAngle / sliceAngle);
 
-                // 4비트 마스크로 먹힌 조각 확인
-                int mask = 1 << sliceIndex;
-                int flags = int(_EatenFlags.x); // 최대 32조각까지 가능
+                // 비트마스크 → float 기반 체크
+                float mask = pow(2.0, sliceIndex);   // 2^sliceIndex
+                float flags = _EatenFlags.x;         // float로 받은 비트값
 
-                if ((flags & mask) != 0)
+                // 먹힌 조각이면 알파 제거
+                if (fmod(flags / mask, 2.0) >= 1.0)
                 {
-                    // 먹힌 조각이면 알파 제거
                     return float4(0,0,0,0);
                 }
 
