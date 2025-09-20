@@ -23,7 +23,7 @@ public class DountManager : MonoBehaviour
         if (currentDonut != null) Destroy(currentDonut);
 
         currentDonut = Instantiate(donutPrefabs[index], spawnPoint.position, Quaternion.identity, parentTransform);
-        currentDonut.GetComponent<DonutEater>().Init(this); // ? Eater에 Manager 전달
+        currentDonut.GetComponent<DonutEater>().Init(this); // Eater에 Manager 전달
     }
 
     public void OnDonutCleared()
@@ -31,11 +31,11 @@ public class DountManager : MonoBehaviour
         currentIndex++;
         if (currentIndex >= donutPrefabs.Length)
         {
-            minigame.Succeed(); // ? 모든 도넛 클리어
+            minigame.Succeed(); // 모든 도넛 클리어
         }
         else
         {
-            SpawnDonut(currentIndex); // ? 다음 도넛 생성
+            SpawnDonut(currentIndex); // 다음 도넛 생성
         }
     }
 }

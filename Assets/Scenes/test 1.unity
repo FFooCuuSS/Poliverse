@@ -172,6 +172,7 @@ MonoBehaviour:
   - {fileID: 799174727835020949, guid: 33a2299044f12e04fb64f391e637ef05, type: 3}
   spawnPoint: {fileID: 609801646}
   minigame: {fileID: 609801644}
+  parentTransform: {fileID: 0}
 --- !u!1001 &609801643
 PrefabInstance:
   m_ObjectHideFlags: 0
