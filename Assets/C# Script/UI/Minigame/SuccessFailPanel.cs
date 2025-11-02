@@ -1,11 +1,11 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class SuccessFailPanel : MonoBehaviour
 {
     [SerializeField] private Sprite[] panelSprite; // [0] = success, [1] = failure
+    [SerializeField] private float autoHideDelay = 1f; // 자동 숨김 대기 시간
 
     private Image sourceImage;
     private Coroutine fadeCoroutine;
@@ -18,27 +18,27 @@ public class SuccessFailPanel : MonoBehaviour
     public void SuccessPanel()
     {
         sourceImage.sprite = panelSprite[0];
-        StartFade(0.8f); // 알파 1로 페이드 인
+        StartFade(1f, 0.2f, true); 
     }
 
     public void FailurePanel()
     {
         sourceImage.sprite = panelSprite[1];
-        StartFade(0.8f);
+        StartFade(1f, 0.2f, true);
     }
 
-    public void hideResultPanel()
+    public void HideResultPanel()
     {
-        StartFade(0f); // 알파 0으로 페이드 아웃
+        StartFade(0f, 0.2f, false);
     }
 
-    private void StartFade(float targetAlpha)
+    private void StartFade(float targetAlpha, float duration, bool autoHide)
     {
         if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
-        fadeCoroutine = StartCoroutine(FadeAlpha(targetAlpha, 0.2f));
+        fadeCoroutine = StartCoroutine(FadeAlpha(targetAlpha, duration, autoHide));
     }
 
-    private IEnumerator FadeAlpha(float targetAlpha, float duration)
+    private IEnumerator FadeAlpha(float targetAlpha, float duration, bool autoHide)
     {
         float startAlpha = sourceImage.color.a;
         float timer = 0f;
@@ -52,5 +52,12 @@ public class SuccessFailPanel : MonoBehaviour
         }
 
         sourceImage.color = new Color(1f, 1f, 1f, targetAlpha);
+
+        // hide
+        if (autoHide && targetAlpha > 0f)
+        {
+            yield return new WaitForSeconds(autoHideDelay);
+            yield return StartCoroutine(FadeAlpha(0f, 0.5f, false));
+        }
     }
 }

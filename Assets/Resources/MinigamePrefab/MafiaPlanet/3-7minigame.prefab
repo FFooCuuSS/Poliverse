@@ -135,7 +135,7 @@ MonoBehaviour:
   targetZone: {fileID: 6906644392072712736}
   stage_3_7: {fileID: 9022024347899304665}
   spacing: 1
-  cellSize: 20
+  cellSize: 30
 --- !u!114 &2209158824274400379
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetZone: {fileID: 6906644392072712736}
-  cellSize: 20
+  cellSize: 30
   cellColor: {r: 0, g: 1, b: 0, a: 0.3}
 --- !u!1 &3395298352391901879
 GameObject:

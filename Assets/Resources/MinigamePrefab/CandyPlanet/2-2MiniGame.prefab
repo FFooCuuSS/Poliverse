@@ -360,7 +360,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IciclePrefab: {fileID: 5171719129144892335, guid: d683809d94d67e14d86ec9951e227269, type: 3}
-  spawnInterval: 1
+  spawnInterval: 0.5
 --- !u!1 &9076018591092794289
 GameObject:
   m_ObjectHideFlags: 0

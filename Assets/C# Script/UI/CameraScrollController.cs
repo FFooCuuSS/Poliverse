@@ -121,7 +121,6 @@ public class CameraScrollController : MonoBehaviour
         yield return new WaitForSeconds(2f);
 
         fadeTarget.SetActive(true);
-        // 알파값 0 → 1 (1초간)
         fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, 0f);
         fadeImage.DOFade(1f, 1f);
 

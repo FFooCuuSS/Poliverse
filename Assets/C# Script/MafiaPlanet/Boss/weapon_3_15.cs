@@ -2,8 +2,22 @@ using UnityEngine;
 
 public class weapon_3_15 : MonoBehaviour
 {
-    [SerializeField] private bool isMagicWand = false; // 마법봉 여부
-    [SerializeField] private manager_3_15 manager;     // 외부 매니저 연결
+    [SerializeField] private bool isMagicWand = false;
+    [SerializeField] public manager_3_15 manager;     
+
+    private float xMoving;
+    [SerializeField] private float movingSpeed = 1f;
+
+    private void Start()
+    {
+        Destroy(gameObject, 10f);
+    }
+
+
+    void Update()
+    {
+        transform.position += Vector3.right * xMoving * Time.deltaTime * movingSpeed;
+    }
 
     private void OnMouseDown()
     {
@@ -15,5 +29,10 @@ public class weapon_3_15 : MonoBehaviour
         {
             manager.OnMagicWandCollected();
         }
+    }
+
+    public void GetXMoving(float xMove)
+    {
+        xMoving = xMove;
     }
 }

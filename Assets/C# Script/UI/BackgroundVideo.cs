@@ -8,7 +8,7 @@ public class BackgroundVideo : MonoBehaviour
 
     void Start()
     {
-        videoPlayer = gameObject.AddComponent<VideoPlayer>();
+        videoPlayer = gameObject.GetComponent<VideoPlayer>();
         videoPlayer.url = System.IO.Path.Combine(Application.streamingAssetsPath, "Lobby_Background.mp4");
 
         videoPlayer.renderMode = VideoRenderMode.RenderTexture;

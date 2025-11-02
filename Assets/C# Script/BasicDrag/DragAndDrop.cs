@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class DragAndDrop : MonoBehaviour
 {
-    [SerializeField] private float maxX = 7f;
-    [SerializeField] private float maxY = 4f;
+    [SerializeField] protected float maxX = 7f;
+    [SerializeField] protected float maxY = 4f;
 
     public bool isDragging = false;
     public bool banDragging = false;

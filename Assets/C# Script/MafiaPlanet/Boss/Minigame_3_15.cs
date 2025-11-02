@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Minigame_3_15 : MiniGameBase
 {
-    protected override float TimerDuration => 500f;
+    protected override float TimerDuration => 30f;
     protected override string MinigameExplain => "무기를 파괴하세요!";
 
     public override void StartGame()

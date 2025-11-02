@@ -8,7 +8,7 @@ using DG.Tweening;
 
 public class MinigameUIManager : MonoBehaviour
 {
-    // 외부참조
+    // UI, 배치 외부참조
     [SerializeField] private TMP_Text guideText;
     [SerializeField] private TMP_Text stageText;
     [SerializeField] private Slider timerSlider;
@@ -23,7 +23,7 @@ public class MinigameUIManager : MonoBehaviour
     [SerializeField] private Sprite[] enemyStandingSprites;
     [SerializeField] private Sprite[] enemyVictorySprites;
 
-    // 내부 변수
+    // 라운드 흐름 내부 변수
     private int selectedPlanet;
     private float loadingTime = 2f;
     private float timerDuration;
@@ -33,6 +33,8 @@ public class MinigameUIManager : MonoBehaviour
     private int bossStageIndex = 0;
     private string bossMinigamePath = "";
     private Coroutine failCoroutine;
+
+    // 성공, 실패 관련 연출
     private SpriteRenderer playerRenderer;
     private SpriteRenderer enemyRenderer;
     private Sprite originalEnemySprite;
@@ -45,6 +47,11 @@ public class MinigameUIManager : MonoBehaviour
     private Queue<string> minigameQueue = new Queue<string>();
 
     private int life = 4;
+
+    // 사운드 및 폴리싱
+    [SerializeField] private AudioClip successBGM;
+    [SerializeField] private AudioClip failureBGM;
+    public AudioSource audioSource;
 
     void Awake()
     {
@@ -65,6 +72,7 @@ public class MinigameUIManager : MonoBehaviour
         lifeNumber = lifeManager.GetComponent<LifeNumber>();
         playerRenderer = standingArea.transform.GetChild(0).GetComponent<SpriteRenderer>();
         enemyRenderer = standingArea.transform.GetChild(1).GetComponent<SpriteRenderer>();
+        audioSource = GetComponent<AudioSource>();
         playerRenderer.sprite = playerStandingSprite;
         enemyRenderer.sprite = enemyStandingSprites[selectedPlanet - 1];
         PlayBounceAnimation(playerRenderer.transform);
@@ -84,9 +92,12 @@ public class MinigameUIManager : MonoBehaviour
             case 4:
                 SetMinigameQueue("MusicPlanet", 15);
                 break;
+            default:
+                return;
         }
 
         StartCoroutine(LoadNextMinigameRoutine());
+        audioSource.Play();
     }
 
     void Update()
@@ -189,7 +200,7 @@ public class MinigameUIManager : MonoBehaviour
         currentMinigame.StartGame();
     }
 
-    // 가이드
+    // 가이드 텍스트
     public void ShowGuide(string text, float duration)
     {
         StartCoroutine(ShowGuideCoroutine(text, duration));
@@ -268,6 +279,8 @@ public class MinigameUIManager : MonoBehaviour
 
         StartCoroutine(PlayStandingEffect(playerRenderer, originalPlayerSprite, originalPlayerSprite, -5f, 1.5f));
         StartCoroutine(PlayDefeatedEffect(enemyRenderer, -10f, 1.0f));
+
+        audioSource.clip = successBGM;
     }
     private void PlayLoseEffect()
     {
@@ -276,6 +289,8 @@ public class MinigameUIManager : MonoBehaviour
 
         StartCoroutine(PlayStandingEffect(enemyRenderer, enemyVictorySprites[selectedPlanet - 1], originalEnemySprite, 5f, -1.5f));
         StartCoroutine(PlayDefeatedEffect(playerRenderer, 10f, -1.0f));
+
+        audioSource.clip = failureBGM;
     }
     void GameOver()
     {
@@ -298,9 +313,9 @@ public class MinigameUIManager : MonoBehaviour
             currentMinigame.OnFail -= OnMinigameFail;
             mainCamera.transform.position = new Vector3(0f, 0f, -10f);
             Destroy(currentMinigame.gameObject);
-            successFailPanel.hideResultPanel();
         }
 
+        audioSource.Play();
         blockInputPanel.SetActive(false);
         timerSlider.gameObject.SetActive(false);
         StartCoroutine(WaitAndLoadNext());
