@@ -19,6 +19,7 @@ TagManager:
   - Dust
   - Icicle
   - FailureTag
+  - FoodPiece
   layers:
   - Default
   - TransparentFX
