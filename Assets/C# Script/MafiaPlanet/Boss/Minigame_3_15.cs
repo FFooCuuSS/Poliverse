@@ -22,5 +22,6 @@ public class Minigame_3_15 : MiniGameBase
     public void Failure()
     {
         Fail();
+        Debug.Log("Gettttt Dunked On");
     }
 }

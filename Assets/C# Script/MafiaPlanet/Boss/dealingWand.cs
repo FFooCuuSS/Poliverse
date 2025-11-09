@@ -5,26 +5,26 @@ using DG.Tweening;
 public class dealingWand : MonoBehaviour
 {
     [Header("Hit Settings")]
-    [SerializeField] private Collider2D hitCollider;       // 자식 콜라이더
-    [SerializeField] private GameObject hitEffectPrefab;   // 이펙트 프리팹
-    [SerializeField] private float activeTime = 0.2f;      // 판정 유지 시간
-    [SerializeField] private float lifeTime = 2f;          // 자동 파괴 시간(스폰 시점 기준)
+    [SerializeField] private Collider2D hitCollider;      
+    [SerializeField] private GameObject hitEffectPrefab;  
+    [SerializeField] private float activeTime = 0.2f;     
+    [SerializeField] private float lifeTime = 2f;         
 
     [Header("Intro Tween")]
-    [SerializeField] private float spawnBackOffset = 5f;  // 방향 반대쪽 오프셋
-    [SerializeField] private float spawnLeftOffset = 5f;  // 왼쪽(반시계 직교) 오프셋
-    [SerializeField] private float moveDuration = 0.18f;   // 이동 시간
-    [SerializeField] private float rotateDuration = 0.16f; // 회전 시간
-    [SerializeField] private float curveBend = 6f;         // 곡선 굴곡 세기(중간 제어점 거리)
+    [SerializeField] private float spawnBackOffset = 5f;  
+    [SerializeField] private float spawnLeftOffset = 5f;  
+    [SerializeField] private float moveDuration = 0.18f;  
+    [SerializeField] private float rotateDuration = 0.16f;
+    [SerializeField] private float curveBend = 6f;        
 
-    private Vector2 lastDir = Vector2.right;               // 받은 방향(정규화 저장)
+    private Vector2 lastDir = Vector2.right;
+    private Vector2 targetPos;
+    private Quaternion targetRot;
     private Sequence introSeq;
     private GameObject tempEffect;
 
     private void Start()
     {
-        Debug.Log("뱁봉");
-
         if (hitCollider == null)
             hitCollider = GetComponentInChildren<Collider2D>();
 
@@ -34,54 +34,68 @@ public class dealingWand : MonoBehaviour
         tempEffect = transform.GetChild(0).gameObject; tempEffect.SetActive(false);
     }
 
-    public void Fire(Vector3 position, Vector2 direction)
+    public void Fire(Vector2 position, Vector2 direction, float lightRemaining, float wandRemaining, Vector2 offset = default, float angleOffsetDeg = 0f)
     {
+        targetPos = position + offset;
+        targetRot = transform.rotation;
+        lifeTime = wandRemaining;
+        activeTime = lightRemaining;
+
         if (direction.sqrMagnitude > 0.0001f)
             lastDir = direction.normalized;
-        Vector2 dir = lastDir;
-        Vector2 left = new Vector2(-dir.y, dir.x);
 
-        Vector3 spawnPos = position + (Vector3)(-dir * spawnBackOffset + -left * spawnLeftOffset);
+        Vector2 dir = lastDir;
+        Vector2 left = new(-dir.y, dir.x);
+
+        Vector2 spawnPos = position + (-dir * spawnBackOffset + -left * spawnLeftOffset);
 
         float finalAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         float startAngle = finalAngle + 90f;
         Quaternion startRot = Quaternion.AngleAxis(startAngle, Vector3.forward);
         Quaternion finalRot = Quaternion.AngleAxis(finalAngle, Vector3.forward);
 
+        // 타겟방향은 여기있음
+        targetRot = Quaternion.AngleAxis(finalAngle + angleOffsetDeg, Vector3.forward);
+
         transform.SetPositionAndRotation(spawnPos, startRot);
 
-        Vector3 control = Vector3.Lerp(spawnPos, position, 0.5f)
-                          + (Vector3)(left * curveBend)
-                          + (Vector3)(-dir * (curveBend * 0.35f));
+        Vector2 control = Vector2.Lerp(spawnPos, position, 0.5f)
+                         + (left * curveBend)
+                         + (-dir * (curveBend * 0.35f));
 
         introSeq?.Kill(false);
         introSeq = DOTween.Sequence();
 
-        introSeq.Join(transform.DOPath(new Vector3[] { control, position },
-                                       moveDuration,
-                                       PathType.CatmullRom)
-                              .SetEase(Ease.OutQuad));
+        introSeq.Join(transform.DOPath(
+            new Vector3[] { control, position },
+            moveDuration,
+            PathType.CatmullRom)
+            .SetEase(Ease.OutQuad));
+
         introSeq.Join(transform.DORotateQuaternion(finalRot, rotateDuration)
-                              .SetEase(Ease.OutQuad));
+            .SetEase(Ease.OutQuad));
 
         introSeq.AppendCallback(() => StartCoroutine(FireRoutine()));
-
         introSeq.AppendInterval(lifeTime);
 
-        Vector3 retreatPos = position + (Vector3)(left.normalized * -7f);
-        introSeq.Append(transform.DOMove(retreatPos, 0.5f)
-                                  .SetEase(Ease.InSine));
+        Vector2 retreatPos = position + (left.normalized * -7f);
 
-        introSeq.OnComplete(() =>
-        {
-            Destroy(gameObject);
-        });
+        introSeq.Append(transform.DOMove(retreatPos, 0.5f)
+            .SetEase(Ease.InSine));
+
+        introSeq.OnComplete(() => Destroy(gameObject));
     }
+
 
 
     private IEnumerator FireRoutine()
     {
-        yield return new WaitForSeconds(0.5f);
+        transform.DOMove(targetPos, lifeTime)
+            .SetEase(Ease.OutSine);
+        transform.DORotateQuaternion(targetRot, lifeTime)
+            .SetEase(Ease.OutSine);
+
+        yield return new WaitForSeconds(moveDuration);
 
         if (hitCollider != null)
         {
@@ -100,6 +114,7 @@ public class dealingWand : MonoBehaviour
             tempEffect.SetActive(false);
         }
     }
+
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()

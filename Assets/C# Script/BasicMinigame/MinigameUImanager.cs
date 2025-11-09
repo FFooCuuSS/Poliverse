@@ -464,6 +464,4 @@ public class MinigameUIManager : MonoBehaviour
 
         yield return resetSeq.WaitForCompletion();
     }
-
-
 }

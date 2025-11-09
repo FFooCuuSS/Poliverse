@@ -18,6 +18,7 @@ TagManager:
   - Item
   - Dust
   - Icicle
+  - FailureTag
   layers:
   - Default
   - TransparentFX

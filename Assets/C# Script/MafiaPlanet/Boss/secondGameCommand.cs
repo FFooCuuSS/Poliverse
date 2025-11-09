@@ -22,7 +22,19 @@ public class secondGameCommand : MonoBehaviour
     [Header("Pattern Settings")]
     [SerializeField] private float delayBetweenPatterns = 1f;
     [SerializeField] private GameObject dealingWandPrefab;
+    [SerializeField] private GameObject endingWandPrefab;
+
     [SerializeField] private WandPatternData[] pattern1;
+    [SerializeField] private WandPatternData[] pattern2;
+    [SerializeField] private WandPatternData[] pattern3;
+    private int[][] burstCount = new int[][]
+    {
+    new int[] { 1, 2, 2 },
+    new int[] { 3, 3, 2 },
+    new int[] { 6, 1 }
+    };
+    private float lightRemaining;
+    private float wandRemaining;
 
     public void StartPattern()
     {
@@ -49,24 +61,80 @@ public class secondGameCommand : MonoBehaviour
         {
             case 1:
                 yield return new WaitForSeconds(3f);
-                for (int i = 0 ; i < pattern1.Length; i++)
+                int indexOfPatern = 0;
+                lightRemaining = 0.5f;
+                wandRemaining = 1.5f;
+                for (int i = 0; i < 3; i++)
                 {
-                    GameObject tempWand = Instantiate(dealingWandPrefab);
-                    dealingWand DealingWand = tempWand.GetComponent<dealingWand>();
-                    DealingWand.Fire(pattern1[i].position, pattern1[i].direction);
-                    Debug.Log("실행");
-                    yield return new WaitForSeconds(1f);
+                    for (int b = 0; b < burstCount[index - 1][i]; b++)
+                    {
+                        GameObject tempWand = Instantiate(dealingWandPrefab);
+                        dealingWand DealingWand = tempWand.GetComponent<dealingWand>();
+                        DealingWand.Fire(pattern1[indexOfPatern + b].position, pattern1[indexOfPatern + b].direction, 
+                            lightRemaining, wandRemaining/*, new Vector2 (5,0)*/);
+                    }
+                    indexOfPatern += burstCount[index - 1][i];
+                    yield return new WaitForSeconds(3f);
                 }
                 break;
 
             case 2:
-                // 패턴 2 실행 코드
+                indexOfPatern = 0;
+                lightRemaining = 2f;
+                wandRemaining = 3f;
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int b = 0; b < burstCount[index - 1][i]; b++)
+                    {
+                        GameObject tempWand = Instantiate(dealingWandPrefab);
+                        dealingWand DealingWand = tempWand.GetComponent<dealingWand>();
+                        Vector2 dir = pattern2[indexOfPatern + b].direction.normalized;
+                        Vector2 opp = new Vector2(-dir.x, dir.y);
+                        if (i < 2) DealingWand.Fire(pattern2[indexOfPatern + b].position, pattern2[indexOfPatern + b].direction,
+                                   lightRemaining, wandRemaining, opp * 7f);
+                        else
+                        {
+                            lightRemaining = 4f;
+                            wandRemaining = 5f;
+                            if (b == 0) DealingWand.Fire(pattern2[indexOfPatern + b].position, pattern2[indexOfPatern + b].direction,
+                                    lightRemaining, wandRemaining, angleOffsetDeg: -60f);
+                            else        DealingWand.Fire(pattern2[indexOfPatern + b].position, pattern2[indexOfPatern + b].direction,
+                                    lightRemaining, wandRemaining, angleOffsetDeg: 60f);
+                        }
+                    }
+                    indexOfPatern += burstCount[index - 1][i];
+                    yield return new WaitForSeconds(4f);
+                }
                 yield return new WaitForSeconds(1.5f);
                 break;
 
             case 3:
-                // 패턴 3 실행 코드
-                yield return new WaitForSeconds(2f);
+                indexOfPatern = 0;
+                for (int i = 0; i < 2; i++)
+                {
+                    yield return new WaitForSeconds(5f);
+                    for (int b = 0; b < burstCount[index - 1][i]; b++)
+                    {
+                        lightRemaining = 99f;
+                        wandRemaining = 99f;
+                        if (i == 0)
+                        {
+                            GameObject tempWand = Instantiate(dealingWandPrefab);
+                            dealingWand DealingWand = tempWand.GetComponent<dealingWand>();
+                            DealingWand.Fire(pattern3[indexOfPatern + b].position, pattern3[indexOfPatern + b].direction,
+                                lightRemaining, wandRemaining);
+                        }
+                        else
+                        {
+                            GameObject tempWand = Instantiate(endingWandPrefab);
+                            EndingWand endingWand = tempWand.GetComponentInChildren<EndingWand>(true);
+                            endingWand.Fire(pattern3[indexOfPatern + b].position, pattern3[indexOfPatern + b].direction,
+                                            lightRemaining, wandRemaining);
+                        }
+                    }
+                    indexOfPatern += burstCount[index - 1][i];
+                    yield return new WaitForSeconds(5f);
+                }
                 break;
         }
     }

@@ -12,9 +12,9 @@ public class manager_3_15 : MonoBehaviour
     public AudioClip ohYesClip;
 
     [Header("Transition Tunables")]
-    [SerializeField] private float fadeInSpeed = 0.8f;  // 알파/초
-    [SerializeField] private float holdTime = 6.5f;   // SFX 타이밍
-    [SerializeField] private float fadeOutDur = 0.35f;  // 빠른 아웃
+    [SerializeField] private float fadeInSpeed = 0.8f;
+    [SerializeField] private float holdTime = 6.5f;
+    [SerializeField] private float fadeOutDur = 0.35f;
 
     // 1번 미니게임
     public int wandCount = 0;
@@ -32,7 +32,7 @@ public class manager_3_15 : MonoBehaviour
         darkImg = DarkPanel.GetComponent<Image>();
         sGC = GetComponent<secondGameCommand>();
 
-        // 시작 시 패널 투명 보장
+        // 시작 시 패널 투명화
         if (darkImg != null)
         {
             var c = darkImg.color;
@@ -40,7 +40,6 @@ public class manager_3_15 : MonoBehaviour
             darkImg.color = c;
         }
 
-        // 프리팹 가시성 초기화(필요에 맞게 조정)
         if (gamePrefabs != null && gamePrefabs.Length >= 2)
         {
             gamePrefabs[0]?.SetActive(true);
@@ -99,7 +98,7 @@ public class manager_3_15 : MonoBehaviour
 
         // 2) 대기 + SFX 실행
         yield return new WaitForSeconds(holdTime);
-        BossSFX(); // 이 시점에 두 번째 미니게임 활성화
+        BossSFX();
 
         // 3) 빠른 페이드 아웃
         float startA = darkImg != null ? darkImg.color.a : 1f;
@@ -133,13 +132,11 @@ public class manager_3_15 : MonoBehaviour
             audioSource.clip = ohYesClip;
             audioSource.Play();
         }
-
-        // 두 번째 미니게임 켜기
+        
         if (gamePrefabs != null && gamePrefabs.Length >= 2)
             gamePrefabs[1]?.SetActive(true);
     }
 
-    // 외부 이벤트
     public void OnMagicWandCollected()
     {
         Debug.Log(++wandCount);

@@ -10,7 +10,7 @@ public class BlockingDirectionalDrag_3_12 : DragAndDrop
 
     [SerializeField] private float followSpeed = 10f;
     [SerializeField] private LayerMask wallLayer;
-    [SerializeField] private float nudgeDistance = 0.12f;   // 반대쪽으로 밀어낼 거리
+    [SerializeField] private float nudgeDistance = 0.12f;
 
     private Collider2D realCollider;
     private Rigidbody2D rb;
