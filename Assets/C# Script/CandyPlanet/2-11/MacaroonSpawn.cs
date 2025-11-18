@@ -54,6 +54,9 @@ public class MacaroonSpawn : MonoBehaviour
 
             GameObject obj = Instantiate(macaronPrefab, pos, Quaternion.identity, this.transform);
 
+            Macaron macaron = obj.GetComponent<Macaron>();
+            macaron.index = i;
+
             if (useRandomSprites)
             {
                 SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
