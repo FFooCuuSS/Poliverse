@@ -17,6 +17,9 @@ public class CompletedMacaroon : MonoBehaviour
     [HideInInspector]
     public int[] answerOrder = new int[5];
 
+    [HideInInspector]
+    public List<int> shuffledIndices;
+
     [Header("옵션")]
     [SerializeField] private bool useRandomSprites = false; // 리소스 준비되면 true
 
@@ -40,6 +43,8 @@ public class CompletedMacaroon : MonoBehaviour
             (indices[i], indices[rand]) = (indices[rand], indices[i]);
         }
 
+        shuffledIndices = new List<int>(indices);
+
         for (int i = 0; i < 5; i++)
         {
             int idx = indices[i];
@@ -53,15 +58,7 @@ public class CompletedMacaroon : MonoBehaviour
             SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
             if (sr != null)
             {
-                if (useRandomSprites)
-                {
-                    sr.sprite = macaronSprites[indices[i]];
-                }
-                else
-                {
-                    sr.sprite = macaronSprites[idx];
-                }
-
+                sr.sprite = macaronSprites[idx];
                 sr.sortingOrder = i + 1;
             }
 

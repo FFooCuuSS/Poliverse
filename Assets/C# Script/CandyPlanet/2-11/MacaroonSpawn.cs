@@ -21,14 +21,10 @@ public class MacaroonSpawn : MonoBehaviour
         if (macaronSprites.Length == 0)
             return;
 
-        int macaronCount = macaronSprites.Length;
+        CompletedMacaroon answer = FindObjectOfType<CompletedMacaroon>();
+        List<int> shuffled = answer.shuffledIndices;
 
-        List<Sprite> shuffledSprites = new List<Sprite>(macaronSprites);
-        for (int i = 0; i < shuffledSprites.Count; i++)
-        {
-            int randIndex = Random.Range(i, shuffledSprites.Count);
-            (shuffledSprites[i], shuffledSprites[randIndex]) = (shuffledSprites[randIndex], shuffledSprites[i]);
-        }
+        int macaronCount = macaronSprites.Length;
 
         List<Vector2> usedPositions = new List<Vector2>();
 
@@ -44,6 +40,7 @@ public class MacaroonSpawn : MonoBehaviour
                     Random.Range(spawnAreaMin.x, spawnAreaMax.x),
                     Random.Range(spawnAreaMin.y, spawnAreaMax.y)
                 );
+
                 tries++;
                 if (tries > maxTries)
                     break;
@@ -55,15 +52,13 @@ public class MacaroonSpawn : MonoBehaviour
             GameObject obj = Instantiate(macaronPrefab, pos, Quaternion.identity, this.transform);
 
             Macaron macaron = obj.GetComponent<Macaron>();
-            macaron.index = i;
 
-            if (useRandomSprites)
+            macaron.index = shuffled[i];
+
+            SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
+            if (sr != null)
             {
-                SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
-                if (sr != null)
-                {
-                    sr.sprite = shuffledSprites[i];
-                }
+                sr.sprite = macaronSprites[shuffled[i]];
             }
         }
     }
