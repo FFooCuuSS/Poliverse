@@ -115,7 +115,6 @@ public class dealingWand : MonoBehaviour
         }
     }
 
-
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {

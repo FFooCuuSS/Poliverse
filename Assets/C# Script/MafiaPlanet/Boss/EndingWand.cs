@@ -6,6 +6,8 @@ using DG.Tweening;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class EndingWand : MonoBehaviour
 {
+    [SerializeField] private bool notifyEnabled = false;
+
     [Header("Beam Shape / Visual")]
     [SerializeField] private float beamMaxLength = 20f;
     [SerializeField] private float beamHalfWidth = 0.075f;
@@ -37,9 +39,9 @@ public class EndingWand : MonoBehaviour
     [SerializeField] private GameObject hitEffectPrefab;
 
     [Header("Appear / Smoothing")]
-    [SerializeField] private float growSpeed = 40f;         // m/s
-    [SerializeField] private float shrinkSpeed = 60f;       // m/s
-    [SerializeField] private float appearFadeTime = 0.08f;  // s
+    [SerializeField] private float growSpeed = 40f;       
+    [SerializeField] private float shrinkSpeed = 60f;     
+    [SerializeField] private float appearFadeTime = 0.08f;
     private float currentLength = 0f;
     private Color _baseColor;
 
@@ -74,8 +76,8 @@ public class EndingWand : MonoBehaviour
         mr.sharedMaterial.renderQueue = 3000;
 
         currentLength = 0f;
-        BuildBeamMesh(0f);
-        SetAlpha(0f); // 시작은 투명
+        BuildBeamMesh(5f);
+        SetAlpha(1f); // 시작은 투명
     }
 
     public void Fire(Vector2 position, Vector2 direction, float lightRemaining, float wandRemaining,
@@ -98,7 +100,7 @@ public class EndingWand : MonoBehaviour
         Quaternion startRot = Quaternion.AngleAxis(startAngle, Vector3.forward);
         Quaternion finalRot = Quaternion.AngleAxis(finalAngle + angleOffsetDeg, Vector3.forward);
 
-        targetRot = finalRot; // ★ 누락되었던 부분
+        targetRot = finalRot;
         transform.SetPositionAndRotation(spawnPos, startRot);
 
         Vector2 control = Vector2.Lerp(spawnPos, position, 0.5f)
@@ -178,10 +180,8 @@ public class EndingWand : MonoBehaviour
                 if (hitFxInstance != null) { Destroy(hitFxInstance); hitFxInstance = null; }
             }
 
-            // 플레이어 통지(절단 길이 이내)
             NotifyPlayersWithin(hits, cutLength);
 
-            // ★ 부드러운 길이 보간
             float spd = (cutLength > currentLength) ? growSpeed : shrinkSpeed;
             currentLength = Mathf.MoveTowards(currentLength, cutLength, spd * Time.deltaTime);
 
@@ -203,6 +203,11 @@ public class EndingWand : MonoBehaviour
         if (hitFxInstance != null) Destroy(hitFxInstance);
     }
 
+    public void EnableNotify()
+    {
+        notifyEnabled = true;
+    }
+
     private void BuildBeamMesh(float length)
     {
         Vector3[] v =
@@ -212,7 +217,7 @@ public class EndingWand : MonoBehaviour
             new(-beamHalfWidth, -length, 0f),
             new( beamHalfWidth, -length, 0f),
         };
-        int[] t = { 0, 2, 1, 1, 2, 3 };
+        int[] t = { 0, 1, 2, 1, 3, 2 };
 
         mesh.Clear();
         mesh.vertices = v;
@@ -239,6 +244,8 @@ public class EndingWand : MonoBehaviour
 
     private void NotifyPlayersWithin(RaycastHit2D[] hits, float maxDistance)
     {
+        if (notifyEnabled) return;
+
         for (int i = 0; i < hits.Length; i++)
         {
             var h = hits[i];
@@ -254,10 +261,8 @@ public class EndingWand : MonoBehaviour
                 continue;
             }
 
-            // 느슨한 호출(없어도 무시)
             go.SendMessage(playerHitMethod, h.point, SendMessageOptions.DontRequireReceiver);
 
-            // 직접 스크립트 호출이 필요하면 안전가드
             var pd = go.GetComponent<PlayerDrag>();
             if (pd != null) pd.EndingBlast();
         }
@@ -268,3 +273,4 @@ public interface IEndingWandHittable
 {
     void OnLaserHit(Vector2 hitPoint, EndingWand source);
 }
+

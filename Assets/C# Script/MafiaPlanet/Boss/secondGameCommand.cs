@@ -5,6 +5,11 @@ public class secondGameCommand : MonoBehaviour
 {
     private bool isStarted = false;
     private int patternIndex = 0;
+    [SerializeField] private Transform wandParent;
+    [SerializeField] GameObject mirror;
+    [SerializeField] GameObject stage_3_15;
+    private Minigame_3_15 minigame_3_15;
+    private Mirror_3_15 mirror_3_15;
 
     [System.Serializable]
     public struct WandPatternData
@@ -35,6 +40,12 @@ public class secondGameCommand : MonoBehaviour
     };
     private float lightRemaining;
     private float wandRemaining;
+
+    private void Start()
+    {
+        minigame_3_15 = stage_3_15.GetComponent<Minigame_3_15>();
+        mirror_3_15 = mirror.GetComponent<Mirror_3_15>();
+    }
 
     public void StartPattern()
     {
@@ -112,30 +123,57 @@ public class secondGameCommand : MonoBehaviour
                 indexOfPatern = 0;
                 for (int i = 0; i < 2; i++)
                 {
-                    yield return new WaitForSeconds(5f);
+                    yield return new WaitForSeconds(3f);
                     for (int b = 0; b < burstCount[index - 1][i]; b++)
                     {
                         lightRemaining = 99f;
                         wandRemaining = 99f;
+
                         if (i == 0)
                         {
-                            GameObject tempWand = Instantiate(dealingWandPrefab);
+                            GameObject tempWand = Instantiate(dealingWandPrefab, wandParent);
                             dealingWand DealingWand = tempWand.GetComponent<dealingWand>();
-                            DealingWand.Fire(pattern3[indexOfPatern + b].position, pattern3[indexOfPatern + b].direction,
-                                lightRemaining, wandRemaining);
+                            DealingWand.Fire(
+                                pattern3[indexOfPatern + b].position,
+                                pattern3[indexOfPatern + b].direction,
+                                lightRemaining,
+                                wandRemaining
+                            );
+                            mirror_3_15.SummonTo();
                         }
                         else
                         {
-                            GameObject tempWand = Instantiate(endingWandPrefab);
+                            GameObject tempWand = Instantiate(endingWandPrefab, wandParent);
                             EndingWand endingWand = tempWand.GetComponentInChildren<EndingWand>(true);
-                            endingWand.Fire(pattern3[indexOfPatern + b].position, pattern3[indexOfPatern + b].direction,
-                                            lightRemaining, wandRemaining);
+
+                            endingWand.Fire(
+                                pattern3[indexOfPatern + b].position,
+                                pattern3[indexOfPatern + b].direction,
+                                lightRemaining,
+                                wandRemaining
+                            );
+
+                            float x = mirror.transform.position.x;
+
+                            if (x >= -1f && x <= 1f)
+                            {
+                                Invoke("delayedSuccess", 3f);
+                                mirror_3_15.SetChildActive();
+                                endingWand.EnableNotify();
+                            }
                         }
                     }
+
                     indexOfPatern += burstCount[index - 1][i];
-                    yield return new WaitForSeconds(5f);
+                    yield return new WaitForSeconds(3f);
                 }
                 break;
+
         }
+    }
+
+    void delayedSuccess()
+    {
+        minigame_3_15.Success();
     }
 }

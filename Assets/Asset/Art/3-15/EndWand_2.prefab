@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 873f88ac835232b4ea78508b49aef3bb, type: 2}
+  - {fileID: 2100000, guid: 4aa95ac3d4bbb6a47a82460eb2a54f5a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -96,11 +96,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5988e29d740c554399ef539f899d73d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  notifyEnabled: 0
   beamMaxLength: 100
   beamHalfWidth: 10
   beamColor: {r: 1, g: 0, b: 1, a: 0.8}
   sortingLayerName: Default
-  sortingOrder: 300
+  sortingOrder: 200
   activeTime: 0.25
   lifeTime: 2
   spawnBackOffset: 5
@@ -116,6 +117,9 @@ MonoBehaviour:
   playerTag: Player
   playerHitMethod: OnLaserHit
   hitEffectPrefab: {fileID: 0}
+  growSpeed: 40
+  shrinkSpeed: 60
+  appearFadeTime: 0.08
 --- !u!1 &8543953906533713207
 GameObject:
   m_ObjectHideFlags: 0
