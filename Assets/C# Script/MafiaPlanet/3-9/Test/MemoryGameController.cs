@@ -12,6 +12,8 @@ public class MemoryGameController : MonoBehaviour
     public Transform[] containedPos; // size 3
 
     public GameObject[] codePrefabs; // size 6
+    public GameObject button1;
+    public GameObject button2;
 
     public float previewSeconds = 2f;
 
@@ -38,6 +40,8 @@ public class MemoryGameController : MonoBehaviour
 
     private void Start()
     {
+        button1.SetActive(false);
+        button2.SetActive(false);
         StartCoroutine(GameFlow());
     }
 
@@ -67,7 +71,8 @@ public class MemoryGameController : MonoBehaviour
 
         // 1) Preview 3 codes in order (show then destroy)
         yield return StartCoroutine(ShowPreview3());
-
+        button1.SetActive(true);
+        button2.SetActive(true);
         // 2) Spawn 6 codes (one of each type) at 6 shuffled positions
         SpawnSixCodesRandom();
 
@@ -145,6 +150,7 @@ public class MemoryGameController : MonoBehaviour
             spawnedSix.Add(inst);
         }
     }
+    private readonly List<GameObject> chosenInstances = new List<GameObject>(); // Enter로 생성된 것 추적
 
     public void OnCodeClicked(int codeId, Renderer rend)
     {
@@ -163,10 +169,6 @@ public class MemoryGameController : MonoBehaviour
             currentSelectedRenderer.material = selectedMat;
 
         Debug.Log($"[MemoryGame] Selected: ID={codeId}. Click ENTER to confirm.");
-    }
-    private readonly List<GameObject> chosenInstances = new List<GameObject>(); // Enter로 생성된 것 추적
-    public void OnEnterClicked()
-    {
         if (!canInput) return;
         if (currentSelectedId < 0) { Debug.Log("No selection."); return; }
         if (inputSeq.Count >= 3) { Debug.Log("Already 3 picks."); return; }
@@ -177,9 +179,13 @@ public class MemoryGameController : MonoBehaviour
         // ▶ 여기서 생성하고 리스트에 기록
         GameObject inst = Instantiate(codePrefabs[currentSelectedId], pos.position, pos.rotation);
         inst.name = $"Chosen_{idx}_ID{currentSelectedId}";
-        chosenInstances.Add(inst);                // ★ 생성한 인스턴스 기록
+        chosenInstances.Add(inst);                // 생성한 인스턴스 기록
 
         inputSeq.Add(currentSelectedId);
+    }
+    public void OnEnterClicked()
+    {
+        
 
         // 선택 해제(하이라이트 복구 등)
         if (currentSelectedRenderer && defaultMat) currentSelectedRenderer.material = defaultMat;
@@ -204,7 +210,7 @@ public class MemoryGameController : MonoBehaviour
             return;
         }
 
-        // ▶ 리스트의 마지막 인스턴스를 정확히 파괴
+        //  리스트의 마지막 인스턴스를 정확히 파괴
         int lastIndex = cur - 1;
         if (lastIndex >= 0 && lastIndex < chosenInstances.Count && chosenInstances[lastIndex] != null)
         {
@@ -235,7 +241,11 @@ public class MemoryGameController : MonoBehaviour
         if (ok)
             Debug.Log($"[MemoryGame] SUCCESS. Answer [{string.Join(",", answerSeq)}] == Input [{string.Join(",", inputSeq)}]");
         else
+        {
             Debug.Log($"[MemoryGame] FAIL. Answer [{string.Join(",", answerSeq)}] != Input [{string.Join(",", inputSeq)}]");
+            canInput = true;
+        }
+            
     }
 
     private int[] GetRandomOrder(int n)
