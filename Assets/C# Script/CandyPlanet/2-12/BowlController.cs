@@ -8,21 +8,21 @@ public class BowlController : MonoBehaviour
     public event Action OnAllReceived;
 
     int targetCount = 0;
-    int curCount = 0;
+    public int curCount = 0;
 
     public void SetTargetCount(int count)
     {
         targetCount = count;
     }
-    private void OnTriggerEnter2D(Collider2D collision)
+
+    public void OnRingEntered()
     {
-        if (collision.CompareTag("Ring"))
+        if (curCount == targetCount)
         {
-            curCount++;
-            if(curCount == targetCount)
-            {
-                OnAllReceived?.Invoke();
-            }
+            OnAllReceived?.Invoke();
         }
     }
+
 }
+
+

@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class ChocoRingGameController : MonoBehaviour
 {
+    private Minigame_2_12 minigame_2_12;
+    public GameObject stage_2_12;
+
     public SpawnRing spawner;
     public BowlController bowl;
 
@@ -17,17 +20,19 @@ public class ChocoRingGameController : MonoBehaviour
 
     private void Start()
     {
+        minigame_2_12 = stage_2_12.GetComponent<Minigame_2_12>();
         targetCount = possibleCounts[Random.Range(0, possibleCounts.Length)];
-        spawner.SpawnRings(targetCount);
-        bowl.SetTargetCount(targetCount);
+        Debug.Log(targetCount);
+        spawner.SpawnRings(targetCount);//
+        bowl.SetTargetCount(targetCount);//
         bowl.OnAllReceived += OnAllChocosCollected;
     }
     void OnAllChocosCollected()
     {
-        StartCoroutine(BringBowlUpRoutine());
+        StartCoroutine(BringBowlUpRoutine(() => { }));
     }
 
-    IEnumerator BringBowlUpRoutine()
+    IEnumerator BringBowlUpRoutine(System.Action onComplete)
     {
         yield return new WaitForSeconds(1.0f);
 
@@ -39,18 +44,26 @@ public class ChocoRingGameController : MonoBehaviour
                 bowlMoveSpeed * Time.deltaTime );
             yield return null;
         }
-        choiceUI.SetActive(true);
+        onComplete?.Invoke();
+        
     }
     
     public void OnSelectChoice(int choice)
     {
-        if(choice == targetCount)
-        {
-            Debug.Log("정답");
-        }
-        else
-        {
-            Debug.Log("오답");
-        }
+        StartCoroutine(BringBowlUpRoutine(()=> {
+            if (choice == targetCount)
+            {
+                Debug.Log("정답");
+                minigame_2_12.Succeed();
+                return;
+            }
+            else
+            {
+                Debug.Log("오답");
+                minigame_2_12.Fail();
+                return;
+            }
+        }));
+        
     }
 }
