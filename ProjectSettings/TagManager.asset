@@ -20,6 +20,7 @@ TagManager:
   - Icicle
   - FailureTag
   - FoodPiece
+  - Food
   layers:
   - Default
   - TransparentFX

@@ -1,94 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1333743193774847532
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 9222097254893569516}
-  - component: {fileID: 3731244848400773416}
-  - component: {fileID: 753468530580183333}
-  - component: {fileID: 128923548750909480}
-  m_Layer: 5
-  m_Name: CompletedMacaroonImage
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &9222097254893569516
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1333743193774847532}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 6741891286923893229}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 274.7, y: 0}
-  m_SizeDelta: {x: 96.3715, y: 166.0379}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &3731244848400773416
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1333743193774847532}
-  m_CullTransparentMesh: 1
---- !u!114 &753468530580183333
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1333743193774847532}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!114 &128923548750909480
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1333743193774847532}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c1de3399ed73cc40be070224cd131a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  completedMacaroonImage: []
 --- !u!1 &1860192323042025981
 GameObject:
   m_ObjectHideFlags: 0
@@ -116,8 +27,8 @@ Transform:
   m_GameObject: {fileID: 1860192323042025981}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.37355128, y: -1.017731, z: 0.054687075}
-  m_LocalScale: {x: 3.531162, y: 1.7492421, z: 1}
+  m_LocalPosition: {x: 0, y: -1.03, z: 0.054687075}
+  m_LocalScale: {x: 6.099729, y: 2.9236832, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1708400430011658296}
@@ -186,7 +97,63 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d9bb47ea2450874ab2612edc97be23a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  yOffset: 0.572
+  yOffset: 0.342
+  minigame: {fileID: 1448831005894958847}
+--- !u!1 &1914234020410024915
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7875678189955158488}
+  - component: {fileID: 3626498279745788442}
+  m_Layer: 0
+  m_Name: CompletedMacaroon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7875678189955158488
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1914234020410024915}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 7.48999, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1708400430011658296}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3626498279745788442
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1914234020410024915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c1de3399ed73cc40be070224cd131a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  macaronPrefab: {fileID: 5609612390775840238, guid: 1847f338e468cb94c9f198f213c68cb2, type: 3}
+  macaronSprites:
+  - {fileID: 21300000, guid: c0cb16c60436fa24586162f4cf1a25bc, type: 3}
+  - {fileID: 21300000, guid: f67023d60759f3a49b3c8d2115213064, type: 3}
+  - {fileID: 21300000, guid: 209fed0224a7abb438deecae5502c509, type: 3}
+  - {fileID: 21300000, guid: 4490af63854d0494c89231a330ba27c2, type: 3}
+  - {fileID: 21300000, guid: a139cc387debcff4b8fbb4f78ffd00af, type: 3}
+  yOffset: 1
+  answerOrder: 0000000000000000000000000000000000000000
+  shuffledIndices: 
+  useRandomSprites: 0
 --- !u!1 &3611827411003599115
 GameObject:
   m_ObjectHideFlags: 0
@@ -218,7 +185,6 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 9222097254893569516}
   - {fileID: 1087718049192927830}
   m_Father: {fileID: 1708400430011658296}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -316,7 +282,7 @@ Transform:
   m_GameObject: {fileID: 5676170027120871771}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.26215127, y: 0.93046904, z: 0.054687075}
+  m_LocalPosition: {x: 0.26215127, y: 0.99, z: 0.054687075}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -336,15 +302,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   macaronPrefab: {fileID: 5609612390775840238, guid: 1847f338e468cb94c9f198f213c68cb2, type: 3}
   macaronSprites:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 21300000, guid: c0cb16c60436fa24586162f4cf1a25bc, type: 3}
+  - {fileID: 21300000, guid: f67023d60759f3a49b3c8d2115213064, type: 3}
+  - {fileID: 21300000, guid: 209fed0224a7abb438deecae5502c509, type: 3}
+  - {fileID: 21300000, guid: 4490af63854d0494c89231a330ba27c2, type: 3}
+  - {fileID: 21300000, guid: a139cc387debcff4b8fbb4f78ffd00af, type: 3}
   spawnAreaMin: {x: -6, y: 1}
   spawnAreaMax: {x: 6, y: 3}
   minDistance: 2
-  useRandomSprites: 0
+  useRandomSprites: 1
 --- !u!1 &6125433192407051965
 GameObject:
   m_ObjectHideFlags: 0
@@ -421,6 +387,7 @@ Transform:
   m_Children:
   - {fileID: 3044950977718645337}
   - {fileID: 8210961041499387530}
+  - {fileID: 7875678189955158488}
   - {fileID: 6741891286923893229}
   - {fileID: 4314089733501067503}
   m_Father: {fileID: 0}
@@ -552,8 +519,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 3, y: -173}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: -22.640106, y: -175.75488}
+  m_SizeDelta: {x: 223.0723, y: 32.8554}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &603430660561935806
 CanvasRenderer:
