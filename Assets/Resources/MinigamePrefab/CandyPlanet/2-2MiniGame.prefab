@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 6849636399273618599}
   - component: {fileID: 1811197947909056433}
   m_Layer: 0
-  m_Name: 2-2MiniGame
+  m_Name: 2-2minigame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
