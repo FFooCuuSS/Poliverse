@@ -20,7 +20,7 @@ TagManager:
   - Icicle
   - FailureTag
   - FoodPiece
-  - Food
+  - Ring
   layers:
   - Default
   - TransparentFX
@@ -32,7 +32,7 @@ TagManager:
   - DrawLayer
   - Wall
   - Player
-  - Enemy
+  - 
   - 
   - 
   - 

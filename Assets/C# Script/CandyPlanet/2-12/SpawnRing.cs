@@ -7,17 +7,16 @@ public class SpawnRing : MonoBehaviour
     [SerializeField] private GameObject ringPrefab;
     public Transform spawnPoint;
 
-    public void SpawnRings(int count)
-    {
-        StartCoroutine(SpawnRoutine(count));
-    }
+    public float minOffsetX = -2f;
+    public float maxOffsetX = 2f;
 
-    IEnumerator SpawnRoutine(int count)
+    public void SpawnRings(int count)
     {
         for (int i = 0; i < count; i++)
         {
-            Instantiate(ringPrefab, spawnPoint.position, Quaternion.identity);
-            yield return new WaitForSeconds(0.3f);
+            float offsetX = Random.Range(minOffsetX, maxOffsetX);
+            Vector3 pos = spawnPoint.position + new Vector3(offsetX, 0);
+            Instantiate(ringPrefab, pos, Quaternion.identity);
         }
     }
 }
