@@ -193,6 +193,7 @@ public class MinigameUIManager : MonoBehaviour
     {
         currentMinigame.OnSuccess += OnMinigameSuccess;
         currentMinigame.OnFail += OnMinigameFail;
+        //currentMinigame.BindRhythmManager(FindObjectOfType<RhythmManager>());
 
         timerDuration = currentMinigame.GetTimerDuration;
         StartTimer(timerDuration);

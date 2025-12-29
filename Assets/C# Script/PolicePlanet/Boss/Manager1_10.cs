@@ -5,6 +5,8 @@ using DG.Tweening;
 
 public class Manager : MonoBehaviour
 {
+    private MiniGameBase minigame;
+
     public GameObject BossStage;
 
     public GameObject ScoreText;
@@ -41,6 +43,8 @@ public class Manager : MonoBehaviour
 
         SpawnPlatform(PlatformType.Up);
         SpawnPlatform(PlatformType.Down);
+
+        minigame = GetComponentInParent<MiniGameBase>();
     }
 
     private void Update()
@@ -148,6 +152,8 @@ public class Manager : MonoBehaviour
         {
             minigame_1_10.Succeed();
         }
+
+        minigame.OnPlayerInput();
     }
 
     private void Failure()

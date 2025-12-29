@@ -1047,7 +1047,7 @@ GameObject:
   - component: {fileID: 4549406087143889271}
   - component: {fileID: 110344156320211899}
   m_Layer: 0
-  m_Name: 2-9MiniGame
+  m_Name: 2-9minigame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

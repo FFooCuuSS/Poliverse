@@ -5,6 +5,8 @@ using UnityEngine.EventSystems;
 
 public class Macaron : MonoBehaviour
 {
+    public int index;
+
     private Vector3 originalPos;
     private SpriteRenderer sr;
     private MacaroonPlate bowl;
