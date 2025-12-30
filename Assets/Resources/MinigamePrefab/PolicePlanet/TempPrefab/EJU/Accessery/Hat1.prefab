@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6531124783990322959}
   - component: {fileID: 6435029151812848382}
   - component: {fileID: 1895371751379385497}
+  - component: {fileID: 2125207934361927852}
   m_Layer: 0
   m_Name: Hat1
   m_TagString: Untagged
@@ -147,3 +148,16 @@ MonoBehaviour:
   maxY: 4
   isDragging: 0
   banDragging: 0
+--- !u!114 &2125207934361927852
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7118407009509505417}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e15f8d57902b564e844d4007d89f805, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interval: 1

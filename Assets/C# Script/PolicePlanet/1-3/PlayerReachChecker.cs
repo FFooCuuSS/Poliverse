@@ -8,7 +8,7 @@ public class PlayerReachChecker : MonoBehaviour
     private Minigame_1_3 minigame_1_3;
 
     [SerializeField] private BoxCollider2D goalCollider;
-    private CapsuleCollider playerCollider;
+    private CapsuleCollider2D playerCollider;
     private DragAndDrop dragAndDrop;
 
     private bool isGameOver = false;
@@ -17,7 +17,7 @@ public class PlayerReachChecker : MonoBehaviour
     private void Start()
     {
         minigame_1_3 = stage_1_3.GetComponent<Minigame_1_3>();
-        playerCollider = GetComponent<CapsuleCollider>();
+        playerCollider = GetComponent<CapsuleCollider2D>();
         dragAndDrop = GetComponent<DragAndDrop>();
 
         Vector3 pos = transform.position;
