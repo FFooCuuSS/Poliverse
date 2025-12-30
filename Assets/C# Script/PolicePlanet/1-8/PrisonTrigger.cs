@@ -21,7 +21,8 @@ public class PrisonTrigger : MonoBehaviour
             prisonersInside++;
             if (prisonersInside == totalPrisoners)
             {
-                manager.GameSuccess();
+                //manager.GameSuccess();
+                manager.SendRhythmInput();
             }
         }
     }

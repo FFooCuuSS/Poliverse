@@ -31,9 +31,19 @@ public class GameManager1_7 : MonoBehaviour
         successCount++;
         Debug.Log("성공 카운트: " + successCount);
 
-        if (successCount >= 1)
-        {
-            minigame_1_7.Success();
-        }
+        //if (successCount >= 1)
+        //{
+        //    minigame_1_7.Success();
+        //}
+    }
+
+    public void SendRhythmInput()
+    {
+        minigame_1_7.OnPlayerInput();
+    }
+
+    public void NotifyMiss()
+    {
+        minigame_1_7.OnMiss();
     }
 }
