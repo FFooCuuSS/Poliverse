@@ -82,16 +82,12 @@ public class Minigame_1_1_remake : MiniGameBase
 
     public override void OnRhythmEvent(string action)
     {
+        Debug.Log("[1-1] OnRhythmEvent = " + action);
+
         if (ended) return;
 
-        if (action == "Show")
-        {
-            HandleShow();
-        }
-        else if (action == "Input")
-        {
-            currentPhase = Phase.Input;
-        }
+        if (action == "Show") HandleShow();
+        else if (action == "Input") currentPhase = Phase.Input;
     }
 
     void Update()
