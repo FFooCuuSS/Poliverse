@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 1509122124435641057}
   - component: {fileID: 3401404196385026846}
   m_Layer: 0
-  m_Name: 1-3minigame_remake
+  m_Name: 1_3minigame_remake
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1197,8 +1197,8 @@ Transform:
   m_GameObject: {fileID: 6785488458395522913}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.11, y: -1.4017, z: 0}
-  m_LocalScale: {x: 1.4936, y: 3.4434, z: 1}
+  m_LocalPosition: {x: 8.3827, y: -1.61, z: 0}
+  m_LocalScale: {x: 0.9481373, y: 3.4434, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1509122124435641057}
