@@ -21,6 +21,8 @@ TagManager:
   - FailureTag
   - FoodPiece
   - Ring
+  - Food
+  - DragZone
   layers:
   - Default
   - TransparentFX
