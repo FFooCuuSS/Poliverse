@@ -1,47 +1,71 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class Minigame_1_4 : MiniGameBase
 {
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "누구야?";
+    protected override string MinigameExplain => "리듬에 맞춰 악세서리를 제거하세요.";
+
+    private List<Accessory> accessories = new List<Accessory>();
+    private bool hasFailed = false;
+
+    public void RegisterAccessory(Accessory acc)
+    {
+        acc.Init(this);
+        accessories.Add(acc);
+    }
 
     public override void StartGame()
     {
-        
-
-        // 추가 초기화
-        // 예: instructionText.text = MinigameExplain;
+        base.StartGame();
+        hasFailed = false;
     }
 
-    public void Succeed()
+    // 악세서리 → 미니게임
+    public override void OnPlayerInput(string action = null)
     {
-        Success();
-    }
-    public void Failure()
-    {
-        Fail();
+        if (IsInputLocked || hasFailed) return;
+        base.OnPlayerInput(action); // RhythmManager로 전달
     }
 
-    public override void OnRhythmEvent(string action)
+    // RhythmManager → 미니게임
+    public override void OnJudgement(JudgementResult judgement)
     {
-        Debug.Log($"{gameObject.name} 리듬메세지: {action}");
+        if (hasFailed) return;
 
-        // 이건 나중에 개별 미니게임에서 override하는 형태로
-        switch (action)
+        if (judgement == JudgementResult.Miss)
         {
-            case "Tap":
-                Debug.Log("Tap");
-                break;
-
-            case "Hold":
-                //ShowHoldPrompt();
-                break;
-
-            case "Swipe":
-                //ShowSwipePrompt();
-                break;
+            hasFailed = true;
+            Fail();
+            return;
         }
+
+        // Perfect / Good
+        RemoveNextAccessory();
+
+        if (AllAccessoriesRemoved())
+        {
+            Success();
+        }
+    }
+
+    private void RemoveNextAccessory()
+    {
+        foreach (var acc in accessories)
+        {
+            if (!acc.IsRemoved)
+            {
+                acc.Remove();
+                break;
+            }
+        }
+    }
+
+    private bool AllAccessoriesRemoved()
+    {
+        foreach (var acc in accessories)
+        {
+            if (!acc.IsRemoved) return false;
+        }
+        return true;
     }
 }

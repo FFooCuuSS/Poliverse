@@ -6,7 +6,7 @@ public class BlinkAndControll : MonoBehaviour
     public float interval = 1f;
 
     private SpriteRenderer sr;
-    private DragAndDrop drag; // 당신이 만든 스크립트
+    private DragAndDrop drag; 
 
     void Awake()
     {
@@ -23,7 +23,7 @@ public class BlinkAndControll : MonoBehaviour
             bool isVisible = !sr.enabled;
 
             sr.enabled = isVisible;
-            drag.enabled = isVisible; // ⭐ 핵심
+            drag.banDragging = !isVisible;
 
             yield return new WaitForSeconds(interval);
         }

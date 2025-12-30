@@ -15,15 +15,6 @@ public class Minigame_1_3 : MiniGameBase
         // 예: instructionText.text = MinigameExplain;
     }
 
-    public void Succeed()
-    {
-        Success();
-    }
-    public void Failure()
-    {
-        Fail();
-    }
-
     public override void OnRhythmEvent(string action)
     {
         Debug.Log($"{gameObject.name} 리듬메세지: {action}");

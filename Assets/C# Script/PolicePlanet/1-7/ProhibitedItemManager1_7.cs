@@ -30,7 +30,16 @@ public class ProhibitedItemManager1_7 : MonoBehaviour
         int index = prohibitedSprites.IndexOf(collidedSprite);
         if (index != -1)
         {
-            gameManager.IncreaseSuccessCount();
+            gameManager.SendRhythmInput();
+        }
+
+        if (index == currentTargetIndex)
+        {
+            gameManager.SendRhythmInput();
+        }
+        else
+        {
+            gameManager.NotifyMiss();
         }
     }
 }

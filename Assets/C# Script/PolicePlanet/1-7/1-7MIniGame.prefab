@@ -95,7 +95,6 @@ GameObject:
   - component: {fileID: 3399353896492056468}
   - component: {fileID: 7896751992598365217}
   - component: {fileID: 9095418060063226309}
-  - component: {fileID: 7152057903732570240}
   - component: {fileID: 5831933254621596007}
   m_Layer: 0
   m_Name: ProhibitedItemTray
@@ -216,18 +215,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 10.14, y: 3.02}
   m_EdgeRadius: 0
---- !u!114 &7152057903732570240
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4394774890805863703}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff56bc088ede7d8489e1b83af261a38f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!50 &5831933254621596007
 Rigidbody2D:
   serializedVersion: 4

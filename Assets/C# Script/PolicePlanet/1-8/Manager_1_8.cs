@@ -56,17 +56,17 @@ public class Manager_1_8 : MonoBehaviour
         return new Vector2(center.x + offsetX, fixedY);
     }
 
-    public void GameSuccess()
-    {
-        minigame_1_8.Succeed();
+    //public void GameSuccess()
+    //{
+    //    minigame_1_8.Succeed();
 
-        DestroyAllPrisoners();
-    }
+    //    DestroyAllPrisoners();
+    //}
 
-    public void GameFail()
-    {
-        DestroyAllPrisoners();
-    }
+    //public void GameFail()
+    //{
+    //    DestroyAllPrisoners();
+    //}
 
     public void DestroyAllPrisoners()
     {
@@ -103,5 +103,15 @@ public class Manager_1_8 : MonoBehaviour
 
         sr.color = endColor;
         Destroy(obj);
+    }
+
+    public void SendRhythmInput()
+    {
+        minigame_1_8.OnPlayerInput();
+    }
+
+    public void NotifyMiss()
+    {
+        minigame_1_8.OnMiss();
     }
 }

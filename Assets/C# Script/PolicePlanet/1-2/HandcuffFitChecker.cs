@@ -5,6 +5,7 @@ public class HandcuffFitChecker : MonoBehaviour
 {
     public GameObject stage_1_2;
     private Minigame_1_2 minigame_1_2;
+    private MiniGameBase minigameBase;
 
     [SerializeField] private GameObject objectToDestroy_1;
     [SerializeField] private GameObject objectToDestroy_2;
@@ -26,6 +27,7 @@ public class HandcuffFitChecker : MonoBehaviour
         minigame_1_2 = stage_1_2.GetComponent<Minigame_1_2>();
         cuffCollider = GetComponent<CircleCollider2D>();
         dragAndDrop = GetComponent<DragAndDrop>();
+        minigameBase = GetComponentInParent<MiniGameBase>();
     }
 
     private void Update()
@@ -74,7 +76,9 @@ public class HandcuffFitChecker : MonoBehaviour
             if (objectToDestroy_2 != null)    objectToDestroy_2.SetActive(false);
             if (objectToSpawn != null)        objectToSpawn.SetActive(true);
 
-            minigame_1_2.Succeed();
+            //minigame_1_2.Succeed();
+            minigameBase.OnPlayerInput();
+            minigameBase.Success();
         }
         else
         {
