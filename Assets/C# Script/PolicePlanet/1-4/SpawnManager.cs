@@ -32,12 +32,8 @@ public class SpawnManager : MonoBehaviour
 
         Accessory acc = accObj.GetComponent<Accessory>();
         if (acc != null)
-<<<<<<< HEAD
         {
             //minigame.RegisterAccessory(acc);
         }
-=======
-            minigame.RegisterAccessory(acc);
->>>>>>> 979b4b8591b3b1ea32f525b99cb1b3821936d21a
     }
 }
