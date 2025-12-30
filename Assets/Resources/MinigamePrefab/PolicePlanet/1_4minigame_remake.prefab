@@ -245,7 +245,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5892576979196237829}
   - component: {fileID: 3572087714889414228}
-  - component: {fileID: 4340067327863652687}
   m_Layer: 0
   m_Name: SpawnManager
   m_TagString: Untagged
@@ -292,28 +291,15 @@ MonoBehaviour:
   - {fileID: 2011575649484946788, guid: 11bf3557ca847154c833c7cf306b3863, type: 3}
   - {fileID: 6297973329712282394, guid: 01f38ccc0d101d34ba316b2818f86ba5, type: 3}
   - {fileID: 1059413337429869894, guid: b7406de375cfbd14b8befac4abfbed61, type: 3}
-  hatSpawnPoint: {fileID: 6689482756079567731}
-  mustacheSpawnPoint: {fileID: 6606089454469853169}
-  glassesSpawnPoint: {fileID: 7531862611604737029}
---- !u!114 &4340067327863652687
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4025022108019526891}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cc3140b93a71394da288c40e7272b3f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  stage_1_4: {fileID: 4942495309295192213}
   montagePrefabs:
   - {fileID: 7141958249741912797, guid: b74bdb8738c5435469ee8f208e0943aa, type: 3}
   - {fileID: 2263854513063585085, guid: 4cd2576fcf69ae94d878367a972df6e7, type: 3}
   - {fileID: 6140424544877389974, guid: 1f33ee2b8112c8e4097b540ced6f0fac, type: 3}
-  mainPosition: {fileID: 2413071336418213362}
-  correctMontageId: 0
+  hatSpawnPoint: {fileID: 6689482756079567731}
+  mustacheSpawnPoint: {fileID: 6606089454469853169}
+  glassesSpawnPoint: {fileID: 7531862611604737029}
+  montageSpawnPoint: {fileID: 3854437293685386950}
+  minigame: {fileID: 9107784826734523122}
 --- !u!1 &4215404672832041196
 GameObject:
   m_ObjectHideFlags: 0
@@ -472,7 +458,7 @@ GameObject:
   - component: {fileID: 5079324151423357558}
   - component: {fileID: 9107784826734523122}
   m_Layer: 0
-  m_Name: 1-4minigame_remake
+  m_Name: 1_4minigame_remake
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

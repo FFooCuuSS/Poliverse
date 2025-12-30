@@ -6,6 +6,7 @@ public class PlayerReachChecker : MonoBehaviour
 {
     public GameObject stage_1_3;
     private Minigame_1_3 minigame_1_3;
+    private MiniGameBase minigameBase;
 
     [SerializeField] private BoxCollider2D goalCollider;
     private CapsuleCollider2D playerCollider;
@@ -19,6 +20,7 @@ public class PlayerReachChecker : MonoBehaviour
         minigame_1_3 = stage_1_3.GetComponent<Minigame_1_3>();
         playerCollider = GetComponent<CapsuleCollider2D>();
         dragAndDrop = GetComponent<DragAndDrop>();
+        minigameBase = GetComponentInParent<MiniGameBase>();
 
         Vector3 pos = transform.position;
         pos.z = 0f;
@@ -60,7 +62,8 @@ public class PlayerReachChecker : MonoBehaviour
         {
             isGameOver = true;
             fixedPosition = transform.position; // 현재 위치 저장
-            minigame_1_3.Failure();
+            // minigame_1_3.Failure();
+            minigameBase.Fail();
         }
     }
 
@@ -73,7 +76,8 @@ public class PlayerReachChecker : MonoBehaviour
         {
             isGameOver = true;
             fixedPosition = transform.position; // 현재 위치 저장
-            minigame_1_3.Succeed();
+            // minigame_1_3.Succeed();
+            minigameBase.Success();
         }
     }
 }
