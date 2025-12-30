@@ -5,9 +5,10 @@ public class test1_1game_manager : MonoBehaviour
 {
     public GameObject enemy;
     public float spawnInterval = 0.5f;
+    public bool GameClear;
 
     private int expected;
-    private Vector2[] pos =
+    public Vector2[] pos =
     {
         new Vector2( 4.5f,  2f),
         new Vector2( 4.5f, -2f),
@@ -17,11 +18,12 @@ public class test1_1game_manager : MonoBehaviour
 
     void Start()
     {
+        GameClear = false;
         Shuffle(pos);
         StartCoroutine(Spawn());
     }
 
-    IEnumerator Spawn()
+    public IEnumerator Spawn()
     {
         expected = 0;
 
@@ -53,15 +55,20 @@ public class test1_1game_manager : MonoBehaviour
 
             Destroy(tag.transform.root.gameObject);
 
-            if (expected >= pos.Length) Debug.Log("All Clear!");
+            //if (expected >= pos.Length) Debug.Log("All Clear!");
+            if(GameClear)
+            {
+               // Time.timeScale = 0f;
+            }
         }
         else
         {
             Debug.Log("Fail: got " + tag.orderIndex + " expected " + expected);
+            expected++;
         }
     }
 
-    void Shuffle(Vector2[] a)
+    public void Shuffle(Vector2[] a)
     {
         for (int i = 0; i < a.Length; i++)
         {
@@ -69,4 +76,25 @@ public class test1_1game_manager : MonoBehaviour
             (a[i], a[r]) = (a[r], a[i]);
         }
     }
+    public void RestartRound()
+    {
+        StopAllCoroutines();
+        Shuffle(pos);
+        StartCoroutine(Spawn());
+    }
+    public void SetGameClear()
+    {
+        StartCoroutine(GameClearRoutine());
+    }
+
+    IEnumerator GameClearRoutine()
+    {
+        GameClear = true;
+
+        // 다음 프레임까지 기다리기 (Destroy 처리되게)
+        yield return null;
+
+        Time.timeScale = 0f;
+    }
+
 }
