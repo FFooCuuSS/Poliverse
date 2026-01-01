@@ -403,10 +403,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc8c66595ef772544b09ab68f90d349b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2
-  targetY: 2.009297
-  isMoving: 0
-  hasArrived: 0
+  totalMoveDistance: 7
+  moveDuration: 1
+  pauseDuration: 0.5
 --- !u!1 &2910513271250986642
 GameObject:
   m_ObjectHideFlags: 0
@@ -453,10 +452,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc8c66595ef772544b09ab68f90d349b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2
-  targetY: 2.009297
-  isMoving: 0
-  hasArrived: 0
+  totalMoveDistance: 7
+  moveDuration: 1
+  pauseDuration: 0.5
 --- !u!1 &3017536596071447263
 GameObject:
   m_ObjectHideFlags: 0

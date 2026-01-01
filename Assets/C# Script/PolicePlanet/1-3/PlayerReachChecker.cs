@@ -8,7 +8,6 @@ public class PlayerReachChecker : MonoBehaviour
     private Minigame_1_3 minigame_1_3;
     private MiniGameBase minigameBase;
 
-    [SerializeField] private BoxCollider2D goalCollider;
     private CapsuleCollider2D playerCollider;
     private DragAndDrop dragAndDrop;
 
@@ -36,7 +35,6 @@ public class PlayerReachChecker : MonoBehaviour
         }
 
         BoundCheck();
-        GoalCheck();
     }
 
     private void OnMouseDown()
@@ -46,11 +44,15 @@ public class PlayerReachChecker : MonoBehaviour
 
     private void BoundCheck()
     {
-        Collider2D[] hits = Physics2D.OverlapPointAll(transform.position);
+        Collider2D[] hits = Physics2D.OverlapBoxAll(
+            playerCollider.bounds.center,
+            playerCollider.bounds.size,
+            0f
+        );
 
         bool isOnPath = false;
 
-        foreach(var hit in hits)
+        foreach (var hit in hits)
         {
             if (hit.CompareTag("Path"))
             {
@@ -58,26 +60,13 @@ public class PlayerReachChecker : MonoBehaviour
                 break;
             }
         }
+
         if (!isOnPath && !isGameOver)
         {
             isGameOver = true;
-            fixedPosition = transform.position; // 현재 위치 저장
-            // minigame_1_3.Failure();
+            fixedPosition = transform.position;
             minigameBase.Fail();
         }
     }
 
-    private void GoalCheck()
-    {
-        Bounds goalBounds = goalCollider.bounds;
-        Bounds playerBounds = playerCollider.bounds;
-
-        if (playerBounds.Intersects(goalBounds) && !isGameOver)
-        {
-            isGameOver = true;
-            fixedPosition = transform.position; // 현재 위치 저장
-            // minigame_1_3.Succeed();
-            minigameBase.Success();
-        }
-    }
 }

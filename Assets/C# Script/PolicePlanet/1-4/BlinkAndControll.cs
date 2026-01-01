@@ -20,12 +20,16 @@ public class BlinkAndControll : MonoBehaviour
     {
         while (true)
         {
-            bool isVisible = !sr.enabled;
+            bool isVisible = sr.color.a == 0f;
 
-            sr.enabled = isVisible;
+            Color c = sr.color;
+            c.a = isVisible ? 1f : 0f;
+            sr.color = c;
+
             drag.banDragging = !isVisible;
 
             yield return new WaitForSeconds(interval);
         }
     }
+
 }
