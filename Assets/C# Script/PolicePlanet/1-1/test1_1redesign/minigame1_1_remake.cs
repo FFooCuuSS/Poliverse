@@ -131,7 +131,7 @@ public class minigame_1_1_remake : MiniGameBase
             return;
         }
 
-        // 입력 구간이 아닐 때 enemy를 클릭하면 Miss
+        // miss 판정
         if (!canClick)
         {
             missCount++;
@@ -139,15 +139,14 @@ public class minigame_1_1_remake : MiniGameBase
             return;
         }
 
-        // 입력 인덱스가 범위를 벗어났으면 더 이상 입력 받지 않음
         if (inputIndex >= ENEMY_COUNT)
             return;
 
-        // 이미 처리된 입력이면(이미 성공/미스로 확정) 무시
+        // 이미 처리된 입력이면 무시
         if (resolvedThisRound[inputIndex])
             return;
 
-        // 순서가 틀린 enemy 클릭 -> Miss
+        // 순서가 틀린 클릭 Miss
         if (clicked != enemies[inputIndex])
         {
             missCount++;
@@ -155,7 +154,7 @@ public class minigame_1_1_remake : MiniGameBase
             return;
         }
 
-        // 정답 enemy 클릭 -> 성공 처리
+        // 정답 성공 처리
         ResolveSuccess(inputIndex);
     }
 
