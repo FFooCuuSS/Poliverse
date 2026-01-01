@@ -1,64 +1,71 @@
+using System.Collections;
 using UnityEngine;
 using static MiniGameBase;
 
-public class Minigame_1_1_remake : MiniGameBase
+public class minigame_1_1_remake : MiniGameBase
 {
     protected override float TimerDuration => 30f;
     protected override string MinigameExplain => "분류해라!";
 
-    enum Phase
-    {
-        Show,
-        Input
-    }
-
-    private Phase currentPhase;
     private IRhythmManager rhythmManager;
 
-    [Header("Enemies (정답 순서 0~3)")]
+    [Header("Enemies (0~3 정답 순서)")]
     public enemy_1_1_test[] enemies;
 
-    [Header("Show Positions (랜덤 배치용, 4개)")]
+    [Header("Show Positions (4개)")]
     public Transform[] showPositions;
 
-    [Header("Target Scope (연출용)")]
+    [Header("Target Scope")]
     public Transform targetScope;
 
-    private int showIndex;
-    private int inputIndex;
-    private int round;
-
-    private int[] shuffledPosIndex;
-
-    private enemy_1_1_test clickedEnemy;
-
-    // 클릭으로 판정을 요청한 경우에만 OnJudged를 처리하기 위한 게이트
-    private bool awaitingJudge;
-
-    // 한 번 성공/실패 처리되면 더 이상 진행되지 않게 막는 락
-    private bool ended;
+    [Header("Auto Off Time (seconds)")]
+    public float autoOffSeconds = 2.5f;
 
     private const int ENEMY_COUNT = 4;
     private const int TOTAL_ROUND = 2;
 
+    private int round;
+    private int showIndex;
+    private int inputIndex;
+
+    private bool canClick;
+    private bool ended;
+
+    private int successCount;
+    private int missCount;
+
+    private int[] shuffledPosIndex;
+    private bool[] resolvedThisRound;
+    private Coroutine[] autoOffJobs;
+
+    private Camera cam;
+
+    void Start()
+    {
+        cam = Camera.main;
+        StartGame();
+    }
+
     public override void StartGame()
     {
         ended = false;
-        awaitingJudge = false;
+        canClick = false;
 
+        round = 0;
         showIndex = 0;
         inputIndex = 0;
-        round = 0;
-        currentPhase = Phase.Show;
 
-        // 시작할 때 enemy 전부 숨김
-        for (int i = 0; i < enemies.Length; i++)
-        {
-            enemies[i].ResetEnemy();
-            enemies[i].gameObject.SetActive(false);
-        }
+        successCount = 0;
+        missCount = 0;
+
+        if (resolvedThisRound == null || resolvedThisRound.Length != ENEMY_COUNT)
+            resolvedThisRound = new bool[ENEMY_COUNT];
+
+        if (autoOffJobs == null || autoOffJobs.Length != ENEMY_COUNT)
+            autoOffJobs = new Coroutine[ENEMY_COUNT];
 
         PrepareShowPositions();
+        ResetRoundObjects();
 
         Debug.Log("[1-1] StartGame");
     }
@@ -66,166 +73,220 @@ public class Minigame_1_1_remake : MiniGameBase
     public override void BindRhythmManager(IRhythmManager manager)
     {
         if (rhythmManager != null)
-        {
             rhythmManager.OnEventTriggered -= OnRhythmEvent;
-            rhythmManager.OnPlayerJudged -= OnJudged;
-        }
 
         rhythmManager = manager;
 
         if (rhythmManager != null)
-        {
             rhythmManager.OnEventTriggered += OnRhythmEvent;
-            rhythmManager.OnPlayerJudged += OnJudged;
-        }
     }
 
     public override void OnRhythmEvent(string action)
     {
-        Debug.Log("[1-1] OnRhythmEvent = " + action);
+        if (ended || string.IsNullOrEmpty(action)) return;
 
-        if (ended) return;
+        action = action.Trim();
 
         if (action == "Show") HandleShow();
-        else if (action == "Input") currentPhase = Phase.Input;
+        else if (action == "Input") HandleInput();
     }
 
     void Update()
     {
-        // 클릭 연출(스코프 이동)은 ended여도 움직이게 해도 되고,
-        // 지금은 ended면 아예 아무것도 안 하게 막음
         if (ended) return;
+        if (!Input.GetMouseButtonDown(0)) return;
+        if (cam == null) return;
 
-        if (Input.GetMouseButtonDown(0))
+        Vector3 w = cam.ScreenToWorldPoint(Input.mousePosition);
+        w.z = 0;
+
+        // 스코프 연출
+        if (targetScope != null)
+            targetScope.position = w;
+
+        // 클릭 위치 레이캐스트
+        RaycastHit2D hit = Physics2D.Raycast(w, Vector2.zero);
+
+        // 아무것도 못 찍었으면: 입력 구간일 때만 Miss로 처리
+        if (!hit)
         {
-            // 스코프 이동(연출)
-            if (targetScope != null && Camera.main != null)
+            if (canClick)
             {
-                Vector3 w = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                w.z = 0;
-                targetScope.position = w;
+                missCount++;
+                Debug.Log("[1-1] MISS: Clicked Empty (no collider)");
             }
-
-            // Input 구간이 아니면 판정 요청 안 함
-            if (currentPhase != Phase.Input) return;
-
-            // 리듬매니저가 없으면 진행 불가
-            if (rhythmManager == null) return;
-
-            // 클릭 위치에서 enemy 레이캐스트
-            Vector3 wp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            clickedEnemy = GetClickedEnemy(new Vector2(wp.x, wp.y));
-
-            // 이번 클릭에 대한 판정을 기다리겠다는 표시
-            awaitingJudge = true;
-
-            // CSV의 Input 노트와 매칭
-            rhythmManager.ReceivePlayerInput("Input");
+            return;
         }
+
+        var clicked = hit.collider.GetComponent<enemy_1_1_test>();
+
+        // 적이 아닌 것을 클릭했으면: 입력 구간일 때만 Miss
+        if (clicked == null)
+        {
+            if (canClick)
+            {
+                missCount++;
+                Debug.Log("[1-1] MISS: Clicked Non-Enemy");
+            }
+            return;
+        }
+
+        // 입력 구간이 아닐 때 enemy를 클릭하면 Miss
+        if (!canClick)
+        {
+            missCount++;
+            Debug.Log("[1-1] MISS: Clicked Enemy Outside Input Time");
+            return;
+        }
+
+        // 입력 인덱스가 범위를 벗어났으면 더 이상 입력 받지 않음
+        if (inputIndex >= ENEMY_COUNT)
+            return;
+
+        // 이미 처리된 입력이면(이미 성공/미스로 확정) 무시
+        if (resolvedThisRound[inputIndex])
+            return;
+
+        // 순서가 틀린 enemy 클릭 -> Miss
+        if (clicked != enemies[inputIndex])
+        {
+            missCount++;
+            Debug.Log("[1-1] MISS: Wrong Enemy (expected=" + inputIndex + ")");
+            return;
+        }
+
+        // 정답 enemy 클릭 -> 성공 처리
+        ResolveSuccess(inputIndex);
     }
 
     void HandleShow()
     {
-        currentPhase = Phase.Show;
+        if (showIndex >= ENEMY_COUNT) return;
+        if (enemies == null || enemies.Length < ENEMY_COUNT) return;
+        if (showPositions == null || showPositions.Length < ENEMY_COUNT) return;
 
-        // 라운드의 첫 Show에서 위치를 다시 섞음
-        if (showIndex == 0)
+        if (shuffledPosIndex == null || shuffledPosIndex.Length != ENEMY_COUNT)
             PrepareShowPositions();
 
-        if (showIndex >= ENEMY_COUNT) return;
-
-        // showIndex번째 enemy를 랜덤 위치에 배치
         int posIdx = shuffledPosIndex[showIndex];
 
-        if (showPositions != null && showPositions.Length >= ENEMY_COUNT)
-            enemies[showIndex].transform.position = showPositions[posIdx].position;
+        var e = enemies[showIndex];
+        var p = showPositions[posIdx];
+        if (e == null || p == null) return;
 
-        enemies[showIndex].gameObject.SetActive(true);
-        enemies[showIndex].Highlight(true);
+        e.transform.position = p.position;
+        e.gameObject.SetActive(true);
+        e.Highlight(true);
+
+        StopAutoOff(showIndex);
+
+        resolvedThisRound[showIndex] = false;
+        autoOffJobs[showIndex] = StartCoroutine(AutoOffRoutine(showIndex));
+
+        Debug.Log("[1-1] SHOW idx=" + showIndex + " posIdx=" + posIdx);
 
         showIndex++;
     }
 
-    void OnJudged(JudgementResult result)
+    void HandleInput()
+    {
+        canClick = true;
+        Debug.Log("[1-1] INPUT START expected=" + inputIndex);
+    }
+
+    IEnumerator AutoOffRoutine(int idx)
+    {
+        yield return new WaitForSeconds(autoOffSeconds);
+
+        if (ended) yield break;
+        if (resolvedThisRound[idx]) yield break;
+
+        resolvedThisRound[idx] = true;
+        missCount++;
+
+        if (enemies[idx] != null)
+            enemies[idx].Clear();
+
+        Debug.Log("[1-1] MISS: AutoOff Timeout idx=" + idx);
+
+        // 자동 off가 현재 입력 대상이면 다음으로 진행
+        if (idx == inputIndex)
+        {
+            inputIndex++;
+            TryEndRound();
+        }
+    }
+
+    void ResolveSuccess(int idx)
     {
         if (ended) return;
+        if (resolvedThisRound[idx]) return;
 
-        // Show 구간에서 들어오는 판정(자동 Miss 포함)은 무시
-        if (currentPhase != Phase.Input) return;
+        resolvedThisRound[idx] = true;
+        successCount++;
 
-        // 이번 클릭으로 판정을 요청한 경우에만 처리
-        if (!awaitingJudge) return;
+        StopAutoOff(idx);
 
-        // 이 판정은 이번 클릭에 대응하는 것으로 확정 -> 바로 게이트 해제
-        awaitingJudge = false;
+        if (enemies[idx] != null)
+            enemies[idx].Clear();
 
-        if (result == JudgementResult.Miss)
-        {
-            Debug.Log("[1-1] Rhythm Miss");
-            Failure();
-            return;
-        }
+        Debug.Log("[1-1] SUCCESS: idx=" + idx);
 
-        // 클릭한 게 없거나(enemy가 아닌 곳 클릭)면 실패
-        if (clickedEnemy == null)
-        {
-            Debug.Log("[1-1] Click Miss");
-            Failure();
-            return;
-        }
-
-        // 순서가 틀리면 실패
-        if (clickedEnemy != enemies[inputIndex])
-        {
-            Debug.Log("[1-1] Wrong Enemy");
-            Failure();
-            return;
-        }
-
-        // 성공 처리
-        clickedEnemy.Clear();
-        clickedEnemy = null;
         inputIndex++;
+        TryEndRound();
+    }
 
-        if (inputIndex >= ENEMY_COUNT)
-            EndRound();
+    void TryEndRound()
+    {
+        if (inputIndex < ENEMY_COUNT) return;
+        EndRound();
     }
 
     void EndRound()
     {
         round++;
 
+        Debug.Log("[1-1] ROUND END round=" + round + " success=" + successCount + " miss=" + missCount);
+
         if (round >= TOTAL_ROUND)
         {
-            Debug.Log("[1-1] Game Success");
-            Succeed();
+            Debug.Log("[1-1] FINAL RESULT success=" + successCount + " miss=" + missCount);
+
+            if (successCount >= 7) Succeed();
+            else Failure();
             return;
         }
 
-        // 다음 라운드 준비
+        canClick = false;
         showIndex = 0;
         inputIndex = 0;
-        currentPhase = Phase.Show;
-
-        clickedEnemy = null;
-        awaitingJudge = false;
-
-        for (int i = 0; i < enemies.Length; i++)
-        {
-            enemies[i].ResetEnemy();
-            enemies[i].gameObject.SetActive(false);
-        }
 
         PrepareShowPositions();
+        ResetRoundObjects();
     }
 
-    enemy_1_1_test GetClickedEnemy(Vector2 clickPos)
+    void ResetRoundObjects()
     {
-        // 클릭한 지점에서 Collider2D를 찾는다
-        RaycastHit2D hit = Physics2D.Raycast(clickPos, Vector2.zero);
-        if (!hit) return null;
+        for (int i = 0; i < ENEMY_COUNT; i++)
+        {
+            resolvedThisRound[i] = false;
+            StopAutoOff(i);
 
-        return hit.collider.GetComponent<enemy_1_1_test>();
+            if (enemies != null && i < enemies.Length && enemies[i] != null)
+            {
+                enemies[i].ResetEnemy();
+                enemies[i].gameObject.SetActive(false);
+            }
+        }
+    }
+
+    void StopAutoOff(int idx)
+    {
+        if (autoOffJobs[idx] != null)
+        {
+            StopCoroutine(autoOffJobs[idx]);
+            autoOffJobs[idx] = null;
+        }
     }
 
     void PrepareShowPositions()
@@ -239,9 +300,7 @@ public class Minigame_1_1_remake : MiniGameBase
         for (int i = 0; i < ENEMY_COUNT; i++)
         {
             int r = Random.Range(i, ENEMY_COUNT);
-            int temp = shuffledPosIndex[i];
-            shuffledPosIndex[i] = shuffledPosIndex[r];
-            shuffledPosIndex[r] = temp;
+            (shuffledPosIndex[i], shuffledPosIndex[r]) = (shuffledPosIndex[r], shuffledPosIndex[i]);
         }
     }
 

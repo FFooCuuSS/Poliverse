@@ -16,8 +16,7 @@ public class enemy_1_1_test : MonoBehaviour
     public void Highlight(bool on)
     {
         if (sr == null) return;
-
-        sr.color = on ? Color.yellow : originalColor;
+        //sr.color = on ? Color.yellow : originalColor;
     }
 
     public void Clear()

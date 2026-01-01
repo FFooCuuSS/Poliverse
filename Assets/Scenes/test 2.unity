@@ -255,9 +255,9 @@ MonoBehaviour:
   addressablesKey: 
   idA: 1
   idB: 1
-  perfectWindow: 0.1
-  goodWindow: 0.2
-  hitWindow: 1
+  perfectWindow: 0.05
+  goodWindow: 0.08
+  hitWindow: 0.1
   events: []
 --- !u!4 &441601158
 Transform:
@@ -285,6 +285,18 @@ PrefabInstance:
     - target: {fileID: 1244798297180689767, guid: d7ab5c15ba54d1642b36f9683547f2dc, type: 3}
       propertyPath: m_Name
       value: 1_1minigame_remake
+      objectReference: {fileID: 0}
+    - target: {fileID: 7288815237851093222, guid: d7ab5c15ba54d1642b36f9683547f2dc, type: 3}
+      propertyPath: m_Color.b
+      value: 0.21960786
+      objectReference: {fileID: 0}
+    - target: {fileID: 7288815237851093222, guid: d7ab5c15ba54d1642b36f9683547f2dc, type: 3}
+      propertyPath: m_Color.g
+      value: 0.21960786
+      objectReference: {fileID: 0}
+    - target: {fileID: 7288815237851093222, guid: d7ab5c15ba54d1642b36f9683547f2dc, type: 3}
+      propertyPath: m_Color.r
+      value: 0.21960786
       objectReference: {fileID: 0}
     - target: {fileID: 8046472587115707616, guid: d7ab5c15ba54d1642b36f9683547f2dc, type: 3}
       propertyPath: m_LocalPosition.x
