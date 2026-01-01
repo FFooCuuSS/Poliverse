@@ -39,7 +39,7 @@ public class ProhibitedItemManager1_7 : MonoBehaviour
         }
         else
         {
-            gameManager.NotifyMiss();
+            //gameManager.NotifyMiss();
         }
     }
 }

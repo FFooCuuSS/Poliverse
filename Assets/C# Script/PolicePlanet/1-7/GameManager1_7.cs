@@ -42,8 +42,8 @@ public class GameManager1_7 : MonoBehaviour
         minigame_1_7.OnPlayerInput();
     }
 
-    public void NotifyMiss()
-    {
-        minigame_1_7.OnMiss();
-    }
+    //public void NotifyMiss()
+    //{
+    //    minigame_1_7.OnMiss();
+    //}
 }
