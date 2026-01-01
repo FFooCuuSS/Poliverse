@@ -35,6 +35,7 @@ public class HandcuffSequenceController : MonoBehaviour
                 {
                     leftCuff.ForceSnapToHand(leftHandCollider);
                     state = State.LeftSnapped;
+                    Debug.Log("왼손수갑");
                 }
                 break;
 
@@ -48,6 +49,7 @@ public class HandcuffSequenceController : MonoBehaviour
                 {
                     rightCuffDrag.enabled = true; // 이제 유저 조작
                     state = State.PlayerDrag;
+                    Debug.Log("수갑드래그하기");
                 }
                 break;
         }

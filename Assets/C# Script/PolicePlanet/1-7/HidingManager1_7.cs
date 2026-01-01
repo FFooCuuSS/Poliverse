@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class HidingManager1_7 : MonoBehaviour
 {
-    private void OnMouseDown()
-    {
-        Destroy(gameObject);
-    }
+    //private void OnMouseDown()
+    //{
+    //    Destroy(gameObject);
+    //}
 }
