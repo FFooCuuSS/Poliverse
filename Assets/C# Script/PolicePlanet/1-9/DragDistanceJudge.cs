@@ -17,7 +17,7 @@ public class DragDistanceJudge : MonoBehaviour
     [SerializeField] private SpriteRenderer targetSpriteRenderer;
     [SerializeField] private Sprite successSprite;
 
-    private Minigame_1_9 minigmae_1_9;
+    private Minigame_1_9 minigame_1_9;
     private Vector3 lastPosition;
     private float totalDistance;
 
@@ -25,7 +25,7 @@ public class DragDistanceJudge : MonoBehaviour
 
     private void Start()
     {
-        minigmae_1_9 = stage_1_9.GetComponent<Minigame_1_9>();
+        minigame_1_9 = stage_1_9.GetComponent<Minigame_1_9>();
     }
 
     void Update()
@@ -52,7 +52,7 @@ public class DragDistanceJudge : MonoBehaviour
 
             if (totalDistance >= distanceThreshold)
             {
-                minigmae_1_9.Succeed();
+                minigame_1_9.Succeed();
                 StartShaking();
                 ActivateObject();
                 ChangeSprite();
@@ -86,5 +86,15 @@ public class DragDistanceJudge : MonoBehaviour
     {
         if (targetSpriteRenderer != null && successSprite != null)
             targetSpriteRenderer.sprite = successSprite;
+    }
+
+    public void SendRhythmInput()
+    {
+        minigame_1_9.OnPlayerInput();
+    }
+
+    public void NotifyMiss()
+    {
+        minigame_1_9.OnMiss();
     }
 }

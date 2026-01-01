@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -41,21 +42,30 @@ public class ProhibitedItemSpawner1_7 : MonoBehaviour
 
         // 3) 아이템 생성
         GameObject prohibitedItem = Instantiate(
-            prohibitedItemPrefabs[index],
-            targetPoint.position,           // 월드 좌표 위치 (targetPoint 기준)
-            targetPoint.rotation,           // targetPoint의 회전값 그대로 사용
-            prohibitedItemsParent           // 부모 transform 지정
-            );
+        prohibitedItemPrefabs[index],
+        targetPoint.position,
+        targetPoint.rotation,
+        prohibitedItemsParent
+        );
+
         prohibitedItem.transform.localPosition = targetPoint.localPosition;
         prohibitedItem.tag = "Item";
 
-        // 4) 죄수 컨트롤러에 등록
+        // Rigidbody2D 확인
+        Rigidbody2D rb = prohibitedItem.GetComponent<Rigidbody2D>();
+        if (rb == null)
+        {
+            rb = prohibitedItem.AddComponent<Rigidbody2D>();
+        }
+        rb.gravityScale = 0f;  // ← 중력 OFF 상태로 생성
+        rb.simulated = false;  // ← 물리 시뮬레이션도 OFF
+
+        // 나중에 DropProhibitedItem에서 활성화
         PrisonerController1_7 controller = prisoner.GetComponent<PrisonerController1_7>();
         if (controller != null)
         {
             controller.SetProhibitedItem(prohibitedItem);
         }
     }
-
 
 }

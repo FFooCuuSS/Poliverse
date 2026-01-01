@@ -7,6 +7,16 @@ public class Minigame_1_7 : MiniGameBase
     public GameObject ProhibitSpawner;
     private ProhibitedItemSpawner1_7 prohibitedItemSpawner1_7;
 
+    public HoldCheck1_7 holdJudge;
+
+    private bool isHolding = false;
+
+    private int holdCount = 0;
+    public int maxHoldCount = 4;
+
+    private float holdTimer = 0f;
+    private float holdTimeout = 2f;
+
     private bool hasMissed = false;
 
     protected override float TimerDuration => 5f;
@@ -18,9 +28,33 @@ public class Minigame_1_7 : MiniGameBase
         prohibitedItemSpawner1_7 = ProhibitSpawner.GetComponent<ProhibitedItemSpawner1_7>();
     }
 
+    void Update()
+    {
+        GameObject prisoner = FindObjectOfType<PrisonerController1_7>()?.gameObject;
+        if (prisoner == null) return;
+
+        // 화면 중앙 근처 체크
+        Vector3 screenPos = Camera.main.WorldToViewportPoint(prisoner.transform.position);
+        bool isNearCenter = screenPos.x > 0.45f && screenPos.x < 0.55f;
+
+        // 중앙 근처에 있지 않으면 Hold UI 숨김
+        if (!isNearCenter && holdJudge != null)
+        {
+            holdJudge.HideHoldUI();
+        }
+
+        // Hold 입력 감지 (예: 리듬 이벤트에 연결되어 있을 수도 있음)
+        // 여기서는 그냥 예시로 Space 키로 테스트 가능
+        if (isNearCenter && Input.GetKeyDown(KeyCode.Space))
+        {
+            HandleHold();
+        }
+    }
+
     public override void StartGame()
     {
         hasMissed = false;
+        holdCount = 0;
 
         // 추가 초기화
         // 예: instructionText.text = MinigameExplain;
@@ -50,7 +84,8 @@ public class Minigame_1_7 : MiniGameBase
                 break;
 
             case "Hold":
-                Debug.Log("Hold");
+                HandleHold();
+                //Debug.Log("Hold");
                 //ShowHoldPrompt();
                 break;
 
@@ -61,28 +96,49 @@ public class Minigame_1_7 : MiniGameBase
         }
     }
 
-    public override void OnJudgement(JudgementResult judgement)
+    private void HandleHold()
     {
-        if (hasMissed) return;
+        GameObject prisoner = FindObjectOfType<PrisonerController1_7>()?.gameObject;
+        if (prisoner == null) return;
 
-        if (judgement == JudgementResult.Perfect ||
-            judgement == JudgementResult.Good)
+        // Hold UI가 최대 횟수 미만이고 현재 생성되어 있지 않으면 생성
+        if (holdJudge.CanHold())
         {
-            GameManager1_7.instance.IncreaseSuccessCount();
+            holdJudge.OnHoldStart(prisoner.transform);
+        }
+    }
+
+    public void OnHoldSuccess()
+    {
+        holdCount++;
+
+        GameObject prisoner = FindObjectOfType<PrisonerController1_7>().gameObject;
+
+        if (holdCount >= maxHoldCount)
+        {
+            // 마지막 Hold 성공
+            prisoner.GetComponent<PrisonerController1_7>().DropProhibitedItem();
+
+            Success();
+            holdJudge.HideHoldUI();
         }
         else
         {
-            OnMiss();
+            Debug.Log($"Hold 성공! 현재 {holdCount} / {maxHoldCount}");
+            // 다음 Hold 준비
+            holdJudge.OnHoldStart(prisoner.transform);
         }
     }
 
-    public void OnMiss()
-    {
-        if (hasMissed) return;
 
-        hasMissed = true;
-        Debug.Log("미스 발생 -> 실패");
 
-        Fail();
-    }
+    //public void OnMiss()
+    //{
+    //    if (hasMissed) return;
+
+    //    hasMissed = true;
+    //    Debug.Log("미스 발생 -> 실패");
+
+    //    Fail();
+    //}
 }
