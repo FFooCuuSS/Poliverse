@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class Prisoner_1_8 : MonoBehaviour
 {
+    /*
     public float moveSpeed = 0.1f;
     public GameObject prison;
 
@@ -22,7 +23,7 @@ public class Prisoner_1_8 : MonoBehaviour
 
     void Update()
     {
-        UpdateMoveDirection();
+        //UpdateMoveDirection();
 
         Vector2 newPosition = (Vector2)transform.position + moveDirection * moveSpeed * Time.deltaTime;
 
@@ -59,5 +60,44 @@ public class Prisoner_1_8 : MonoBehaviour
         }
 
         moveDirection = awayFromPrison.normalized;
+    }
+    */
+
+    public float moveSpeed = 2f;
+    public float destroyX = -7f;
+
+    public GameObject prison;
+
+    // 감옥에 들어갈 수 있는 상태인지
+    public bool canBeCaptured = false;
+
+    void Update()
+    {
+        // 왼쪽으로 이동
+        transform.Translate(Vector2.left * moveSpeed * Time.deltaTime);
+
+        // 화면 밖 제거
+        if (transform.position.x < destroyX)
+        {
+            Destroy(gameObject);
+        }
+
+        CheckPrisonRange();
+    }
+
+    void CheckPrisonRange()
+    {
+        if (prison == null) return;
+
+        float prisonY = prison.transform.position.y;
+        float distanceY = Mathf.Abs(transform.position.y - prisonY);
+
+        // 감옥 세로 범위 (값은 조절)
+        canBeCaptured = distanceY < 0.8f;
+    }
+
+    public void SetSpeed(float speed)
+    {
+        moveSpeed = speed;
     }
 }
