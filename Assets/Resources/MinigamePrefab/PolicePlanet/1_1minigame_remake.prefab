@@ -64,6 +64,7 @@ MonoBehaviour:
   - {fileID: 4669179609981329607}
   - {fileID: 4814175968190138895}
   targetScope: {fileID: 7094457886735114223}
+  autoOffSeconds: 2.5
 --- !u!1 &1995058189454874920
 GameObject:
   m_ObjectHideFlags: 0
@@ -172,7 +173,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
