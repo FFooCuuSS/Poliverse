@@ -14,7 +14,13 @@ public class Manager_1_8 : MonoBehaviour
 
     public int numberOfPrisoners = 3;
 
-    private List<GameObject> prisonerList = new List<GameObject>(); // 생성된 죄수 관리용
+    private int spawnedCount = 0;
+    private List<GameObject> prisonerList = new List<GameObject>();
+
+    public float timeToReachPrison = 1f;
+
+    [Header("Spawn Settings")]
+    public int maxPrisonerCount = 3;
 
     private void Start()
     {
@@ -30,17 +36,17 @@ public class Manager_1_8 : MonoBehaviour
 
     void StartGame()
     {
-        for (int i = 0; i < numberOfPrisoners; i++)
-        {
-            Vector2 spawnPos = GetValidSpawnPosition(prisonPos, -1f);
+        //for (int i = 0; i < numberOfPrisoners; i++)
+        //{
+        //    Vector2 spawnPos = new Vector2(7f, Random.Range(-2f, 2f));
 
-            GameObject prisonerObj = Instantiate(prisonerPrefab[i], spawnPos, Quaternion.identity);
-            Prisoner_1_8 prisoner_1_8 = prisonerObj.GetComponent<Prisoner_1_8>();
+        //    GameObject prisonerObj = Instantiate(prisonerPrefab[i], spawnPos, Quaternion.identity);
+        //    Prisoner_1_8 prisoner_1_8 = prisonerObj.GetComponent<Prisoner_1_8>();
 
-            prisoner_1_8.prison = prisonObj;
+        //    prisoner_1_8.prison = prisonObj;
 
-            prisonerList.Add(prisonerObj);
-        }
+        //    prisonerList.Add(prisonerObj);
+        //}
     }
 
     Vector2 GetValidSpawnPosition(Vector2 center, float fixedY)
@@ -81,6 +87,37 @@ public class Manager_1_8 : MonoBehaviour
         prisonerList.Clear(); // 리스트 초기화
     }
 
+    public void SpawnPrisoner()
+    {
+        if (spawnedCount >= maxPrisonerCount)
+            return;
+
+        // 감옥 기준 스폰 위치 계산
+        float prisonX = prisonObj.transform.position.x;
+        float spawnX = prisonX + 7f; // 감옥 오른쪽에서 등장
+        float spawnY = Random.Range(-2f, 2f);
+
+        Vector2 spawnPos = new Vector2(spawnX, spawnY);
+
+        // 프리팹 인덱스 순환
+        int prefabIndex = spawnedCount % prisonerPrefab.Length;
+
+        GameObject prisonerObj =
+            Instantiate(prisonerPrefab[prefabIndex], spawnPos, Quaternion.identity);
+
+        Prisoner_1_8 prisoner = prisonerObj.GetComponent<Prisoner_1_8>();
+        prisoner.prison = prisonObj;
+
+        // 이동 거리 → 속도 계산
+        float distance = spawnPos.x - prisonX;
+        float speed = distance / timeToReachPrison;
+        prisoner.SetSpeed(speed);
+
+        prisonerList.Add(prisonerObj);
+        spawnedCount++;
+    }
+
+
     private IEnumerator FadeAndDestroy(GameObject obj, float duration)
     {
         SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
@@ -112,6 +149,6 @@ public class Manager_1_8 : MonoBehaviour
 
     public void NotifyMiss()
     {
-        minigame_1_8.OnMiss();
+        //minigame_1_8.OnMiss();
     }
 }

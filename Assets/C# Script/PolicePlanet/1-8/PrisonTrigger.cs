@@ -5,21 +5,26 @@ public class PrisonTrigger : MonoBehaviour
     public int totalPrisoners;
     public Manager_1_8 manager;
 
+    private PrisonController_1_8 prisonController;
     private int prisonersInside = 0;
 
     private void Update()
     {
         //Debug.Log(prisonersInside);
+        prisonController = GetComponent<PrisonController_1_8>();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("충돌");
+        //Debug.Log("충돌");
+        if (!prisonController.IsActive) return;
 
         if (other.CompareTag("Thief"))
         {
             prisonersInside++;
-            if (prisonersInside == totalPrisoners)
+            Destroy(other.gameObject);
+
+            if (prisonersInside >= totalPrisoners)
             {
                 //manager.GameSuccess();
                 manager.SendRhythmInput();
@@ -27,11 +32,11 @@ public class PrisonTrigger : MonoBehaviour
         }
     }
 
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.CompareTag("Thief"))
-        {
-            prisonersInside--;
-        }
-    }
+    //private void OnTriggerExit2D(Collider2D other)
+    //{
+    //    if (other.CompareTag("Thief"))
+    //    {
+    //        prisonersInside--;
+    //    }
+    //}
 }

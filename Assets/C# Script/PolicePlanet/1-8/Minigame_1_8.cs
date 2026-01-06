@@ -9,12 +9,17 @@ public class Minigame_1_8 : MiniGameBase
 
     private bool hasMissed = false;
 
+    private bool canTap = false;
+    private PrisonController_1_8 prisonController;
+
+
     protected override float TimerDuration => 5f;
     protected override string MinigameExplain => "모두 가둬라!";
 
     private void Start()
     {
         manager_1_8 = manager.GetComponent<Manager_1_8>();
+        prisonController = manager_1_8.prisonObj.GetComponent<PrisonController_1_8>();
     }
 
     public override void StartGame()
@@ -36,6 +41,13 @@ public class Minigame_1_8 : MiniGameBase
         base.Fail();
     }
 
+    public bool CanTap => canTap;
+
+    public void UseTap()
+    {
+        canTap = false;
+    }
+
     public override void OnRhythmEvent(string action)
     {
         Debug.Log($"{gameObject.name} 리듬메세지: {action}");
@@ -44,12 +56,15 @@ public class Minigame_1_8 : MiniGameBase
         switch (action)
         {
             case "Tap":
+                canTap = true;
                 Debug.Log("Tap");
+                manager_1_8.SpawnPrisoner();
                 //ShowTapPrompt();
                 break;
 
             case "Hold":
                 Debug.Log("Hold");
+                manager_1_8.SpawnPrisoner();
                 //ShowHoldPrompt();
                 break;
 
@@ -67,22 +82,23 @@ public class Minigame_1_8 : MiniGameBase
         if (judgement == JudgementResult.Perfect ||
             judgement == JudgementResult.Good)
         {
-            Debug.Log("리듬 성공 → 미니게임 성공");
-            Success();
+            Debug.Log("판정 성공 → 감옥 작동");
+            prisonController.ActivatePrison();
         }
         else
         {
-            OnMiss();
+            //OnMiss();
+            Fail();
         }
     }
 
-    public void OnMiss()
-    {
-        if (hasMissed) return;
+    //public void OnMiss()
+    //{
+    //    if (hasMissed) return;
 
-        hasMissed = true;
-        Debug.Log("미스 발생 -> 실패");
+    //    hasMissed = true;
+    //    Debug.Log("미스 발생 -> 실패");
 
-        Fail();
-    }
+    //    Fail();
+    //}
 }
