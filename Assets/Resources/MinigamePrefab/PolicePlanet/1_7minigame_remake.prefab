@@ -96,7 +96,7 @@ GameObject:
   - component: {fileID: 6803564812893199740}
   - component: {fileID: 6584522784603379527}
   m_Layer: 0
-  m_Name: 1-7minigame_remake
+  m_Name: 1_7minigame_remake
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
