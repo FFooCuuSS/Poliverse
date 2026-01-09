@@ -1,82 +1,53 @@
+using System;
 using UnityEngine;
 
-[RequireComponent(typeof(Collider2D))]
 public class PoliceMover : MonoBehaviour
 {
-    [Header("Lane (0,1,2)")]
     public int laneIndex;
 
-    [Header("After reaching target X")]
-    public float passSpeed = 6f;
+    [Header("Auto destroy when x <")]
+    public float destroyX = -8f;
 
-    [Header("Destroy when X <")]
-    public float destroyX = -7f;
+    // 미니게임에게 "나 화면 밖으로 나가서 제거됐다" 알려주기
+    public event Action<PoliceMover> OnAutoDestroyed;
 
-    private float startX;
-    private float targetX;
-    private float startTime;
-    private float arriveTime;
+    private float speed;          // 왼쪽으로 가는 속도(양수)
+    private bool locked = false;
 
-    private bool isMoving = false;
-    private bool isLocked = false;
-
-    // Spawn 시점에 호출:
-    // startTime~arriveTime 동안 targetX에 정확히 도착하고,
-    // 이후에는 passSpeed로 계속 왼쪽 이동
-    public void StartMoveTimed(float _startX, float _targetX, float _startTime, float _arriveTime)
+    // startX -> targetX까지 정확히 travelTime(=1초)에 도착하도록 speed 계산
+    public void InitMoveToTarget(float startX, float targetX, float travelTime)
     {
-        startX = _startX;
-        targetX = _targetX;
-        startTime = _startTime;
-        arriveTime = _arriveTime;
+        float dist = startX - targetX; // startX가 더 크니까 양수여야 정상
+        speed = (travelTime <= 0f) ? 0f : dist / travelTime;
+        if (speed < 0f) speed = -speed; // 혹시 뒤집혀도 안전하게
 
-        isLocked = false;
-        isMoving = true;
-
-        Vector3 pos = transform.position;
-        pos.x = startX;
-        transform.position = pos;
+        // 위치는 호출하는 쪽에서 이미 잡아준다고 가정
     }
 
     private void Update()
     {
-        if (isLocked) return;
-        if (!isMoving) return;
+        if (locked) return;
 
-        float now = Time.time;
+        // 항상 같은 속도로 왼쪽 진행(컨테이너 지나가도 속도 동일)
+        transform.position += Vector3.left * speed * Time.deltaTime;
 
-        // 1) 도착 전: 시간 보간으로 정확히 목표 X까지 이동
-        if (now <= arriveTime)
-        {
-            float t = Mathf.InverseLerp(startTime, arriveTime, now);
-            float x = Mathf.Lerp(startX, targetX, t);
-
-            Vector3 pos = transform.position;
-            pos.x = x;
-            transform.position = pos;
-        }
-        // 2) 도착 후: 계속 왼쪽으로 지나감
-        else
-        {
-            transform.position += Vector3.left * passSpeed * Time.deltaTime;
-        }
-
-        // 3) 화면 밖 제거
+        // 화면 밖으로 나가면 제거
         if (transform.position.x < destroyX)
         {
+            OnAutoDestroyed?.Invoke(this);
             Destroy(gameObject);
         }
     }
 
-    // 성공 시: 현재 transform 위치 그대로 고정
+    // 클릭 성공 시: 즉시 현재 위치에서 고정
     public void LockHere()
     {
-        isLocked = true;
-        isMoving = false;
+        locked = true;
 
-        // Animator가 위치를 덮어쓰는 케이스가 종종 있어서 있으면 끔
+        // Animator가 transform을 덮어쓰는 경우 방지
         Animator anim = GetComponent<Animator>();
-        if (anim != null)
-            anim.enabled = false;
+        if (anim != null) anim.enabled = false;
     }
+
+    public bool IsLocked => locked;
 }

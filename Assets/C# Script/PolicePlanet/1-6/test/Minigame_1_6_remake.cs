@@ -4,7 +4,7 @@ using UnityEngine;
 public class Minigame_1_6_remake : MiniGameBase
 {
     protected override float TimerDuration => 30f;
-    protected override string MinigameExplain => "Spawn에 경찰 출발, Input 타이밍에 Space! 컨테이너 위면 성공";
+    protected override string MinigameExplain => "Spawn->경찰 출발, Input ON 후 1초 클릭 Perfect / +-0.2 Good";
 
     [Header("Prefabs")]
     public ContainerTarget containerPrefab;
@@ -20,32 +20,30 @@ public class Minigame_1_6_remake : MiniGameBase
     [Header("Police Start X")]
     public float policeStartX = 10f;
 
-    [Header("Timing")]
-    public float travelTime = 1f;          // Spawn 후 1초에 컨테이너 X 도착
-    public float inputWindowSeconds = 0.25f; // Input 타이밍에서 Space 허용 구간
+    [Header("Move Timing")]
+    public float travelTime = 1f; // startX->containerX까지 1초
 
-    [Header("Result Rule")]
-    public bool acceptGood = true; // Good도 성공 처리
+    [Header("Judgement Windows (seconds)")]
+    public float perfectWindow = 0.0f; // "정확히 1초"를 원하면 0, 현실적으로는 0.03 추천
+    public float goodWindow = 0.2f;
+
+    [Header("Auto destroy X")]
+    public float destroyX = -8f;
 
     private ContainerTarget[] containers;
     private List<int> laneOrder;
 
     private PoliceMover currentPolice;
-    private Collider2D currentPoliceCol;
 
-    private int spawnCount = 0;      // Spawn 몇 번 했는지 (0~3)
-    private int resolvedCount = 0;   // 경찰 3명에 대해 (성공 or 미스) 처리한 횟수
-    private int missCount = 0;
-    private int successCount = 0;
+    private bool inputEnabled = false;     // Input 이벤트로 켜짐
+    private bool clickLocked = false;      // 클릭 후 다음 Input까지 잠금
 
-    // 현재 경찰이 “Input 기회를 받은 상태인지”
-    private bool inputStartedForCurrent = false;
+    private float inputOnTime = 0f;        // Input 켜진 실제 시간(Time.time)
+    private float targetClickTime = 0f;    // inputOnTime + 1초
 
-    // Input 윈도우 상태
-    private bool inputWindowOpen = false;
-
-    // 리듬매니저 판정 기다리는 중인지 (내가 Space 눌러서 만든 판정만 처리하려고)
-    private bool pendingJudge = false;
+    private int spawnCount = 0;
+    private int judgedCount = 0;           // 3회 판정 완료 수(Perfect/Good/Miss)
+    private int hitCount = 0;              // Perfect/Good 성공 횟수
 
     private bool finished = false;
 
@@ -61,136 +59,28 @@ public class Minigame_1_6_remake : MiniGameBase
         if (finished) return;
         if (IsInputLocked) return;
 
-        // Input 창 열려있을 때만 Space 받음
-        if (inputWindowOpen && !pendingJudge && Input.GetKeyDown(KeyCode.Space))
+        // Input이 켜져 있고, 클릭 잠금이 아닐 때만 좌클릭 허용
+        if (inputEnabled && !clickLocked && Input.GetMouseButtonDown(0))
         {
-            HandleSpacePress();
+            JudgeByTimingAndLock();
         }
     }
 
+    // RhythmManagerTest에서 CSV 이벤트가 들어오는 곳
     public override void OnRhythmEvent(string action)
     {
         if (finished) return;
 
         if (action == "Spawn")
         {
-            // 조건 2) 다음 경찰이 움직이는데도 입력이 안 되어있으면 Miss
-            // (현재 경찰이 Input을 한 번이라도 받았고, 아직 해결(성공) 못했으면 miss)
-            TryResolveAsMissBecauseNextSpawn();
-
             SpawnPolice();
         }
         else if (action == "Input")
         {
-            // 현재 경찰에게 Input 기회를 부여 (윈도우 열기)
-            OpenInputWindow();
-        }
-        else
-        {
-            // 다른 액션이면 그냥 닫음
-            CloseInputWindowImmediate();
+            EnableInputNow();
         }
     }
 
-    // =========================
-    // Input Window
-    // =========================
-    private void OpenInputWindow()
-    {
-        if (currentPolice == null) return;
-
-        // Input을 받았다는 플래그
-        inputStartedForCurrent = true;
-
-        // 연속 호출 대비
-        CancelInvoke(nameof(CloseInputWindowTimeUp));
-
-        inputWindowOpen = true;
-        pendingJudge = false;
-
-        Invoke(nameof(CloseInputWindowTimeUp), inputWindowSeconds);
-    }
-
-    private void CloseInputWindowTimeUp()
-    {
-        inputWindowOpen = false;
-
-        // 여기서는 Miss 처리 안 함.
-        // 왜냐면 너 규칙이 "다음 Spawn 때까지 입력이 안 되어있으면 Miss" 이거라서.
-        // 마지막 경찰은 다음 Spawn이 없으니, 마지막만 예외로 여기서 처리해줘야 함.
-        if (spawnCount >= 3)
-        {
-            // 마지막 경찰인데 Input 기회를 받았고 아직 해결 안 됐다면 -> Miss 1회
-            TryResolveAsMissBecauseNoMoreSpawn();
-        }
-    }
-
-    private void CloseInputWindowImmediate()
-    {
-        CancelInvoke(nameof(CloseInputWindowTimeUp));
-        inputWindowOpen = false;
-        pendingJudge = false;
-    }
-
-    // =========================
-    // Space Press
-    // =========================
-    private void HandleSpacePress()
-    {
-        if (currentPolice == null || currentPoliceCol == null) return;
-
-        // 조건 1) collide 안 된 시점에서 눌렀으면 Miss
-        bool onTarget = containers[currentPolice.laneIndex].IsPoliceOver(currentPoliceCol);
-
-        if (!onTarget)
-        {
-            // 미스 처리하고 현재 경찰은 “해결 완료”로 넘김(더 이상 입력 못하게)
-            missCount++;
-            ResolveCurrentPolice();
-            return;
-        }
-
-        // collide는 됐으니 이제 리듬 타이밍 판정만 요청
-        pendingJudge = true;
-        OnPlayerInput("Input"); // CSV에서 type이 Input이면 action도 Input으로 맞춤
-    }
-
-    // =========================
-    // Rhythm judgement (from manager)
-    // =========================
-    public override void OnJudgement(JudgementResult judgement)
-    {
-        base.OnJudgement(judgement);
-
-        // 리듬매니저가 자동으로 뿌리는 Miss(CheckMisses)는 전부 무시
-        if (!pendingJudge) return;
-        pendingJudge = false;
-
-        bool rhythmOK =
-            (judgement == JudgementResult.Perfect) ||
-            (acceptGood && judgement == JudgementResult.Good);
-
-        if (!rhythmOK)
-        {
-            // 타이밍 미스는 "미스 카운트"로 치지 않음(너 규칙이 2개만이라서)
-            // 대신, 같은 Input 윈도우 안에서 재시도 가능하게 그냥 유지
-            // inputWindowOpen이 true인 동안 다시 Space 눌러도 됨
-            return;
-        }
-
-        // 리듬도 OK면 성공 확정 (collide는 Space 누를 때 이미 체크했음)
-        if (currentPolice != null)
-        {
-            currentPolice.LockHere();
-            successCount++;
-        }
-
-        ResolveCurrentPolice();
-    }
-
-    // =========================
-    // Spawn / Resolve
-    // =========================
     private void SpawnPolice()
     {
         if (spawnCount >= 3) return;
@@ -201,80 +91,113 @@ public class Minigame_1_6_remake : MiniGameBase
         // 경찰 생성
         PoliceMover p = Instantiate(policePrefab);
         p.laneIndex = lane;
+        p.destroyX = destroyX;
+
+        // y는 lane, x는 startX 고정
         p.transform.position = new Vector3(policeStartX, laneYs[lane], 0f);
 
+        // 목표 컨테이너 x
         float targetX = containers[lane].transform.position.x;
-        float now = Time.time;
 
-        p.StartMoveTimed(policeStartX, targetX, now, now + travelTime);
+        // 1초에 정확히 도착하도록 속도 세팅
+        p.InitMoveToTarget(policeStartX, targetX, travelTime);
+
+        // 화면 밖 자동 제거 시 Miss 처리하려고 이벤트 연결
+        p.OnAutoDestroyed += OnPoliceAutoDestroyed;
 
         currentPolice = p;
-        currentPoliceCol = p.GetComponent<Collider2D>();
 
-        // 새 경찰 시작하면 상태 초기화
-        inputStartedForCurrent = false;
-        CloseInputWindowImmediate();
+        // 스폰 시점엔 클릭 막아두고(Input 이벤트가 와야 풀림)
+        inputEnabled = false;
+        clickLocked = true;
     }
 
-    private void ResolveCurrentPolice()
+    private void EnableInputNow()
     {
-        // 현재 경찰 1명에 대한 결과가 확정된 순간
-        resolvedCount++;
-
-        // 다음 입력 못하게
-        inputStartedForCurrent = false;
-        CloseInputWindowImmediate();
-
-        // 마지막까지 다 처리했으면 최종 판정
-        CheckFinish();
-    }
-
-    private void TryResolveAsMissBecauseNextSpawn()
-    {
-        // "다음 경찰이 움직이는데도 입력이 안 되어있는 경우" -> Miss
-        // 즉, 현재 경찰이 Input 기회를 받았는데도(=inputStartedForCurrent),
-        // 성공 확정(ResolveCurrentPolice)이 안 된 상태에서 다음 Spawn이 오면 miss.
         if (currentPolice == null) return;
 
-        if (inputStartedForCurrent && resolvedCount < spawnCount)
-        {
-            missCount++;
-            ResolveCurrentPolice();
-        }
+        inputEnabled = true;
+        clickLocked = false;
+
+        inputOnTime = Time.time;
+        targetClickTime = inputOnTime + 1f;
     }
 
-    private void TryResolveAsMissBecauseNoMoreSpawn()
+    private void JudgeByTimingAndLock()
     {
-        // 마지막 경찰은 다음 Spawn이 없으니까,
-        // Input 기회를 받았는데 해결이 안 되었으면 여기서 miss 처리
         if (currentPolice == null) return;
 
-        if (inputStartedForCurrent && resolvedCount < spawnCount)
+        // 클릭하면 즉시 고정 + 다음 Input까지 클릭 불가
+        clickLocked = true;
+        inputEnabled = false;
+
+        currentPolice.LockHere();
+
+        float now = Time.time;
+        float delta = Mathf.Abs(now - targetClickTime);
+
+        // 판정: Perfect / Good / Miss
+        if (delta <= perfectWindow)
         {
-            missCount++;
-            ResolveCurrentPolice();
+            hitCount++;
+            judgedCount++;
+            Debug.Log("Perfect");
         }
+        else if (delta <= goodWindow)
+        {
+            hitCount++;
+            judgedCount++;
+            Debug.Log("Good");
+        }
+        else
+        {
+            judgedCount++;
+            Debug.Log("Miss");
+        }
+
+        CheckFinishIfDone();
     }
 
-    private void CheckFinish()
+    // 클릭 없이 지나가서 삭제되면 Miss 처리
+    private void OnPoliceAutoDestroyed(PoliceMover p)
     {
-        // 경찰 3명 다 결과가 확정됐으면 끝
-        if (resolvedCount < 3) return;
+        // 현재 대상 경찰이 아닌 경우는 무시(안전)
+        if (p != currentPolice) return;
+
+        // 이미 클릭 판정으로 처리된 상태면 무시
+        if (clickLocked == true && inputEnabled == false && judgedCount > 0)
+        {
+            // 완전 엄격히 하려면 "이번 회차가 처리됐는지" 플래그로 관리하는게 더 정확함
+        }
+
+        // "클릭이 없어서 x<-8"이면 Miss 1회
+        judgedCount++;
+        Debug.Log("Miss");
+
+        // 다음 Input 전까지 클릭 불가 상태 유지
+        inputEnabled = false;
+        clickLocked = true;
+
+        CheckFinishIfDone();
+    }
+
+    private void CheckFinishIfDone()
+    {
+        // 3회 판정이 끝나야 결과 표시
+        if (judgedCount < 3) return;
 
         finished = true;
 
-        if (missCount > 0) Fail();
-        else Success();
+        // Perfect/Good이 3번이면 성공, 아니면 실패
+        if (hitCount >= 3) Success();
+        else Fail();
     }
 
-    // =========================
-    // Setup
-    // =========================
     private void SetupContainers()
     {
         if (containerPrefab == null)
         {
-            Debug.LogError("[Minigame_1_6_remake] containerPrefab is NULL");
+            Debug.LogError("[1-6] containerPrefab is NULL");
             enabled = false;
             return;
         }
@@ -297,7 +220,6 @@ public class Minigame_1_6_remake : MiniGameBase
     private void BuildLaneOrder()
     {
         laneOrder = new List<int> { 0, 1, 2 };
-
         for (int i = 0; i < laneOrder.Count; i++)
         {
             int r = Random.Range(i, laneOrder.Count);
@@ -305,13 +227,11 @@ public class Minigame_1_6_remake : MiniGameBase
         }
 
         spawnCount = 0;
-        resolvedCount = 0;
-        missCount = 0;
-        successCount = 0;
+        judgedCount = 0;
+        hitCount = 0;
 
-        inputStartedForCurrent = false;
-        inputWindowOpen = false;
-        pendingJudge = false;
+        inputEnabled = false;
+        clickLocked = false;
         finished = false;
     }
 }

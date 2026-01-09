@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2253214604651361042
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9106849129359481783}
+  - component: {fileID: 4993246990863108086}
+  m_Layer: 0
+  m_Name: 1_6minigame_remake
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9106849129359481783
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2253214604651361042}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.1, y: -0.06, z: -0.12985785}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4993246990863108086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2253214604651361042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aab658a527f1d0e4ba8e550fa19c5417, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  containerPrefab: {fileID: 2155221365746734567, guid: 41edb96c7e83bad4d8ae73608c2f1184, type: 3}
+  policePrefab: {fileID: 827955440244213084, guid: ad6f142351b41bf429abe04afc7bc425, type: 3}
+  laneYs:
+  - 3
+  - 0
+  - -3
+  containerXMin: -7
+  containerXMax: 7
+  policeStartX: 10
+  travelTime: 1
+  perfectWindow: 0
+  goodWindow: 0.2
+  destroyX: -8
