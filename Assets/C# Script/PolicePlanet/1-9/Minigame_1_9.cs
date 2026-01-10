@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class Minigame_1_9 : MiniGameBase
 {
@@ -9,13 +10,13 @@ public class Minigame_1_9 : MiniGameBase
     protected override float TimerDuration => 5f;
     protected override string MinigameExplain => "가동시켜라!";
 
+    private int touchCount = 0;
+    private const int targetTouchCount = 3;
+
     public override void StartGame()
     {
         hasMissed = false;
-
-    // 추가 초기화
-    // 예: instructionText.text = MinigameExplain;
-}
+    }
 
     public void Succeed()
     {
@@ -25,6 +26,7 @@ public class Minigame_1_9 : MiniGameBase
     {
         Fail();
     }
+
 
     public override void OnRhythmEvent(string action)
     {
@@ -62,17 +64,17 @@ public class Minigame_1_9 : MiniGameBase
         }
         else
         {
-            OnMiss();
+            //OnMiss();
         }
     }
 
-    public void OnMiss()
-    {
-        if (hasMissed) return;
+    //public void OnMiss()
+    //{
+    //    if (hasMissed) return;
 
-        hasMissed = true;
-        Debug.Log("미스 발생 -> 실패");
+    //    hasMissed = true;
+    //    Debug.Log("미스 발생 -> 실패");
 
-        Fail();
-    }
+    //    Fail();
+    //}
 }

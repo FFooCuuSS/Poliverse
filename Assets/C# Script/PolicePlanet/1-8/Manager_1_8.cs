@@ -17,10 +17,19 @@ public class Manager_1_8 : MonoBehaviour
     private int spawnedCount = 0;
     private List<GameObject> prisonerList = new List<GameObject>();
 
-    public float timeToReachPrison = 1f;
-
     [Header("Spawn Settings")]
     public int maxPrisonerCount = 3;
+    public float spawnY = -1f;
+
+    [Header("Timing Settings")]
+    public float timeToReachPrison = 1f;
+    public float spawnXOffsetMin = 0f;
+    public float spawnXOffsetMax = 1f;
+
+    [Header("Speed Clamp Settings")]
+    public float minMoveSpeed = 6f;
+    public float maxMoveSpeed = 10f;
+
 
     private void Start()
     {
@@ -92,34 +101,45 @@ public class Manager_1_8 : MonoBehaviour
         if (spawnedCount >= maxPrisonerCount)
             return;
 
-        // 감옥 기준 스폰 위치 계산
-        float prisonX = prisonObj.transform.position.x;
-        float spawnX = prisonX + 7f; // 감옥 오른쪽에서 등장
-        float spawnY = Random.Range(-2f, 2f);
+        Camera cam = Camera.main;
+
+        // 화면 오른쪽 바깥 기준 스폰 X
+        float baseSpawnX =
+            cam.ViewportToWorldPoint(new Vector3(0.9f, 0f, 0f)).x;
+
+        // 거리 차이를 위한 오프셋
+        float offsetX = Random.Range(spawnXOffsetMin, spawnXOffsetMax);
+
+        float spawnX = baseSpawnX + offsetX;
+        float spawnY = this.spawnY;
 
         Vector2 spawnPos = new Vector2(spawnX, spawnY);
 
-        // 프리팹 인덱스 순환
+        // 프리팹 선택
         int prefabIndex = spawnedCount % prisonerPrefab.Length;
-
         GameObject prisonerObj =
             Instantiate(prisonerPrefab[prefabIndex], spawnPos, Quaternion.identity);
 
         Prisoner_1_8 prisoner = prisonerObj.GetComponent<Prisoner_1_8>();
         prisoner.prison = prisonObj;
 
-        // 이동 거리 → 속도 계산
-        float distance = spawnPos.x - prisonX;
-        float speed = distance / timeToReachPrison;
+        // 핵심: 도착 시간 기준 속도 계산
+        float prisonX = prisonObj.transform.position.x;
+        float distance = spawnX - prisonX;
+
+        float rawSpeed = distance / Mathf.Max(timeToReachPrison, 0.01f);
+        float speed = Mathf.Clamp(rawSpeed, minMoveSpeed, maxMoveSpeed);
+
         prisoner.SetSpeed(speed);
 
         prisonerList.Add(prisonerObj);
         spawnedCount++;
     }
 
-
     private IEnumerator FadeAndDestroy(GameObject obj, float duration)
     {
+        if (obj == null) yield break;
+
         SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
         if (sr == null)
         {
@@ -133,13 +153,16 @@ public class Manager_1_8 : MonoBehaviour
 
         while (timer < duration)
         {
+            if (sr == null || obj == null)
+                yield break;
+
             timer += Time.deltaTime;
             sr.color = Color.Lerp(startColor, endColor, timer / duration);
             yield return null;
         }
 
-        sr.color = endColor;
-        Destroy(obj);
+        if (obj != null)
+            Destroy(obj);
     }
 
     public void SendRhythmInput()

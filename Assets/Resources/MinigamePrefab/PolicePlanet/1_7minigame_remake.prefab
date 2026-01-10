@@ -138,6 +138,7 @@ MonoBehaviour:
   ProhibitSpawner: {fileID: 2057269779248561557}
   holdJudge: {fileID: 1384034412918304911}
   maxHoldCount: 4
+  basket: {fileID: 1114006704717622196}
 --- !u!114 &6584522784603379527
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -250,6 +251,7 @@ GameObject:
   - component: {fileID: 7835594959431465238}
   - component: {fileID: 8281627218039554225}
   - component: {fileID: 3226970345010877608}
+  - component: {fileID: 5196433697508588414}
   m_Layer: 0
   m_Name: ProhibitedItemTray
   m_TagString: Untagged
@@ -377,7 +379,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1251052605248761245}
-  m_BodyType: 1
+  m_BodyType: 2
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -396,6 +398,18 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &5196433697508588414
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1251052605248761245}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9ae216576480f2478d8fda0051439ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2057269779248561557
 GameObject:
   m_ObjectHideFlags: 0
@@ -518,7 +532,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   holdUIPrefab: {fileID: 1339359407143525951, guid: 9bcaa3d4491803b42803ad10768aac9b, type: 3}
-  shrinkSpeed: 0.5
+  shrinkSpeed: 1
   maxHoldCount: 4
 --- !u!1 &4514964588818708058
 GameObject:
