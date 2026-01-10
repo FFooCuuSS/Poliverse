@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public class PlayerSwipe : MonoBehaviour
 {
     [SerializeField] private float swipeThreshold = 50f;
     [SerializeField] private float moveStep = 1f;
+    [SerializeField] private float moveDuration = 0.2f; 
 
     private Vector2 startPos;
     private bool isSwiping;
+    private bool isMoving = false;
 
     private MiniGameBase miniGameBase;
 
@@ -17,6 +20,7 @@ public class PlayerSwipe : MonoBehaviour
 
     void Update()
     {
+        if (isMoving) return;
         if (miniGameBase != null && miniGameBase.IsInputLocked)
             return;
 
@@ -70,22 +74,26 @@ public class PlayerSwipe : MonoBehaviour
 
         // 입력 전달 (리듬 판정용)
         miniGameBase?.OnPlayerInput("Swipe");
-        Debug.Log("스와이프");
 
-        // 실제 이동 (게임 로직)
-        if (deltaY > 0)
-            MoveUp();
-        else
-            MoveDown();
+        float direction = deltaY > 0 ? 1f : -1f;
+        Vector3 targetPos = transform.position + Vector3.up * moveStep * direction;
+
+        StartCoroutine(SmoothMove(transform.position, targetPos));
     }
 
-    private void MoveUp()
+    private IEnumerator SmoothMove(Vector3 from, Vector3 to)
     {
-        transform.position += new Vector3(0f, moveStep, 0f);
-    }
+        isMoving = true;
 
-    private void MoveDown()
-    {
-        transform.position += new Vector3(0f, -moveStep, 0f);
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime / moveDuration;
+            transform.position = Vector3.Lerp(from, to, t);
+            yield return null;
+        }
+
+        transform.position = to; // 위치 보정
+        isMoving = false;
     }
 }
