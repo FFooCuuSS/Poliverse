@@ -93,8 +93,8 @@ public class DragDistanceJudge : MonoBehaviour
         minigame_1_9.OnPlayerInput();
     }
 
-    public void NotifyMiss()
-    {
-        minigame_1_9.OnMiss();
-    }
+    //public void NotifyMiss()
+    //{
+    //    minigame_1_9.OnMiss();
+    //}
 }

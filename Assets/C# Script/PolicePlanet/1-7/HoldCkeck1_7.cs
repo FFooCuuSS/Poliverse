@@ -5,7 +5,7 @@ using UnityEngine;
 public class HoldCheck1_7 : MonoBehaviour
 {
     public GameObject holdUIPrefab;      // Inspector에서 Prefab 연결
-    public float shrinkSpeed = 1.2f;
+    public float shrinkSpeed = 2f;
     public int maxHoldCount = 4;
 
     private int currentHoldCount = 0;
@@ -50,9 +50,9 @@ public class HoldCheck1_7 : MonoBehaviour
 
         // 항상 새로 생성될 때 크기 초기화
         if (shrinkingCircle != null)
-            shrinkingCircle.localScale = Vector3.one * 1.5f; // 줄어드는 원
+            shrinkingCircle.localScale = Vector3.one * 4f; // 줄어드는 원
         if (targetCircle != null)
-            targetCircle.localScale = Vector3.one; // 기준 원
+            targetCircle.localScale = Vector3.one * 3f; // 기준 원
 
         isHolding = true;
     }
@@ -60,14 +60,15 @@ public class HoldCheck1_7 : MonoBehaviour
 
     void Update()
     {
-        if (isHolding && shrinkingCircle != null)
+        if (isHolding && shrinkingCircle != null && targetCircle != null)
         {
             // 줄어들기
             shrinkingCircle.localScale -= Vector3.one * shrinkSpeed * Time.deltaTime;
 
-            if (shrinkingCircle.localScale.x <= 0f)
+            // 줄어드는 원이 기준 원 크기와 같아지거나 작아졌을 때
+            if (shrinkingCircle.localScale.x <= targetCircle.localScale.x)
             {
-                // 줄어든 원 삭제
+                // UI 전체 삭제 (기준 원 + 줄어드는 원)
                 Destroy(currentHoldUI);
                 currentHoldUI = null;
                 isHolding = false;

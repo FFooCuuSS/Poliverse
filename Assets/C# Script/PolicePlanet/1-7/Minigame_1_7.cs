@@ -19,6 +19,9 @@ public class Minigame_1_7 : MiniGameBase
 
     private bool hasMissed = false;
 
+    public Transform basket;
+
+
     protected override float TimerDuration => 5f;
     protected override string MinigameExplain => "금지야!";
 
@@ -112,12 +115,14 @@ public class Minigame_1_7 : MiniGameBase
     {
         holdCount++;
 
-        GameObject prisoner = FindObjectOfType<PrisonerController1_7>().gameObject;
+        PrisonerController1_7 prisoner =
+            FindObjectOfType<PrisonerController1_7>();
+
+        if (prisoner == null) return;
 
         if (holdCount >= maxHoldCount)
         {
-            // 마지막 Hold 성공
-            prisoner.GetComponent<PrisonerController1_7>().DropProhibitedItem();
+            prisoner.DropToBasket(basket);
 
             Success();
             holdJudge.HideHoldUI();
@@ -125,11 +130,9 @@ public class Minigame_1_7 : MiniGameBase
         else
         {
             Debug.Log($"Hold 성공! 현재 {holdCount} / {maxHoldCount}");
-            // 다음 Hold 준비
             holdJudge.OnHoldStart(prisoner.transform);
         }
     }
-
 
 
     //public void OnMiss()
