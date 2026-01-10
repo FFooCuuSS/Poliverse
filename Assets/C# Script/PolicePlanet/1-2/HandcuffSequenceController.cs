@@ -22,7 +22,7 @@ public class HandcuffSequenceController : MonoBehaviour
 
     void Start()
     {
-        rightCuffDrag.enabled = false; // 처음엔 조작 불가
+        rightCuffDrag.enabled = false; // 시작은 막아둠
         leftHand.StartMove();
     }
 
@@ -34,8 +34,11 @@ public class HandcuffSequenceController : MonoBehaviour
                 if (leftHand.hasArrived)
                 {
                     leftCuff.ForceSnapToHand(leftHandCollider);
+
+                    rightCuffDrag.enabled = true;
+                    Debug.Log("왼손 수갑채움, 수갑 드래그 가능");
+
                     state = State.LeftSnapped;
-                    Debug.Log("왼손수갑");
                 }
                 break;
 
@@ -47,9 +50,8 @@ public class HandcuffSequenceController : MonoBehaviour
             case State.RightMoving:
                 if (rightHand.hasArrived)
                 {
-                    rightCuffDrag.enabled = true; // 이제 유저 조작
                     state = State.PlayerDrag;
-                    Debug.Log("수갑드래그하기");
+                    Debug.Log("오른손 도착");
                 }
                 break;
         }

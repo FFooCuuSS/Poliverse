@@ -31,7 +31,7 @@ Transform:
   m_GameObject: {fileID: 69035319621313238}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -5.8, y: 1.89, z: 0}
+  m_LocalPosition: {x: 5.42, y: -2.92, z: 0}
   m_LocalScale: {x: 0.74, y: 0.74, z: 1.48}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -107,7 +107,7 @@ MonoBehaviour:
   startCuff: {fileID: 69035319621313238}
   endCuff: {fileID: 9112010128705886894}
   nodePrefab: {fileID: 3717214168868558252, guid: 56ece32f93dfe7146afdfed9c842dc2b, type: 3}
-  numOfNodes: 7
+  numOfNodes: 10
 --- !u!114 &1416842417430334025
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -383,7 +383,7 @@ Transform:
   m_GameObject: {fileID: 2748125281193554936}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.3482695, y: 9, z: 0.04867087}
+  m_LocalPosition: {x: 0, y: 9, z: 0.04867087}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -432,7 +432,7 @@ Transform:
   m_GameObject: {fileID: 2910513271250986642}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.3482695, y: 9, z: 0.04867087}
+  m_LocalPosition: {x: 0, y: 9, z: 0.04867087}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -703,7 +703,7 @@ Transform:
   m_GameObject: {fileID: 3526526228473338749}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.53, y: -0.8, z: 0}
+  m_LocalPosition: {x: 0, y: -0.8, z: 0}
   m_LocalScale: {x: 0.7212146, y: 0.7212146, z: 0.7212146}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -787,7 +787,7 @@ Transform:
   m_GameObject: {fileID: 4097824647878649574}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.53, y: 1.79, z: 0}
+  m_LocalPosition: {x: 0, y: 1.79, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -1685,7 +1685,7 @@ HingeJoint2D:
   m_BreakAction: 3
   m_AutoConfigureConnectedAnchor: 1
   m_Anchor: {x: 0, y: 0}
-  m_ConnectedAnchor: {x: -4.8306003, y: 4.0012197}
+  m_ConnectedAnchor: {x: 6.3894, y: -0.8087802}
   m_UseMotor: 0
   m_Motor:
     m_MotorSpeed: 0
