@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Minigame_1_3 : MiniGameBase
 {
-    protected override float TimerDuration => 12f;
+    protected override float TimerDuration => 15f;
     protected override string MinigameExplain => "조심해라!";
 
     private float currentTime;

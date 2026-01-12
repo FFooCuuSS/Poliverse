@@ -936,6 +936,8 @@ MonoBehaviour:
   lifeManager: {fileID: 1321278160}
   mainCamera: {fileID: 134180023}
   standingArea: {fileID: 1427174223}
+  planetCsvs:
+  - {fileID: 4900000, guid: d69b17f77d95b8b48b88f46175f2c750, type: 3}
   playerStandingSprite: {fileID: 21300000, guid: 536edece401dcaa499a5627cdf60be39, type: 3}
   enemyStandingSprites:
   - {fileID: 21300000, guid: 6ef33d3ff42509c44b4dcca2a0ee153e, type: 3}
@@ -1059,10 +1061,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   audioSource: {fileID: 0}
-  events: []
+  loadMode: 1
+  chartFile: {fileID: 0}
+  addressablesKey: 
   perfectWindow: 0.03
   goodWindow: 0.07
   hitWindow: 0.12
+  events: []
 --- !u!1 &576246587
 GameObject:
   m_ObjectHideFlags: 0

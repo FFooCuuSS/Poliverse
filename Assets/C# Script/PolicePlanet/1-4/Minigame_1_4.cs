@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Minigame_1_4 : MiniGameBase
 {
-    protected override float TimerDuration => 5f;
+    protected override float TimerDuration => 15f;
     protected override string MinigameExplain => "리듬에 맞춰 악세서리를 제거하세요.";
 
     private List<Accessory> accessories = new List<Accessory>();

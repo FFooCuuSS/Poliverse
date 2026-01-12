@@ -7,7 +7,7 @@ public class Minigame_1_9 : MiniGameBase
 {
     private bool hasMissed = false;
 
-    protected override float TimerDuration => 5f;
+    protected override float TimerDuration => 15f;
     protected override string MinigameExplain => "가동시켜라!";
 
     private int touchCount = 0;

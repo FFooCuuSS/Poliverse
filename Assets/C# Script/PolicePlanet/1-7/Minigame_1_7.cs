@@ -22,7 +22,7 @@ public class Minigame_1_7 : MiniGameBase
     public Transform basket;
 
 
-    protected override float TimerDuration => 5f;
+    protected override float TimerDuration => 10f;
     protected override string MinigameExplain => "╠щаЖ╬ъ!";
 
 

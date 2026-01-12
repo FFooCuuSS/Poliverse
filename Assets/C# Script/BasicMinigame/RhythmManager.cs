@@ -1,71 +1,68 @@
-using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
-public class RhythmManager : MonoBehaviour
+public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
 {
     [Header("Audio")]
-    public AudioSource audioSource;
+    [SerializeField] private AudioSource audioSource;
 
     public enum ChartLoadMode { TextAsset, Addressables }
 
     [Header("Chart Source")]
-    public ChartLoadMode loadMode = ChartLoadMode.TextAsset;
+    public ChartLoadMode loadMode = ChartLoadMode.Addressables;
 
-    [Header("TextAsset (Test)")]
-    public TextAsset chartFile; // CSV
+    [Header("TextAsset (Optional)")]
+    public TextAsset chartFile;
 
     [Header("Addressables")]
-    public string addressablesKey; // 예: "1_PoliceNote" 또는 Addressables Address
-
-    [Header("Minigame ID (Test input)")]
-    public int idA = 1;
-    public int idB = 1;
-    private MiniGameBase currentMinigame;
-
-    [Header("Chart Data")]
-    public List<RhythmEvent> events = new List<RhythmEvent>();
-    private int eventIndex = 0;
+    [Tooltip("전체 차트를 하나로 쓸 거면 key를 고정. 미니게임마다 다르면 ConfigureForMinigame에서 교체.")]
+    public string addressablesKey;
 
     [Header("Judgement Settings (seconds)")]
     public float perfectWindow = 0.03f;
     public float goodWindow = 0.07f;
     public float hitWindow = 0.12f;
 
-    private double dspStartTime;
-
-    public event Action<string> OnEventTriggered;
-    public event Action<RhythmJudgement> OnPlayerJudged;
-
-    public enum RhythmJudgement { Perfect, Good, Miss }
-
     [Serializable]
     public class RhythmEvent
     {
-        public string action;
+        public string action;   // 입력 매칭 키
+        public string type;
         public double time;
         public bool consumed;
     }
 
-    public string CurrentMinigameId => $"{idA}-{idB}";
+    [Header("Runtime")]
+    [SerializeField] private List<RhythmEvent> events = new List<RhythmEvent>();
+    private int eventIndex = 0;
+    private double dspStartTime;
 
-    private AsyncOperationHandle<TextAsset>? loadedHandle; // Addressables 핸들 보관
+    private MiniGameBase currentMinigame;
+    private string currentMinigameId;
+    private bool isRunning;
 
+    // IRhythmManager events
+    public event Action<string> OnEventTriggered;
+    public event Action<MiniGameBase.JudgementResult> OnPlayerJudged;
 
+    private AsyncOperationHandle<TextAsset>? loadedHandle;
 
-    private async void Start()
+    private double SongTime => AudioSettings.dspTime - dspStartTime;
+
+    private void Awake()
     {
-        await LoadChartAsync(CurrentMinigameId);
-        StartSong();
+        if (audioSource == null) audioSource = GetComponent<AudioSource>();
     }
 
     private void OnDestroy()
     {
-        // Addressables로 로드했으면 해제 (메모리/핸들 누수 방지)
+        UnbindCurrentMinigame();
+
         if (loadedHandle.HasValue)
         {
             Addressables.Release(loadedHandle.Value);
@@ -73,12 +70,67 @@ public class RhythmManager : MonoBehaviour
         }
     }
 
+    // =========================
+    // 외부(로드씬)에서 호출할 API
+    // =========================
+
+    /// <summary>
+    /// 현재 미니게임을 교체(또는 초기 세팅)하고, 차트를 로드한 뒤 타임라인을 시작한다.
+    /// </summary>
+    public async Task ConfigureForMinigameAsync(
+    MiniGameBase minigame,
+    string minigameId,
+    TextAsset csv
+)
+    {
+        if (audioSource == null)
+            throw new NullReferenceException("[RhythmManager] audioSource is NULL");
+
+        // 0) 이전 미니게임 정리
+        UnbindCurrentMinigame();
+        StopSongInternal();
+
+        currentMinigame = minigame;
+        currentMinigameId = minigameId;
+
+        // 1) CSV 주입
+        if (csv == null)
+            throw new NullReferenceException("[RhythmManager] csv(TextAsset) is NULL");
+
+        // loadMode를 TextAsset로 강제 (행성별 CSV면 Addressables키 필요 없음)
+        loadMode = ChartLoadMode.TextAsset;
+        chartFile = csv;
+
+        // 2) 차트 로드
+        await LoadChartAsync(currentMinigameId);
+
+        // 3) 바인딩
+        if (currentMinigame != null)
+            currentMinigame.BindRhythmManager(this);
+
+        // 4) 시작
+        StartSong();
+    }
+
+    /// <summary>
+    /// 현재 타임라인 중단 + 바인딩 해제(미니게임 Destroy 전에 호출 추천)
+    /// </summary>
+    public void ClearCurrent()
+    {
+        UnbindCurrentMinigame();
+        StopSongInternal();
+        currentMinigameId = null;
+        events.Clear();
+        eventIndex = 0;
+    }
+
+    // =========================
+    // 핵심 기능(테스트 코드 이식)
+    // =========================
+
     public async Task LoadChartAsync(string minigameId)
     {
         events.Clear();
-
-        if (audioSource == null)
-            throw new NullReferenceException("[RhythmManager] audioSource is NULL");
 
         TextAsset csv = null;
 
@@ -86,10 +138,17 @@ public class RhythmManager : MonoBehaviour
         {
             csv = chartFile;
         }
-        else // Addressables
+        else
         {
             if (string.IsNullOrWhiteSpace(addressablesKey))
                 throw new NullReferenceException("[RhythmManager] addressablesKey is EMPTY");
+
+            // 이전 handle 있으면 release
+            if (loadedHandle.HasValue)
+            {
+                Addressables.Release(loadedHandle.Value);
+                loadedHandle = null;
+            }
 
             var handle = Addressables.LoadAssetAsync<TextAsset>(addressablesKey);
             loadedHandle = handle;
@@ -107,13 +166,16 @@ public class RhythmManager : MonoBehaviour
 
         ParseCsv(csv.text, minigameId);
 
-        Debug.Log($"[RhythmManager] Loaded {events.Count} notes for {minigameId}");
+        Debug.Log($"[RhythmManager] Loaded {events.Count} notes for {minigameId} (key={addressablesKey})");
     }
 
     private void ParseCsv(string text, string minigameId)
     {
         string raw = text.Replace("\uFEFF", "");
         string[] lines = raw.Split('\n');
+
+        List<double?> times = null;
+        List<string> types = null;
 
         foreach (string rawLine in lines)
         {
@@ -123,28 +185,68 @@ public class RhythmManager : MonoBehaviour
             string[] parts = line.Split(',');
             if (parts.Length == 0) continue;
 
-            // 헤더 스킵 (네가 원하면 "minigame" 기준 유지)
-            if (parts[0].Trim().ToLower() == "minigame")
+            string first = parts[0].Trim();
+
+            if (first.Equals("minigame", StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            string id = parts[0].Trim();
-            if (id != minigameId) continue;
-
-            for (int i = 1; i < parts.Length; i++)
+            if (first == $"{minigameId}_time")
             {
-                string p = parts[i].Trim();
-                if (string.IsNullOrWhiteSpace(p)) continue;
-
-                if (double.TryParse(p, NumberStyles.Float, CultureInfo.InvariantCulture, out double t))
+                times = new List<double?>();
+                for (int i = 1; i < parts.Length; i++)
                 {
-                    events.Add(new RhythmEvent
+                    string p = parts[i].Trim();
+                    if (string.IsNullOrWhiteSpace(p) || p == "-")
                     {
-                        action = id,
-                        time = t,
-                        consumed = false
-                    });
+                        times.Add(null);
+                        continue;
+                    }
+
+                    if (double.TryParse(p, NumberStyles.Float, CultureInfo.InvariantCulture, out double t))
+                        times.Add(t);
+                    else
+                        times.Add(null);
                 }
             }
+
+            if (first == $"{minigameId}_type")
+            {
+                types = new List<string>();
+                for (int i = 1; i < parts.Length; i++)
+                {
+                    string p = parts[i].Trim();
+                    if (string.IsNullOrWhiteSpace(p) || p == "-")
+                    {
+                        types.Add(null);
+                        continue;
+                    }
+                    types.Add(p);
+                }
+            }
+        }
+
+        if (times == null)
+            throw new Exception($"[RhythmManager] No time row found for {minigameId}");
+
+        if (types == null)
+            types = new List<string>(new string[times.Count]);
+
+        int count = Math.Min(times.Count, types.Count);
+
+        for (int i = 0; i < count; i++)
+        {
+            if (!times[i].HasValue) continue;
+
+            string type = types[i];
+            if (string.IsNullOrWhiteSpace(type)) type = "Tap";
+
+            events.Add(new RhythmEvent
+            {
+                time = times[i].Value,
+                type = type,
+                action = type,
+                consumed = false
+            });
         }
 
         events.Sort((a, b) => a.time.CompareTo(b.time));
@@ -154,38 +256,54 @@ public class RhythmManager : MonoBehaviour
     public void StartSong()
     {
         dspStartTime = AudioSettings.dspTime;
-        audioSource.PlayScheduled(dspStartTime);
-        eventIndex = 0;
 
+        if (audioSource != null && audioSource.clip != null)
+        {
+            // 바로 Play()보다 scheduled가 안정적
+            audioSource.Stop();
+            audioSource.PlayScheduled(dspStartTime);
+        }
+        else
+        {
+            Debug.LogWarning("[RhythmManager] audioSource.clip is NULL. 타임라인만 진행됩니다.");
+        }
+
+        eventIndex = 0;
         for (int i = 0; i < events.Count; i++)
             events[i].consumed = false;
+
+        isRunning = true;
     }
 
-    private double SongTime => AudioSettings.dspTime - dspStartTime;
-
-    void Update()
+    private void StopSongInternal()
     {
-        RunEventTimeline();
-        DetectPlayerInput();
+        isRunning = false;
+        if (audioSource != null) audioSource.Stop();
     }
 
-    void RunEventTimeline()
+    private void Update()
+    {
+        if (!isRunning) return;
+
+        RunEventTimeline();
+        CheckMisses();
+    }
+
+    private void RunEventTimeline()
     {
         while (eventIndex < events.Count && events[eventIndex].time <= SongTime)
         {
-            OnEventTriggered?.Invoke(events[eventIndex].action);
+            var e = events[eventIndex];
+            OnEventTriggered?.Invoke(e.action);
             eventIndex++;
         }
     }
 
-    void DetectPlayerInput()
+    // 미니게임에서 호출
+    public void ReceivePlayerInput(string action = null)
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-            ReceivePlayerInput();
-    }
+        if (!isRunning) return;
 
-    public void ReceivePlayerInput()
-    {
         double now = SongTime;
 
         RhythmEvent nearest = null;
@@ -195,6 +313,7 @@ public class RhythmManager : MonoBehaviour
         {
             var e = events[i];
             if (e.consumed) continue;
+            if (action != null && e.action != action) continue;
 
             double delta = Math.Abs(e.time - now);
             if (delta > hitWindow) continue;
@@ -206,13 +325,40 @@ public class RhythmManager : MonoBehaviour
             }
         }
 
-        RhythmJudgement judgement;
-        if (nearest == null) judgement = RhythmJudgement.Miss;
-        else if (bestDelta <= perfectWindow) judgement = RhythmJudgement.Perfect;
-        else if (bestDelta <= goodWindow) judgement = RhythmJudgement.Good;
-        else judgement = RhythmJudgement.Miss;
+        MiniGameBase.JudgementResult judgement;
+        if (nearest == null) judgement = MiniGameBase.JudgementResult.Miss;
+        else if (bestDelta <= perfectWindow) judgement = MiniGameBase.JudgementResult.Perfect;
+        else if (bestDelta <= goodWindow) judgement = MiniGameBase.JudgementResult.Good;
+        else judgement = MiniGameBase.JudgementResult.Miss;
 
         if (nearest != null) nearest.consumed = true;
+
         OnPlayerJudged?.Invoke(judgement);
+    }
+
+    private void CheckMisses()
+    {
+        double now = SongTime;
+
+        for (int i = 0; i < events.Count; i++)
+        {
+            var e = events[i];
+            if (e.consumed) continue;
+
+            if (now <= e.time + hitWindow) break;
+
+            e.consumed = true;
+            events[i] = e;
+
+            OnPlayerJudged?.Invoke(MiniGameBase.JudgementResult.Miss);
+        }
+    }
+
+    private void UnbindCurrentMinigame()
+    {
+        if (currentMinigame != null)
+            currentMinigame.BindRhythmManager(null);
+
+        currentMinigame = null;
     }
 }

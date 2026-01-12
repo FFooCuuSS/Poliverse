@@ -18,10 +18,14 @@ public class MinigameUIManager : MonoBehaviour
     [SerializeField] private GameObject mainCamera;
     [SerializeField] private GameObject standingArea;
 
+    [Header("Planet CSVs (index: 0=1번행성, 1=2번행성, 2=3번행성, 3=4번행성)")]
+    [SerializeField] private TextAsset[] planetCsvs;
+
     [Header("Standing Sprites")]
     [SerializeField] private Sprite playerStandingSprite;
     [SerializeField] private Sprite[] enemyStandingSprites;
     [SerializeField] private Sprite[] enemyVictorySprites;
+
 
     // 라운드 흐름 내부 변수
     private int selectedPlanet;
@@ -33,6 +37,7 @@ public class MinigameUIManager : MonoBehaviour
     private int bossStageIndex = 0;
     private string bossMinigamePath = "";
     private Coroutine failCoroutine;
+    private RhythmManager rhythmManager;
 
     // 성공, 실패 관련 연출
     private SpriteRenderer playerRenderer;
@@ -75,6 +80,7 @@ public class MinigameUIManager : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         playerRenderer.sprite = playerStandingSprite;
         enemyRenderer.sprite = enemyStandingSprites[selectedPlanet - 1];
+        rhythmManager = GetComponent<RhythmManager>();
         PlayBounceAnimation(playerRenderer.transform);
         PlayBounceAnimation(enemyRenderer.transform);
 
@@ -133,7 +139,7 @@ public class MinigameUIManager : MonoBehaviour
 
         for (int i = 1; i < minigameCount; i++)
         {
-            string path = $"MinigamePrefab/{planetName}/{selectedPlanet}-{i}minigame";
+            string path = $"MinigamePrefab/{planetName}/{selectedPlanet}_{i}minigame_remake";
 
             if (Resources.Load<GameObject>(path) != null)
             {
@@ -149,11 +155,11 @@ public class MinigameUIManager : MonoBehaviour
 
         foreach (int index in minigameIndexes)
         {
-            string path = $"MinigamePrefab/{planetName}/{selectedPlanet}-{index}minigame";
+            string path = $"MinigamePrefab/{planetName}/{selectedPlanet}_{index}minigame_remake";
             minigameQueue.Enqueue(path);
         }
 
-        string bossPath = $"MinigamePrefab/{planetName}/{selectedPlanet}-{minigameCount}minigame";
+        string bossPath = $"MinigamePrefab/{planetName}/{selectedPlanet}_{minigameCount}minigame_remake";
 
         if (Resources.Load<GameObject>(bossPath) != null)
         {
@@ -170,27 +176,54 @@ public class MinigameUIManager : MonoBehaviour
         {
             yield return new WaitForSeconds(2f);
             SceneManager.LoadScene("LobbyScene");
-
             yield break;
         }
 
         yield return new WaitForSeconds(loadingTime);
 
         timerSlider.gameObject.SetActive(true);
+
         string minigamePath = minigameQueue.Dequeue();
         GameObject minigameObj = Instantiate(Resources.Load<GameObject>(minigamePath));
         currentMinigame = minigameObj.GetComponent<MiniGameBase>();
 
         ShowGuide(currentMinigame.GetMinigameExplain, 1f);
-
         yield return new WaitForSeconds(0.5f);
+
+        // 여기 추가: 리듬 매니저 준비
+        if (rhythmManager != null)
+        {
+            string minigameId = ExtractMinigameIdFromPath(minigamePath);
+
+            // 여기: 행성별 CSV 선택
+            TextAsset csv = null;
+            int idx = selectedPlanet - 1;
+            if (planetCsvs != null && idx >= 0 && idx < planetCsvs.Length)
+                csv = planetCsvs[idx];
+
+            if (csv == null)
+                Debug.LogWarning($"[MinigameUIManager] planetCsvs[{idx}] is NULL. 리듬 차트 로드 실패 가능");
+
+            yield return ConfigureRhythmRoutine(minigameId, csv);
+            currentMinigame.BindRhythmManager(rhythmManager);
+        }
 
         StartMinigame();
     }
 
+    private IEnumerator ConfigureRhythmRoutine(string minigameId, TextAsset csv)
+    {
+        var task = rhythmManager.ConfigureForMinigameAsync(currentMinigame, minigameId, csv);
+        while (!task.IsCompleted) yield return null;
+    }
+
+
     // 미니게임 상태 및 시간 초기화
     private void StartMinigame()
     {
+        CancelInvoke(nameof(PlayWinEffect));
+        CancelInvoke(nameof(PlayLoseEffect));
+
         currentMinigame.OnSuccess += OnMinigameSuccess;
         currentMinigame.OnFail += OnMinigameFail;
         //currentMinigame.BindRhythmManager(FindObjectOfType<RhythmManager>());
@@ -200,6 +233,25 @@ public class MinigameUIManager : MonoBehaviour
 
         currentMinigame.StartGame();
     }
+
+    private string ExtractMinigameIdFromPath(string minigamePath)
+    {
+        // 예: "MinigamePrefab/MusicPlanet/4_12minigame_remake"
+        // -> "4-12"
+        var file = minigamePath.Substring(minigamePath.LastIndexOf('/') + 1); // "4_12minigame_remake"
+        int us = file.IndexOf('_');
+        if (us < 0) return $"{selectedPlanet}-1";
+
+        string a = file.Substring(0, us); // "4"
+        string rest = file.Substring(us + 1); // "12minigame_remake"
+
+        int k = 0;
+        while (k < rest.Length && char.IsDigit(rest[k])) k++;
+        string b = (k > 0) ? rest.Substring(0, k) : "1";
+
+        return $"{a}-{b}";
+    }
+
 
     // 가이드 텍스트
     public void ShowGuide(string text, float duration)
@@ -312,6 +364,10 @@ public class MinigameUIManager : MonoBehaviour
 
             currentMinigame.OnSuccess -= OnMinigameSuccess;
             currentMinigame.OnFail -= OnMinigameFail;
+
+            if (rhythmManager != null)
+                rhythmManager.ClearCurrent();
+
             mainCamera.transform.position = new Vector3(0f, 0f, -10f);
             Destroy(currentMinigame.gameObject);
         }
@@ -331,6 +387,10 @@ public class MinigameUIManager : MonoBehaviour
         {
             currentMinigame.OnSuccess -= OnMinigameSuccess;
             currentMinigame.OnFail -= OnMinigameFail;
+
+            if (rhythmManager != null)
+                rhythmManager.ClearCurrent();
+
             Destroy(currentMinigame.gameObject);
         }
 

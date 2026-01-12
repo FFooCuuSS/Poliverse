@@ -7,7 +7,7 @@ public class Minigame_1_5 : MiniGameBase
     public GameObject CameraManager;
     private CameraManager1_5 cameraManager1_5;
 
-    protected override float TimerDuration => 8f;
+    protected override float TimerDuration => 15f;
     protected override string MinigameExplain => "숨어있지마라!";
 
     private void Start()

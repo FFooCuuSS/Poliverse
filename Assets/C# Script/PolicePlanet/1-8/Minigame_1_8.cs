@@ -13,7 +13,7 @@ public class Minigame_1_8 : MiniGameBase
     private PrisonController_1_8 prisonController;
 
 
-    protected override float TimerDuration => 5f;
+    protected override float TimerDuration => 15f;
     protected override string MinigameExplain => "¸ðµÎ °¡µÖ¶ó!";
 
     private void Start()
@@ -88,7 +88,7 @@ public class Minigame_1_8 : MiniGameBase
         else
         {
             //OnMiss();
-            Fail();
+            //Fail();
         }
     }
 
