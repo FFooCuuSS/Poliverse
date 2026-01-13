@@ -4,7 +4,7 @@ using UnityEngine;
 public class Minigame_1_6_remake : MiniGameBase
 {
     protected override float TimerDuration => 30f;
-    protected override string MinigameExplain => "Spawn->경찰 출발, Input ON 후 1초 클릭 Perfect / +-0.2 Good";
+    protected override string MinigameExplain => "타이밍에 맞춰 경찰을 배치하라!";
 
     [Header("Prefabs")]
     public ContainerTarget containerPrefab;
@@ -90,6 +90,7 @@ public class Minigame_1_6_remake : MiniGameBase
 
         // 경찰 생성
         PoliceMover p = Instantiate(policePrefab);
+        p.gameObject.SetActive(true);
         p.laneIndex = lane;
         p.destroyX = destroyX;
 
@@ -210,6 +211,7 @@ public class Minigame_1_6_remake : MiniGameBase
             float y = laneYs[i];
 
             ContainerTarget c = Instantiate(containerPrefab);
+            c.gameObject.SetActive(true);
             c.laneIndex = i;
             c.transform.position = new Vector3(x, y, 0f);
 
