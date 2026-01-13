@@ -23,8 +23,8 @@ public class HandControlerTest : MonoBehaviour
 
     IEnumerator Move1()
     {
-        Vector2 startPos = new Vector2(17, 2);   // ½ÃÀÛ ÁÂÇ¥
-        Vector2 endPos = new Vector2(-13, 2);     // µµÂø ÁÂÇ¥
+        Vector2 startPos = new Vector2(17.5f, 2);   // ½ÃÀÛ ÁÂÇ¥
+        Vector2 endPos = new Vector2(-12.5f, 2);     // µµÂø ÁÂÇ¥
         float moveTime = 6f; // ÀÌµ¿ ½Ã°£
     float elapsed = 0f;
 
