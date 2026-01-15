@@ -21,14 +21,6 @@ public class Minigame_1_9 : MiniGameBase
 
     private Tween blinkTween;
 
-    void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            handleMover.PlayStretch();
-        }
-    }
-
     public override void StartGame()
     {
         canInput = false;
@@ -65,14 +57,26 @@ public class Minigame_1_9 : MiniGameBase
 
     public void OnScreenTouch()
     {
-        if (!canInput) return;
-
-        canInput = false;
-
+        // 항상 핸들 모션 실행
         handleMover.PlayStretch();
 
-        OnPlayerInput();
+        // 줄 늘어났다 줄어드는 효과
+        if (rope != null)
+            rope.PlayStretch(new Vector3(2f, 0, 0), 0.3f);
+
+        if (canInput)
+        {
+            canInput = false;
+
+            // 디버그 메시지 출력
+            Debug.Log("성공!");
+
+            // 실제 성공 처리 호출
+            Success(); // 또는 OnPlayerInput() 호출 계속해도 됨
+        }
     }
+
+
 
     // 판정 처리
     public override void OnJudgement(JudgementResult judgement)

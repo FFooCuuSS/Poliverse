@@ -87,14 +87,26 @@ public class Manager_1_8 : MonoBehaviour
     {
         foreach (GameObject prisoner in prisonerList)
         {
-            if (prisoner != null)
-            {
-                StartCoroutine(FadeAndDestroy(prisoner, 0.3f));
-            }
+            if (prisoner == null) continue;
+
+            Prisoner_1_8 p = prisoner.GetComponent<Prisoner_1_8>();
+
+            // 잡힌 범인은 즉시 제거하지 않음
+            if (p != null && p.IsCaptured)
+                continue;
+
+            StartCoroutine(FadeAndDestroy(prisoner, 0.3f));
         }
 
-        prisonerList.Clear(); // 리스트 초기화
+        // 리스트에서 살아있는 것만 유지
+        prisonerList.RemoveAll(p =>
+        {
+            if (p == null) return true;
+            Prisoner_1_8 pr = p.GetComponent<Prisoner_1_8>();
+            return pr != null && pr.IsCaptured;
+        });
     }
+
 
     public void SpawnPrisoner()
     {

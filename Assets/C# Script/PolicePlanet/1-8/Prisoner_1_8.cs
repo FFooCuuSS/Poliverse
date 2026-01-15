@@ -63,6 +63,11 @@ public class Prisoner_1_8 : MonoBehaviour
     }
     */
 
+    [Header("Capture Range")]
+    public float captureRangeX = 0.7f;
+    public float captureRangeY = 0.8f;
+
+
     public float moveSpeed = 2f;
     public float destroyX = -7f;
 
@@ -71,8 +76,22 @@ public class Prisoner_1_8 : MonoBehaviour
     // 감옥에 들어갈 수 있는 상태인지
     public bool canBeCaptured = false;
 
+    private bool isCaptured = false;
+
+    public bool IsCaptured => isCaptured;
+
+    private SpriteRenderer sr;
+
+    void Awake()
+    {
+        sr = GetComponent<SpriteRenderer>();
+    }
+
+
     void Update()
     {
+        if (isCaptured) return;
+
         // 왼쪽으로 이동
         transform.Translate(Vector2.left * moveSpeed * Time.deltaTime);
 
@@ -89,15 +108,56 @@ public class Prisoner_1_8 : MonoBehaviour
     {
         if (prison == null) return;
 
-        float prisonY = prison.transform.position.y;
-        float distanceY = Mathf.Abs(transform.position.y - prisonY);
+        Vector2 prisonerPos = transform.position;
+        Vector2 prisonPos = prison.transform.position;
 
-        // 감옥 세로 범위 (값은 조절)
-        canBeCaptured = distanceY < 0.8f;
+        float distanceX = Mathf.Abs(prisonerPos.x - prisonPos.x);
+        float distanceY = Mathf.Abs(prisonerPos.y - prisonPos.y);
+
+        canBeCaptured =
+            distanceX <= captureRangeX &&
+            distanceY <= captureRangeY;
     }
+
 
     public void SetSpeed(float speed)
     {
         moveSpeed = speed;
     }
+
+    public void Capture()
+    {
+        if (isCaptured) return;
+
+        isCaptured = true;
+        moveSpeed = 0f;
+
+        if (sr != null)
+        {
+            Color c = sr.color;
+            sr.color = new Color(c.r, c.g, c.b, 0.4f);
+        }
+
+        StartCoroutine(FadeOutAndDestroy());
+    }
+
+    IEnumerator FadeOutAndDestroy()
+    {
+        yield return new WaitForSeconds(0.4f); // 멈춘 상태 보여주기
+
+        float t = 0f;
+        float duration = 0.4f;
+        Color start = sr.color;
+        Color end = new Color(start.r, start.g, start.b, 0f);
+
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            sr.color = Color.Lerp(start, end, t / duration);
+            yield return null;
+        }
+
+        Destroy(gameObject);
+    }
+
 }
