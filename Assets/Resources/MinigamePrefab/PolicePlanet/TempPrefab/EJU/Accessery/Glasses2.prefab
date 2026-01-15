@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4253986692362055812}
   - component: {fileID: 3956327255730271043}
   - component: {fileID: 4084228683985837535}
+  - component: {fileID: 22353906281107420}
   m_Layer: 0
   m_Name: Glasses2
   m_TagString: Untagged
@@ -160,4 +161,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e15f8d57902b564e844d4007d89f805, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interval: 1
+  sr: {fileID: 0}
+  drag: {fileID: 0}
+--- !u!114 &22353906281107420
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6297973329712282394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2abcc14a3f57b44fb3dc99a74f18b6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

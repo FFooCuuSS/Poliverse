@@ -1,39 +1,45 @@
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 public class SpawnManager : MonoBehaviour
 {
     public List<GameObject> hatPrefabs;
-    public List<GameObject> mustachePrefabs;
     public List<GameObject> glassesPrefabs;
+    public List<GameObject> mustachePrefabs; 
     public List<GameObject> montagePrefabs;
 
+
     public Transform hatSpawnPoint;
-    public Transform mustacheSpawnPoint;
     public Transform glassesSpawnPoint;
+    public Transform mustacheSpawnPoint;
     public Transform montageSpawnPoint;
 
-    public Minigame_1_4 minigame;
+    public AccessoryBlinkManager blinkManager;
 
     void Start()
     {
-        SpawnRandom(hatPrefabs, hatSpawnPoint);
-        SpawnRandom(mustachePrefabs, mustacheSpawnPoint);
-        SpawnRandom(glassesPrefabs, glassesSpawnPoint);
-        SpawnRandom(montagePrefabs, montageSpawnPoint);
+        Spawn(hatPrefabs, hatSpawnPoint);
+        Spawn(glassesPrefabs, glassesSpawnPoint);
+        Spawn(mustachePrefabs, mustacheSpawnPoint);
+        SpawnMontage();
     }
 
-    void SpawnRandom(List<GameObject> prefabList, Transform spawnPoint)
+    void Spawn(List<GameObject> prefabs, Transform point)
     {
-        if (prefabList.Count == 0 || spawnPoint == null) return;
+        GameObject selected = Instantiate(
+            prefabs[Random.Range(0, prefabs.Count)],
+            point
+        );
 
-        GameObject selected = prefabList[Random.Range(0, prefabList.Count)];
-        GameObject accObj = Instantiate(selected, spawnPoint);
-
-        Accessory acc = accObj.GetComponent<Accessory>();
-        if (acc != null)
-        {
-            minigame.RegisterAccessory(acc);
-        }
+        Accessory acc = selected.GetComponent<Accessory>();
+        blinkManager.RegisterAccessory(acc);
+    }
+    void SpawnMontage()
+    {
+        Instantiate(
+            montagePrefabs[Random.Range(0, montagePrefabs.Count)],
+            montageSpawnPoint
+        );
     }
 }
