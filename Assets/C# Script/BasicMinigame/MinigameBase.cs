@@ -21,6 +21,12 @@ public abstract class MiniGameBase : MonoBehaviour
     public float GetTimerDuration => TimerDuration;
     public string GetMinigameExplain => MinigameExplain;
 
+
+    public virtual float perfectWindowOverride => 0.03f;
+    public virtual float goodWindowOverride => 0.07f;
+    public virtual float hitWindowOverride => 1f;
+
+
     // 여기서 판정 타입을 표준화 (외부 클래스 RhythmManager에 의존 X)
     public enum JudgementResult { Perfect, Good, Miss }
 
