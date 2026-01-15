@@ -63,12 +63,29 @@ public class RhythmManagerTest : MonoBehaviour, MiniGameBase.IRhythmManager
 
         // 테스트: currentMinigame이 있으면 바인딩
         if (currentMinigame != null)
+        {
             currentMinigame.BindRhythmManager(this);
+
+            ApplyWindowsFromMinigame();
+        }
         else
             Debug.LogWarning("[RhythmManagerTest] currentMinigame is NULL. 이벤트만 발행됩니다.");
 
         StartSong();
     }
+
+    private void ApplyWindowsFromMinigame()
+    {
+        if (currentMinigame == null) return;
+
+        perfectWindow = currentMinigame.perfectWindowOverride;
+        goodWindow = currentMinigame.goodWindowOverride;
+        hitWindow = currentMinigame.hitWindowOverride;
+
+        Debug.Log($"[RhythmManagerTest] Override windows from {currentMinigame.name} " +
+                  $"(Perfect={perfectWindow}, Good={goodWindow}, Hit={hitWindow})");
+    }
+
 
     private void OnDestroy()
     {
