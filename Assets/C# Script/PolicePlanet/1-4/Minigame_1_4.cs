@@ -1,19 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+Ôªøusing System.Collections.Generic;
 
 public class Minigame_1_4 : MiniGameBase
 {
     protected override float TimerDuration => 15f;
-    protected override string MinigameExplain => "∏ÆµÎø° ∏¬√Á æ«ººº≠∏Æ∏¶ ¡¶∞≈«œººø‰.";
+    protected override string MinigameExplain => "Î¶¨Îì¨Ïóê ÎßûÏ∂∞ ÏïÖÏÑ∏ÏÑúÎ¶¨Î•º Ï†úÍ±∞ÌïòÏÑ∏Ïöî.";
 
-    private List<Accessory> accessories = new List<Accessory>();
+    private List<Accessory> orderedAccessories;
     private bool hasFailed = false;
 
-    public void RegisterAccessory(Accessory acc)
+    // üî• BlinkManagerÍ∞Ä Ìò∏Ï∂ú
+    public void SetAccessoryOrder(List<Accessory> accessories)
     {
-        acc.Init(this);
-        accessories.Add(acc);
+        orderedAccessories = accessories;
+
+        foreach (var acc in orderedAccessories)
+            acc.Init(this);
     }
 
     public override void StartGame()
@@ -22,14 +23,12 @@ public class Minigame_1_4 : MiniGameBase
         hasFailed = false;
     }
 
-    // æ«ººº≠∏Æ °Ê πÃ¥œ∞‘¿”
     public override void OnPlayerInput(string action = null)
     {
         if (IsInputLocked || hasFailed) return;
-        base.OnPlayerInput(action); // RhythmManager∑Œ ¿¸¥ﬁ
+        base.OnPlayerInput(action);
     }
 
-    // RhythmManager °Ê πÃ¥œ∞‘¿”
     public override void OnJudgement(JudgementResult judgement)
     {
         if (hasFailed) return;
@@ -41,7 +40,6 @@ public class Minigame_1_4 : MiniGameBase
             return;
         }
 
-        // Perfect / Good
         RemoveNextAccessory();
 
         if (AllAccessoriesRemoved())
@@ -52,7 +50,7 @@ public class Minigame_1_4 : MiniGameBase
 
     private void RemoveNextAccessory()
     {
-        foreach (var acc in accessories)
+        foreach (var acc in orderedAccessories)
         {
             if (!acc.IsRemoved)
             {
@@ -64,31 +62,10 @@ public class Minigame_1_4 : MiniGameBase
 
     private bool AllAccessoriesRemoved()
     {
-        foreach (var acc in accessories)
+        foreach (var acc in orderedAccessories)
         {
             if (!acc.IsRemoved) return false;
         }
         return true;
-    }
-
-    public override void OnRhythmEvent(string action)
-    {
-        Debug.Log($"{gameObject.name} ∏ÆµÎ∏ﬁºº¡ˆ: {action}");
-
-        // ¿Ã∞« ≥™¡ﬂø° ∞≥∫∞ πÃ¥œ∞‘¿”ø°º≠ override«œ¥¬ «¸≈¬∑Œ
-        switch (action)
-        {
-            case "Tap":
-                //Debug.Log("Tap");
-                break;
-
-            case "Hold":
-                //ShowHoldPrompt();
-                break;
-
-            case "Swipe":
-                //ShowSwipePrompt();
-                break;
-        }
     }
 }

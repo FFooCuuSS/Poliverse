@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7776900586167654758}
   - component: {fileID: 3359180521193363985}
   - component: {fileID: -8087005615335485446}
+  - component: {fileID: 1373128950353196505}
   m_Layer: 0
   m_Name: Mustache2
   m_TagString: Untagged
@@ -160,4 +161,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e15f8d57902b564e844d4007d89f805, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interval: 1
+  sr: {fileID: 2455049258634301753}
+  drag: {fileID: 3359180521193363985}
+--- !u!114 &1373128950353196505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1713371915770953406}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2abcc14a3f57b44fb3dc99a74f18b6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

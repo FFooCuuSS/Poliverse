@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5507863355459480100}
   - component: {fileID: 5628835858123054342}
   - component: {fileID: -6963262691383668811}
+  - component: {fileID: 8723587003279199038}
   m_Layer: 0
   m_Name: Hat3
   m_TagString: Untagged
@@ -160,4 +161,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e15f8d57902b564e844d4007d89f805, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interval: 1
+  sr: {fileID: 7040053197338802748}
+  drag: {fileID: 5628835858123054342}
+--- !u!114 &8723587003279199038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8597438760979435280}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2abcc14a3f57b44fb3dc99a74f18b6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
