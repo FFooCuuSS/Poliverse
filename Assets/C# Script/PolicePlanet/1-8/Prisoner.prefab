@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4393862948131718318}
   - component: {fileID: 2254310914510908547}
   - component: {fileID: 4128482641108332645}
+  - component: {fileID: 3396446759344146367}
   m_Layer: 0
   m_Name: Prisoner
   m_TagString: Thief
@@ -30,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.39, y: 1.39, z: 1.39}
+  m_LocalScale: {x: 0.9231268, y: 0.9231268, z: 0.9231268}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -99,6 +100,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cb6f2fa823dfd748b689e064be73c4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  captureRangeX: 0.7
+  captureRangeY: 0.8
   moveSpeed: 1
   destroyX: -7
   prison: {fileID: 0}
@@ -132,11 +135,11 @@ CapsuleCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.115999475, y: -0.16300704}
-  m_Size: {x: 2.280248, y: 3.569917}
+  m_Offset: {x: 0.16960067, y: -0.13241027}
+  m_Size: {x: 4.0754437, y: 5.018303}
   m_Direction: 0
 --- !u!114 &4128482641108332645
 MonoBehaviour:
@@ -155,3 +158,30 @@ MonoBehaviour:
   isDragging: 0
   banDragging: 0
   angleInDegrees: 0
+--- !u!50 &3396446759344146367
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2674854900296907583}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0

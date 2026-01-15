@@ -3,83 +3,85 @@ using DG.Tweening;
 
 public class DragDistanceJudge : MonoBehaviour
 {
-    [SerializeField] private GameObject stage_1_9;
+    [Header("미니게임 참조")]
+    [SerializeField] private Minigame_1_9 minigame_1_9;
+
+    [Header("드래그 판정")]
     [SerializeField] private float distanceThreshold = 5f;
 
-    [Header("성공 시 움직일 오브젝트")]
+    [Header("성공 연출")]
     [SerializeField] private GameObject movingObject;
-
-    [Header("성공 시 활성화할 오브젝트")]
     [SerializeField] private GameObject activateObject;
     [SerializeField] private GameObject lightEffect;
 
-    [Header("성공 시 바꿀 스프라이트 설정")]
+    [Header("성공 시 스프라이트 변경")]
     [SerializeField] private SpriteRenderer targetSpriteRenderer;
     [SerializeField] private Sprite successSprite;
 
-    private Minigame_1_9 minigame_1_9;
     private Vector3 lastPosition;
     private float totalDistance;
+    private bool isDragging;
 
-    private bool isDragging = false;
-
-    private void Start()
+    private void OnMouseDown()
     {
-        minigame_1_9 = stage_1_9.GetComponent<Minigame_1_9>();
+        lastPosition = transform.position;
+        totalDistance = 0f;
+        isDragging = true;
     }
 
-    void Update()
+    // 드래그 중 이동 거리 누적
+    private void OnMouseDrag()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (!isDragging) return;
+
+        Vector3 currentPos = transform.position;
+        totalDistance += Vector3.Distance(currentPos, lastPosition);
+        lastPosition = currentPos;
+    }
+
+    // 드래그 종료 시 판정
+    private void OnMouseUp()
+    {
+        if (!isDragging) return;
+        isDragging = false;
+
+        // minigame_1_9 null 체크
+        if (minigame_1_9 != null)
+            minigame_1_9.OnScreenTouch();
+
+        // 거리 기준 성공
+        if (totalDistance >= distanceThreshold)
         {
-            lastPosition = this.transform.position;
-            totalDistance = 0f;
-            isDragging = true;
-        }
-
-        if (isDragging && Input.GetMouseButton(0))
-        {
-            Vector3 currentPos = this.transform.position;
-            float delta = Vector3.Distance(currentPos, lastPosition);
-
-            totalDistance += delta;
-            lastPosition = currentPos;
-        }
-
-        if (isDragging && Input.GetMouseButtonUp(0))
-        {
-            isDragging = false;
-
-            if (totalDistance >= distanceThreshold)
-            {
-                minigame_1_9.Succeed();
-                StartShaking();
-                ActivateObject();
-                ChangeSprite();
-            }
+            minigame_1_9.Succeed();
+            StartShaking();
+            ActivateObject();
+            ChangeSprite();
         }
     }
 
-    private void StartShaking()
+        private void StartShaking()
     {
-        movingObject.transform.DOShakePosition(
-            duration: 1f,
-            strength: 0.1f,
-            vibrato: 20,
-            randomness: 90,
-            snapping: false,
-            fadeOut: false
-        )
-        .SetLoops(-1);
+        if (movingObject == null) return;
+
+        movingObject.transform
+            .DOShakePosition(
+                duration: 1f,
+                strength: 0.1f,
+                vibrato: 20,
+                randomness: 90,
+                snapping: false,
+                fadeOut: false
+            )
+            .SetLoops(-1);
     }
 
     private void ActivateObject()
     {
         if (activateObject != null)
-        {
             activateObject.SetActive(true);
+
+        if (lightEffect != null)
             lightEffect.SetActive(true);
-        }
     }
 
     private void ChangeSprite()
@@ -88,10 +90,8 @@ public class DragDistanceJudge : MonoBehaviour
             targetSpriteRenderer.sprite = successSprite;
     }
 
-    public void SendRhythmInput()
-    {
-        minigame_1_9.OnPlayerInput();
-    }
+
+
 
     //public void NotifyMiss()
     //{

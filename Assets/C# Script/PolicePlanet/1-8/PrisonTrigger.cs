@@ -16,21 +16,33 @@ public class PrisonTrigger : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        //Debug.Log("충돌");
-        if (!prisonController.IsActive) return;
 
-        if (other.CompareTag("Thief"))
+        if (!other.CompareTag("Thief")) return;
+
+
+        Prisoner_1_8 prisoner = other.GetComponent<Prisoner_1_8>();
+        if (prisoner == null)
         {
-            prisonersInside++;
-            Destroy(other.gameObject);
-
-            if (prisonersInside >= totalPrisoners)
-            {
-                //manager.GameSuccess();
-                manager.SendRhythmInput();
-            }
+            return;
         }
+
+        PrisonController_1_8 controller = GetComponent<PrisonController_1_8>();
+
+        if (!controller.IsActive) return;
+        if (!prisoner.canBeCaptured) return;
+
+        Debug.Log("잡았다!");
+        prisoner.Capture();
     }
+
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        // Enter와 동일한 로직을 계속 검사
+        OnTriggerEnter2D(other);
+    }
+
+
+
 
     //private void OnTriggerExit2D(Collider2D other)
     //{
