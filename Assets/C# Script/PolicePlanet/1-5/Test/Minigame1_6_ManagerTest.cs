@@ -14,6 +14,7 @@ public class Minigame1_6_ManagerTest : MiniGameBase
     public float inputCooldown = 0.15f;   // 입력 후 잠금 시간
 
     public int collideCnt;
+    int judgeCnt;
     int inputCnt;
 
     // 입력 잠금
@@ -31,7 +32,9 @@ public class Minigame1_6_ManagerTest : MiniGameBase
 
     private void Start()
     {
+        judgeCnt = 0;
         collideCnt = 0;
+        inputCnt = 0;
         gameEnded = false;
 
         if (case1_Obj != null) case1_Obj.SetActive(false);
@@ -81,19 +84,32 @@ public class Minigame1_6_ManagerTest : MiniGameBase
             TryInput();
             inputCnt++;
         }
-        if(handControler.caseNum==1&&inputCnt>=4)
+        if (handControler.caseNum == 1)
         {
-            inputLocked = true;
+            if(inputCnt>=4)
+            {
+                inputLocked = true;
+            }
+            if (mainHand.position.x < -12)
+            {
+                CheckSuccessCondition();
+            }
         }
-        if (handControler.caseNum == 2 && inputCnt >= 3)
+        if (handControler.caseNum == 2) 
         {
-            inputLocked = true;
+            if (inputCnt>=3)
+            {
+                inputLocked = true;
+            }
+            if (mainHand.position.x < -14.5)
+            {
+                CheckSuccessCondition();
+            }
         }
 
-        
-        CheckSuccessCondition();
 
-        
+
+
     }
 
     private void TryInput()
@@ -126,8 +142,7 @@ public class Minigame1_6_ManagerTest : MiniGameBase
         if (judgement == MiniGameBase.JudgementResult.Perfect ||
             judgement == MiniGameBase.JudgementResult.Good)
         {
-            // 판정 성공 시 추가 처리 원하면 여기서
-            // (요청대로 Success/Fail 판정은 collideCnt 기준으로만 연결)
+            judgeCnt++;
         }
         else
         {
@@ -139,13 +154,17 @@ public class Minigame1_6_ManagerTest : MiniGameBase
     {
         if (handControler == null) return;
 
-        if (handControler.caseNum == 1 && collideCnt >= CASE1_GOAL)
+        if (handControler.caseNum == 1 && collideCnt >= CASE1_GOAL )
         {
             EndSuccess();
         }
-        else if (handControler.caseNum == 2 && collideCnt >= CASE2_GOAL)
+        else if (handControler.caseNum == 2 && collideCnt >= CASE2_GOAL )
         {
             EndSuccess();
+        }
+        else
+        {
+            Fail();
         }
     }
 

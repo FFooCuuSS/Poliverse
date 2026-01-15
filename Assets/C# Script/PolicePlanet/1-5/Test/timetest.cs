@@ -14,7 +14,7 @@ public class timetest : MonoBehaviour
 
         if (idx < targets.Length && timeAcc >= targets[idx])
         {
-            Debug.Log("current time: " + targets[idx] + " hand pos : " + hand.transform.position.x);
+            Debug.Log("current time: " + timeAcc + " hand pos : " + hand.transform.position.x);
             idx++;
         }
     }

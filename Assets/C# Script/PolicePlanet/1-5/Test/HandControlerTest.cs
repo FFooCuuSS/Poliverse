@@ -35,7 +35,6 @@ public class HandControlerTest : MonoBehaviour
         {
             elapsed += Time.deltaTime;
 
-            // 0 ~ 1 사이 값
             float t = elapsed / moveTime;
 
             // 위치 보간
@@ -61,7 +60,6 @@ public class HandControlerTest : MonoBehaviour
         {
             elapsed += Time.deltaTime;
 
-            // 0 ~ 1 사이 값
             float t = elapsed / moveTime;
 
             // 위치 보간
