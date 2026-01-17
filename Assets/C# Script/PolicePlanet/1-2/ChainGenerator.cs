@@ -97,7 +97,7 @@ public class ChainGenerator : MonoBehaviour
 
         hinge.connectedBody = fromRb;
         hinge.autoConfigureConnectedAnchor = false;
-        hinge.anchor = new Vector2(-1, 0);
-        hinge.connectedAnchor = new Vector2(1, 0);
+        hinge.anchor = new Vector2(-1.2f, 0);
+        hinge.connectedAnchor = new Vector2(1.2f, 0);
     }
 }

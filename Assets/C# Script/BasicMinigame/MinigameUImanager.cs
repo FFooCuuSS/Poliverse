@@ -26,6 +26,10 @@ public class MinigameUIManager : MonoBehaviour
     [SerializeField] private Sprite[] enemyStandingSprites;
     [SerializeField] private Sprite[] enemyVictorySprites;
 
+    [Header("GameOver Fade")]
+    [SerializeField] private Image gameOverPanelImage; // 패널의 Image
+    [SerializeField] private float gameOverFadeDuration = 1.0f;
+    private bool isGameOver = false;
 
     // 라운드 흐름 내부 변수
     private int selectedPlanet;
@@ -33,6 +37,7 @@ public class MinigameUIManager : MonoBehaviour
     private float timerDuration;
     private float timerElapsed;
     private bool isTimerActive;
+    private bool isEndingMinigame = false;
     private int currentStage = 1;
     private int bossStageIndex = 0;
     private string bossMinigamePath = "";
@@ -101,9 +106,15 @@ public class MinigameUIManager : MonoBehaviour
             default:
                 return;
         }
+        if (gameOverPanelImage != null)
+        {
+            var c = gameOverPanelImage.color;
+            c.a = 0f;
+            gameOverPanelImage.color = c;
 
+            gameOverPanelImage.gameObject.SetActive(false);
+        }
         StartCoroutine(LoadNextMinigameRoutine());
-        audioSource.Play();
     }
 
     void Update()
@@ -127,8 +138,14 @@ public class MinigameUIManager : MonoBehaviour
     private IEnumerator TimerEndFailDelay()
     {
         yield return new WaitForSeconds(1f);
-        currentMinigame.Fail();
 
+        if (isGameOver || isEndingMinigame || currentMinigame == null)
+        {
+            failCoroutine = null;
+            yield break;
+        }
+
+        currentMinigame.Fail();
         failCoroutine = null;
     }
 
@@ -205,7 +222,7 @@ public class MinigameUIManager : MonoBehaviour
                 Debug.LogWarning($"[MinigameUIManager] planetCsvs[{idx}] is NULL. 리듬 차트 로드 실패 가능");
 
             yield return ConfigureRhythmRoutine(minigameId, csv);
-            currentMinigame.BindRhythmManager(rhythmManager);
+            RefreshRhythmWindows();
         }
 
         StartMinigame();
@@ -215,6 +232,12 @@ public class MinigameUIManager : MonoBehaviour
     {
         var task = rhythmManager.ConfigureForMinigameAsync(currentMinigame, minigameId, csv);
         while (!task.IsCompleted) yield return null;
+    }
+
+    private void RefreshRhythmWindows()
+    {
+        if (rhythmManager == null) return;
+        rhythmManager.RefreshWindowsFromCurrentMinigame();
     }
 
 
@@ -298,6 +321,8 @@ public class MinigameUIManager : MonoBehaviour
 
     private void OnMinigameFail()
     {
+        if (isGameOver) return;
+
         isTimerActive = false;
         life--;
         lifeNumber.LoseLife();
@@ -310,7 +335,7 @@ public class MinigameUIManager : MonoBehaviour
         {
             if (life <= 0)
             {
-                Invoke("GameOver", 1f);
+                StartCoroutine(GameOverRoutine());
                 return;
             }
 
@@ -345,14 +370,54 @@ public class MinigameUIManager : MonoBehaviour
 
         audioSource.clip = failureBGM;
     }
-    void GameOver()
+    private IEnumerator GameOverRoutine()
     {
+        if (isGameOver) yield break;
+        isGameOver = true;
+
+        // 타이머/입력/코루틴 정리
+        isTimerActive = false;
+
+        if (failCoroutine != null)
+        {
+            StopCoroutine(failCoroutine);
+            failCoroutine = null;
+        }
+
+        blockInputPanel.SetActive(true); // 입력 막기
+
+        // 리듬 정리(있으면)
+        if (rhythmManager != null)
+            rhythmManager.ClearCurrent();
+
+        if (gameOverPanelImage != null)
+        {
+            gameOverPanelImage.gameObject.SetActive(true);
+
+            // 알파 0으로 시작
+            var c = gameOverPanelImage.color;
+            c.a = 0f;
+            gameOverPanelImage.color = c;
+
+            yield return gameOverPanelImage.DOFade(1f, gameOverFadeDuration)
+                                           .SetEase(Ease.Linear)
+                                           .WaitForCompletion();
+        }
+        else
+        {
+            yield return new WaitForSeconds(1f);
+        }
+
         CameraScrollController.selectedPlanetIndex = 0;
         SceneManager.LoadScene("LobbyScene");
     }
 
+
     private IEnumerator DelayAndEndMinigame()
     {
+        if (isEndingMinigame) yield break;
+        isEndingMinigame = true;
+
         UpdateStageText();
         blockInputPanel.SetActive(true);
 
@@ -372,10 +437,13 @@ public class MinigameUIManager : MonoBehaviour
             Destroy(currentMinigame.gameObject);
         }
 
-        audioSource.Play();
+        Debug.Log("게임 끝난 판정");
         blockInputPanel.SetActive(false);
         timerSlider.gameObject.SetActive(false);
+        isEndingMinigame = false;
         StartCoroutine(WaitAndLoadNext());
+        audioSource.Play();
+
     }
 
     private IEnumerator RetryCurrentMinigame()
@@ -423,7 +491,7 @@ public class MinigameUIManager : MonoBehaviour
         }
         else
         {
-
+            StartCoroutine(GameOverRoutine());
         }
     }
 

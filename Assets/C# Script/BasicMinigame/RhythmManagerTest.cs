@@ -223,7 +223,10 @@ public class RhythmManagerTest : MonoBehaviour, MiniGameBase.IRhythmManager
         events.Sort((a, b) => a.time.CompareTo(b.time));
         eventIndex = 0;
     }
-
+    private static bool IsShowType(string type)
+    {
+        return string.Equals(type, "Show", StringComparison.OrdinalIgnoreCase);
+    }
     public void StartSong()
     {
         dspStartTime = AudioSettings.dspTime;
@@ -272,6 +275,7 @@ public class RhythmManagerTest : MonoBehaviour, MiniGameBase.IRhythmManager
         {
             var e = events[i];
             if (e.consumed) continue;
+            if (IsShowType(e.type)) continue;
             if (action != null && e.action != action) continue;
 
             // 액션 분리하고 싶으면 여기서 action 매칭 걸어라
@@ -307,7 +311,7 @@ public class RhythmManagerTest : MonoBehaviour, MiniGameBase.IRhythmManager
         {
             var e = events[i];
             if (e.consumed) continue;
-
+            if (IsShowType(e.type)) continue;
             if (now <= e.time + hitWindow) break;
 
             e.consumed = true;

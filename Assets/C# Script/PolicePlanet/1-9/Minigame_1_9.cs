@@ -15,11 +15,17 @@ public class Minigame_1_9 : MiniGameBase
 
     private bool canInput = false;
     private bool hasMissed = false;
-
+    private SpriteRenderer bgRenderer;
     protected override float TimerDuration => 15f;
     protected override string MinigameExplain => "가동시켜라!";
 
     private Tween blinkTween;
+
+    private void Awake()
+    {
+        if (brightBackground != null)
+            bgRenderer = brightBackground.GetComponent<SpriteRenderer>();
+    }
 
     public override void StartGame()
     {
@@ -85,30 +91,53 @@ public class Minigame_1_9 : MiniGameBase
 
         if (judgement == JudgementResult.Perfect || judgement == JudgementResult.Good)
             Success();
+        /*
         else
             Fail();
+        */
     }
 
     private void PlayBlinkOnce()
     {
-        if (brightBackground == null) return;
+        if (bgRenderer == null) return;
 
-        // 각 Show마다 독립적인 Sequence 생성
-        Sequence blinkSequence = DOTween.Sequence();
-        blinkSequence.AppendCallback(() => brightBackground.SetActive(true));
-        blinkSequence.AppendInterval(0.5f); // 켜진 시간
-        blinkSequence.AppendCallback(() => brightBackground.SetActive(false));
+        blinkTween?.Kill();
 
-        // 자동 제거
-        blinkSequence.SetAutoKill(true);
+        // 켜고 알파 0으로 초기화
+        brightBackground.SetActive(true);
+        bgRenderer.color = new Color(
+            bgRenderer.color.r,
+            bgRenderer.color.g,
+            bgRenderer.color.b,
+            0f
+        );
+
+        blinkTween = DOTween.Sequence()
+            .Append(bgRenderer.DOFade(1f, 0.2f)) // Fade In
+            .AppendInterval(0.1f)               // 유지 (원하면 0 가능)
+            .Append(bgRenderer.DOFade(0f, 0.2f)) // Fade Out
+            .OnComplete(() =>
+            {
+                brightBackground.SetActive(false);
+            });
     }
+
 
 
     private void StopBlink()
     {
         blinkTween?.Kill();
+        blinkTween = null;
 
-        if (brightBackground != null)
+        if (bgRenderer != null)
+        {
+            bgRenderer.color = new Color(
+                bgRenderer.color.r,
+                bgRenderer.color.g,
+                bgRenderer.color.b,
+                0f
+            );
             brightBackground.SetActive(false);
+        }
     }
 }

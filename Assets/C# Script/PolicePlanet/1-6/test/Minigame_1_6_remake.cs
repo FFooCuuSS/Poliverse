@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class Minigame_1_6_remake : MiniGameBase
 {
-    protected override float TimerDuration => 30f;
-    protected override string MinigameExplain => "타이밍에 맞춰 경찰을 배치하라!";
+    protected override float TimerDuration => 12f;
+    protected override string MinigameExplain => "타이밍에 맞춰 배치해라!";
 
     [Header("Prefabs")]
     public ContainerTarget containerPrefab;

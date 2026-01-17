@@ -2,13 +2,12 @@
 
 public class Minigame_1_4 : MiniGameBase
 {
-    protected override float TimerDuration => 15f;
+    protected override float TimerDuration => 10f;
     protected override string MinigameExplain => "리듬에 맞춰 악세서리를 제거하세요.";
 
     private List<Accessory> orderedAccessories;
     private bool hasFailed = false;
 
-    // 🔥 BlinkManager가 호출
     public void SetAccessoryOrder(List<Accessory> accessories)
     {
         orderedAccessories = accessories;
@@ -36,7 +35,7 @@ public class Minigame_1_4 : MiniGameBase
         if (judgement == JudgementResult.Miss)
         {
             hasFailed = true;
-            Fail();
+            //Fail();
             return;
         }
 

@@ -1,15 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class AccessoryBlinkManager : MonoBehaviour
 {
-    public float interval = 0.2f;
+    [Header("Fade Settings")]
+    [SerializeField] private float minAlpha = 0.5f;    
+    [SerializeField] private float fadeDuration = 0.5f;
 
-    private List<Accessory> accessories = new List<Accessory>();
+    private readonly List<Accessory> accessories = new List<Accessory>();
 
     public void RegisterAccessory(Accessory acc)
     {
+        if (acc == null) return;
         accessories.Add(acc);
 
         // 전부 항상 보이게 유지
@@ -26,16 +30,28 @@ public class AccessoryBlinkManager : MonoBehaviour
     {
         yield return new WaitUntil(() => accessories.Count == 3);
 
-        foreach (Accessory acc in accessories)
+        float[] blinkCenters = { 1f, 2f, 3f };
+
+        for (int i = 0; i < accessories.Count && i < blinkCenters.Length; i++)
         {
-           
-            SetAlpha(acc, 0f);
-            yield return new WaitForSeconds(interval);
-            SetAlpha(acc, 1f);
-            yield return new WaitForSeconds(0.5f);
+            Accessory acc = accessories[i];
+            if (acc == null) continue;
+
+            float startAt = Mathf.Max(0f, blinkCenters[i] - fadeDuration);
+
+            var sr = acc.GetComponent<SpriteRenderer>();
+            if (sr == null) continue;
+
+            sr.DOKill();
+
+            Sequence seq = DOTween.Sequence();
+            seq.SetDelay(startAt);
+            seq.Append(sr.DOFade(minAlpha, fadeDuration));
+            seq.Append(sr.DOFade(1f, fadeDuration));
         }
 
-        
+        yield return new WaitForSeconds(3f + fadeDuration);
+
         FindObjectOfType<Minigame_1_4>()
             .SetAccessoryOrder(accessories);
     }

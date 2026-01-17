@@ -108,9 +108,22 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
         if (currentMinigame != null)
             currentMinigame.BindRhythmManager(this);
 
+        ApplyWindowsFromMinigame();
+
         // 4) 시작
         StartSong();
     }
+
+    public void RefreshWindowsFromCurrentMinigame()
+    {
+        ApplyWindowsFromMinigame();
+    }
+
+    private static bool IsShowType(string type)
+    {
+        return string.Equals(type, "Show", StringComparison.OrdinalIgnoreCase);
+    }
+
 
     /// <summary>
     /// 현재 타임라인 중단 + 바인딩 해제(미니게임 Destroy 전에 호출 추천)
@@ -299,6 +312,19 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
         }
     }
 
+    private void ApplyWindowsFromMinigame()
+    {
+        if (currentMinigame == null) return;
+
+        perfectWindow = currentMinigame.perfectWindowOverride;
+        goodWindow = currentMinigame.goodWindowOverride;
+        hitWindow = currentMinigame.hitWindowOverride;
+
+        Debug.Log($"[RhythmManager] Override windows from {currentMinigame.name} " +
+                  $"(Perfect={perfectWindow}, Good={goodWindow}, Hit={hitWindow})");
+    }
+
+
     // 미니게임에서 호출
     public void ReceivePlayerInput(string action = null)
     {
@@ -313,6 +339,7 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
         {
             var e = events[i];
             if (e.consumed) continue;
+            if (IsShowType(e.type)) continue;
             if (action != null && e.action != action) continue;
 
             double delta = Math.Abs(e.time - now);
@@ -344,7 +371,7 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
         {
             var e = events[i];
             if (e.consumed) continue;
-
+            if (IsShowType(e.type)) continue;
             if (now <= e.time + hitWindow) break;
 
             e.consumed = true;

@@ -27,7 +27,7 @@ public class Minigame1_6_ManagerTest : MiniGameBase
     private const int CASE1_GOAL = 4;
     private const int CASE2_GOAL = 3;
 
-    protected override float TimerDuration => 15f;
+    protected override float TimerDuration => 12f;
     protected override string MinigameExplain => "숨은 죄수를 찾아라!";
 
     private void Start()

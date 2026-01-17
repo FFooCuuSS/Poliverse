@@ -4,7 +4,7 @@ using static MiniGameBase;
 
 public class minigame_1_1_remake : MiniGameBase
 {
-    protected override float TimerDuration => 30f;
+    protected override float TimerDuration => 15f;
     protected override string MinigameExplain => "분류해라!";
 
     private IRhythmManager rhythmManager;
