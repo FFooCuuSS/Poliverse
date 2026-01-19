@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class HandcuffSequenceController : MonoBehaviour
 {
@@ -8,6 +8,7 @@ public class HandcuffSequenceController : MonoBehaviour
     public HandcuffFitChecker leftCuff;
     public CircleCollider2D leftHandCollider;
 
+    public ChainGenerator chainGenerator;
     public DragAndDrop rightCuffDrag;
 
     private enum State
@@ -22,7 +23,7 @@ public class HandcuffSequenceController : MonoBehaviour
 
     void Start()
     {
-        rightCuffDrag.enabled = false; // ½ÃÀÛÀº ¸·¾ÆµÒ
+        rightCuffDrag.enabled = true; // ì˜¤ë¥¸ì†ì€ ì²˜ìŒë¶€í„° ë“œë˜ê·¸ ê°€ëŠ¥
         leftHand.StartMove();
     }
 
@@ -35,9 +36,10 @@ public class HandcuffSequenceController : MonoBehaviour
                 {
                     leftCuff.ForceSnapToHand(leftHandCollider);
 
-                    rightCuffDrag.enabled = true;
-                    Debug.Log("¿Ş¼Õ ¼ö°©Ã¤¿ò, ¼ö°© µå·¡±× °¡´É");
+                    leftHandCollider.enabled = false;
+                    chainGenerator.isLeftCuffLocked = true; // ğŸ”’ í•µì‹¬
 
+                    Debug.Log("ì™¼ì† ìˆ˜ê°‘ ì¥ì°© ì™„ë£Œ");
                     state = State.LeftSnapped;
                 }
                 break;
@@ -50,8 +52,8 @@ public class HandcuffSequenceController : MonoBehaviour
             case State.RightMoving:
                 if (rightHand.hasArrived)
                 {
+                    Debug.Log("ì˜¤ë¥¸ì† ë„ì°© â€“ í”Œë ˆì´ì–´ ì¡°ì‘");
                     state = State.PlayerDrag;
-                    Debug.Log("¿À¸¥¼Õ µµÂø");
                 }
                 break;
         }

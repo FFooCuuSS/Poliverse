@@ -8,6 +8,11 @@ public class Minigame_1_4 : MiniGameBase
     private List<Accessory> orderedAccessories;
     private bool hasFailed = false;
 
+    private void Start()
+    {
+        StartGame();
+    }
+
     public void SetAccessoryOrder(List<Accessory> accessories)
     {
         orderedAccessories = accessories;

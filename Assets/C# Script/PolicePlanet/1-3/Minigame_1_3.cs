@@ -51,6 +51,8 @@ public class Minigame_1_3 : MiniGameBase
                 break;
             case "Swipe":
                 break;
+            case "Show":
+                break;
         }
     }
 }
