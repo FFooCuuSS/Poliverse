@@ -11,10 +11,12 @@ public class AccessoryBlinkManager : MonoBehaviour
 
     private readonly List<Accessory> accessories = new List<Accessory>();
 
+
     public void RegisterAccessory(Accessory acc)
     {
         if (acc == null) return;
         accessories.Add(acc);
+        acc.LockInput();
 
         // 전부 항상 보이게 유지
         acc.gameObject.SetActive(true);
@@ -51,6 +53,13 @@ public class AccessoryBlinkManager : MonoBehaviour
         }
 
         yield return new WaitForSeconds(3f + fadeDuration);
+
+
+        var game = FindObjectOfType<Minigame_1_4>();
+        game.SetAccessoryOrder(accessories);
+
+        foreach (var acc in accessories)
+            acc.UnlockInput();
 
         FindObjectOfType<Minigame_1_4>()
             .SetAccessoryOrder(accessories);

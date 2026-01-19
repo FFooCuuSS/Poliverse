@@ -1,100 +1,95 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 
 public class ChainGenerator : MonoBehaviour
 {
-    [SerializeField] private GameObject start;                // Ω√¿€ ø¿∫Í¡ß∆Æ
-    [SerializeField] private GameObject end;                  // ≥° ø¿∫Í¡ß∆Æ
+    [Header("Chain Ends")]
+    [SerializeField] private GameObject left;      // Ï≤¥Ïù∏ ÏãúÏûë (ÏôºÏÜê Í∏∞Ï§ÄÏ†ê)
+    [SerializeField] private GameObject right;     // Ï≤¥Ïù∏ ÎÅù (Ïò§Î•∏ÏÜê Í∏∞Ï§ÄÏ†ê)
 
-    [SerializeField] private GameObject startCuff;                // Ω√¿€ ø¿∫Í¡ß∆Æ
-    [SerializeField] private GameObject endCuff;                // Ω√¿€ ø¿∫Í¡ß∆Æ
+    [Header("Cuffs")]
+    [SerializeField] private GameObject leftCuff;
+    [SerializeField] private GameObject rightCuff;
 
-    [SerializeField] private GameObject nodePrefab;           // ¡ﬂ∞£ ≥ÎµÂ «¡∏Æ∆’
-    [SerializeField] private int numOfNodes = 10;             // ≥ÎµÂ ∞≥ºˆ
+    [Header("Chain")]
+    [SerializeField] private GameObject nodePrefab;
+    [SerializeField] private int numOfNodes = 10;
+
+    [Header("State")]
+    public bool isLeftCuffLocked = false; // ÏôºÏÜê ÏãúÏä§ÌÖú Í≥†Ï†ï Ïó¨Î∂Ä
 
     private float nodeDistance = 0.5f;
-    DragAndDrop startDrag;
-    DragAndDrop endDrag;
+    private DragAndDrop leftDrag;
+    private DragAndDrop rightDrag;
+
     void Start()
     {
-        startDrag = startCuff.GetComponent<DragAndDrop>();
-        endDrag = endCuff.GetComponent<DragAndDrop>();
+        leftDrag = leftCuff.GetComponent<DragAndDrop>();
+        rightDrag = rightCuff.GetComponent<DragAndDrop>();
 
-        Vector2 direction = (end.transform.position - start.transform.position).normalized;
-        float totalLength = Vector2.Distance(start.transform.position, end.transform.position);
-        nodeDistance = totalLength / (numOfNodes + 1);  // +1 to account for spacing
+        Vector2 direction = (right.transform.position - left.transform.position).normalized;
+        float totalLength = Vector2.Distance(left.transform.position, right.transform.position);
+        nodeDistance = totalLength / (numOfNodes + 1);
 
-        GameObject previous = start;
+        GameObject previous = left;
 
         for (int i = 0; i < numOfNodes; i++)
         {
-            Vector2 nodePos = (Vector2)start.transform.position + direction * nodeDistance * (i + 1);
-            GameObject node = Instantiate(nodePrefab, nodePos, Quaternion.identity, this.transform);
-
-            // ø¨∞·
+            Vector2 nodePos = (Vector2)left.transform.position + direction * nodeDistance * (i + 1);
+            GameObject node = Instantiate(nodePrefab, nodePos, Quaternion.identity, transform);
             ConnectWithHinge(previous, node);
-
             previous = node;
         }
 
-        // ∏∂¡ˆ∏∑ ≥ÎµÂøÕ end ø¨∞·
-        ConnectWithHinge(previous, end);
+        ConnectWithHinge(previous, right);
     }
 
-    private void Update()
+    void Update()
     {
-        float dist = Vector2.Distance(start.transform.position, end.transform.position);
-        if (dist > 10.5f)
+        float dist = Vector2.Distance(left.transform.position, right.transform.position);
+        if (dist <= 10.5f) return;
+
+        float followSpeed = 15f;
+
+        // ‚ñ∂ Ïò§Î•∏ÏÜêÏùÑ ÎìúÎûòÍ∑∏ Ï§ë
+        if (rightDrag.isDragging)
         {
-            float followSpeed = 15f;
+            // ‚ùó ÏôºÏÜêÏù¥ Ïû†Í≤® ÏûàÏúºÎ©¥ Ï†àÎåÄ Ïù¥Îèô Í∏àÏßÄ
+            if (isLeftCuffLocked) return;
 
-            if (startDrag.isDragging)
-            {
-                Vector3 moveTarget = Vector3.MoveTowards(
-                    end.transform.position,
-                    start.transform.position,
-                    followSpeed * Time.deltaTime
-                );
+            Vector3 moveTarget = Vector3.MoveTowards(
+                left.transform.position,
+                right.transform.position,
+                followSpeed * Time.deltaTime
+            );
 
-                Vector3 offset = moveTarget - end.transform.position;
+            Vector3 offset = moveTarget - left.transform.position;
+            leftCuff.transform.position += offset;
+        }
+        // ‚ñ∂ ÏôºÏÜêÏùÑ ÎìúÎûòÍ∑∏ Ï§ë (Ïù¥ Í≤ΩÏö∞Îßå Ïò§Î•∏ÏÜêÏù¥ Îî∞ÎùºÏò¥)
+        else if (leftDrag.isDragging)
+        {
+            Vector3 moveTarget = Vector3.MoveTowards(
+                right.transform.position,
+                left.transform.position,
+                followSpeed * Time.deltaTime
+            );
 
-                endCuff.transform.position += offset; // ºˆ∞©µµ «‘≤≤ ¿Ãµø
-            }
-            else if (endDrag.isDragging)
-            {
-                Vector3 moveTarget = Vector3.MoveTowards(
-                    start.transform.position,
-                    end.transform.position,
-                    followSpeed * Time.deltaTime
-                );
-
-                Vector3 offset = moveTarget - start.transform.position;
-
-                startCuff.transform.position += offset; // ºˆ∞©µµ «‘≤≤ ¿Ãµø
-            }
+            Vector3 offset = moveTarget - right.transform.position;
+            rightCuff.transform.position += offset;
         }
     }
 
-
     void ConnectWithHinge(GameObject from, GameObject to)
     {
-        Rigidbody2D fromRb = from.GetComponent<Rigidbody2D>();
-        if (fromRb == null)
-            fromRb = from.AddComponent<Rigidbody2D>();
+        Rigidbody2D fromRb = from.GetComponent<Rigidbody2D>() ?? from.AddComponent<Rigidbody2D>();
+        Rigidbody2D toRb = to.GetComponent<Rigidbody2D>() ?? to.AddComponent<Rigidbody2D>();
 
-        Rigidbody2D toRb = to.GetComponent<Rigidbody2D>();
-        if (toRb == null)
-            toRb = to.AddComponent<Rigidbody2D>();
-
-        // Dynamic √≥∏Æ: start≥™ end∞° æ∆¥œ∂Û∏È
-        if (to != start && to != end)
+        if (to != left && to != right)
             toRb.bodyType = RigidbodyType2D.Dynamic;
         else
             toRb.bodyType = RigidbodyType2D.Kinematic;
 
-        HingeJoint2D hinge = to.GetComponent<HingeJoint2D>();
-        if (hinge == null)
-            hinge = to.AddComponent<HingeJoint2D>();
-
+        HingeJoint2D hinge = to.GetComponent<HingeJoint2D>() ?? to.AddComponent<HingeJoint2D>();
         hinge.connectedBody = fromRb;
         hinge.autoConfigureConnectedAnchor = false;
         hinge.anchor = new Vector2(-1.2f, 0);

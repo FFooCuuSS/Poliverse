@@ -14,7 +14,7 @@ public class HandcuffFitChecker : MonoBehaviour
 
 
     [SerializeField] private List<CircleCollider2D> handColliders;
-    [SerializeField] private List<DragAndDrop> dragAndDrops;
+//    [SerializeField] private List<DragAndDrop> dragAndDrops;
     private CircleCollider2D cuffCollider;
     private DragAndDrop dragAndDrop;
 
@@ -93,7 +93,8 @@ public class HandcuffFitChecker : MonoBehaviour
 
         if (dragAndDrop != null)
             dragAndDrop.enabled = false;
-
+        if (cuffCollider != null)
+            cuffCollider.enabled = false;
         GameClearCheck();
     }
 }

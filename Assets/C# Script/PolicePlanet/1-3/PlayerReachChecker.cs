@@ -37,11 +37,6 @@ public class PlayerReachChecker : MonoBehaviour
         BoundCheck();
     }
 
-    private void OnMouseDown()
-    {
-        Debug.Log("³ª¿©±â");
-    }
-
     private void BoundCheck()
     {
         Collider2D[] hits = Physics2D.OverlapBoxAll(
@@ -67,6 +62,7 @@ public class PlayerReachChecker : MonoBehaviour
             fixedPosition = transform.position;
             minigameBase.Fail();
         }
+        
     }
-
+    
 }

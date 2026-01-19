@@ -102,12 +102,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a576b855180d7b439b529c8159e8913, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  start: {fileID: 9164173106436622639}
-  end: {fileID: 8195691794778059463}
-  startCuff: {fileID: 69035319621313238}
-  endCuff: {fileID: 9112010128705886894}
+  left: {fileID: 8195691794778059463}
+  right: {fileID: 9164173106436622639}
+  leftCuff: {fileID: 9112010128705886894}
+  rightCuff: {fileID: 69035319621313238}
   nodePrefab: {fileID: 3717214168868558252, guid: 56ece32f93dfe7146afdfed9c842dc2b, type: 3}
   numOfNodes: 11
+  isLeftCuffLocked: 0
 --- !u!114 &1416842417430334025
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -143,7 +144,6 @@ MonoBehaviour:
   handColliders:
   - {fileID: 8076192000081770606}
   - {fileID: 3187027208396221911}
-  dragAndDrops: []
 --- !u!58 &6717803861390508200
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -608,6 +608,7 @@ MonoBehaviour:
   rightHand: {fileID: 715889241897249678}
   leftCuff: {fileID: 4275712946937975648}
   leftHandCollider: {fileID: 8076192000081770606}
+  chainGenerator: {fileID: 1503856696520320065}
   rightCuffDrag: {fileID: 1416842417430334025}
 --- !u!1 &3159021568148757785
 GameObject:
@@ -1543,9 +1544,6 @@ MonoBehaviour:
   handColliders:
   - {fileID: 8076192000081770606}
   - {fileID: 3187027208396221911}
-  dragAndDrops:
-  - {fileID: 1416842417430334025}
-  - {fileID: 2780870381783352897}
 --- !u!50 &3735643748721292146
 Rigidbody2D:
   serializedVersion: 4
