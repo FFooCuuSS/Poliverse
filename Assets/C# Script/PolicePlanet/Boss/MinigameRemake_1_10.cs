@@ -7,6 +7,10 @@ public class MinigameRemake_1_10 : MiniGameBase
     protected override float TimerDuration => 15f;
     protected override string MinigameExplain => "분류해라!";
 
+    public override float perfectWindowOverride => 0.1f;
+    public override float goodWindowOverride => 0.3f;
+    public override float hitWindowOverride => 0.5f;
+
     [Header("Refs")]
     [SerializeField] private Manager_1_10 manager;   // 같은 프리팹/자식에서 드래그 or Find로 세팅
 
@@ -21,9 +25,6 @@ public class MinigameRemake_1_10 : MiniGameBase
         ended = false;
         inputOpen = false;
         awaitingJudge = false;
-
-        if (manager == null)
-            manager = GetComponentInChildren<Manager_1_10>(true);
 
         if (manager != null)
             manager.OnMinigameStart(this);
@@ -55,13 +56,18 @@ public class MinigameRemake_1_10 : MiniGameBase
             if (manager != null)
                 manager.OnInputWindowOpened(); // 연속 Show 오프셋 리셋 등에 사용
         }
+        else if (action == "Move")
+        {
+            if (manager != null)
+                manager.MoveBothPlatforms();
+        }
     }
 
     /// <summary>
     /// 외부(Manager_1_10)에서 스와이프 등 입력이 들어오면 호출.
     /// 실제 판정은 RhythmManager가 하고, 결과는 OnJudgement로 돌아온다.
     /// </summary>
-    public void SubmitPlayerInput(string action = null)
+    public void SubmitPlayerInput(string action = "Input")
     {
         if (ended) return;
         if (!inputOpen) return;
@@ -74,21 +80,27 @@ public class MinigameRemake_1_10 : MiniGameBase
     public override void OnJudgement(JudgementResult judgement)
     {
         if (ended) return;
+        base.OnJudgement(judgement);
 
-        // Miss면 입력 실패 처리(일단 Move를 막고 다시 입력 기다리게)
-        if (judgement == JudgementResult.Miss)
-        {
-            awaitingJudge = false; // 다시 입력 가능
-            if (manager != null)
-                manager.OnRhythmMiss();
-            return;
-        }
-
-        // Good/Perfect면 “타이밍 통과”로 보고 실제 분류 이동 실행
+        // 판정 대기 해제
         awaitingJudge = false;
-        if (manager != null)
-            manager.OnRhythmAccepted(judgement);
+
+        // 판정별로 Manager의 public 함수 호출
+        switch (judgement)
+        {
+            case JudgementResult.Miss:
+                manager.OnMiss();
+                break;
+
+            case JudgementResult.Good:
+                manager.OnAccepted(judgement);
+                break;
+            case JudgementResult.Perfect:
+                manager.OnAccepted(judgement);
+                break;
+        }
     }
+
 
     public void Succeed()
     {

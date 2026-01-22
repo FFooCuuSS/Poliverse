@@ -22,8 +22,8 @@ public abstract class MiniGameBase : MonoBehaviour
     public string GetMinigameExplain => MinigameExplain;
 
 
-    public virtual float perfectWindowOverride => 0.03f;
-    public virtual float goodWindowOverride => 0.07f;
+    public virtual float perfectWindowOverride => 0.1f;
+    public virtual float goodWindowOverride => 0.3f;
     public virtual float hitWindowOverride => 1f;
 
 

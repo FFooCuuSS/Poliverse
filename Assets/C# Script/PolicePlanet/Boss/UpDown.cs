@@ -5,53 +5,51 @@ public class UpDown : MonoBehaviour
 {
     public GameObject ManagerObj;
     public bool goUp;
-    public float speed;
+    public float speed = 1f;
 
     private Manager_1_10 manager;
+    private bool isMoving;
 
-    void Start()
+    private void Awake()
     {
-        if (ManagerObj != null)
-            manager = ManagerObj.GetComponent<Manager_1_10>();
+        ResolveManager();
+    }
+
+    private void ResolveManager()
+    {
+        if (manager != null) return;
+
+        if (ManagerObj != null) manager = ManagerObj.GetComponent<Manager_1_10>();
+        if (manager == null) manager = GetComponentInParent<Manager_1_10>();
     }
 
     private void OnMouseDown()
     {
-        if (manager == null) return;
-        if (manager.platformIsMoving) return;
+        ResolveManager();
 
-        // 클릭 순간엔 "요청"만 한다. (플랫폼 이동/사람 이동은 판정 통과 후)
-        manager.RequestMoveFromPlatform(goUp, this);
+        // 2) 플랫폼의 goUp 값 그대로 입력 전달
+        if (manager != null)
+            manager.RequestMoveFromPlatform(goUp);
     }
 
-    // Manager가 리듬 판정 통과 후 호출
-    public void TriggerPlatformMove(float delay = 0.65f)
+    public void TryMovePlatformImmediate()
     {
-        Invoke(nameof(MovePlatform), delay);
-    }
-
-    private void MovePlatform()
-    {
-        if (manager == null) return;
+        if (isMoving) return;
+        isMoving = true;
 
         float direction = goUp ? 1f : -1f;
         Vector3 startPos = transform.position;
         Vector3 targetPos = startPos + Vector3.up * direction * speed;
 
-        transform.DOMove(targetPos, 0.3f)
-            .SetEase(Ease.OutQuad)
+        // 1) 이동: 부드럽게 가속 (들어올 때 튀지 않음)
+        transform.DOMove(targetPos, 0.8f)
+            .SetEase(Ease.OutCubic)   // ← 핵심: 자연스럽게 밀어올림
             .OnComplete(() =>
             {
-                transform.DOMove(startPos, 0.25f)
-                    .SetEase(Ease.OutQuad)
-                    .OnComplete(() =>
-                    {
-                        manager.platformIsMoving = false;
-
-                        // (선택) 플랫폼을 "재생성"하는 구버전 루프가 필요하면:
-                        manager.SpawnPlatform(goUp ? Manager_1_10.PlatformType.Up : Manager_1_10.PlatformType.Down);
-                        Destroy(gameObject);
-                    });
+                // 2) 복귀: 바운스
+                transform.DOMove(startPos, 0.5f)
+                    .SetEase(Ease.OutBounce, 1.15f)
+                    .OnComplete(() => isMoving = false);
             });
     }
 }

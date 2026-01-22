@@ -47,10 +47,10 @@ MonoBehaviour:
   BossStage: {fileID: 5036016482146621326}
   ScoreText: {fileID: 3299152267961153330}
   spawnParent: {fileID: 2764859171032426446}
-  UpPlatform: {fileID: 6706325807068112129, guid: 42ffa58a33c5ff445830a9c8bb1a5b91, type: 3}
-  DownPlatform: {fileID: 7242658782053470114, guid: c8e6c30d3c478074eaa0027baf9c4145, type: 3}
-  Police: {fileID: 1938337618239732854, guid: acd5f0045f2e04547845ef5f9d94baaf, type: 3}
-  Sinner: {fileID: 7902227361782794465, guid: 1b91e08adaa830246867c90fc7ff83a0, type: 3}
+  UpPlatformPrefab: {fileID: 6706325807068112129, guid: 42ffa58a33c5ff445830a9c8bb1a5b91, type: 3}
+  DownPlatformPrefab: {fileID: 7242658782053470114, guid: c8e6c30d3c478074eaa0027baf9c4145, type: 3}
+  PolicePrefab: {fileID: 1938337618239732854, guid: acd5f0045f2e04547845ef5f9d94baaf, type: 3}
+  SinnerPrefab: {fileID: 7902227361782794465, guid: 1b91e08adaa830246867c90fc7ff83a0, type: 3}
   sinnerSprites:
   - {fileID: 21300000, guid: 857a7bd3b4dd56946bb701cec657c181, type: 3}
   - {fileID: 21300000, guid: df8f9b4ac6b972f41a35adb5c7e59161, type: 3}
@@ -58,9 +58,10 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 468d688e0443c9645842c1fb2511abbc, type: 3}
   - {fileID: 21300000, guid: eaf2e2aa51c3c2044a35c4cec2121455, type: 3}
   showSpawnStepX: 0.6
-  spawnMan: 0
-  platformIsMoving: 0
-  type: 0
+  missFadeOutDuration: 0.15
+  enablePointerInput: 1
+  swipeThresholdPx: 60
+  swipeMaxTime: 0.35
 --- !u!1 &1281042691183256108
 GameObject:
   m_ObjectHideFlags: 0

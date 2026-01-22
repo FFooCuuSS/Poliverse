@@ -12,13 +12,11 @@ public class Manager_1_10 : MonoBehaviour
     [SerializeField] private Transform spawnParent;
 
     [Header("Prefabs")]
-    [SerializeField] private GameObject UpPlatform;
-    [SerializeField] private GameObject DownPlatform;
-    [SerializeField] private GameObject Police;
-    [SerializeField] private GameObject Sinner;
+    [SerializeField] private GameObject UpPlatformPrefab;
+    [SerializeField] private GameObject DownPlatformPrefab;
+    [SerializeField] private GameObject PolicePrefab;
+    [SerializeField] private GameObject SinnerPrefab;
     [SerializeField] private Sprite[] sinnerSprites;
-    private UpDown upPlatform;
-    private UpDown downPlatform;
 
     [Header("Show Spawn Offset")]
     [SerializeField] private float showSpawnStepX = 0.6f;
@@ -26,61 +24,68 @@ public class Manager_1_10 : MonoBehaviour
     [Header("Miss FadeOut")]
     [SerializeField] private float missFadeOutDuration = 0.15f;
 
-    [Header("Player Input (Touch/Swipe)")]
-    [SerializeField] private bool enablePointerInput = true;
-    [SerializeField] private float swipeThresholdPx = 60f;
-    [SerializeField] private float swipeMaxTime = 0.35f; // 너무 느린 드래그는 탭으로 처리
+    [Header("Move Event (Lift All)")]
+    [SerializeField] private float moveEventDeltaY = 5.0f;
+    [SerializeField] private float moveEventDuration = 0.5f;
+    [SerializeField] private float moveEventClearDelay = 0.2f;
 
-    private Vector2 pointerDownPos;
-    private float pointerDownTime;
-    private bool pointerDown;
-    private bool inputOpen = false;
-
-    public bool platformIsMoving = false;
-
-    public enum PlatformType { Up, Down }
-
-    // ====== 핵심: 스폰할 때 타입을 같이 저장 ======
-    private struct PersonEntry
-    {
-        public GameObject go;
-        public bool isSinner;
-        public PersonEntry(GameObject go, bool isSinner)
-        {
-            this.go = go;
-            this.isSinner = isSinner;
-        }
-    }
-
-    // Show로 쌓이는 전체(이전 사람 지우지 않음)
-    private readonly List<PersonEntry> people = new List<PersonEntry>();
-
-    // Input 시점에 고정되는 "이번 턴 대상"
-    private List<PersonEntry> turnPeople = new List<PersonEntry>();
-
-    // 현재 선택된 사람(입력 1회에 1명)
-    private PersonEntry? selected = null;
+    // runtime
+    private UpDown upPlatform;
+    private UpDown downPlatform;
 
     private Score score;
     private MinigameRemake_1_10 minigame;
 
-    private bool hasPendingMove = false;
-    private bool pendingGoUp = false;
-    private UpDown pendingPlatform = null;
+    private bool inputOpen = false;
+    private bool awaitingJudge = false;
+    private bool moveEventRunning = false;
 
     private int consecutiveShowCount = 0;
+
+    // =========================
+    // 데이터 구조: FIFO 큐 + 보낸 사람 목록
+    // =========================
+    private struct PersonEntry
+    {
+        public GameObject go;
+        public bool isSinner;
+        public PersonEntry(GameObject go, bool isSinner) { this.go = go; this.isSinner = isSinner; }
+    }
+
+    // Show로 생긴 사람들(대기열) - FIFO
+    private readonly Queue<PersonEntry> waitingQueue = new Queue<PersonEntry>();
+
+    // 성공/실패 여부와 상관없이 "플랫폼 쪽으로 보낸 사람들" (Move 이벤트 때도 같이 움직여야 함)
+    private readonly List<PersonEntry> sentPeople = new List<PersonEntry>();
+
+    // 현재 판정 대기중인 1명 (Input 1회당 1명)
+    private PersonEntry? current = null;
+    private bool pendingGoUp = false;
+    private bool pendingCorrect = false;
+
+    // 플랫폼 배치 카운트
+    private int sentCountUp = 0;
+    private int sentCountDown = 0;
+
+    public enum PlatformType { Up, Down }
 
     public void OnMinigameStart(MinigameRemake_1_10 mg)
     {
         minigame = mg;
+
         consecutiveShowCount = 0;
+        inputOpen = false;
+        awaitingJudge = false;
+        moveEventRunning = false;
 
-        hasPendingMove = false;
+        current = null;
         pendingGoUp = false;
-        pendingPlatform = null;
-        platformIsMoving = false;
+        pendingCorrect = false;
 
-        ClearAllPeopleImmediate();
+        sentCountUp = 0;
+        sentCountDown = 0;
+
+        ClearAllImmediate();
     }
 
     private void Start()
@@ -91,120 +96,50 @@ public class Manager_1_10 : MonoBehaviour
         if (ScoreText != null && score == null)
             score = ScoreText.GetComponent<Score>();
 
-        upPlatform = UpPlatform.GetComponent<UpDown>();
-        downPlatform = DownPlatform.GetComponent<UpDown>();
-
-        SpawnPlatform(PlatformType.Up);
-        SpawnPlatform(PlatformType.Down);
-    }
-    private void Update()
-    {
-        if (!enablePointerInput) return;
-        if (!inputOpen) return;                 // Input 구간만 받음
-        if (platformIsMoving) return;           // gate
-        if (hasPendingMove) return;             // 판정 대기중 중복 입력 방지
-        if (turnPeople == null || turnPeople.Count == 0) return;
-
-        // 모바일 터치
-        if (Input.touchCount > 0)
-        {
-            Touch t = Input.GetTouch(0);
-
-            if (t.phase == TouchPhase.Began)
-            {
-                pointerDown = true;
-                pointerDownPos = t.position;
-                pointerDownTime = Time.unscaledTime;
-            }
-            else if ((t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled) && pointerDown)
-            {
-                pointerDown = false;
-                HandlePointerUp(t.position);
-            }
-            return;
-        }
-
-        // PC 마우스(에디터 테스트)
-        if (Input.GetMouseButtonDown(0))
-        {
-            pointerDown = true;
-            pointerDownPos = Input.mousePosition;
-            pointerDownTime = Time.unscaledTime;
-        }
-        else if (Input.GetMouseButtonUp(0) && pointerDown)
-        {
-            pointerDown = false;
-            HandlePointerUp((Vector2)Input.mousePosition);
-        }
+        if (upPlatform == null) upPlatform = SpawnPlatform(PlatformType.Up);
+        if (downPlatform == null) downPlatform = SpawnPlatform(PlatformType.Down);
     }
 
-    private void HandlePointerUp(Vector2 upPos)
+    private UpDown SpawnPlatform(PlatformType type)
     {
-        Vector2 delta = upPos - pointerDownPos;
-        float dt = Time.unscaledTime - pointerDownTime;
+        GameObject prefab = (type == PlatformType.Up) ? UpPlatformPrefab : DownPlatformPrefab;
+        if (prefab == null) return null;
 
-        bool isSwipe = (Mathf.Abs(delta.x) >= swipeThresholdPx) && (dt <= swipeMaxTime);
-
-        bool goUp;
-        if (isSwipe)
+        GameObject inst = Instantiate(prefab, prefab.transform.position, Quaternion.identity, spawnParent);
+        var ud = inst.GetComponent<UpDown>();
+        if (ud != null)
         {
-            // 오른쪽 스와이프 = Up, 왼쪽 = Down
-            goUp = delta.x > 0f;
+            ud.ManagerObj = gameObject;
+            ud.goUp = (type == PlatformType.Up);
         }
-        else
-        {
-            // 탭이면 화면 좌/우로 결정
-            goUp = upPos.x >= (Screen.width * 0.5f); // 오른쪽 탭=Up
-        }
-
-        RequestMoveFromInput(goUp);
-    }
-
-
-    // =========================
-    // 플랫폼 생성
-    // =========================
-    public void SpawnPlatform(PlatformType type)
-    {
-        GameObject prefab = (type == PlatformType.Up) ? UpPlatform : DownPlatform;
-        if (prefab == null) return;
-
-        GameObject instance = Instantiate(prefab, prefab.transform.position, Quaternion.identity, spawnParent);
-
-        var upDown = instance.GetComponent<UpDown>();
-        if (upDown != null)
-        {
-            upDown.ManagerObj = this.gameObject;
-
-            if (type == PlatformType.Up) upPlatform = upDown;
-            else downPlatform = upDown;
-        }
+        return ud;
     }
 
     // =========================
-    // Show/Input 이벤트
+    // Minigame 이벤트
     // =========================
     public void SpawnPersonForShow()
     {
         SpawnPersonInternal(offsetX: consecutiveShowCount * showSpawnStepX);
         inputOpen = false;
+        awaitingJudge = false;
         consecutiveShowCount++;
     }
 
     public void OnInputWindowOpened()
     {
-        // Input 시작 시점에 이번 턴 대상자 고정
         inputOpen = true;
-        turnPeople = new List<PersonEntry>(people);
-
+        awaitingJudge = false;
         consecutiveShowCount = 0;
-        selected = null;
+
+        // Input 열릴 때 current는 비워둔다. (클릭 시 current를 잡는다)
+        pendingCorrect = false;
     }
 
     private void SpawnPersonInternal(float offsetX)
     {
         bool spawnSinner = Random.Range(0, 2) == 0;
-        GameObject prefab = spawnSinner ? Sinner : Police;
+        GameObject prefab = spawnSinner ? SinnerPrefab : PolicePrefab;
         if (prefab == null) return;
 
         Vector3 pos = prefab.transform.position;
@@ -219,220 +154,219 @@ public class Manager_1_10 : MonoBehaviour
             if (spawnSinner && sinnerSprites != null && sinnerSprites.Length > 0)
                 sr.sprite = sinnerSprites[Random.Range(0, sinnerSprites.Length)];
 
-            Color c = sr.color;
-            c.a = 0f;
-            sr.color = c;
-            StartCoroutine(FadeIn(sr, 0.1f));
+            sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 0f);
+            sr.DOFade(1f, 0.1f);
         }
 
-        people.Add(new PersonEntry(person, spawnSinner));
-    }
-
-    private IEnumerator FadeIn(SpriteRenderer sr, float duration)
-    {
-        float timer = 0f;
-        Color original = sr.color;
-
-        while (timer < duration)
-        {
-            timer += Time.deltaTime;
-            float a = Mathf.Clamp01(timer / duration);
-            sr.color = new Color(original.r, original.g, original.b, a);
-            yield return null;
-        }
-        sr.color = new Color(original.r, original.g, original.b, 1f);
+        waitingQueue.Enqueue(new PersonEntry(person, spawnSinner));
     }
 
     // =========================
-    // 입력 기반 요청(스와이프/터치에서 호출)
+    // 플랫폼 클릭 입력
     // =========================
-    public void RequestMoveFromInput(bool goUp)
+    public void RequestMoveFromPlatform(bool goUp)
     {
-        RequestMoveFromPlatform(goUp, null);
-    }
+        if (!inputOpen) return;
+        if (awaitingJudge) return;
+        if (minigame == null) return;
+        if (moveEventRunning) return;
 
-    // (플랫폼 클릭도 여전히 쓰면 이걸 호출하면 됨)
-    public void RequestMoveFromPlatform(bool goUp, UpDown platform)
-    {
-        if (platformIsMoving) return;
+        // FIFO: 먼저 들어온 사람부터 처리
+        if (!TryDequeueAlive(out var entry)) return;
 
-        platformIsMoving = true;
-        hasPendingMove = true;
         pendingGoUp = goUp;
-        pendingPlatform = platform;
+        current = entry;
 
-        SelectForDirection(goUp);
+        pendingCorrect = (goUp && !entry.isSinner) || (!goUp && entry.isSinner);
 
-        if (minigame != null) minigame.SubmitPlayerInput();
-        else
-        {
-            Debug.LogWarning("[Manager_1_10] minigame is NULL.");
-            platformIsMoving = false;
-            hasPendingMove = false;
-            pendingPlatform = null;
-            selected = null;
-        }
+        awaitingJudge = true;
+        minigame.SubmitPlayerInput("Input");
     }
 
-    private void SelectForDirection(bool goUp)
+    private bool TryDequeueAlive(out PersonEntry entry)
     {
-        // 규칙: Up=Police, Down=Sinner 라면
-        bool wantSinner = !goUp;
-
-        selected = FindLatest(turnPeople, wantSinner);
-
-        // 안전장치: 턴 리스트가 비었으면 전체에서라도
-        if (selected == null)
-            selected = FindLatest(people, wantSinner);
-    }
-
-    private PersonEntry? FindLatest(List<PersonEntry> list, bool wantSinner)
-    {
-        for (int i = list.Count - 1; i >= 0; i--)
+        // 큐 앞에서부터 null 제거하면서 유효한 사람 찾기
+        while (waitingQueue.Count > 0)
         {
-            var e = list[i];
-            if (e.go == null) continue;
-            if (e.isSinner == wantSinner) return e;
+            var e = waitingQueue.Dequeue();
+            if (e.go != null)
+            {
+                entry = e;
+                return true;
+            }
         }
-
-        // 없으면 마지막 생존자
-        for (int i = list.Count - 1; i >= 0; i--)
-        {
-            var e = list[i];
-            if (e.go == null) continue;
-            return e;
-        }
-
-        return null;
+        entry = default;
+        return false;
     }
 
     // =========================
-    // 리듬 판정 콜백
+    // 판정 콜백
     // =========================
-    public void OnRhythmAccepted(JudgementResult judgement)
+    public void OnAccepted(JudgementResult judgement)
     {
-        if (!hasPendingMove) return;
+        if (!awaitingJudge) return;
+        awaitingJudge = false;
+        inputOpen = false;
 
-        DoMoveSelected(pendingGoUp);
+        MoveCurrentToLane(pendingGoUp);
 
-        if (pendingPlatform != null)
-            pendingPlatform.TriggerPlatformMove(0.65f);
-        else
-            StartCoroutine(ForceReleasePlatformGate(1.2f));
+        if (pendingCorrect) AddScoreAndCheckWin();
 
-        hasPendingMove = false;
-        pendingPlatform = null;
+        current = null;
     }
 
-    public void OnRhythmMiss()
+    public void OnMiss()
     {
-        hasPendingMove = false;
-        pendingPlatform = null;
-        platformIsMoving = false;
-        selected = null;
+        // Miss는 무입력 Miss도 들어오므로 awaitingJudge로 막지 말자.
+        awaitingJudge = false;
+        inputOpen = false;
 
-        StartCoroutine(FadeOutAndClearTurnPeople());
+        // 1) 클릭으로 잡고 있던 current가 있으면 그걸 삭제
+        if (current.HasValue && current.Value.go != null)
+        {
+            StartCoroutine(FadeOutAndDestroyOne(current.Value.go));
+            current = null;
+            return;
+        }
+
+        // 2) 무입력 Miss면 큐에서 "가장 앞" 1명을 삭제(FIFO)
+        if (TryDequeueAlive(out var e))
+        {
+            if (e.go != null) StartCoroutine(FadeOutAndDestroyOne(e.go));
+        }
     }
 
-    private IEnumerator ForceReleasePlatformGate(float t)
+    private void MoveCurrentToLane(bool goUp)
     {
-        yield return new WaitForSeconds(t);
-        platformIsMoving = false;
+        if (!current.HasValue) return;
+        var e = current.Value;
+        if (e.go == null) return;
+
+        // 목표 X: -6f 시작 / 4.5f 시작 + 0.4씩 누적
+        float baseX = goUp ? 4.5f : -5.7f;
+        int idx = goUp ? sentCountUp : sentCountDown;
+        float targetX = baseX + (0.5f * idx);
+
+        if (goUp) sentCountUp++;
+        else sentCountDown++;
+
+        // 트윈 정리 후 이동
+        DOTween.Kill(e.go.transform);
+
+        e.go.transform.DOMoveX(targetX, moveEventDuration)
+            .SetEase(Ease.OutQuad);
+
+        sentPeople.Add(e);
     }
 
-    private IEnumerator FadeOutAndClearTurnPeople()
+    private void AddScoreAndCheckWin()
     {
-        var list = turnPeople;
-        turnPeople = new List<PersonEntry>();
+        if (score != null) score.nScore++;
+        if (score != null && score.nScore >= 10)
+            minigame?.Succeed();
+    }
 
+    private IEnumerator FadeOutAndDestroyOne(GameObject target)
+    {
         float dur = Mathf.Max(0.01f, missFadeOutDuration);
 
-        foreach (var e in list)
+        if (target != null)
         {
-            if (e.go == null) continue;
-            var sr = e.go.GetComponent<SpriteRenderer>();
+            DOTween.Kill(target.transform);
+            var sr = target.GetComponent<SpriteRenderer>();
             if (sr != null) sr.DOFade(0f, dur).SetEase(Ease.OutQuad);
         }
 
         yield return new WaitForSeconds(dur);
 
-        foreach (var e in list)
-        {
-            if (e.go == null) continue;
-            RemoveFromPeople(e.go);
-            Destroy(e.go);
-        }
-    }
-
-    private void RemoveFromPeople(GameObject go)
-    {
-        for (int i = people.Count - 1; i >= 0; i--)
-        {
-            if (people[i].go == go)
-            {
-                people.RemoveAt(i);
-                return;
-            }
-        }
-    }
-
-    private void ClearAllPeopleImmediate()
-    {
-        for (int i = people.Count - 1; i >= 0; i--)
-        {
-            if (people[i].go != null) Destroy(people[i].go);
-        }
-        people.Clear();
-        turnPeople.Clear();
-        selected = null;
+        if (target != null) Destroy(target);
     }
 
     // =========================
-    // 이동/정답 처리
+    // Move 이벤트 (전체 리프트)
     // =========================
-    private void DoMoveSelected(bool goUp)
+    public void MoveBothPlatforms()
     {
-        if (selected == null) return;
+        if (moveEventRunning) return;
+        moveEventRunning = true;
 
-        var e = selected.Value;
-        if (e.go == null) return;
+        // 판정/입력 중단
+        awaitingJudge = false;
+        inputOpen = false;
 
-        float targetX = goUp ? 5f : -5f;
-        Vector2 targetPos = new Vector2(targetX, e.go.transform.position.y);
+        if (upPlatform != null) upPlatform.TryMovePlatformImmediate();
+        if (downPlatform != null) downPlatform.TryMovePlatformImmediate();
 
-        e.go.transform.DOMove(targetPos, 0.5f)
-            .SetEase(Ease.OutQuad)
-            .OnComplete(() => StartCoroutine(MoveUpOrDownAfterDelay(e.go, goUp)));
+        // 카운트 초기화(리프트 후 전부 정리되니까)
+        sentCountUp = 0;
+        sentCountDown = 0;
 
-        bool correct = (goUp && !e.isSinner) || (!goUp && e.isSinner);
-        if (correct) Success();
-        else Failure();
+        // ★ 여기 핵심: "대기열 + 보낸 사람" 모두 이동
+        MoveAllPeopleY(waitingQueue, sentPeople);
+
+        // 이동 후 전부 정리
+        StartCoroutine(ClearAllAfterMoveEvent(moveEventDuration + moveEventClearDelay));
     }
 
-    private IEnumerator MoveUpOrDownAfterDelay(GameObject person, bool goUp)
+    private void MoveAllPeopleY(Queue<PersonEntry> q, List<PersonEntry> sent)
     {
-        yield return new WaitForSeconds(0.15f);
-        if (person == null) yield break;
-
-        Vector2 finalPos = (Vector2)person.transform.position + (Vector2)Vector3.up * (goUp ? 12f : -12f);
-        person.transform.DOMove(finalPos, 0.3f).SetEase(Ease.OutQuad);
-    }
-
-    private void Success()
-    {
-        if (score != null) score.nScore++;
-
-        if (minigame != null) minigame.OnPlayerInput();
-
-        if (score != null && score.nScore >= 10)
+        // 큐는 순회가 되지만, null은 그냥 스킵
+        foreach (var p in q)
         {
-            if (minigame != null) minigame.Succeed();
+            MoveOneY(p);
         }
+
+        for (int i = 0; i < sent.Count; i++)
+        {
+            MoveOneY(sent[i]);
+        }
+
+        // current도 남아있다면 같이 이동 (클릭 직후 Move가 올 수 있으니)
+        if (current.HasValue)
+            MoveOneY(current.Value);
     }
 
-    private void Failure()
+    private void MoveOneY(PersonEntry p)
     {
-        // 실패 정책
-        // minigame.Failure();
+        if (p.go == null) return;
+
+        Transform tr = p.go.transform;
+        DOTween.Kill(tr);
+
+        float dy = p.isSinner ? -moveEventDeltaY : moveEventDeltaY;
+        tr.DOMoveY(tr.position.y + dy, moveEventDuration)
+          .SetEase(Ease.OutBack, 1.35f)
+          .SetUpdate(false);
+    }
+
+    private IEnumerator ClearAllAfterMoveEvent(float wait)
+    {
+        yield return new WaitForSeconds(wait);
+        ClearAllImmediate();
+        moveEventRunning = false;
+    }
+
+    // =========================
+    // Clear
+    // =========================
+    private void ClearAllImmediate()
+    {
+        // current
+        if (current.HasValue && current.Value.go != null) Destroy(current.Value.go);
+        current = null;
+
+        // queue
+        while (waitingQueue.Count > 0)
+        {
+            var e = waitingQueue.Dequeue();
+            if (e.go != null) Destroy(e.go);
+        }
+
+        // sent
+        for (int i = sentPeople.Count - 1; i >= 0; i--)
+        {
+            if (sentPeople[i].go != null) Destroy(sentPeople[i].go);
+            sentPeople.RemoveAt(i);
+        }
     }
 }
