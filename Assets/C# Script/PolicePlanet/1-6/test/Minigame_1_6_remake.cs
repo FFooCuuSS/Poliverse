@@ -9,13 +9,18 @@ public class Minigame_1_6_remake : MiniGameBase
     [Header("Prefabs")]
     public ContainerTarget containerPrefab;
     public PoliceMover policePrefab;
+    public Sprite blueSprite;
+    public Sprite greenSprite;
+    public Sprite bluePolice;
+    public Sprite greenPolice;
+    public Sprite whitePolice;
 
     [Header("Lane Y Positions")]
     public float[] laneYs = { 3f, 0f, -3f };
 
     [Header("Container Random X Range")]
-    public float containerXMin = -7f;
-    public float containerXMax = 7f;
+    public float containerXMin = -6f;
+    public float containerXMax = 5f;
 
     [Header("Police Start X")]
     public float policeStartX = 10f;
@@ -96,7 +101,19 @@ public class Minigame_1_6_remake : MiniGameBase
 
         // y는 lane, x는 startX 고정
         p.transform.position = new Vector3(policeStartX, laneYs[lane], 0f);
-
+        SpriteRenderer sr = p.GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            if (p.transform.position.y==-3)
+            {
+                sr.sprite = bluePolice;
+            }
+            else if (p.transform.position.y == 3)
+            {
+                sr.sprite = greenPolice;
+            }
+            else sr.sprite = whitePolice;
+        }
         // 목표 컨테이너 x
         float targetX = containers[lane].transform.position.x;
 
@@ -211,10 +228,23 @@ public class Minigame_1_6_remake : MiniGameBase
             float y = laneYs[i];
 
             ContainerTarget c = Instantiate(containerPrefab);
+
+            
+            c.transform.position = new Vector3(x, y, 0f);
+            SpriteRenderer sr = c.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                if (Mathf.Approximately(y, -3f))
+                {
+                    sr.sprite = blueSprite;
+                }
+                else if (Mathf.Approximately(y, 3f))
+                {
+                    sr.sprite = greenSprite;
+                }
+            }
             c.gameObject.SetActive(true);
             c.laneIndex = i;
-            c.transform.position = new Vector3(x, y, 0f);
-
             containers[i] = c;
         }
     }

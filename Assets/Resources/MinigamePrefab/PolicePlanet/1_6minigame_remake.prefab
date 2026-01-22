@@ -278,6 +278,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   containerPrefab: {fileID: 5092327181554927329}
   policePrefab: {fileID: 5663870418901770768}
+  blueSprite: {fileID: 21300000, guid: a5a05757a8fe6174fbbaba661c2e893e, type: 3}
+  greenSprite: {fileID: 21300000, guid: ae6ada8d1eb66eb4fadae14f9bcb4f58, type: 3}
+  bluePolice: {fileID: 21300000, guid: 20e9786ad436a5c4b928e3d1a0790aec, type: 3}
+  greenPolice: {fileID: 21300000, guid: 48af3146405bc124a99ec300a625cbd3, type: 3}
+  whitePolice: {fileID: 21300000, guid: d613756541c5f2e41bfced6e2572480e, type: 3}
   laneYs:
   - 3
   - 0

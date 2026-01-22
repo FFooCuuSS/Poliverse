@@ -17,6 +17,8 @@ public class minigame_1_1_remake : MiniGameBase
 
     [Header("Target Scope")]
     public Transform targetScope;
+    [Header("Scope Sprite")]
+    public GameObject Scope;
 
     [Header("Auto Off Time (seconds)")]
     public float autoOffSeconds = 2.5f;
@@ -42,6 +44,7 @@ public class minigame_1_1_remake : MiniGameBase
 
     void Start()
     {
+        Scope.SetActive(false);
         cam = Camera.main;
         StartGame();
     }
@@ -185,6 +188,10 @@ public class minigame_1_1_remake : MiniGameBase
         Debug.Log("[1-1] SHOW idx=" + showIndex + " posIdx=" + posIdx);
 
         showIndex++;
+        if (showIndex > 3)
+        {
+            Scope.SetActive(true);
+        }
     }
 
     void HandleInput()
@@ -239,6 +246,8 @@ public class minigame_1_1_remake : MiniGameBase
     {
         if (inputIndex < ENEMY_COUNT) return;
         EndRound();
+        Scope.SetActive(false);
+        targetScope.position = new Vector2(0, 0);
     }
 
     void EndRound()
