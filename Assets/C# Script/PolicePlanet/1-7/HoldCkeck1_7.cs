@@ -4,37 +4,70 @@ using UnityEngine;
 
 public class HoldCheck1_7 : MonoBehaviour
 {
-    public GameObject holdUIPrefab;      // Inspector에서 Prefab 연결
+    [Header("UI Prefab & Settings")]
+    public GameObject holdUIPrefab;
     public float shrinkSpeed = 2f;
-    public int maxHoldCount = 4;
+    public int maxHoldCount = 4;                   // 전체 UI 노드 수
+    [SerializeField] private float successTolerance = 0.2f;
 
-    private int currentHoldCount = 0;
+    [Header("게임 참조")]
+    public Minigame_1_7 minigame;
+
+    [Header("클릭 버퍼링")]
+    private bool clickBuffered = false;
+    private float clickBufferTimer = 0f;
+    [SerializeField] private float clickBufferTime = 0.15f;
+
+    // 현재 UI 노드 진행
+    public int CurrentUINode { get; private set; } = 0;
+
+    // 내부 변수
     private GameObject currentHoldUI;
     private Transform targetCircle;
     private Transform shrinkingCircle;
     private bool isHolding = false;
 
-    // Hold 시작
-    public void OnHoldStart(Transform prisoner)
+    public void StartAllHolds(Transform prisoner)
     {
-        if (currentHoldCount >= maxHoldCount) return; // 최대 횟수 체크
+        CurrentUINode = 0;
+        SpawnNextUI(prisoner);
+    }
 
-        // 이전 UI 제거
+    public bool CanHold()
+    {
+        return !isHolding && CurrentUINode < maxHoldCount;
+    }
+
+    public void HideHoldUI()
+    {
         if (currentHoldUI != null)
         {
             Destroy(currentHoldUI);
             currentHoldUI = null;
         }
+        isHolding = false;
+    }
+
+    private void SpawnNextUI(Transform prisoner)
+    {
+        if (CurrentUINode >= maxHoldCount)
+        {
+            // 더 이상 UI 노드 없음
+            return;
+        }
+
+        // 이전 UI 제거
+        HideHoldUI();
 
         // 새로운 UI 생성
         currentHoldUI = Instantiate(holdUIPrefab);
 
-        // 화면 맨 위로 보이게 하기
+        // 화면 맨 위로 보이게
         SpriteRenderer[] renderers = currentHoldUI.GetComponentsInChildren<SpriteRenderer>();
         foreach (var sr in renderers)
         {
-            sr.sortingLayerName = "UI"; // UI용 Sorting Layer
-            sr.sortingOrder = 200;      // 높은 숫자 -> 맨 위
+            sr.sortingLayerName = "UI";
+            sr.sortingOrder = 200;
         }
 
         // 죄수 주변 랜덤 위치
@@ -48,61 +81,92 @@ public class HoldCheck1_7 : MonoBehaviour
         targetCircle = currentHoldUI.transform.Find("TargetCircle");
         shrinkingCircle = currentHoldUI.transform.Find("ShrinkingCircle");
 
-        // 항상 새로 생성될 때 크기 초기화
-        if (shrinkingCircle != null)
-            shrinkingCircle.localScale = Vector3.one * 4f; // 줄어드는 원
-        if (targetCircle != null)
-            targetCircle.localScale = Vector3.one * 3f; // 기준 원
+        if (shrinkingCircle != null) shrinkingCircle.localScale = Vector3.one * 4f;
+        if (targetCircle != null) targetCircle.localScale = Vector3.one * 3f;
 
         isHolding = true;
+        clickBuffered = false;
+        clickBufferTimer = 0f;
     }
 
-
-    void Update()
+    private void Resolve(bool success)
     {
-        if (isHolding && shrinkingCircle != null && targetCircle != null)
-        {
-            // 줄어들기
-            shrinkingCircle.localScale -= Vector3.one * shrinkSpeed * Time.deltaTime;
-
-            // 줄어드는 원이 기준 원 크기와 같아지거나 작아졌을 때
-            if (shrinkingCircle.localScale.x <= targetCircle.localScale.x)
-            {
-                // UI 전체 삭제 (기준 원 + 줄어드는 원)
-                Destroy(currentHoldUI);
-                currentHoldUI = null;
-                isHolding = false;
-
-                // 성공 카운트 증가
-                currentHoldCount++;
-
-                // Minigame에 성공 알림
-                FindObjectOfType<Minigame_1_7>().OnHoldSuccess();
-            }
-        }
-    }
-
-    public bool CanHold()
-    {
-        return currentHoldCount < maxHoldCount && !isHolding;
-    }
-
-    public void ResetHolds()
-    {
-        currentHoldCount = 0;
         isHolding = false;
-        if (currentHoldUI != null)
-            Destroy(currentHoldUI);
-    }
+        clickBuffered = false;
 
-    public void HideHoldUI()
-    {
         if (currentHoldUI != null)
         {
             Destroy(currentHoldUI);
             currentHoldUI = null;
         }
+
+        CurrentUINode++;
+
+        if (success)
+        {
+            Debug.Log($"Hold 성공! 노드 {CurrentUINode} / {maxHoldCount}");
+            minigame.RegisterHoldSuccess();
+        }
+        else
+        {
+            Debug.Log($"Hold 실패! 노드 {CurrentUINode} / {maxHoldCount}");
+            minigame.RegisterHoldFail();
+        }
+
+        // 다음 UI 노드가 남아 있으면 생성
+        if (CurrentUINode < maxHoldCount)
+        {
+            PrisonerController1_7 prisoner = FindObjectOfType<PrisonerController1_7>();
+            if (prisoner != null)
+            {
+                SpawnNextUI(prisoner.transform);
+            }
+        }
+    }
+
+    void Update()
+    {
+        // 클릭 입력 버퍼링
+        if (Input.GetMouseButtonDown(0))
+        {
+            clickBuffered = true;
+            clickBufferTimer = clickBufferTime;
+        }
+
+        if (clickBuffered)
+        {
+            clickBufferTimer -= Time.deltaTime;
+            if (clickBufferTimer <= 0f) clickBuffered = false;
+        }
+
+        // Hold 진행 중이 아니면 종료
+        if (!isHolding || shrinkingCircle == null || targetCircle == null)
+            return;
+
+        // 줄어드는 원 축소
+        shrinkingCircle.localScale -= Vector3.one * shrinkSpeed * Time.deltaTime;
+
+        float diff = Mathf.Abs(shrinkingCircle.localScale.x - targetCircle.localScale.x);
+
+        // 성공 판정: 기준원과 차이가 허용범위 내에서 클릭했을 때
+        if (diff <= successTolerance && clickBuffered)
+        {
+            Resolve(true);
+            return;
+        }
+
+        // 실패 판정: 줄어드는 원이 기준원보다 작아졌을 때
+        if (shrinkingCircle.localScale.x < targetCircle.localScale.x - successTolerance)
+        {
+            Resolve(false);
+        }
+    }
+
+    public void OnHoldStart(Transform prisoner)
+    {
+        if (CanHold())
+        {
+            SpawnNextUI(prisoner);
+        }
     }
 }
-
-

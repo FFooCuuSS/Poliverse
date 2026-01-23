@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 471093569162425524}
   - component: {fileID: 4377352022064199180}
+  - component: {fileID: 2368948133030545989}
   m_Layer: 5
   m_Name: ShrinkingCircle
   m_TagString: Untagged
@@ -84,6 +85,22 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &2368948133030545989
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 92913306354020953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8725f7aabbc2d141bd7ae8043cf5147, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxX: 7
+  maxY: 4
+  isDragging: 0
+  banDragging: 1
 --- !u!1 &1339359407143525951
 GameObject:
   m_ObjectHideFlags: 0
