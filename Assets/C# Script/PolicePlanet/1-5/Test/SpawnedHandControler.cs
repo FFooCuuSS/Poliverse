@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class SpawnedHandControler : MonoBehaviour
 {
-    public Minigame1_6_ManagerTest minigameManager1_6;
+    public Minigame1_6_Manager_remake minigameManager1_6;
 
     
 

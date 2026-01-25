@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class Minigame1_6_ManagerTest : MiniGameBase
+public class Minigame1_6_Manager_remake : MiniGameBase
 {
     public HandControlerTest handControler;
     public Transform mainHand;
@@ -18,7 +18,8 @@ public class Minigame1_6_ManagerTest : MiniGameBase
     int inputCnt;
 
     // 입력 잠금
-    private bool inputLocked = false;
+    private bool cooldownLocked = false;
+    private bool maxInputLocked = false;
 
     // Success/Fail 중복 호출 방지
     private bool gameEnded = false;
@@ -35,8 +36,9 @@ public class Minigame1_6_ManagerTest : MiniGameBase
         judgeCnt = 0;
         collideCnt = 0;
         inputCnt = 0;
+        cooldownLocked = false;
+        maxInputLocked = false;
         gameEnded = false;
-
         if (case1_Obj != null) case1_Obj.SetActive(false);
         if (case2_Obj != null) case2_Obj.SetActive(false);
 
@@ -56,13 +58,18 @@ public class Minigame1_6_ManagerTest : MiniGameBase
         {
             Debug.Log("rhythm 매니저 연결 안됨");
         }
+       // Debug.Log(handControler.caseNum);
+
     }
 
     public override void StartGame()
     {
-        // 미니게임 시작 시 초기화(필요한 것만)
         collideCnt = 0;
-        inputLocked = false;
+        judgeCnt = 0;
+        inputCnt = 0;
+
+        cooldownLocked = false;
+        maxInputLocked = false;
         gameEnded = false;
     }
 
@@ -76,62 +83,64 @@ public class Minigame1_6_ManagerTest : MiniGameBase
 
     private void Update()
     {
+       // Debug.Log("Update 들어옴"); // 1) Update 자체가 도는지
+       // if (handControler == null) { Debug.Log("handControler NULL"); return; } // 2) null 체크
+       // Debug.Log("caseNum=" + handControler.caseNum); // 3) 값 확인
         if (gameEnded) return;
 
-        // 입력
-        if (Input.GetMouseButtonDown(0))
-        {
-            TryInput();
-            inputCnt++;
-        }
+        // 영구 잠금이면 입력 자체를 막음
+        if (maxInputLocked) return;
+        
+
+        // case별 입력 제한
         if (handControler.caseNum == 1)
         {
-            if(inputCnt>=4)
-            {
-                inputLocked = true;
-            }
+           // Debug.Log("inputCnt" + inputCnt + "maxInputLock: " + maxInputLocked);
+
+            if (inputCnt >= 4) maxInputLocked = true;
             if (mainHand.position.x < -12)
-            {
                 CheckSuccessCondition();
-            }
         }
-        if (handControler.caseNum == 2) 
+        else if (handControler.caseNum == 2)
         {
-            if (inputCnt>=3)
-            {
-                inputLocked = true;
-            }
+            if (inputCnt >= 3) maxInputLocked = true;
+           // Debug.Log("inputCnt" + inputCnt + "maxInputLock: " + maxInputLocked);
+
             if (mainHand.position.x < -14.5)
-            {
                 CheckSuccessCondition();
-            }
         }
+        if (cooldownLocked == false && maxInputLocked==false)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                inputCnt++;
 
+                TryInput();
+            }
 
-
-
+        }
     }
 
     private void TryInput()
     {
-        // (연타 방지)
-        if (inputLocked) return;
+        // 안전장치
+        if (cooldownLocked || maxInputLocked) return;
 
         SpawnHand();
 
-        // 판정 요청
         if (rhythm != null)
             rhythm.ReceivePlayerInput("Input");
 
-        // 입력 후 일정 시간 잠금
+        
+
         StartCoroutine(InputCooldownRoutine());
     }
 
     private IEnumerator InputCooldownRoutine()
     {
-        inputLocked = true;
+        cooldownLocked = true;
         yield return new WaitForSeconds(inputCooldown);
-        inputLocked = false;
+        cooldownLocked = false;
     }
 
     // 리듬매니저 판정 결과 

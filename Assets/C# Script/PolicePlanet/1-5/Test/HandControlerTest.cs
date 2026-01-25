@@ -5,22 +5,26 @@ using UnityEngine;
 public class HandControlerTest : MonoBehaviour
 {
     public int caseNum;
-    bool chooseCase;
+    bool chooseCase = false;
 
     private void Update()
     {
-        switch (caseNum)
+        if(!chooseCase)
         {
-            case 1:
-                StartCoroutine(Move1());
-                caseNum = 0;
-                break;
-            case 2:
-                StartCoroutine(Move2());
-                caseNum = 0;
-                break;
+            switch (caseNum)
+            {
+                case 1:
+                    StartCoroutine(Move1());
+                    chooseCase = true;
+                    break;
+                case 2:
+                    StartCoroutine(Move2());
+                    chooseCase = true;
+                    break;
 
+            }
         }
+        
     }
     void Start()
     {
