@@ -133,11 +133,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ec0c55fb9291d549bbfa8d5de2388c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!4 &204151408 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6799748189946725150, guid: 1de080422aa3ed448be383cef9c65e86, type: 3}
-  m_PrefabInstance: {fileID: 248600051}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &248600051
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -150,14 +145,6 @@ PrefabInstance:
       propertyPath: rhythm
       value: 
       objectReference: {fileID: 441601159}
-    - target: {fileID: 2681583153551992655, guid: 1de080422aa3ed448be383cef9c65e86, type: 3}
-      propertyPath: mainParent
-      value: 
-      objectReference: {fileID: 283979997}
-    - target: {fileID: 4906868880634651617, guid: 1de080422aa3ed448be383cef9c65e86, type: 3}
-      propertyPath: m_SortingOrder
-      value: 20
-      objectReference: {fileID: 0}
     - target: {fileID: 6406463608160356691, guid: 1de080422aa3ed448be383cef9c65e86, type: 3}
       propertyPath: m_Name
       value: 1_5minigame_remake
@@ -204,43 +191,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 6799748189946725150, guid: 1de080422aa3ed448be383cef9c65e86, type: 3}
-      insertIndex: 0
-      addedObject: {fileID: 283979997}
+    m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1de080422aa3ed448be383cef9c65e86, type: 3}
---- !u!1 &283979996
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 283979997}
-  m_Layer: 0
-  m_Name: MainParent
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &283979997
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 283979996}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.20236157}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 204151408}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &441601155
 GameObject:
   m_ObjectHideFlags: 0

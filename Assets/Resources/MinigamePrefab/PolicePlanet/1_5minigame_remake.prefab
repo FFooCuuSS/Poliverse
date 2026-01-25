@@ -965,7 +965,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 20
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -1836,6 +1836,7 @@ MonoBehaviour:
   case1_Obj: {fileID: 1565932494567966548}
   case2_Obj: {fileID: 2512127380254364688}
   handSpawn: {fileID: 3745992119061816433}
+  mainParent: {fileID: 6799748189946725150}
   rhythm: {fileID: 0}
   inputCooldown: 0.15
   collideCnt: 0

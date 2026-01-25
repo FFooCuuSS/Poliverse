@@ -8,6 +8,7 @@ public class Minigame1_6_Manager_remake : MiniGameBase
     public GameObject case1_Obj;
     public GameObject case2_Obj;
     public GameObject handSpawn;
+    public Transform mainParent;
 
     public rythmManager1_5_Test rhythm;
 
@@ -198,13 +199,18 @@ public class Minigame1_6_Manager_remake : MiniGameBase
 
     private void SpawnHand()
     {
-        if (handSpawn == null || mainHand == null)
+        if (handSpawn == null || mainHand == null || mainParent == null)
         {
-            Debug.Log("handSpawn 또는 mainHand 할당 안됨");
+            Debug.Log("handSpawn / mainHand / mainParent 할당 안됨");
             return;
         }
 
         Vector2 spawnPos = new Vector2(mainHand.position.x, -1f);
-        Instantiate(handSpawn, spawnPos, Quaternion.identity);
+
+        GameObject hand = Instantiate(handSpawn, spawnPos, Quaternion.identity);
+
+        // 부모 설정 (정리용, 위치는 신경 안 씀)
+        hand.transform.SetParent(mainParent);
     }
+
 }
