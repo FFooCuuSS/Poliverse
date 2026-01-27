@@ -28,10 +28,15 @@ public class Rope : MonoBehaviour
     //    lineRenderer.SetPosition(1, targetPosition);
     //}
 
-    public Transform ropeStart;  // 줄 시작점
-    private LineRenderer lineRenderer;
+    [Header("줄 시작점")]
+    public Transform ropeStart;
 
+    private LineRenderer lineRenderer;
     private Tween stretchTween;
+
+    [Header("Tween 세팅")]
+    public float stretchDuration = 0.2f;   // 늘어날 때 걸리는 시간
+    public Ease stretchEase = Ease.OutQuad; // 자연스러운 Ease
 
     void Awake()
     {
@@ -40,12 +45,19 @@ public class Rope : MonoBehaviour
         {
             lineRenderer.positionCount = 2;
 
-            // 기본 색상, 너비 설정 꼭 해주기
-            lineRenderer.startWidth = 0.1f;
-            lineRenderer.endWidth = 0.1f;
-            lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-            lineRenderer.startColor = Color.white;
-            lineRenderer.endColor = Color.white;
+            // 인스펙터에서 지정한 색상 그대로 사용
+            if (lineRenderer.startWidth == 0) lineRenderer.startWidth = 0.1f;
+            if (lineRenderer.endWidth == 0) lineRenderer.endWidth = 0.1f;
+        }
+    }
+
+    void Start()
+    {
+        if (lineRenderer != null && ropeStart != null)
+        {
+            // 초기 끝점은 시작점과 동일
+            lineRenderer.SetPosition(0, ropeStart.position);
+            lineRenderer.SetPosition(1, ropeStart.position);
         }
     }
 
@@ -53,43 +65,35 @@ public class Rope : MonoBehaviour
     {
         if (lineRenderer == null || ropeStart == null) return;
 
+        // 시작점 항상 갱신
         lineRenderer.SetPosition(0, ropeStart.position);
-        // 끝점은 Tween으로 움직이므로 여기선 그냥 현재 위치 유지
-        // 혹시 Tween 작동 전에는 끝점 위치를 초기화 해주세요:
-        if (!DOTween.IsTweening(transform)) // DOTween 이용 중 아니면
-            lineRenderer.SetPosition(1, transform.position);
-    }
 
-
-    void Start()
-    {
-        if (lineRenderer != null && ropeStart != null)
+        // Tween 중이 아니면 끝점 현재 위치 유지
+        if (stretchTween == null || !stretchTween.IsActive() || !stretchTween.IsPlaying())
         {
-            lineRenderer.SetPosition(0, ropeStart.position);
-            lineRenderer.SetPosition(1, ropeStart.position); // 처음 끝점도 시작점
+            lineRenderer.SetPosition(1, transform.position);
         }
     }
 
-
-    public void PlayStretch(Vector3 stretchOffset, float duration)
+    public void PlayStretch(Vector3 stretchOffset)
     {
-        if (lineRenderer == null) return;
+        if (lineRenderer == null || ropeStart == null) return;
 
         stretchTween?.Kill();
 
-        Vector3 startPos = lineRenderer.GetPosition(1);        // 현재 끝점
-        Vector3 targetPos = ropeStart.position + stretchOffset; // 목표 위치 (시작점 기준)
+        Vector3 startPos = lineRenderer.GetPosition(1);
+        Vector3 targetPos = ropeStart.position + stretchOffset;
 
-        stretchTween = DOTween.To(() => lineRenderer.GetPosition(1),
-                                  x => lineRenderer.SetPosition(1, x),
-                                  targetPos,
-                                  duration / 2f)
-            .OnComplete(() =>
-            {
-                DOTween.To(() => lineRenderer.GetPosition(1),
-                           x => lineRenderer.SetPosition(1, x),
-                           ropeStart.position,
-                           duration / 2f);
-            });
+        stretchTween = DOTween.Sequence()
+            .Append(DOTween.To(() => lineRenderer.GetPosition(1),
+                               x => lineRenderer.SetPosition(1, x),
+                               targetPos,
+                               stretchDuration)  // Rope 인스펙터에서 설정한 duration 사용
+                   .SetEase(Ease.OutQuad))
+            .Append(DOTween.To(() => lineRenderer.GetPosition(1),
+                               x => lineRenderer.SetPosition(1, x),
+                               ropeStart.position,
+                               stretchDuration)
+                   .SetEase(Ease.OutQuad));
     }
 }

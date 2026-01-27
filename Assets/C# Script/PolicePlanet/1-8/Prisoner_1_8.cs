@@ -67,7 +67,6 @@ public class Prisoner_1_8 : MonoBehaviour
     public float captureRangeX = 0.7f;
     public float captureRangeY = 0.8f;
 
-
     public float moveSpeed = 2f;
     public float destroyX = -7f;
 
@@ -82,20 +81,20 @@ public class Prisoner_1_8 : MonoBehaviour
 
     private SpriteRenderer sr;
 
+    private Vector2 moveDir;
+
     void Awake()
     {
+        moveDir = new Vector2(-1f, -0.1f).normalized;//대각선이동 각도 조절 -0.1f 수정
         sr = GetComponent<SpriteRenderer>();
     }
-
 
     void Update()
     {
         if (isCaptured) return;
 
-        // 왼쪽으로 이동
-        transform.Translate(Vector2.left * moveSpeed * Time.deltaTime);
+        transform.Translate(moveDir * moveSpeed * Time.deltaTime);
 
-        // 화면 밖 제거
         if (transform.position.x < destroyX)
         {
             Destroy(gameObject);
@@ -131,6 +130,13 @@ public class Prisoner_1_8 : MonoBehaviour
 
         isCaptured = true;
         moveSpeed = 0f;
+
+        // 성공 알림
+        Manager_1_8 manager = FindObjectOfType<Manager_1_8>();
+        if (manager != null)
+        {
+            manager.hasAnySuccess = true;
+        }
 
         if (sr != null)
         {

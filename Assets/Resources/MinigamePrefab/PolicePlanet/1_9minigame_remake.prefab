@@ -151,6 +151,7 @@ MonoBehaviour:
   rope: {fileID: 1756486582245401636}
   brightBackground: {fileID: 2686023745983911226}
   handleMover: {fileID: 8425222912558260087}
+  maxInputCount: 3
 --- !u!1 &1652557685022657608
 GameObject:
   m_ObjectHideFlags: 0
@@ -506,7 +507,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8ca9dcc816afbc4fa54f198e3f1510c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minigame_1_9: {fileID: 0}
+  minigame_1_9: {fileID: 7640853242025358338}
   distanceThreshold: 50
   movingObject: {fileID: 7804807665910267671}
   activateObject: {fileID: 2686023745983911226}
@@ -526,6 +527,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ropeStart: {fileID: 7915494354526730502}
+  stretchDuration: 0.2
+  stretchEase: 6
 --- !u!114 &593524897205460729
 MonoBehaviour:
   m_ObjectHideFlags: 0
