@@ -44,9 +44,14 @@ public class minigame_1_1_remake : MiniGameBase
 
     void Start()
     {
+        Debug.Log("[1-1] Start() called");
         Scope.SetActive(false);
         cam = Camera.main;
         StartGame();
+        /*if (Scope != null) Scope.SetActive(false);
+        cam = Camera.main;
+        StartGame();
+         */
     }
 
     public override void StartGame()
@@ -75,6 +80,7 @@ public class minigame_1_1_remake : MiniGameBase
 
     public override void BindRhythmManager(IRhythmManager manager)
     {
+        Debug.Log("[1-1] BindRhythmManager called manager=" + (manager != null));
         if (rhythmManager != null)
             rhythmManager.OnEventTriggered -= OnRhythmEvent;
 
@@ -86,6 +92,7 @@ public class minigame_1_1_remake : MiniGameBase
 
     public override void OnRhythmEvent(string action)
     {
+        Debug.Log("[1-1] OnRhythmEvent action=" + action);
         if (ended || string.IsNullOrEmpty(action)) return;
 
         action = action.Trim();
@@ -103,14 +110,11 @@ public class minigame_1_1_remake : MiniGameBase
         Vector3 w = cam.ScreenToWorldPoint(Input.mousePosition);
         w.z = 0;
 
-        // 스코프 연출
         if (targetScope != null)
             targetScope.position = w;
 
-        // 클릭 위치 레이캐스트
         RaycastHit2D hit = Physics2D.Raycast(w, Vector2.zero);
 
-        // 아무것도 못 찍었으면: 입력 구간일 때만 Miss로 처리
         if (!hit)
         {
             if (canClick)
@@ -123,7 +127,6 @@ public class minigame_1_1_remake : MiniGameBase
 
         var clicked = hit.collider.GetComponent<enemy_1_1_test>();
 
-        // 적이 아닌 것을 클릭했으면: 입력 구간일 때만 Miss
         if (clicked == null)
         {
             if (canClick)
@@ -134,7 +137,6 @@ public class minigame_1_1_remake : MiniGameBase
             return;
         }
 
-        // miss 판정
         if (!canClick)
         {
             missCount++;
@@ -145,11 +147,9 @@ public class minigame_1_1_remake : MiniGameBase
         if (inputIndex >= ENEMY_COUNT)
             return;
 
-        // 이미 처리된 입력이면 무시
         if (resolvedThisRound[inputIndex])
             return;
 
-        // 순서가 틀린 클릭 Miss
         if (clicked != enemies[inputIndex])
         {
             missCount++;
@@ -157,40 +157,83 @@ public class minigame_1_1_remake : MiniGameBase
             return;
         }
 
-        // 정답 성공 처리
         ResolveSuccess(inputIndex);
     }
 
     void HandleShow()
     {
-        if (showIndex >= ENEMY_COUNT) return;
-        if (enemies == null || enemies.Length < ENEMY_COUNT) return;
-        if (showPositions == null || showPositions.Length < ENEMY_COUNT) return;
+        Debug.Log("[1-1] HandleShow entered showIndex=" + showIndex);
+
+        if (showIndex >= ENEMY_COUNT)
+        {
+            Debug.Log("[1-1] HandleShow return: showIndex>=ENEMY_COUNT");
+            return;
+        }
+
+        if (enemies == null)
+        {
+            Debug.Log("[1-1] HandleShow return: enemies is null");
+            return;
+        }
+
+        if (enemies.Length < ENEMY_COUNT)
+        {
+            Debug.Log("[1-1] HandleShow return: enemies length=" + enemies.Length);
+            return;
+        }
+
+        if (showPositions == null)
+        {
+            Debug.Log("[1-1] HandleShow return: showPositions is null");
+            return;
+        }
+
+        if (showPositions.Length < ENEMY_COUNT)
+        {
+            Debug.Log("[1-1] HandleShow return: showPositions length=" + showPositions.Length);
+            return;
+        }
 
         if (shuffledPosIndex == null || shuffledPosIndex.Length != ENEMY_COUNT)
+        {
+            Debug.Log("[1-1] HandleShow: PrepareShowPositions()");
             PrepareShowPositions();
+        }
 
         int posIdx = shuffledPosIndex[showIndex];
 
         var e = enemies[showIndex];
         var p = showPositions[posIdx];
-        if (e == null || p == null) return;
+
+        if (e == null)
+        {
+            Debug.Log("[1-1] HandleShow return: enemies[" + showIndex + "] is null");
+            return;
+        }
+
+        if (p == null)
+        {
+            Debug.Log("[1-1] HandleShow return: showPositions[" + posIdx + "] is null");
+            return;
+        }
 
         e.transform.position = p.position;
-        e.gameObject.SetActive(true);
-        e.Highlight(true);
+
+        // 여기서부터 네가 원하는 순서
+        EnemySetActiveTrueThenShow(e);
 
         StopAutoOff(showIndex);
 
         resolvedThisRound[showIndex] = false;
         autoOffJobs[showIndex] = StartCoroutine(AutoOffRoutine(showIndex));
 
-        Debug.Log("[1-1] SHOW idx=" + showIndex + " posIdx=" + posIdx);
-
+        Debug.Log("[1-1] HandleShow BEFORE showIndex++");
         showIndex++;
+        Debug.Log("[1-1] HandleShow AFTER showIndex++ showIndex=" + showIndex);
+
         if (showIndex > 3)
         {
-            Scope.SetActive(true);
+            if (Scope != null) Scope.SetActive(true);
         }
     }
 
@@ -211,11 +254,13 @@ public class minigame_1_1_remake : MiniGameBase
         missCount++;
 
         if (enemies[idx] != null)
-            enemies[idx].Clear();
+        {
+            // 원하는 흐름: FadeOut(Hide) -> SetActive(false)
+            yield return EnemyHideThenSetActiveFalse(enemies[idx]);
+        }
 
         Debug.Log("[1-1] MISS: AutoOff Timeout idx=" + idx);
 
-        // 자동 off가 현재 입력 대상이면 다음으로 진행
         if (idx == inputIndex)
         {
             inputIndex++;
@@ -234,7 +279,10 @@ public class minigame_1_1_remake : MiniGameBase
         StopAutoOff(idx);
 
         if (enemies[idx] != null)
-            enemies[idx].Clear();
+        {
+            // 원하는 흐름: FadeOut(Hide) -> SetActive(false)
+            StartCoroutine(EnemyHideThenSetActiveFalse(enemies[idx]));
+        }
 
         Debug.Log("[1-1] SUCCESS: idx=" + idx);
 
@@ -246,8 +294,9 @@ public class minigame_1_1_remake : MiniGameBase
     {
         if (inputIndex < ENEMY_COUNT) return;
         EndRound();
-        Scope.SetActive(false);
-        targetScope.position = new Vector2(0, 0);
+
+        if (Scope != null) Scope.SetActive(false);
+        if (targetScope != null) targetScope.position = new Vector2(0, 0);
     }
 
     void EndRound()
@@ -283,7 +332,9 @@ public class minigame_1_1_remake : MiniGameBase
             if (enemies != null && i < enemies.Length && enemies[i] != null)
             {
                 enemies[i].ResetEnemy();
-                enemies[i].gameObject.SetActive(false);
+
+                // 라운드 리셋은 즉시 정리: 알파를 낮춰두고 비활성화
+                EnemySetInactiveImmediate(enemies[i]);
             }
         }
     }
@@ -324,5 +375,60 @@ public class minigame_1_1_remake : MiniGameBase
         if (ended) return;
         ended = true;
         Fail();
+    }
+
+    // 아래부터 enemy 표시/숨김 유틸(요구한 순서 그대로 구현)
+
+    void EnemySetActiveTrueThenShow(enemy_1_1_test e)
+    {
+        if (e == null) return;
+
+        GameObject go = e.gameObject;
+
+        // 먼저 켜기
+        go.SetActive(true);
+        Debug.Log("AFTER SetActive(true): activeSelf=" + go.activeSelf + " activeInHierarchy=" + go.activeInHierarchy);
+
+
+        // 알파를 낮은 값으로 강제로 맞춘 후 페이드 인 시작(처음 한 프레임 번쩍임 방지)
+        FadeActiveToggle fade = go.GetComponent<FadeActiveToggle>();
+        if (fade != null)
+        {
+            fade.SetAlphaImmediate(fade.inactiveAlpha);
+            fade.FadeIn();
+        }
+    }
+
+    IEnumerator EnemyHideThenSetActiveFalse(enemy_1_1_test e)
+    {
+        if (e == null) yield break;
+
+        GameObject go = e.gameObject;
+
+        FadeActiveToggle fade = go.GetComponent<FadeActiveToggle>();
+        if (fade != null)
+        {
+            fade.FadeOut();
+            yield return new WaitForSeconds(fade.GetFadeTime());
+        }
+
+        // 마지막에 끄기
+        go.SetActive(false);
+    }
+
+    void EnemySetInactiveImmediate(enemy_1_1_test e)
+    {
+        if (e == null) return;
+
+        GameObject go = e.gameObject;
+
+        FadeActiveToggle fade = go.GetComponent<FadeActiveToggle>();
+        if (fade != null)
+        {
+            // 비활성화 상태에서도 다음 Show 때 자연스럽게 시작되도록 알파를 낮게 맞춰둠
+            fade.SetAlphaImmediate(fade.inactiveAlpha);
+        }
+
+        go.SetActive(false);
     }
 }
