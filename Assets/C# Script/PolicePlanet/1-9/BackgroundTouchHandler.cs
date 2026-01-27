@@ -34,6 +34,6 @@ public class BackgroundTouchHandler : MonoBehaviour
     public void OnBackgroundTouch()
     {
         minigame?.OnScreenTouch();
-        rope?.PlayStretch(stretchOffset, stretchDuration);
+        rope?.PlayStretch(stretchOffset);
     }
 }

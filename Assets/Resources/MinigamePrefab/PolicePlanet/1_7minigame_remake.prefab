@@ -135,10 +135,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70ee45b8b217e894e9a47ad0ffec542e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ProhibitSpawner: {fileID: 2057269779248561557}
+  ProhibitPrefabs: []
+  basket: {fileID: 1114006704717622196}
   holdJudge: {fileID: 1384034412918304911}
   maxHoldCount: 4
-  basket: {fileID: 1114006704717622196}
 --- !u!114 &6584522784603379527
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -534,6 +534,9 @@ MonoBehaviour:
   holdUIPrefab: {fileID: 1339359407143525951, guid: 9bcaa3d4491803b42803ad10768aac9b, type: 3}
   shrinkSpeed: 1
   maxHoldCount: 4
+  successTolerance: 0.2
+  minigame: {fileID: 6803564812893199740}
+  clickBufferTime: 0.15
 --- !u!1 &4514964588818708058
 GameObject:
   m_ObjectHideFlags: 0
