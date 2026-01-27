@@ -21,6 +21,14 @@ public class Minigame_1_9 : MiniGameBase
 
     private Tween blinkTween;
 
+    [Header("총 입력 수 (인스펙터에서 수정 가능)")]
+    [SerializeField] private int maxInputCount = 3;
+
+    private bool hasAnySuccess = false;
+    private int totalInputCount = 0;
+    private int handledInputCount = 0;
+    private List<bool> inputResults = new List<bool>();
+
     private void Awake()
     {
         if (brightBackground != null)
@@ -30,18 +38,13 @@ public class Minigame_1_9 : MiniGameBase
     public override void StartGame()
     {
         canInput = false;
+        hasAnySuccess = false;
+
         StopBlink();
 
-        hasMissed = false;
-    }
-
-    public void Succeed()
-    {
-        Success();
-    }
-    public void Failure()
-    {
-        Fail();
+        totalInputCount = 3;  // 여기서 총 입력 수를 미리 정함
+        handledInputCount = 0;
+        inputResults.Clear();
     }
 
     public override void OnRhythmEvent(string action)
@@ -56,7 +59,15 @@ public class Minigame_1_9 : MiniGameBase
                 break;
 
             case "Input":
+                if (totalInputCount >= maxInputCount)
+                    return; // 최대 입력 수 초과 방지
+
                 canInput = true;
+                totalInputCount++;               // 등장한 입력 수 증가
+                inputResults.Add(false);         // 아직 성공/실패 기록 없음
+                Debug.Log($"Input 등장 ({totalInputCount}/{maxInputCount})");
+
+                Invoke(nameof(AutoMissInput), 0.5f);
                 break;
         }
     }
@@ -66,35 +77,26 @@ public class Minigame_1_9 : MiniGameBase
         // 항상 핸들 모션 실행
         handleMover.PlayStretch();
 
-        // 줄 늘어났다 줄어드는 효과
         if (rope != null)
-            rope.PlayStretch(new Vector3(2f, 0, 0), 0.3f);
+            rope.PlayStretch(new Vector3(2f, 0, 0));
 
-        if (canInput)
-        {
-            canInput = false;
+        if (!canInput) return;
 
-            // 디버그 메시지 출력
-            Debug.Log("성공!");
+        canInput = false;
+        handledInputCount++;
 
-            // 실제 성공 처리 호출
-            Success(); // 또는 OnPlayerInput() 호출 계속해도 됨
-        }
+        inputResults[handledInputCount - 1] = true;
+        hasAnySuccess = true;
+
+        Debug.Log($"인풋 처리됨 ({handledInputCount}/{maxInputCount}) → 성공 기록");
+
+        CheckIfLastInputHandled();
     }
-
-
 
     // 판정 처리
     public override void OnJudgement(JudgementResult judgement)
     {
         StopBlink();
-
-        if (judgement == JudgementResult.Perfect || judgement == JudgementResult.Good)
-            Success();
-        /*
-        else
-            Fail();
-        */
     }
 
     private void PlayBlinkOnce()
@@ -122,8 +124,6 @@ public class Minigame_1_9 : MiniGameBase
             });
     }
 
-
-
     private void StopBlink()
     {
         blinkTween?.Kill();
@@ -139,5 +139,42 @@ public class Minigame_1_9 : MiniGameBase
             );
             brightBackground.SetActive(false);
         }
+    }
+
+    public void NotifySuccess()
+    {
+        hasAnySuccess = true;
+    }
+
+    private void AutoMissInput()
+    {
+        if (!canInput) return;
+
+        canInput = false;
+        handledInputCount++;
+
+        Debug.Log($"입력 없음 → 자동 미스 ({handledInputCount}/{maxInputCount})");
+
+        CheckIfLastInputHandled();
+    }
+
+    private void CheckIfLastInputHandled()
+    {
+        if (handledInputCount < maxInputCount)
+            return; // 아직 처리 안 끝남
+
+        Debug.Log("모든 Input 처리 완료 → 최종 판정");
+
+        if (hasAnySuccess)
+        {
+            Debug.Log("최종 성공!");
+            Success();
+        }
+        else
+        {
+            Debug.Log("최종 실패");
+            base.Fail();
+        }
+
     }
 }

@@ -30,6 +30,7 @@ public class Manager_1_8 : MonoBehaviour
     public float minMoveSpeed = 6f;
     public float maxMoveSpeed = 10f;
 
+    public bool hasAnySuccess = false;
 
     private void Start()
     {

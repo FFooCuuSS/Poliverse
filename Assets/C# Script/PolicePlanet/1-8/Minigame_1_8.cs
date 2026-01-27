@@ -30,13 +30,16 @@ public class Minigame_1_8 : MiniGameBase
     // 예: instructionText.text = MinigameExplain;
     }
 
-    public void Succeed()
-    {
-        Success();
-    }
-
     public override void Fail()
     {
+        if (manager_1_8.hasAnySuccess)
+        {
+            Debug.Log("게임 성공");
+            Success();
+            return;
+        }
+
+        Debug.Log("전부 실패 → 게임 실패");
         manager_1_8.DestroyAllPrisoners();
         base.Fail();
     }

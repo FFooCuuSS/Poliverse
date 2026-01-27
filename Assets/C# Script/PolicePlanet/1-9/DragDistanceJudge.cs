@@ -52,14 +52,16 @@ public class DragDistanceJudge : MonoBehaviour
         // 거리 기준 성공
         if (totalDistance >= distanceThreshold)
         {
-            minigame_1_9.Succeed();
+            Debug.Log("성공");
+
+            minigame_1_9.NotifySuccess();
             StartShaking();
             ActivateObject();
             ChangeSprite();
         }
     }
 
-        private void StartShaking()
+    private void StartShaking()
     {
         if (movingObject == null) return;
 
@@ -89,8 +91,6 @@ public class DragDistanceJudge : MonoBehaviour
         if (targetSpriteRenderer != null && successSprite != null)
             targetSpriteRenderer.sprite = successSprite;
     }
-
-
 
 
     //public void NotifyMiss()
