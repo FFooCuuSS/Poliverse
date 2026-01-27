@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class Minigame1_6_Manager_remake : MiniGameBase
+public class Minigame1_5_Manager_remake : MiniGameBase
 {
     public HandControlerTest handControler;
     public Transform mainHand;
@@ -21,6 +21,10 @@ public class Minigame1_6_Manager_remake : MiniGameBase
     // 입력 잠금
     private bool cooldownLocked = false;
     private bool maxInputLocked = false;
+
+    // 최근 판정이 Good/Perfect인지 저장(SpawnedHand에서 읽음)
+    public bool lastJudgeGoodOrPerfect;
+
 
     // Success/Fail 중복 호출 방지
     private bool gameEnded = false;
@@ -124,18 +128,19 @@ public class Minigame1_6_Manager_remake : MiniGameBase
 
     private void TryInput()
     {
-        // 안전장치
         if (cooldownLocked || maxInputLocked) return;
+
+        // 이번 클릭 입력 시작 시, 판정 상태 초기화
+        lastJudgeGoodOrPerfect = false;
 
         SpawnHand();
 
         if (rhythm != null)
             rhythm.ReceivePlayerInput("Input");
 
-        
-
         StartCoroutine(InputCooldownRoutine());
     }
+
 
     private IEnumerator InputCooldownRoutine()
     {
@@ -153,12 +158,14 @@ public class Minigame1_6_Manager_remake : MiniGameBase
             judgement == MiniGameBase.JudgementResult.Good)
         {
             judgeCnt++;
+            lastJudgeGoodOrPerfect = true;
         }
         else
         {
-            //Fail();
+            lastJudgeGoodOrPerfect = false;
         }
     }
+
 
     private void CheckSuccessCondition()
     {
@@ -208,9 +215,15 @@ public class Minigame1_6_Manager_remake : MiniGameBase
         Vector2 spawnPos = new Vector2(mainHand.position.x, -1f);
 
         GameObject hand = Instantiate(handSpawn, spawnPos, Quaternion.identity);
-
-        // 부모 설정 (정리용, 위치는 신경 안 씀)
         hand.transform.SetParent(mainParent);
+
+        // SpawnedHand에 매니저 연결
+        SpawnedHandControler sh = hand.GetComponent<SpawnedHandControler>();
+        if (sh != null)
+        {
+            sh.minigameManager1_5 = this;
+        }
     }
+
 
 }
