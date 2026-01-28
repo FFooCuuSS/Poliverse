@@ -7,7 +7,7 @@ public class Accessory : MonoBehaviour
 
     private Minigame_1_4 minigame;
 
-    private DragAndDrop drag;   // ★ 추가
+    private DragAndDrop drag;   
     void Awake()
     {
         drag = GetComponent<DragAndDrop>();
@@ -25,14 +25,14 @@ public class Accessory : MonoBehaviour
     {
         InputLocked = true;
         if (drag != null)
-            drag.banDragging = true;   // ★ 핵심
+            drag.banDragging = true;   
     }
 
     public void UnlockInput()
     {
         InputLocked = false;
         if (drag != null)
-            drag.banDragging = false;  // ★ 핵심
+            drag.banDragging = false;  
     }
 
 
@@ -40,7 +40,7 @@ public class Accessory : MonoBehaviour
     {
         if (InputLocked) return;
         OnSlide();
-        Debug.Log("onslide 호출");
+        
     }
 
     // 실제 슬라이드 입력 시 호출

@@ -2,16 +2,19 @@
 
 public class HandcuffSequenceController : MonoBehaviour
 {
+    public static HandcuffSequenceController Instance;
+
     public HandAutoMove leftHand;
     public HandAutoMove rightHand;
 
     public HandcuffFitChecker leftCuff;
     public CircleCollider2D leftHandCollider;
+    public CircleCollider2D rightHandCollider;
 
     public ChainGenerator chainGenerator;
     public DragAndDrop rightCuffDrag;
 
-    private enum State
+    public enum State
     {
         LeftMoving,
         LeftSnapped,
@@ -19,17 +22,23 @@ public class HandcuffSequenceController : MonoBehaviour
         PlayerDrag
     }
 
-    private State state = State.LeftMoving;
+    public State curState { get; private set; } = State.LeftMoving;
+
+    void Awake()
+    {
+        if(Instance == null) Instance = this;
+    }
 
     void Start()
     {
         rightCuffDrag.enabled = true; // 오른손은 처음부터 드래그 가능
         leftHand.StartMove();
+        rightHandCollider.enabled = false;
     }
 
     void Update()
     {
-        switch (state)
+        switch (curState)
         {
             case State.LeftMoving:
                 if (leftHand.hasArrived)
@@ -37,23 +46,24 @@ public class HandcuffSequenceController : MonoBehaviour
                     leftCuff.ForceSnapToHand(leftHandCollider);
 
                     leftHandCollider.enabled = false;
-                    chainGenerator.isLeftCuffLocked = true; // 🔒 핵심
+                    chainGenerator.isLeftCuffLocked = true; 
 
                     Debug.Log("왼손 수갑 장착 완료");
-                    state = State.LeftSnapped;
+                    curState = State.LeftSnapped;
+                    rightHandCollider.enabled = true ;
                 }
                 break;
 
             case State.LeftSnapped:
                 rightHand.StartMove();
-                state = State.RightMoving;
+                curState = State.RightMoving;
                 break;
 
             case State.RightMoving:
                 if (rightHand.hasArrived)
                 {
                     Debug.Log("오른손 도착 – 플레이어 조작");
-                    state = State.PlayerDrag;
+                    curState = State.PlayerDrag;
                 }
                 break;
         }

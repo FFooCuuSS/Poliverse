@@ -1,8 +1,8 @@
 minigame,각 미니게임별 노트,,,,,,,,,,,,,,,
 1-1_time,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10
 1-1_type,Show,Show,Show,Show,Input,Input,Input,Input,Show,Show,Show,Show,Input,Input,Input,Input
-1-2_time,9,-,-,-,,,,,,,,,,,,
-1-2_type,Tap,-,-,-,,,,,,,,,,,,
+1-2_time,8,-,-,-,,,,,,,,,,,,
+1-2_type,Swipe,-,-,-,,,,,,,,,,,,
 1-3_time,1,6,11,16,21,26,,,,,,,,,,
 1-3_type,Show,Show,Show,Show,Show,Show,,,,,,,,,,
 1-4_time,5,6,7,-,,,,,,,,,,,,
