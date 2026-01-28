@@ -608,6 +608,7 @@ MonoBehaviour:
   rightHand: {fileID: 715889241897249678}
   leftCuff: {fileID: 4275712946937975648}
   leftHandCollider: {fileID: 8076192000081770606}
+  rightHandCollider: {fileID: 3187027208396221911}
   chainGenerator: {fileID: 1503856696520320065}
   rightCuffDrag: {fileID: 1416842417430334025}
 --- !u!1 &3159021568148757785

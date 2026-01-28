@@ -5,7 +5,6 @@ public class HandcuffFitChecker : MonoBehaviour
 {
     public GameObject stage_1_2;
     private Minigame_1_2 minigame_1_2;
-    private MiniGameBase minigameBase;
 
     [SerializeField] private GameObject objectToDestroy_1;
     [SerializeField] private GameObject objectToDestroy_2;
@@ -27,7 +26,6 @@ public class HandcuffFitChecker : MonoBehaviour
         minigame_1_2 = stage_1_2.GetComponent<Minigame_1_2>();
         cuffCollider = GetComponent<CircleCollider2D>();
         dragAndDrop = GetComponent<DragAndDrop>();
-        minigameBase = GetComponentInParent<MiniGameBase>();
     }
 
     private void Update()
@@ -42,6 +40,7 @@ public class HandcuffFitChecker : MonoBehaviour
     {
         foreach (var handcol in handColliders)
         {
+            if (handcol == null || !handcol.enabled) continue;
             if (cuffCollider.bounds.Intersects(handcol.bounds))
             {
                 transform.position = handcol.bounds.center;
@@ -68,21 +67,33 @@ public class HandcuffFitChecker : MonoBehaviour
                 return;
         }
 
-        isGameEnded = true;
-
-        if (all[0].snappedHand != all[1].snappedHand)
+        bool isCorrectTiming = (HandcuffSequenceController.Instance != null &&
+            HandcuffSequenceController.Instance.curState == HandcuffSequenceController.State.PlayerDrag);
+        if (isCorrectTiming)
         {
-            if (objectToDestroy_1 != null)    objectToDestroy_1.SetActive(false);
-            if (objectToDestroy_2 != null)    objectToDestroy_2.SetActive(false);
-            if (objectToSpawn != null)        objectToSpawn.SetActive(true);
+            if (all[0].snappedHand != all[1].snappedHand)
+            {
+                //정확한 타이밍에 양손에 채운 경우
+                isGameEnded = true;
+                if (objectToDestroy_1 != null) objectToDestroy_1.SetActive(false);
+                if (objectToDestroy_2 != null) objectToDestroy_2.SetActive(false);
+                if (objectToSpawn != null) objectToSpawn.SetActive(true);
 
-            //minigame_1_2.Succeed();
-            minigameBase.OnPlayerInput();
-            minigameBase.Success();
+
+            }
+            else
+            {
+                // 같은 손에 두 개 채운 경우
+                isGameEnded = true;
+                minigame_1_2.Failure();
+            }
         }
+        
         else
         {
-            minigame_1_2.Fail();
+            //타이밍이 안맞을 때 수갑을 채운 경우
+            isGameEnded = true;
+            minigame_1_2.Failure();
         }
     }
     public void ForceSnapToHand(CircleCollider2D handCol)
