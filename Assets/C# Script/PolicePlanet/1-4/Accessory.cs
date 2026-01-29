@@ -7,10 +7,13 @@ public class Accessory : MonoBehaviour
 
     private Minigame_1_4 minigame;
 
-    private DragAndDrop drag;   
+    private DragAndDrop drag;
+
+    private Montage curMontage;
     void Awake()
     {
         drag = GetComponent<DragAndDrop>();
+         
     }
 
     public void Init(Minigame_1_4 game)
@@ -19,6 +22,11 @@ public class Accessory : MonoBehaviour
         IsRemoved = false;
         InputLocked = false;
         UnlockInput();
+    }
+
+    public void SetMontage(Montage montage)
+    {
+        curMontage = montage;
     }
 
     public void LockInput()
@@ -51,6 +59,12 @@ public class Accessory : MonoBehaviour
         if (minigame == null) return;
 
         minigame.OnPlayerInput("Swipe");
+
+        // 피격 몽타주 보이기 함수 추가 필요
+        if(curMontage != null)
+        {
+            curMontage.PlayHit();
+        }
     }
 
     public void Remove()

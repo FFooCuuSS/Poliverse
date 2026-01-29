@@ -8,6 +8,7 @@ public class SpawnManager : MonoBehaviour
     public List<GameObject> glassesPrefabs;
     public List<GameObject> mustachePrefabs; 
     public List<GameObject> montagePrefabs;
+    public List<GameObject> attackMontagePrefabs;
 
 
     public Transform hatSpawnPoint;
@@ -16,6 +17,11 @@ public class SpawnManager : MonoBehaviour
     public Transform montageSpawnPoint;
 
     public AccessoryBlinkManager blinkManager;
+    private Accessory acc;
+
+    private GameObject selectedMontage;
+
+    
 
     void Start()
     {
@@ -32,14 +38,19 @@ public class SpawnManager : MonoBehaviour
             point
         );
 
-        Accessory acc = selected.GetComponent<Accessory>();
+        acc = selected.GetComponent<Accessory>();
         blinkManager.RegisterAccessory(acc);
     }
     void SpawnMontage()
     {
-        Instantiate(
+        selectedMontage = Instantiate(
             montagePrefabs[Random.Range(0, montagePrefabs.Count)],
             montageSpawnPoint
         );
+
+        Montage montage = selectedMontage.GetComponent<Montage>();
+        acc.SetMontage(montage);        
+        
     }
+    
 }

@@ -79,7 +79,7 @@ public class HandcuffFitChecker : MonoBehaviour
                 if (objectToDestroy_2 != null) objectToDestroy_2.SetActive(false);
                 if (objectToSpawn != null) objectToSpawn.SetActive(true);
 
-
+                minigame_1_2.OnPlayerInput("Swipe");
             }
             else
             {
