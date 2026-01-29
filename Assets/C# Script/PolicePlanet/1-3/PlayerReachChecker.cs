@@ -11,9 +11,16 @@ public class PlayerReachChecker : MonoBehaviour
     private CapsuleCollider2D playerCollider;
     private DragAndDrop dragAndDrop;
 
+    SpriteRenderer sr;
+    public Sprite PlayerFail;
+
     private bool isGameOver = false;
     private Vector3 fixedPosition;
 
+    private void Awake()
+    {
+        sr = GetComponent<SpriteRenderer>();
+    }
     private void Start()
     {
         minigame_1_3 = stage_1_3.GetComponent<Minigame_1_3>();
@@ -60,6 +67,7 @@ public class PlayerReachChecker : MonoBehaviour
         {
             isGameOver = true;
             fixedPosition = transform.position;
+            sr.sprite = PlayerFail;
             minigameBase.Fail();
         }
         

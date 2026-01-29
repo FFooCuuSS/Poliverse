@@ -98,3 +98,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   montageID: 2
+  normalSprite: {fileID: 21300000, guid: 3e480595cacf4634ca19ab46e5f9caa7, type: 3}
+  hitSprite: {fileID: 21300000, guid: 1bd7900c44e90c94cb9d707b8bc60de4, type: 3}
