@@ -283,6 +283,7 @@ MonoBehaviour:
   bluePolice: {fileID: 21300000, guid: 20e9786ad436a5c4b928e3d1a0790aec, type: 3}
   greenPolice: {fileID: 21300000, guid: 48af3146405bc124a99ec300a625cbd3, type: 3}
   whitePolice: {fileID: 21300000, guid: d613756541c5f2e41bfced6e2572480e, type: 3}
+  mainParent: {fileID: 9106849129359481783}
   laneYs:
   - 3
   - 0

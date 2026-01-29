@@ -14,6 +14,8 @@ public class Minigame_1_6_remake : MiniGameBase
     public Sprite bluePolice;
     public Sprite greenPolice;
     public Sprite whitePolice;
+    [Header("set parent")]
+    public Transform mainParent;
 
     [Header("Lane Y Positions")]
     public float[] laneYs = { 3f, 0f, -3f };
@@ -94,7 +96,8 @@ public class Minigame_1_6_remake : MiniGameBase
         spawnCount++;
 
         // °æÂû »ý¼º
-        PoliceMover p = Instantiate(policePrefab);
+        PoliceMover p = Instantiate(policePrefab, mainParent);
+
         p.gameObject.SetActive(true);
         p.laneIndex = lane;
         p.destroyX = destroyX;
@@ -227,7 +230,7 @@ public class Minigame_1_6_remake : MiniGameBase
             float x = Random.Range(containerXMin, containerXMax);
             float y = laneYs[i];
 
-            ContainerTarget c = Instantiate(containerPrefab);
+            ContainerTarget c = Instantiate(containerPrefab,mainParent);
 
             
             c.transform.position = new Vector3(x, y, 0f);
