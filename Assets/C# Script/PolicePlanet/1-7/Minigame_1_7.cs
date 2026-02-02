@@ -126,7 +126,7 @@ public class Minigame_1_7 : MiniGameBase
     private void GiveRandomProhibitToPrisoner(PrisonerController1_7 prisoner)
     {
         prisoner.DropToBasket(basket);
-
-        Debug.Log("금지물품이 나왔습니다!");
+        Debug.Log("금지물품이 바구니로 날아갑니다!");
     }
+
 }
