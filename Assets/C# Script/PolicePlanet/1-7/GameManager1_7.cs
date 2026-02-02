@@ -4,9 +4,11 @@ public class GameManager1_7 : MonoBehaviour
 {
     public static GameManager1_7 instance;
 
+    private PrisonerController1_7 currentPrisoner;
+
     public PrisonerSpawner1_7 prisonerSpawner;
-    public ProhibitedItemManager1_7 prohibitedItemManager;
     public GameObject stage_1_7;
+
     private Minigame_1_7 minigame_1_7;
 
     public int successCount = 0;
@@ -14,27 +16,39 @@ public class GameManager1_7 : MonoBehaviour
     void Awake()
     {
         if (instance == null) instance = this;
-        else Destroy(gameObject);
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
 
         minigame_1_7 = stage_1_7.GetComponent<Minigame_1_7>();
+
         SpawnPrisonerAndItems();
     }
 
     public void SpawnPrisonerAndItems()
     {
-        GameObject prisoner = prisonerSpawner.SpawnRandomPrisoner();
-        prohibitedItemManager.SpawnMarkAndItems(prisoner);
+        GameObject prisonerObj = prisonerSpawner.SpawnRandomPrisoner();
+
+        if (prisonerObj == null)
+        {
+            Debug.LogError("Prisoner 생성 실패");
+            return;
+        }
+
+        currentPrisoner = prisonerObj.GetComponent<PrisonerController1_7>();
+
+        if (currentPrisoner == null)
+        {
+            Debug.LogError("PrisonerController1_7 없음");
+        }
     }
 
     public void IncreaseSuccessCount()
     {
         successCount++;
         Debug.Log("성공 카운트: " + successCount);
-
-        //if (successCount >= 1)
-        //{
-        //    minigame_1_7.Success();
-        //}
     }
 
     public void SendRhythmInput()
@@ -42,8 +56,16 @@ public class GameManager1_7 : MonoBehaviour
         minigame_1_7.OnPlayerInput();
     }
 
-    //public void NotifyMiss()
-    //{
-    //    minigame_1_7.OnMiss();
-    //}
+    public void OnMinigameSuccess(Transform basket)
+    {
+        if (currentPrisoner != null)
+        {
+            Debug.Log("성공! 현재 죄수에게 물건을 던지라고 명령합니다.");
+            currentPrisoner.DropToBasket(basket);
+        }
+        else
+        {
+            Debug.LogError("현재 죄수 참조 없음");
+        }
+    }
 }
