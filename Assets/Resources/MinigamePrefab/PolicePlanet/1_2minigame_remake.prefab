@@ -228,6 +228,8 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &146286648587000810
 GameObject:
   m_ObjectHideFlags: 0
@@ -1794,6 +1796,8 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &9164173106436622639
 GameObject:
   m_ObjectHideFlags: 0

@@ -73,19 +73,19 @@ public class HandcuffFitChecker : MonoBehaviour
         {
             if (all[0].snappedHand != all[1].snappedHand)
             {
+                minigame_1_2.OnPlayerInput("Input");
                 //정확한 타이밍에 양손에 채운 경우
                 isGameEnded = true;
                 if (objectToDestroy_1 != null) objectToDestroy_1.SetActive(false);
                 if (objectToDestroy_2 != null) objectToDestroy_2.SetActive(false);
                 if (objectToSpawn != null) objectToSpawn.SetActive(true);
 
-                minigame_1_2.OnPlayerInput("Swipe");
+                
             }
             else
             {
                 // 같은 손에 두 개 채운 경우
                 isGameEnded = true;
-                minigame_1_2.Failure();
             }
         }
         
@@ -94,7 +94,6 @@ public class HandcuffFitChecker : MonoBehaviour
             //타이밍이 안맞을 때 수갑을 채운 경우
             Debug.Log("타이밍");
             isGameEnded = true;
-            minigame_1_2.Failure();
         }
     }
     public void ForceSnapToHand(CircleCollider2D handCol)

@@ -20,7 +20,7 @@ public class Montage : MonoBehaviour
     public void PlayHit()
     {
         if (hitSprite == null) return;
-
+        
         if (hitRoutine != null)
             StopCoroutine(hitRoutine);
 
@@ -30,7 +30,7 @@ public class Montage : MonoBehaviour
     IEnumerator HitRoutine()
     {
         sr.sprite = hitSprite;
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(0.5f);
         sr.sprite = normalSprite;
     }
 }

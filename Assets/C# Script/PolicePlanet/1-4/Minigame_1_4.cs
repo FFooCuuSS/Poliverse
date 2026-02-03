@@ -109,13 +109,4 @@ public class Minigame_1_4 : MiniGameBase
             Success();
         }
     }
-
-    private bool AllAccessoriesRemoved()
-    {
-        foreach (var acc in orderedAccessories)
-        {
-            if (!acc.IsRemoved) return false;
-        }
-        return true;
-    }
 }

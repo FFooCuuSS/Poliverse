@@ -27,6 +27,7 @@ public class Accessory : MonoBehaviour
     public void SetMontage(Montage montage)
     {
         curMontage = montage;
+        Debug.Log($"{name} SetMontage → {montage?.name}");
     }
 
     public void LockInput()
@@ -57,14 +58,14 @@ public class Accessory : MonoBehaviour
         if (InputLocked) return;
         if (IsRemoved) return;
         if (minigame == null) return;
-
-        minigame.OnPlayerInput("Swipe");
-
-        // 피격 몽타주 보이기 함수 추가 필요
-        if(curMontage != null)
+        if (curMontage != null)
         {
             curMontage.PlayHit();
+            Debug.Log("피격표정");
         }
+        minigame.OnPlayerInput("Swipe");
+
+        
     }
 
     public void Remove()

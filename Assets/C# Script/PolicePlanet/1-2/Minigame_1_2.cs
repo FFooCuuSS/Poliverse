@@ -14,6 +14,10 @@ public class Minigame_1_2 : MiniGameBase
 
     private bool ended;
 
+    private void Start()
+    {
+        StartGame();
+    }
     public override void StartGame()
     {
         base.StartGame();
@@ -24,10 +28,12 @@ public class Minigame_1_2 : MiniGameBase
 
     public void Succeed()
     {
+        ended = true;
         Success();
     }
     public void Failure()
     {
+        ended = true;
         Fail();
     }
     public override void OnRhythmEvent(string action)
@@ -57,13 +63,11 @@ public class Minigame_1_2 : MiniGameBase
 
         if (judgement == JudgementResult.Miss)
         {
-            //Fail();
-            Success();
-
+            Failure();
         }
         else if (judgement == JudgementResult.Good || judgement == JudgementResult.Perfect)
         {
-            Success();
+            Succeed();
         }
      }
 }
