@@ -295,7 +295,6 @@ MonoBehaviour:
   - {fileID: 7141958249741912797, guid: b74bdb8738c5435469ee8f208e0943aa, type: 3}
   - {fileID: 2263854513063585085, guid: 4cd2576fcf69ae94d878367a972df6e7, type: 3}
   - {fileID: 6140424544877389974, guid: 1f33ee2b8112c8e4097b540ced6f0fac, type: 3}
-  attackMontagePrefabs: []
   hatSpawnPoint: {fileID: 6689482756079567731}
   glassesSpawnPoint: {fileID: 7531862611604737029}
   mustacheSpawnPoint: {fileID: 6606089454469853169}
@@ -964,3 +963,5 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
