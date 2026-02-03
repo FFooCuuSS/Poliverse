@@ -10,7 +10,7 @@ public class Minigame1_5_Manager_remake : MiniGameBase
     public GameObject handSpawn;
     public Transform mainParent;
 
-    public rythmManager1_5_Test rhythm;
+    public RhythmManagerTest rhythm;
 
     public float inputCooldown = 0.15f;   // 입력 후 잠금 시간
 
@@ -33,6 +33,7 @@ public class Minigame1_5_Manager_remake : MiniGameBase
     private const int CASE1_GOAL = 4;
     private const int CASE2_GOAL = 3;
 
+    public int setCaseNum;
     protected override float TimerDuration => 7f;
     protected override string MinigameExplain => "숨은 죄수를 찾아라!";
 
@@ -50,7 +51,7 @@ public class Minigame1_5_Manager_remake : MiniGameBase
         // case 선택
         int randInt = Random.Range(1, 3);
         if (handControler != null) handControler.caseNum = randInt;
-
+        setCaseNum = randInt;
         if (randInt == 1 && case1_Obj != null) case1_Obj.SetActive(true);
         else if (randInt == 2 && case2_Obj != null) case2_Obj.SetActive(true);
 
@@ -98,21 +99,27 @@ public class Minigame1_5_Manager_remake : MiniGameBase
         
 
         // case별 입력 제한
-        if (handControler.caseNum == 1)
+        if (setCaseNum == 1)
         {
            // Debug.Log("inputCnt" + inputCnt + "maxInputLock: " + maxInputLocked);
 
             if (inputCnt >= 4) maxInputLocked = true;
             if (mainHand.position.x < -12)
+            {
+                Debug.Log("InputLocked, checkSuccessCondition case1");
                 CheckSuccessCondition();
+            }
+            
         }
-        else if (handControler.caseNum == 2)
+        else if (setCaseNum == 2)
         {
             if (inputCnt >= 3) maxInputLocked = true;
-           // Debug.Log("inputCnt" + inputCnt + "maxInputLock: " + maxInputLocked);
-
+            // Debug.Log("inputCnt" + inputCnt + "maxInputLock: " + maxInputLocked);
             if (mainHand.position.x < -14.5)
+            {
+                Debug.Log("InputLocked, checkSuccessCondition case2");
                 CheckSuccessCondition();
+            }
         }
         if (cooldownLocked == false && maxInputLocked==false)
         {
@@ -171,17 +178,17 @@ public class Minigame1_5_Manager_remake : MiniGameBase
     {
         if (handControler == null) return;
 
-        if (handControler.caseNum == 1 && collideCnt >= CASE1_GOAL )
+        if (setCaseNum == 1 && collideCnt >= CASE1_GOAL )
         {
             EndSuccess();
         }
-        else if (handControler.caseNum == 2 && collideCnt >= CASE2_GOAL )
+        else if (setCaseNum == 2 && collideCnt >= CASE2_GOAL )
         {
             EndSuccess();
         }
         else
         {
-            Fail();
+            EndFail();
         }
     }
 
@@ -196,12 +203,12 @@ public class Minigame1_5_Manager_remake : MiniGameBase
    
 
    
-    public override void Fail()
+    public void EndFail()
     {
         if (gameEnded) return;
         gameEnded = true;
 
-        base.Fail();
+        Fail();
     }
 
     private void SpawnHand()
