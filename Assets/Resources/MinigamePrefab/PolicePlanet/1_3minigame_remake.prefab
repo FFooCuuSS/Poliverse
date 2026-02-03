@@ -934,6 +934,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45e39f8c32f448c489cd781f6e653bbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 379004386101876771}
+  backDistance: 0.4
+  backDuration: 0.4
+  dashDistance: 20
+  dashDuration: 0.8
 --- !u!1 &1690320259972736052
 GameObject:
   m_ObjectHideFlags: 0
@@ -1791,6 +1796,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8979257006118812481}
+  - component: {fileID: 7907661665624487179}
+  - component: {fileID: 6651063626726518396}
   m_Layer: 0
   m_Name: Decoration
   m_TagString: Untagged
@@ -1817,6 +1824,43 @@ Transform:
   - {fileID: 2789989281624497165}
   m_Father: {fileID: 1509122124435641057}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7907661665624487179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3998444442190673519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 950824f9ed961674b968752dbbff6b20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnTriggerX: 0
+  spawnOffsetX: 20
+  moveSpeed: 1
+  destroyX: -40
+--- !u!114 &6651063626726518396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3998444442190673519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0
+  roundTripTime: 0.5
+  squashX: 0.03
+  squashY: 0.05
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
 --- !u!1 &4002465194220302801
 GameObject:
   m_ObjectHideFlags: 0
@@ -3866,6 +3910,7 @@ GameObject:
   - component: {fileID: 1169635675661879797}
   - component: {fileID: 4377450302629609407}
   - component: {fileID: 6545779191831193915}
+  - component: {fileID: 7290277962758416243}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -4031,6 +4076,27 @@ MonoBehaviour:
   swipeThreshold: 50
   moveStep: 3
   moveDuration: 0.2
+--- !u!114 &7290277962758416243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8187664250252556540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.05
+  roundTripTime: 0.5
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
 --- !u!1 &8298070752260130414
 GameObject:
   m_ObjectHideFlags: 0

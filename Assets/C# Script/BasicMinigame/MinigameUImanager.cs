@@ -285,7 +285,7 @@ public class MinigameUIManager : MonoBehaviour
     private IEnumerator ShowGuideCoroutine(string text, float duration)
     {
         guideText.text = text;
-        guideText.gameObject.SetActive(true);
+        //guideText.gameObject.SetActive(true);
         yield return new WaitForSeconds(duration);
         guideText.gameObject.SetActive(false);
     }
@@ -399,19 +399,14 @@ public class MinigameUIManager : MonoBehaviour
             c.a = 0f;
             gameOverPanelImage.color = c;
 
-            yield return gameOverPanelImage.DOFade(1f, gameOverFadeDuration)
+            yield return gameOverPanelImage.DOFade(2f, gameOverFadeDuration)
                                            .SetEase(Ease.Linear)
                                            .WaitForCompletion();
-        }
-        else
-        {
-            yield return new WaitForSeconds(1f);
         }
 
         CameraScrollController.selectedPlanetIndex = 0;
         SceneManager.LoadScene("LobbyScene");
     }
-
 
     private IEnumerator DelayAndEndMinigame()
     {
@@ -443,7 +438,6 @@ public class MinigameUIManager : MonoBehaviour
         isEndingMinigame = false;
         StartCoroutine(WaitAndLoadNext());
         audioSource.Play();
-
     }
 
     private IEnumerator RetryCurrentMinigame()

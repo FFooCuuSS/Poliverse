@@ -6,8 +6,8 @@ public class Minigame_1_2 : MiniGameBase
 {
     // 판정 범위 오버라이드
     public override float perfectWindowOverride => 0.15f;
-    public override float goodWindowOverride => 0.4f;
-    public override float hitWindowOverride => 0.8f;
+    public override float goodWindowOverride => 0.5f;
+    public override float hitWindowOverride => 1f;
 
     protected override float TimerDuration => 15f;
     protected override string MinigameExplain => "체포해라!";
@@ -36,11 +36,12 @@ public class Minigame_1_2 : MiniGameBase
         Debug.Log($"{gameObject.name} 리듬메세지: {action}");
         action = action.Trim();
 
-        if (action == "Swipe")
+        if (action == "Input")
         {
 
         }
     }
+
     public override void OnPlayerInput(string action = null)
     {
         // 입력 잠금 상태면 무시
@@ -54,8 +55,15 @@ public class Minigame_1_2 : MiniGameBase
 
         base.OnJudgement(judgement);
 
-        if(judgement == JudgementResult.Miss ) Fail();
-        
-        else Success();
-    }
+        if (judgement == JudgementResult.Miss)
+        {
+            //Fail();
+            Success();
+
+        }
+        else if (judgement == JudgementResult.Good || judgement == JudgementResult.Perfect)
+        {
+            Success();
+        }
+     }
 }

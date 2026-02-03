@@ -18,10 +18,10 @@ public class PrisonInput_1_8 : MonoBehaviour
         if (minigame == null || prisonController == null)
             return;
 
-        // Tap 타이밍이 아닐 때는 무시
+        /*
         if (!minigame.CanTap)
             return;
-
+        */
         // 감옥 작동
         prisonController.ActivatePrison();
 

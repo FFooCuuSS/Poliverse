@@ -28,7 +28,6 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
     public float goodWindow = 0.07f;
     public float hitWindow = 0.12f;
 
-    [Serializable]
     public class RhythmEvent
     {
         public string action;   // 입력 매칭 키
@@ -42,6 +41,14 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
     private int eventIndex = 0;
     private double dspStartTime;
 
+    private double songTime => AudioSettings.dspTime - dspStartTime;
+    public double DspStartTime => dspStartTime;
+    public bool IsRunning => isRunning;
+    public double SongTime => songTime;
+
+    public event Action<double> OnSongStarted; // dspStartTime 전달
+    public event Action OnSongStopped;
+
     private MiniGameBase currentMinigame;
     private string currentMinigameId;
     private bool isRunning;
@@ -52,7 +59,6 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
 
     private AsyncOperationHandle<TextAsset>? loadedHandle;
 
-    private double SongTime => AudioSettings.dspTime - dspStartTime;
 
     private void Awake()
     {
@@ -111,6 +117,8 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
         ApplyWindowsFromMinigame();
 
         // 4) 시작
+        
+        // 나중에 audioSource랑 음악 확정되면 사용
         StartSong();
     }
 
@@ -274,7 +282,7 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
         {
             // 바로 Play()보다 scheduled가 안정적
             audioSource.Stop();
-            audioSource.PlayScheduled(dspStartTime);
+            //audioSource.PlayScheduled(dspStartTime);
         }
         else
         {
@@ -286,12 +294,14 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
             events[i].consumed = false;
 
         isRunning = true;
+        OnSongStarted?.Invoke(dspStartTime);
     }
 
     private void StopSongInternal()
     {
         isRunning = false;
         if (audioSource != null) audioSource.Stop();
+        OnSongStopped?.Invoke();
     }
 
     private void Update()
@@ -378,6 +388,7 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
             events[i] = e;
 
             OnPlayerJudged?.Invoke(MiniGameBase.JudgementResult.Miss);
+            Debug.Log("CheckMiss");
         }
     }
 

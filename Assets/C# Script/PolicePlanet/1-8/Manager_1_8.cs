@@ -19,7 +19,7 @@ public class Manager_1_8 : MonoBehaviour
 
     [Header("Spawn Settings")]
     public int maxPrisonerCount = 3;
-    public float spawnY = -1f;
+    public float spawnY = -3.5f;
 
     [Header("Timing Settings")]
     public float timeToReachPrison = 1f;
@@ -31,6 +31,8 @@ public class Manager_1_8 : MonoBehaviour
     public float maxMoveSpeed = 10f;
 
     public bool hasAnySuccess = false;
+    public int endedPrisoner = 0;
+    private bool isEnded = false;
 
     private void Start()
     {
@@ -42,6 +44,15 @@ public class Manager_1_8 : MonoBehaviour
         prisonPos = prisonObj.transform.position;
 
         StartGame();
+    }
+
+    private void Update()
+    {
+        if (endedPrisoner == maxPrisonerCount && !isEnded) 
+        {
+            isEnded = true;
+            minigame_1_8.ResultJudge();
+        }
     }
 
     void StartGame()

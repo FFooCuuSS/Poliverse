@@ -144,7 +144,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f305124740d87ff44bcd1a71d27faec1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minigameManager1_6: {fileID: 0}
+  minigameManager1_5: {fileID: 0}
   flashInTime: 0.1
   flashOutTime: 0.7
 --- !u!50 &6481481703501550018

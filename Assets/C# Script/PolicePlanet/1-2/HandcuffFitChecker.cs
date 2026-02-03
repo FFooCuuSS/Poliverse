@@ -92,6 +92,7 @@ public class HandcuffFitChecker : MonoBehaviour
         else
         {
             //타이밍이 안맞을 때 수갑을 채운 경우
+            Debug.Log("타이밍");
             isGameEnded = true;
             minigame_1_2.Failure();
         }

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using TMPro;
 
 public class Minigame_1_9 : MiniGameBase
 {
@@ -10,13 +11,17 @@ public class Minigame_1_9 : MiniGameBase
 
     [Header("배경 깜빡임")]
     [SerializeField] private GameObject brightBackground;
-
     [SerializeField] private HandleMover_1_9 handleMover;
+
+    [Header("성공 연출")]
+    [SerializeField] private GameObject movingObject;
+    [SerializeField] private GameObject activateObject;
+    [SerializeField] private GameObject lightEffect;
 
     private bool canInput = false;
     private bool hasMissed = false;
     private SpriteRenderer bgRenderer;
-    protected override float TimerDuration => 15f;
+    protected override float TimerDuration => 10f;
     protected override string MinigameExplain => "가동시켜라!";
 
     private Tween blinkTween;
@@ -96,7 +101,7 @@ public class Minigame_1_9 : MiniGameBase
     // 판정 처리
     public override void OnJudgement(JudgementResult judgement)
     {
-        StopBlink();
+        //StopBlink();
     }
 
     private void PlayBlinkOnce()
@@ -129,6 +134,7 @@ public class Minigame_1_9 : MiniGameBase
         blinkTween?.Kill();
         blinkTween = null;
 
+        /*
         if (bgRenderer != null)
         {
             bgRenderer.color = new Color(
@@ -139,6 +145,7 @@ public class Minigame_1_9 : MiniGameBase
             );
             brightBackground.SetActive(false);
         }
+        */
     }
 
     public void NotifySuccess()
@@ -168,13 +175,44 @@ public class Minigame_1_9 : MiniGameBase
         if (hasAnySuccess)
         {
             Debug.Log("최종 성공!");
+            StartShaking();
+            ActivateObject();
             Success();
         }
         else
         {
             Debug.Log("최종 실패");
-            base.Fail();
+            Fail();
+        }
+    }
+
+    private void StartShaking()
+    {
+        if (movingObject == null) return;
+
+        movingObject.transform
+            .DOShakePosition(
+                duration: 1f,
+                strength: 0.1f,
+                vibrato: 20,
+                randomness: 90,
+                snapping: false,
+                fadeOut: false
+            )
+            .SetLoops(-1);
+    }
+
+    private void ActivateObject()
+    {
+        if (activateObject != null)
+        {
+            activateObject.SetActive(true);
+
+            SpriteRenderer sr = activateObject.GetComponent<SpriteRenderer>();
+            sr.color = Color.white;
         }
 
+        if (lightEffect != null)
+            lightEffect.SetActive(true);
     }
 }

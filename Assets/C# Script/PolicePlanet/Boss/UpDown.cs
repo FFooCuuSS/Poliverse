@@ -27,7 +27,6 @@ public class UpDown : MonoBehaviour
     {
         ResolveManager();
 
-        // 2) 플랫폼의 goUp 값 그대로 입력 전달
         if (manager != null)
             manager.RequestMoveFromPlatform(goUp);
     }
@@ -43,7 +42,7 @@ public class UpDown : MonoBehaviour
 
         // 1) 이동: 부드럽게 가속 (들어올 때 튀지 않음)
         transform.DOMove(targetPos, 0.8f)
-            .SetEase(Ease.OutCubic)   // ← 핵심: 자연스럽게 밀어올림
+            .SetEase(Ease.OutCubic)
             .OnComplete(() =>
             {
                 // 2) 복귀: 바운스

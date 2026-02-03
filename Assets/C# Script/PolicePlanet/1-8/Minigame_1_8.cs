@@ -13,7 +13,7 @@ public class Minigame_1_8 : MiniGameBase
     private PrisonController_1_8 prisonController;
 
 
-    protected override float TimerDuration => 15f;
+    protected override float TimerDuration => 10f;
     protected override string MinigameExplain => "모두 가둬라!";
 
     private void Start()
@@ -30,18 +30,17 @@ public class Minigame_1_8 : MiniGameBase
     // 예: instructionText.text = MinigameExplain;
     }
 
-    public override void Fail()
+    public void ResultJudge()
     {
         if (manager_1_8.hasAnySuccess)
         {
-            Debug.Log("게임 성공");
             Success();
-            return;
         }
-
-        Debug.Log("전부 실패 → 게임 실패");
-        manager_1_8.DestroyAllPrisoners();
-        base.Fail();
+        else
+        {
+            manager_1_8.DestroyAllPrisoners();
+            Fail();
+        }
     }
 
     public bool CanTap => canTap;

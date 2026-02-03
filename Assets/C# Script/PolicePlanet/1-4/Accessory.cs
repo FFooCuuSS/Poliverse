@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using DG.Tweening;
 public class Accessory : MonoBehaviour
 {
     public bool IsRemoved { get; private set; }
@@ -69,7 +69,28 @@ public class Accessory : MonoBehaviour
 
     public void Remove()
     {
+        if (IsRemoved) return;
+
         IsRemoved = true;
-        gameObject.SetActive(false); // 또는 애니메이션
+        LockInput();
+
+        SpriteRenderer[] srs = GetComponentsInChildren<SpriteRenderer>();
+        if (srs.Length == 0)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
+        // 알파 페이드
+        foreach (var sr in srs)
+        {
+            sr.DOFade(0f, 0.25f);
+        }
+
+        // 페이드 끝나고 비활성화
+        DOVirtual.DelayedCall(0.25f, () =>
+        {
+            gameObject.SetActive(false);
+        });
     }
 }

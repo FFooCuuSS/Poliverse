@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7867054680717948997}
   - component: {fileID: 467781894908349584}
   - component: {fileID: 2904844658063267788}
+  - component: {fileID: 1736134301053287304}
   m_Layer: 0
   m_Name: UpPlatform
   m_TagString: Untagged
@@ -146,3 +147,24 @@ MonoBehaviour:
   ManagerObj: {fileID: 0}
   goUp: 1
   speed: 16
+--- !u!114 &1736134301053287304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6706325807068112129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0
+  roundTripTime: 0.5
+  squashX: 0.02
+  squashY: 0.04
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0

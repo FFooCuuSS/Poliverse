@@ -52,5 +52,4 @@ public class SpawnManager : MonoBehaviour
         acc.SetMontage(montage);        
         
     }
-    
 }

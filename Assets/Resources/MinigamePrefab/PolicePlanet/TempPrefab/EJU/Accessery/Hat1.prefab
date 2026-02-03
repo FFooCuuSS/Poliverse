@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1895371751379385497}
   - component: {fileID: 2125207934361927852}
   - component: {fileID: 3459005321917207314}
+  - component: {fileID: 7752743037494564061}
   m_Layer: 0
   m_Name: Hat1
   m_TagString: Untagged
@@ -175,3 +176,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2abcc14a3f57b44fb3dc99a74f18b6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &7752743037494564061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7118407009509505417}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.1
+  roundTripTime: 0.5
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0

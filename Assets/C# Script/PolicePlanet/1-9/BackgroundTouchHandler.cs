@@ -9,24 +9,27 @@ public class BackgroundTouchHandler : MonoBehaviour
     [SerializeField] private Vector3 stretchOffset = new Vector3(2f, 0, 0);
     [SerializeField] private float stretchDuration = 0.3f;
 
-    //private bool hasTouched = false;
+    [Header("Input Cooldown")]
+    [SerializeField] private float inputCooldown = 0.5f;
+
+    private float lastInputTime = -999f;
 
     void Update()
     {
-        //if (hasTouched) return;
+        // 쿨타임 체크
+        if (Time.time - lastInputTime < inputCooldown)
+            return;
 
-        // PC 마우스 왼쪽 버튼 클릭 감지
         if (Input.GetMouseButtonDown(0))
         {
             Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2 mousePos2D = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
 
-            // 배경 콜라이더가 2D일 경우
             Collider2D hitCollider = Physics2D.OverlapPoint(mousePos2D);
             if (hitCollider != null && hitCollider.gameObject == gameObject)
             {
+                lastInputTime = Time.time;
                 OnBackgroundTouch();
-                //hasTouched = true; // 한 번만 처리하고 싶으면 true
             }
         }
     }

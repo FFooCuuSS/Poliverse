@@ -250,6 +250,7 @@ GameObject:
   - component: {fileID: 5366221892569576969}
   - component: {fileID: 4549888133952531382}
   - component: {fileID: 8698956506881297003}
+  - component: {fileID: 6051094530913140221}
   m_Layer: 0
   m_Name: Prisoner3
   m_TagString: Untagged
@@ -340,6 +341,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 25
   prisonerSpawner: {fileID: 0}
+--- !u!114 &6051094530913140221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 865242890287121849}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.5
+  squashX: 0.05
+  squashY: 0.08
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
 --- !u!1 &1136837349314751266
 GameObject:
   m_ObjectHideFlags: 0

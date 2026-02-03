@@ -214,7 +214,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &17983675
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2341,6 +2341,7 @@ GameObject:
   - component: {fileID: 699328043}
   - component: {fileID: 699328042}
   - component: {fileID: 699328044}
+  - component: {fileID: 699328045}
   m_Layer: 5
   m_Name: planetResource
   m_TagString: Untagged
@@ -2419,6 +2420,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveDistance: 10
   moveDuration: 1
+--- !u!114 &699328045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 699328040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.5
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &717045894
 GameObject:
   m_ObjectHideFlags: 0

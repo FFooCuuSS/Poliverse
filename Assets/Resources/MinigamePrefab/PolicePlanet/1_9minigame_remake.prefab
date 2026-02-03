@@ -151,6 +151,9 @@ MonoBehaviour:
   rope: {fileID: 1756486582245401636}
   brightBackground: {fileID: 2686023745983911226}
   handleMover: {fileID: 8425222912558260087}
+  movingObject: {fileID: 7804807665910267671}
+  activateObject: {fileID: 2686023745983911226}
+  lightEffect: {fileID: 656621996231608356}
   maxInputCount: 3
 --- !u!1 &1652557685022657608
 GameObject:
@@ -330,6 +333,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6260627268875610542}
   - component: {fileID: 6750941364633214657}
+  - component: {fileID: 6489187080369509225}
   m_Layer: 0
   m_Name: Generator
   m_TagString: Untagged
@@ -404,6 +408,27 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &6489187080369509225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7804807665910267671}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.1
+  roundTripTime: 0.5
+  squashX: 0.02
+  squashY: 0.04
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
 --- !u!1 &8461093048078694742
 GameObject:
   m_ObjectHideFlags: 0
@@ -826,6 +851,7 @@ MonoBehaviour:
   rope: {fileID: 1756486582245401636}
   stretchOffset: {x: 8, y: 0, z: 0}
   stretchDuration: 0.3
+  inputCooldown: 0.5
 --- !u!61 &2710440634802935953
 BoxCollider2D:
   m_ObjectHideFlags: 0

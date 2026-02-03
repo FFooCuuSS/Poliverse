@@ -154,6 +154,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3291123579896196071}
   - component: {fileID: 6591683902154023000}
+  - component: {fileID: 1925764700110178089}
   m_Layer: 0
   m_Name: 1_6_map
   m_TagString: Untagged
@@ -228,6 +229,27 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1925764700110178089
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2190672964592153035}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.02
+  roundTripTime: 0.5
+  squashX: 0.02
+  squashY: 0.04
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
 --- !u!1 &2253214604651361042
 GameObject:
   m_ObjectHideFlags: 0
@@ -280,9 +302,16 @@ MonoBehaviour:
   policePrefab: {fileID: 5663870418901770768}
   blueSprite: {fileID: 21300000, guid: a5a05757a8fe6174fbbaba661c2e893e, type: 3}
   greenSprite: {fileID: 21300000, guid: ae6ada8d1eb66eb4fadae14f9bcb4f58, type: 3}
+  whiteSprite: {fileID: 21300000, guid: 7a19d27fb02bfaa49a70f370a38d6a8f, type: 3}
   bluePolice: {fileID: 21300000, guid: 20e9786ad436a5c4b928e3d1a0790aec, type: 3}
   greenPolice: {fileID: 21300000, guid: 48af3146405bc124a99ec300a625cbd3, type: 3}
   whitePolice: {fileID: 21300000, guid: d613756541c5f2e41bfced6e2572480e, type: 3}
+  bluePoliceSuccess: {fileID: 21300000, guid: bcfa48df82d256d41953a73dd901edd9, type: 3}
+  bluePoliceFail: {fileID: 21300000, guid: 469a67bacc43f2d439f5da92edd02d08, type: 3}
+  greenPoliceSuccess: {fileID: 21300000, guid: 289fa812d5eb7494d8ccea76408b0187, type: 3}
+  greenPoliceFail: {fileID: 21300000, guid: b91e9851bef02bb4dbcd673a1855abad, type: 3}
+  whitePoliceSuccess: {fileID: 21300000, guid: 6994fa6576b9fae46834ee255657b85e, type: 3}
+  whitePoliceFail: {fileID: 21300000, guid: 2db00f8970b433a439bcbc9fdd9a3479, type: 3}
   mainParent: {fileID: 9106849129359481783}
   laneYs:
   - 3
@@ -307,6 +336,7 @@ GameObject:
   - component: {fileID: 4575499336548175052}
   - component: {fileID: 42183528273848648}
   - component: {fileID: 5663870418901770768}
+  - component: {fileID: 7528159834874554796}
   m_Layer: 10
   m_Name: police
   m_TagString: Police
@@ -626,5 +656,29 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 9026055389075888751, guid: ad6f142351b41bf429abe04afc7bc425, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7528159834874554796}
   m_SourcePrefab: {fileID: 100100000, guid: ad6f142351b41bf429abe04afc7bc425, type: 3}
+--- !u!114 &7528159834874554796
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8257416561575040706}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.1
+  roundTripTime: 0.5
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0

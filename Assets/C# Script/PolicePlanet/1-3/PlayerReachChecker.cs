@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 public class PlayerReachChecker : MonoBehaviour
@@ -16,6 +17,7 @@ public class PlayerReachChecker : MonoBehaviour
 
     private bool isGameOver = false;
     private Vector3 fixedPosition;
+    private Tween failTween;
 
     private void Awake()
     {
@@ -68,9 +70,48 @@ public class PlayerReachChecker : MonoBehaviour
             isGameOver = true;
             fixedPosition = transform.position;
             sr.sprite = PlayerFail;
+
+            transform.DOKill();
+            PlayFailAnimation();
+
             minigameBase.Fail();
         }
-        
     }
-    
+
+    // =========================
+    // 실패 연출
+    // =========================
+    private void PlayFailAnimation()
+    {
+        transform.position = fixedPosition;
+        transform.DOKill(true);
+        failTween?.Kill(true);
+
+        float duration = 0.25f;
+        float spinZ = -30f;
+        float dropY = 0.10f;        // (선택) 아주 살짝만 내려가게
+
+        Vector3 startScale = transform.localScale;
+
+        failTween = DOTween.Sequence()
+            .Join(transform.DORotate(
+                    new Vector3(0f, 0f, transform.eulerAngles.z + spinZ),
+                    duration,
+                    RotateMode.FastBeyond360
+                ).SetEase(Ease.OutCubic))
+
+            .Join(transform.DOScale(Vector3.zero, duration)
+                .SetEase(Ease.InBack, 1.5f))
+
+            .Join(transform.DOMoveY(fixedPosition.y - dropY, duration)
+                .SetEase(Ease.OutQuad))
+
+            .OnComplete(() =>
+            {
+                gameObject.SetActive(false);
+
+                // 재사용할 거면 스케일 원복 (비활성화 전에 해두면 안전)
+                transform.localScale = startScale;
+            });
+    }
 }

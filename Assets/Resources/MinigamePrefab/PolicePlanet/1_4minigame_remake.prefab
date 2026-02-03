@@ -868,6 +868,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6007283752299222671}
   - component: {fileID: 2034112257737043325}
+  - component: {fileID: 3858819842517326732}
   m_Layer: 0
   m_Name: 1_7_table
   m_TagString: Untagged
@@ -884,7 +885,7 @@ Transform:
   m_GameObject: {fileID: 8951201484509762218}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.48, z: 0}
+  m_LocalPosition: {x: 0, y: -0.05, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -942,3 +943,24 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &3858819842517326732
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8951201484509762218}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0
+  roundTripTime: 0.5
+  squashX: 0.01
+  squashY: 0.02
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0

@@ -16,7 +16,8 @@ public class Manager_1_10 : MonoBehaviour
     [SerializeField] private GameObject DownPlatformPrefab;
     [SerializeField] private GameObject PolicePrefab;
     [SerializeField] private GameObject SinnerPrefab;
-    [SerializeField] private Sprite[] sinnerSprites;
+    [SerializeField] private Sprite[] sinnerBodySprites;
+    [SerializeField] private Sprite[] sinnerHeadSprites;
 
     [Header("Show Spawn Offset")]
     [SerializeField] private float showSpawnStepX = 0.6f;
@@ -28,6 +29,9 @@ public class Manager_1_10 : MonoBehaviour
     [SerializeField] private float moveEventDeltaY = 5.0f;
     [SerializeField] private float moveEventDuration = 0.5f;
     [SerializeField] private float moveEventClearDelay = 0.2f;
+
+    [SerializeField] private GameObject clearObject;
+    [SerializeField] private GameObject failObject;
 
     // runtime
     private UpDown upPlatform;
@@ -132,7 +136,6 @@ public class Manager_1_10 : MonoBehaviour
         awaitingJudge = false;
         consecutiveShowCount = 0;
 
-        // Input 열릴 때 current는 비워둔다. (클릭 시 current를 잡는다)
         pendingCorrect = false;
     }
 
@@ -151,8 +154,26 @@ public class Manager_1_10 : MonoBehaviour
         var sr = person.GetComponent<SpriteRenderer>();
         if (sr != null)
         {
-            if (spawnSinner && sinnerSprites != null && sinnerSprites.Length > 0)
-                sr.sprite = sinnerSprites[Random.Range(0, sinnerSprites.Length)];
+            if (spawnSinner)
+            {
+                int idx = Random.Range(0, sinnerBodySprites.Length);
+
+                // 1) 몸통(루트 SpriteRenderer) 교체
+                if (sr != null && sinnerBodySprites != null && sinnerBodySprites.Length > 0)
+                    sr.sprite = sinnerBodySprites[idx];
+
+                // 2) 머리(자식 SpriteRenderer) 교체
+                var headSr = sr.transform.GetChild(0).GetComponent<SpriteRenderer>();
+                if (headSr != null && sinnerHeadSprites != null && sinnerHeadSprites.Length > 0)
+                    headSr.sprite = sinnerHeadSprites[idx];
+
+                // 3) 페이드도 머리까지 같이
+                if (headSr != null)
+                {
+                    headSr.color = new Color(headSr.color.r, headSr.color.g, headSr.color.b, 0f);
+                    headSr.DOFade(1f, 0.1f);
+                }
+            }
 
             sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 0f);
             sr.DOFade(1f, 0.1f);
@@ -171,7 +192,6 @@ public class Manager_1_10 : MonoBehaviour
         if (minigame == null) return;
         if (moveEventRunning) return;
 
-        // FIFO: 먼저 들어온 사람부터 처리
         if (!TryDequeueAlive(out var entry)) return;
 
         pendingGoUp = goUp;
@@ -272,15 +292,23 @@ public class Manager_1_10 : MonoBehaviour
 
         if (target != null)
         {
+            // 트윈 정리 (Transform + SpriteRenderer 둘 다)
             DOTween.Kill(target.transform);
-            var sr = target.GetComponent<SpriteRenderer>();
-            if (sr != null) sr.DOFade(0f, dur).SetEase(Ease.OutQuad);
+
+            var srs = target.GetComponentsInChildren<SpriteRenderer>(true);
+            for (int i = 0; i < srs.Length; i++)
+            {
+                if (srs[i] == null) continue;
+                srs[i].DOKill(); // 기존 페이드/트윈 제거
+                srs[i].DOFade(0f, dur).SetEase(Ease.OutQuad);
+            }
         }
 
         yield return new WaitForSeconds(dur);
 
         if (target != null) Destroy(target);
     }
+
 
     // =========================
     // Move 이벤트 (전체 리프트)
@@ -297,15 +325,20 @@ public class Manager_1_10 : MonoBehaviour
         if (upPlatform != null) upPlatform.TryMovePlatformImmediate();
         if (downPlatform != null) downPlatform.TryMovePlatformImmediate();
 
-        // 카운트 초기화(리프트 후 전부 정리되니까)
+        if (score.nScore <= 2)
+        {
+            if (clearObject != null) clearObject.SetActive(false);
+            if (failObject != null) failObject.SetActive(true);
+            minigame.Fail();
+            return;
+        }
+
         sentCountUp = 0;
         sentCountDown = 0;
 
-        // ★ 여기 핵심: "대기열 + 보낸 사람" 모두 이동
         MoveAllPeopleY(waitingQueue, sentPeople);
-
-        // 이동 후 전부 정리
         StartCoroutine(ClearAllAfterMoveEvent(moveEventDuration + moveEventClearDelay));
+        minigame.Success();
     }
 
     private void MoveAllPeopleY(Queue<PersonEntry> q, List<PersonEntry> sent)

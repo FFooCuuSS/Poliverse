@@ -13,13 +13,12 @@ public class Score : MonoBehaviour
 
     void Start()
     {
-        myText.text = $"{nScore} /5";
+        myText.text = $"{nScore} / 5";
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (nScore > 15) return;
-        myText.text = $"{nScore} /5";
+        myText.text = $"{nScore} / 5";
     }
 }

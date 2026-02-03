@@ -46,7 +46,7 @@ public class ChainGenerator : MonoBehaviour
     void Update()
     {
         float dist = Vector2.Distance(left.transform.position, right.transform.position);
-        if (dist <= 10.5f) return;
+        if (dist <= 15f) return;
 
         float followSpeed = 15f;
 
@@ -65,7 +65,6 @@ public class ChainGenerator : MonoBehaviour
             Vector3 offset = moveTarget - left.transform.position;
             leftCuff.transform.position += offset;
         }
-        // ▶ 왼손을 드래그 중 (이 경우만 오른손이 따라옴)
         else if (leftDrag.isDragging)
         {
             Vector3 moveTarget = Vector3.MoveTowards(

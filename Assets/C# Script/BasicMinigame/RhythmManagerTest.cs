@@ -50,6 +50,12 @@ public class RhythmManagerTest : MonoBehaviour, MiniGameBase.IRhythmManager
 
     private double dspStartTime;
 
+    public bool IsRunning => isRunning;
+    public double SongTimePublic => AudioSettings.dspTime - dspStartTime; // 외부 노출용
+    private bool isRunning;
+    public event Action<double> OnSongStarted;
+    public event Action OnSongStopped;
+
     // IRhythmManager 구현 이벤트 (MiniGameBase가 구독)
     public event Action<string> OnEventTriggered;
     public event Action<MiniGameBase.JudgementResult> OnPlayerJudged;
@@ -239,6 +245,9 @@ public class RhythmManagerTest : MonoBehaviour, MiniGameBase.IRhythmManager
         eventIndex = 0;
         for (int i = 0; i < events.Count; i++)
             events[i].consumed = false;
+
+        isRunning = true;
+    OnSongStarted?.Invoke(dspStartTime);
     }
 
     private double SongTime => AudioSettings.dspTime - dspStartTime;
@@ -318,6 +327,7 @@ public class RhythmManagerTest : MonoBehaviour, MiniGameBase.IRhythmManager
             events[i] = e;
 
             OnPlayerJudged?.Invoke(MiniGameBase.JudgementResult.Miss);
+            Debug.Log("CheckMiss");
         }
     }
 }

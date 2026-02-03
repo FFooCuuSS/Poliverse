@@ -39,10 +39,9 @@ public class MinigameRemake_1_10 : MiniGameBase
 
         action = action.Trim();
 
-        // CSV가 Show/Input이므로 action도 Show/Input로 들어온다고 가정 (action=type 구조)
         if (action == "Show")
         {
-            inputOpen = false;          // Show 중 입력 닫기(원하면 유지 가능)
+            inputOpen = false;
             awaitingJudge = false;
 
             if (manager != null)
@@ -54,7 +53,7 @@ public class MinigameRemake_1_10 : MiniGameBase
             awaitingJudge = false;
 
             if (manager != null)
-                manager.OnInputWindowOpened(); // 연속 Show 오프셋 리셋 등에 사용
+                manager.OnInputWindowOpened();
         }
         else if (action == "Move")
         {

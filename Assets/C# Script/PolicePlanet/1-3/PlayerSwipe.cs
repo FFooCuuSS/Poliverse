@@ -1,15 +1,15 @@
 ﻿using UnityEngine;
-using System.Collections;
+using DG.Tweening;
 
 public class PlayerSwipe : MonoBehaviour
 {
     [SerializeField] private float swipeThreshold = 50f;
     [SerializeField] private float moveStep = 1f;
-    [SerializeField] private float moveDuration = 0.2f; 
+    [SerializeField] private float moveDuration = 0.2f;
 
     private Vector2 startPos;
     private bool isSwiping;
-    private bool isMoving = false;
+    private bool isMoving;
 
     private MiniGameBase miniGameBase;
 
@@ -21,8 +21,7 @@ public class PlayerSwipe : MonoBehaviour
     void Update()
     {
         if (isMoving) return;
-        if (miniGameBase != null && miniGameBase.IsInputLocked)
-            return;
+        if (miniGameBase != null && miniGameBase.IsInputLocked) return;
 
 #if UNITY_EDITOR || UNITY_STANDALONE
         MouseInput();
@@ -72,28 +71,16 @@ public class PlayerSwipe : MonoBehaviour
         if (Mathf.Abs(deltaY) < swipeThreshold)
             return;
 
-        // 입력 전달 (리듬 판정용)
-        miniGameBase?.OnPlayerInput("Swipe");
+        //miniGameBase?.OnPlayerInput("Swipe");
 
         float direction = deltaY > 0 ? 1f : -1f;
         Vector3 targetPos = transform.position + Vector3.up * moveStep * direction;
 
-        StartCoroutine(SmoothMove(transform.position, targetPos));
-    }
-
-    private IEnumerator SmoothMove(Vector3 from, Vector3 to)
-    {
         isMoving = true;
+        transform.DOKill();
 
-        float t = 0f;
-        while (t < 1f)
-        {
-            t += Time.deltaTime / moveDuration;
-            transform.position = Vector3.Lerp(from, to, t);
-            yield return null;
-        }
-
-        transform.position = to; // 위치 보정
-        isMoving = false;
+        transform.DOMove(targetPos, moveDuration)
+            .SetEase(Ease.OutCubic)
+            .OnComplete(() => isMoving = false);
     }
 }

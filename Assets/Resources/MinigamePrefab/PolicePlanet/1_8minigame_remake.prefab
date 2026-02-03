@@ -73,8 +73,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: d304593fd49a49e498f97597f89023ce, type: 3}
-  m_Color: {r: 0.69182384, g: 0.69182384, b: 0.69182384, a: 1}
+  m_Sprite: {fileID: 21300000, guid: a616cce0a47bea64b90dc9b7f7a110c1, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -130,18 +130,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stage_1_8: {fileID: 8828454147527212713}
   prisonerPrefab:
-  - {fileID: 2674854900296907583, guid: 150f2b07c06804e4e9384d0974d51e31, type: 3}
-  - {fileID: 2674854900296907583, guid: aeca472b41a6153438a27c1e820ef1aa, type: 3}
-  - {fileID: 2674854900296907583, guid: b0c24a6a478c2364ca98878b5514e73a, type: 3}
+  - {fileID: 7922007419614909789, guid: c13616db1e05f03408f6949d28bfc1e4, type: 3}
+  - {fileID: 7347824996176220860, guid: 0f01e5a01bd21444fb51b6ee3eaa5f45, type: 3}
+  - {fileID: 8994401564694592256, guid: 43f66bb40abcdce4781d2743e5cc8441, type: 3}
   prisonObj: {fileID: 8598709807105546593}
   numberOfPrisoners: 3
   maxPrisonerCount: 4
-  spawnY: -1
+  spawnY: -1.9
   timeToReachPrison: 0.5
   spawnXOffsetMin: 0
   spawnXOffsetMax: 1
   minMoveSpeed: 5
   maxMoveSpeed: 9
+  hasAnySuccess: 0
+  endedPrisoner: 0
 --- !u!1 &8598709807105546593
 GameObject:
   m_ObjectHideFlags: 0
@@ -157,6 +159,7 @@ GameObject:
   - component: {fileID: 8098382608747204187}
   - component: {fileID: 7967251355986387368}
   - component: {fileID: 8329217561923396548}
+  - component: {fileID: 3074040877156209213}
   m_Layer: 0
   m_Name: RealJail
   m_TagString: Untagged
@@ -173,7 +176,7 @@ Transform:
   m_GameObject: {fileID: 8598709807105546593}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -5.34, y: 2.66, z: 0}
+  m_LocalPosition: {x: -5.34, y: 5.85, z: 0}
   m_LocalScale: {x: 0.64734674, y: 0.64734674, z: 0.64734674}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -220,7 +223,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 10
-  m_Sprite: {fileID: 21300000, guid: 90095af57ad5102459e6981cd7966b46, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 20babf2c97122264ab04099a2dd9d5ca, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -277,18 +280,18 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.112561226, y: -0.2760414}
+  m_Offset: {x: -0.27152455, y: -5.5285897}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 19.2, y: 10.8}
+    oldSize: {x: 6.48, y: 17.3}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 6.2507896, y: 6.725876}
+  m_Size: {x: 3.7331045, y: 5.734473}
   m_EdgeRadius: 0
 --- !u!50 &8098382608747204187
 Rigidbody2D:
@@ -329,9 +332,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60a4168685dcdce48b33d690829e0d02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  downY: -1.8
-  upY: 2
-  moveSpeed: 10
+  downDeltaY: 4.2
+  downDuration: 0.12
+  staySeconds: 0.3
+  upDuration: 0.5
+  slamOvershoot: 0.25
+  upBounce: 2
 --- !u!114 &8329217561923396548
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -344,6 +350,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7185aaaf28dbc684bb6d4932c0014ab6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &3074040877156209213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8598709807105546593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.25
+  roundTripTime: 0.5
+  squashX: 0.03
+  squashY: 0.05
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &8828454147527212713
 GameObject:
   m_ObjectHideFlags: 0

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6149402177983420041}
   - component: {fileID: 8221330642440388778}
   - component: {fileID: 804392693448409065}
+  - component: {fileID: 362316329546057587}
   m_Layer: 0
   m_Name: 1_5_criminal (6)
   m_TagString: Enemy
@@ -135,6 +136,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalSprite: {fileID: 21300000, guid: 972e3d4a505dba64bb9d2be8e72e1a39, type: 3}
   hitSprite: {fileID: 21300000, guid: cbd305486b9c9354c93a2a1056db2469, type: 3}
+--- !u!114 &362316329546057587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 50736438193338006}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.5
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
 --- !u!1 &446322564873067274
 GameObject:
   m_ObjectHideFlags: 0
@@ -545,6 +567,7 @@ GameObject:
   - component: {fileID: 8283360162979922934}
   - component: {fileID: 1582840538238871433}
   - component: {fileID: 830009785011823503}
+  - component: {fileID: 5326596051001836448}
   m_Layer: 0
   m_Name: 1_5_criminal (5)
   m_TagString: Enemy
@@ -668,6 +691,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalSprite: {fileID: 21300000, guid: 972e3d4a505dba64bb9d2be8e72e1a39, type: 3}
   hitSprite: {fileID: 21300000, guid: cbd305486b9c9354c93a2a1056db2469, type: 3}
+--- !u!114 &5326596051001836448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2227270996634788978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.5
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
 --- !u!1 &2512127380254364688
 GameObject:
   m_ObjectHideFlags: 0
@@ -1172,6 +1216,7 @@ GameObject:
   - component: {fileID: 2799115229273885115}
   - component: {fileID: 9061804851463159112}
   - component: {fileID: 7216937520944188512}
+  - component: {fileID: 6414763396764594867}
   m_Layer: 0
   m_Name: 1_5_criminal
   m_TagString: Enemy
@@ -1295,6 +1340,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalSprite: {fileID: 21300000, guid: 972e3d4a505dba64bb9d2be8e72e1a39, type: 3}
   hitSprite: {fileID: 21300000, guid: cbd305486b9c9354c93a2a1056db2469, type: 3}
+--- !u!114 &6414763396764594867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4743797740771751968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.5
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
 --- !u!1 &4955934922279721680
 GameObject:
   m_ObjectHideFlags: 0
@@ -1427,6 +1493,7 @@ GameObject:
   - component: {fileID: 8369917588434528964}
   - component: {fileID: 4484579207078258786}
   - component: {fileID: 4399010495391254152}
+  - component: {fileID: 7913900854290497687}
   m_Layer: 0
   m_Name: 1_5_criminal (7)
   m_TagString: Enemy
@@ -1550,6 +1617,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalSprite: {fileID: 21300000, guid: 972e3d4a505dba64bb9d2be8e72e1a39, type: 3}
   hitSprite: {fileID: 21300000, guid: cbd305486b9c9354c93a2a1056db2469, type: 3}
+--- !u!114 &7913900854290497687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5048218419075910385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.5
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
 --- !u!1 &6382035987184040646
 GameObject:
   m_ObjectHideFlags: 0
@@ -1740,6 +1828,7 @@ GameObject:
   - component: {fileID: 5564223094895817741}
   - component: {fileID: 4739047389263699100}
   - component: {fileID: 3296209959664214665}
+  - component: {fileID: 4526869784706167285}
   m_Layer: 0
   m_Name: 1_5_criminal (1)
   m_TagString: Enemy
@@ -1863,6 +1952,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalSprite: {fileID: 21300000, guid: 972e3d4a505dba64bb9d2be8e72e1a39, type: 3}
   hitSprite: {fileID: 21300000, guid: cbd305486b9c9354c93a2a1056db2469, type: 3}
+--- !u!114 &4526869784706167285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6827938551070454749}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.5
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
 --- !u!1 &7621586563719668400
 GameObject:
   m_ObjectHideFlags: 0
@@ -1875,6 +1985,7 @@ GameObject:
   - component: {fileID: 8124319350203231970}
   - component: {fileID: 1491852813438278043}
   - component: {fileID: 4605459851945425803}
+  - component: {fileID: 3591897713101563050}
   m_Layer: 0
   m_Name: 1_5_criminal (3)
   m_TagString: Enemy
@@ -1998,6 +2109,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalSprite: {fileID: 21300000, guid: 972e3d4a505dba64bb9d2be8e72e1a39, type: 3}
   hitSprite: {fileID: 21300000, guid: cbd305486b9c9354c93a2a1056db2469, type: 3}
+--- !u!114 &3591897713101563050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7621586563719668400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.5
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
 --- !u!1 &9169600275481452391
 GameObject:
   m_ObjectHideFlags: 0
@@ -2010,6 +2142,7 @@ GameObject:
   - component: {fileID: 2897761149949970031}
   - component: {fileID: 7391137345400969605}
   - component: {fileID: 6858507326708659610}
+  - component: {fileID: 1391734624935602483}
   m_Layer: 0
   m_Name: 1_5_criminal (2)
   m_TagString: Enemy
@@ -2133,3 +2266,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalSprite: {fileID: 21300000, guid: 972e3d4a505dba64bb9d2be8e72e1a39, type: 3}
   hitSprite: {fileID: 21300000, guid: cbd305486b9c9354c93a2a1056db2469, type: 3}
+--- !u!114 &1391734624935602483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9169600275481452391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.5
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
