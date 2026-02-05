@@ -680,7 +680,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3706219922465246173, guid: 2afbd1f9135592a429f79902107a88d1, type: 3}
       propertyPath: m_Name
-      value: 2-1MiniGame
+      value: 2_1minigame_remake
       objectReference: {fileID: 0}
     - target: {fileID: 3706219922465246173, guid: 2afbd1f9135592a429f79902107a88d1, type: 3}
       propertyPath: m_IsActive
