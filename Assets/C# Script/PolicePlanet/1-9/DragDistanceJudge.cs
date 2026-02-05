@@ -47,17 +47,17 @@ public class DragDistanceJudge : MonoBehaviour
 
         // minigame_1_9 null 체크
         if (minigame_1_9 != null)
-            minigame_1_9.OnScreenTouch();
+            minigame_1_9.SubmitPlayerInput("Input");
 
         // 거리 기준 성공
         if (totalDistance >= distanceThreshold)
         {
             Debug.Log("성공");
 
-            minigame_1_9.NotifySuccess();
-            StartShaking();
-            ActivateObject();
-            ChangeSprite();
+            //minigame_1_9.NotifySuccess();
+            //StartShaking();
+            //ActivateObject();
+            //ChangeSprite();
         }
     }
 
