@@ -34,9 +34,15 @@ public class BackgroundTouchHandler : MonoBehaviour
         }
     }
 
+    //public void OnBackgroundTouch()
+    //{
+    //    minigame?.OnScreenTouch();
+    //    rope?.PlayStretch(stretchOffset);
+    //}
+
     public void OnBackgroundTouch()
     {
-        minigame?.OnScreenTouch();
+        minigame?.SubmitPlayerInput("Input");
         rope?.PlayStretch(stretchOffset);
     }
 }

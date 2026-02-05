@@ -135,7 +135,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70ee45b8b217e894e9a47ad0ffec542e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ProhibitPrefabs: []
+  ProhibitPrefabs:
+  - {fileID: 6228572483370876363, guid: 009a9947019bfd74eb9377c8ed869ef0, type: 3}
+  - {fileID: 4829609381255049112, guid: 68cdae8dc350add49a1358d1b02b87d2, type: 3}
+  - {fileID: 2995635012953968395, guid: fb95d14468cd8a946a530625f0ed4e33, type: 3}
+  - {fileID: 5364975643095373470, guid: 3e60fed6584cb2b448a6a4b9e2f9679b, type: 3}
+  - {fileID: 892478601395926057, guid: 967913bb653082943abb35cefd7ec1f9, type: 3}
   basket: {fileID: 1114006704717622196}
   holdJudge: {fileID: 1384034412918304911}
   maxHoldCount: 4
@@ -152,7 +157,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prisonerSpawner: {fileID: 8328137765551624356}
-  prohibitedItemManager: {fileID: 7165679566525968247}
   stage_1_7: {fileID: 498653246545478516}
   successCount: 0
 --- !u!1 &653283948147611525
@@ -355,7 +359,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: -2.89}
@@ -455,17 +459,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9654933da3ea214d9e491e3b3ceb5e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prohibitedSprites:
-  - {fileID: 21300000, guid: 107fec35b6549914aa1d9c2c88cbefb2, type: 3}
-  - {fileID: 21300000, guid: 2b1631925329a6c4f9d57636bc96eec8, type: 3}
-  - {fileID: 21300000, guid: 49b6db3e5325b654daff91883b402570, type: 3}
-  prohibitedMarkSprites:
-  - {fileID: 21300000, guid: 5c363765eb155d6499c6f07f7dac74b2, type: 3}
-  - {fileID: 21300000, guid: b84536bb12f9f3e49bd1933a9cb37fca, type: 3}
-  - {fileID: 21300000, guid: 35bfadb7c4a27214f94d332cc0fa43b4, type: 3}
-  prohibitedMarkRenderer: {fileID: 7923560725034239397}
-  itemSpawner: {fileID: 8610549162199787063}
-  gameManager: {fileID: 6584522784603379527}
 --- !u!114 &8610549162199787063
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -478,15 +471,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01aef568d7147e043a60b361ddbfb4e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prohibitedItemPrefabs:
-  - {fileID: 6228572483370876363, guid: 009a9947019bfd74eb9377c8ed869ef0, type: 3}
-  - {fileID: 2995635012953968395, guid: fb95d14468cd8a946a530625f0ed4e33, type: 3}
-  - {fileID: 5364975643095373470, guid: 3e60fed6584cb2b448a6a4b9e2f9679b, type: 3}
-  prohibitedMarkSprites:
-  - {fileID: 21300000, guid: 5c363765eb155d6499c6f07f7dac74b2, type: 3}
-  - {fileID: 21300000, guid: b84536bb12f9f3e49bd1933a9cb37fca, type: 3}
-  - {fileID: 21300000, guid: 35bfadb7c4a27214f94d332cc0fa43b4, type: 3}
-  spawnParent: {fileID: 2063895515683314593}
+  itemManager: {fileID: 7165679566525968247}
+  targetPosition: {fileID: 1114006704717622196}
 --- !u!1 &3084337815926443138
 GameObject:
   m_ObjectHideFlags: 0
@@ -532,11 +518,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   holdUIPrefab: {fileID: 1339359407143525951, guid: 9bcaa3d4491803b42803ad10768aac9b, type: 3}
-  shrinkSpeed: 1
   maxHoldCount: 4
   successTolerance: 0.2
+  shrinkDuration: 0.9
+  vanishMargin: 0.05
   minigame: {fileID: 6803564812893199740}
-  clickBufferTime: 0.15
 --- !u!1 &4514964588818708058
 GameObject:
   m_ObjectHideFlags: 0
@@ -671,7 +657,7 @@ MonoBehaviour:
   - {fileID: 265879921070085338, guid: fe6c8908797624a4fa0c68c49f21487b, type: 3}
   - {fileID: 865242890287121849, guid: 6a78935d605c2b64bbb62de47e95d9d7, type: 3}
   spawnPoint: {fileID: 827015306164567116}
-  isSpawning: 1
+  itemManager: {fileID: 7165679566525968247}
 --- !u!1 &8933431926371867399
 GameObject:
   m_ObjectHideFlags: 0

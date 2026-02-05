@@ -11,11 +11,14 @@ public class Player2_3 : MonoBehaviour
 
     private bool isShrinking = false;
 
+    [SerializeField] private Minigame_2_3 minigame;
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0) && !isShrinking)
         {
             StartCoroutine(ShrinkAndRestore());
+            minigame?.SubmitPlayerInput("Input");
         }
     }
 

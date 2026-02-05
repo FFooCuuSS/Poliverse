@@ -12,6 +12,10 @@ public class Minigame_1_8 : MiniGameBase
     private bool canTap = false;
     private PrisonController_1_8 prisonController;
 
+    public override float perfectWindowOverride => 0.15f;
+    public override float goodWindowOverride => 0.4f;
+    public override float hitWindowOverride => 0.8f;
+
 
     protected override float TimerDuration => 10f;
     protected override string MinigameExplain => "모두 가둬라!";
@@ -81,26 +85,19 @@ public class Minigame_1_8 : MiniGameBase
     {
         if (hasMissed) return;
 
-        if (judgement == JudgementResult.Perfect ||
-            judgement == JudgementResult.Good)
+        switch (judgement)
         {
-            Debug.Log("판정 성공 → 감옥 작동");
-            prisonController.ActivatePrison();
-        }
-        else
-        {
-            //OnMiss();
-            //Fail();
+            case JudgementResult.Perfect:
+            case JudgementResult.Good:
+                Debug.Log("판정 성공 → 감옥 작동");
+                prisonController.ActivatePrison();
+                break;
+
+            case JudgementResult.Miss:
+                Debug.Log("미스 발생");
+                hasMissed = true;
+                break;
         }
     }
 
-    //public void OnMiss()
-    //{
-    //    if (hasMissed) return;
-
-    //    hasMissed = true;
-    //    Debug.Log("미스 발생 -> 실패");
-
-    //    Fail();
-    //}
 }
