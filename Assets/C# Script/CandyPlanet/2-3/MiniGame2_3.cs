@@ -11,93 +11,132 @@ public class Minigame_2_3 : MiniGameBase
     protected override float TimerDuration => 5f;
     protected override string MinigameExplain => "가동시켜라!";
 
-    private bool ended;
-    private bool inputOpen;
-    private bool awaitingJudge;
-    private bool hasAnySuccess;
+    [Header("총 Input 수")]
+    [SerializeField] private int maxInputCount = 3;
+
+    [SerializeField] private MovingIconController2_3 movingIcon;
+
+    private int handledInputCount = 0;
+    private bool hasAnySuccess = false;
+    private List<bool> inputResults = new List<bool>();
+    private bool inputOpen = false;
+    private bool awaitingJudge = false;
+
+    public bool IsInputTiming { get; private set; }
 
     public override void StartGame()
     {
         base.StartGame();
-
-        ended = false;
+        handledInputCount = 0;
+        hasAnySuccess = false;
+        inputResults.Clear();
         inputOpen = false;
         awaitingJudge = false;
-        hasAnySuccess = false;
     }
 
     public override void OnRhythmEvent(string action)
     {
-        if (ended) return;
-        if (string.IsNullOrEmpty(action)) return;
+        Debug.Log($"OnRhythmEvent 호출됨, action: {action}");
+        base.OnRhythmEvent(action);
 
-        action = action.Trim();
-        Debug.Log($"{gameObject.name} 리듬메세지: {action}");
-
-        switch (action)
+        if (action == "Input")
         {
-            case "Input":
-                inputOpen = true;
-                awaitingJudge = false;
-                break;
+            inputOpen = true;
+            awaitingJudge = false;
+            IsInputTiming = true;
 
-            case "InputEnd":
-                if (inputOpen && !awaitingJudge)
-                {
-                    OnJudgement(JudgementResult.Miss);
-                }
-                inputOpen = false;
-                break;
+            // Input 등장 시 기록 초기화
+            if (handledInputCount < maxInputCount)
+            {
+                inputResults.Add(false); // 아직 성공/실패 기록 없음
+                Debug.Log($"Input 등장 ({handledInputCount + 1}/{maxInputCount})");
+            }
+
+            // 자동 Miss 처리 (예: 0.5초 안에 입력 없으면 실패)
+            Invoke(nameof(AutoMissInput), 0.5f);
         }
     }
 
-    /// <summary>
-    /// Player2_3에서 호출
-    /// </summary>
     public void SubmitPlayerInput(string action = "Input")
     {
-        if (ended) return;
-        if (!inputOpen) return;
-        if (awaitingJudge) return;
+        if (!inputOpen || awaitingJudge || handledInputCount >= maxInputCount)
+            return;
 
         awaitingJudge = true;
-        OnPlayerInput(action);
+
+        bool success = movingIcon.IsInCorrectZone;
+
+        // 이번 Input 결과 저장
+        inputResults[handledInputCount] = success;
+
+        if (success)
+            hasAnySuccess = true;
+
+        Debug.Log($"Input {handledInputCount + 1} : {(success ? "성공" : "실패")}");
+
+        inputOpen = false;
+        IsInputTiming = false;
+
+        handledInputCount++;
+        CheckIfAllInputsHandled();
     }
 
     public override void OnJudgement(JudgementResult judgement)
     {
-        if (ended) return;
+        if (!inputOpen || handledInputCount >= maxInputCount)
+            return;
 
         awaitingJudge = false;
         inputOpen = false;
+        IsInputTiming = false;
 
-        switch (judgement)
+        // 성공 판정이면
+        if (judgement == JudgementResult.Perfect || judgement == JudgementResult.Good)
         {
-            case JudgementResult.Perfect:
-            case JudgementResult.Good:
-                Debug.Log("판정 성공");
-                hasAnySuccess = true;
-                break;
-
-            case JudgementResult.Miss:
-                Debug.Log("판정 실패 → 즉시 실패");
-                ended = true;
-                Fail();
-                break;
+            inputResults[handledInputCount] = true;
+            hasAnySuccess = true;
+            Debug.Log($"Input {handledInputCount + 1} 성공!");
         }
+        else
+        {
+            Debug.Log($"Input {handledInputCount + 1} 실패!");
+        }
+
+        handledInputCount++;
+        CheckIfAllInputsHandled();
     }
 
-    /// <summary>
-    /// 리듬 차트 종료 시 호출
-    /// </summary>
-    public void FinalJudge()
+    private void AutoMissInput()
     {
-        if (ended) return;
-        ended = true;
+        if (!inputOpen) return;
+
+        inputOpen = false;
+        IsInputTiming = false;
+
+        inputResults[handledInputCount] = false;
+
+        Debug.Log($"Input {handledInputCount + 1} 자동 실패");
+
+        handledInputCount++;
+        CheckIfAllInputsHandled();
+    }
+
+    private void CheckIfAllInputsHandled()
+    {
+        if (handledInputCount < maxInputCount)
+            return;
+
+        Debug.Log("모든 Input 처리 완료 → 최종 판정");
 
         if (hasAnySuccess)
+        {
+            Debug.Log("최종 성공!");
             Success();
+        }
         else
+        {
+            Debug.Log("최종 실패!");
             Fail();
+        }
     }
 }

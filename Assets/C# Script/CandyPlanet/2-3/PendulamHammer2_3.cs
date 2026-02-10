@@ -9,18 +9,30 @@ public class PendulamHammer2_3 : MonoBehaviour
     public float swingSpeed = 1f;  // 흔들림 속도
     public float startAngle = 0f;
     private float time;
-    private void Start()
+
+    public Minigame_2_3 minigame;
+
+    void Start()
     {
         time = startAngle;
     }
+
     void Update()
     {
         time += Time.deltaTime * swingSpeed;
 
-        // 사인파를 이용한 각도 계산
+        // 각도 계산
         float angle = swingAngle * Mathf.Sin(time);
 
-        // Z축 회전 적용 (2D라면 Z축 회전, 3D라면 필요에 따라 수정)
+        // 회전 적용
         transform.localRotation = Quaternion.Euler(0, 0, angle);
+
+        // Input 타이밍에는 중앙 통과 체크만
+        if (minigame != null && minigame.IsInputTiming)
+        {
+            // 중앙과의 거리 (정확히 중앙 통과 여부 확인)
+            float distanceToCenter = Mathf.Abs(transform.localEulerAngles.z);
+            // 필요 시 -180~180 변환해서 정확히 체크
+        }
     }
 }
