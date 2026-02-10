@@ -40,7 +40,8 @@ public class PlayerHold : MonoBehaviour
     private void MouseInput()
     {
         if (Input.GetMouseButtonDown(0))
-        { 
+        {
+            Debug.Log("hold");
             StartHold();
             minigame_2_1.OnPlayerInput("Hold");
         }

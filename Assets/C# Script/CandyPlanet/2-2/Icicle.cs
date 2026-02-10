@@ -1,0 +1,60 @@
+using System;
+using System.Collections;
+using UnityEngine;
+
+public enum IcicleState
+{
+    Forming,    // 1´Ü°è: ¸ÎÈû
+    Growing,    // 2´Ü°è: Ä¿Áü
+    Falling     // 3´Ü°è: ¶³¾îÁü
+}
+
+public class Icicle : MonoBehaviour
+{
+    [Header("Sprites")]
+    [SerializeField] private Sprite formingSprite;
+    [SerializeField] private Sprite growingSprite;
+    [SerializeField] private Sprite fallingSprite;
+
+    [Header("Timing")]
+    [SerializeField] private float formingTime = 0.5f;
+    [SerializeField] private float growingTime = 0.7f;
+
+    private SpriteRenderer sr;
+    private Rigidbody2D rb;
+    private IcicleState state;
+
+    public static event Action OnIcicleFalling;
+
+    void Awake()
+    {
+        sr = GetComponent<SpriteRenderer>();
+        rb = GetComponent<Rigidbody2D>();
+        rb.isKinematic = true; // ¶³¾îÁö±â Àü±îÁö °íÁ¤
+    }
+
+    void OnEnable()
+    {
+        StartCoroutine(StateRoutine());
+    }
+
+    private IEnumerator StateRoutine()
+    {
+        // 1´Ü°è
+        state = IcicleState.Forming;
+        sr.sprite = formingSprite;
+        yield return new WaitForSeconds(formingTime);
+
+        // 2´Ü°è
+        state = IcicleState.Growing;
+        sr.sprite = growingSprite;
+        yield return new WaitForSeconds(growingTime);
+
+        // 3´Ü°è
+        state = IcicleState.Falling;
+        sr.sprite = fallingSprite;
+        rb.isKinematic = false; 
+        OnIcicleFalling?.Invoke();
+
+    }
+}

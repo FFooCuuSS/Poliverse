@@ -16,7 +16,7 @@ public class IcicleHitPlayer : MonoBehaviour
     {
         if (coll.gameObject.tag == "Icicle")
         {
-            minigame_2_2.Failure();
+            minigame_2_2.missCount++;
         }
     }
 
