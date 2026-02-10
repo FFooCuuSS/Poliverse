@@ -23,6 +23,7 @@ TagManager:
   - Ring
   - Food
   - DragZone
+  - CorrectZone
   layers:
   - Default
   - TransparentFX

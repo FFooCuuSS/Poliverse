@@ -65,8 +65,8 @@ public class HoldCheck1_7 : MonoBehaviour
         targetCircle = currentHoldUI.transform.Find("TargetCircle");
         shrinkingCircle = currentHoldUI.transform.Find("ShrinkingCircle");
 
-        if (shrinkingCircle != null) shrinkingCircle.localScale = Vector3.one * 4f;
-        if (targetCircle != null) targetCircle.localScale = Vector3.one * 3f;
+        //if (shrinkingCircle != null) shrinkingCircle.localScale = Vector3.one * 4f;
+        //if (targetCircle != null) targetCircle.localScale = Vector3.one * 3f;
 
         shrinkTimer = 0f;
         startScale = shrinkingCircle.localScale.x;

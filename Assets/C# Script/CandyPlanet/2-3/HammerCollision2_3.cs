@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class HammerCollision2_3 : MonoBehaviour
 {
-    public GameObject stage_2_5;
     private Minigame_2_3 minigame_2_3;
 
 
