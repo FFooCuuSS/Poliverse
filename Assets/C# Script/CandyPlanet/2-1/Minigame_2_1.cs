@@ -14,7 +14,7 @@ public class Minigame_2_1 : MiniGameBase
 
     private bool ended;
     private int missCount = 0;
-    private int totalCount = 4;
+    private int totalCount = 2;
 
     private DropCake dropCake;
 
@@ -23,6 +23,8 @@ public class Minigame_2_1 : MiniGameBase
     [SerializeField] private int missAmount;
     [SerializeField] private int goodAmount;
     [SerializeField] private int perfectAmount;
+
+    [SerializeField] private float duration;
 
     private void Start()
     {
@@ -52,11 +54,15 @@ public class Minigame_2_1 : MiniGameBase
         if (ended) return;
         Debug.Log($"{gameObject.name} ¸®µë¸Þ¼¼Áö: {action}");
         action = action.Trim();
-
         if (action == "Hold")
         {
-
+            dropCake.MoveDownAndBack(duration);
         }
+        if (action == "Show")
+        {
+            CheckGameResult();
+        }
+
     }
     public override void OnPlayerInput(string action = null)
     {
