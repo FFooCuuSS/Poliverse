@@ -8,7 +8,7 @@ public class DropCake : MonoBehaviour
 {
     public int processedCount = 0;
 
-    [SerializeField] private float targetY = 2.5f;
+    [SerializeField] private float targetY;
     [SerializeField] private Transform cake;
 
     public void MoveDownAndBack(float duration)

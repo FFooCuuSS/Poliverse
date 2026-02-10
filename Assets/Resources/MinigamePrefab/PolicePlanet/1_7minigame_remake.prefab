@@ -142,7 +142,7 @@ MonoBehaviour:
   - {fileID: 5364975643095373470, guid: 3e60fed6584cb2b448a6a4b9e2f9679b, type: 3}
   - {fileID: 892478601395926057, guid: 967913bb653082943abb35cefd7ec1f9, type: 3}
   basket: {fileID: 1114006704717622196}
-  holdJudge: {fileID: 1384034412918304911}
+  holdJudge: {fileID: 6633415375601139176}
   maxHoldCount: 4
 --- !u!114 &6584522784603379527
 MonoBehaviour:
@@ -482,7 +482,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3671790301851879190}
-  - component: {fileID: 1384034412918304911}
+  - component: {fileID: 6633415375601139176}
   m_Layer: 0
   m_Name: HoldUI
   m_TagString: Untagged
@@ -505,7 +505,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8648226528163337377}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1384034412918304911
+--- !u!114 &6633415375601139176
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -514,7 +514,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3084337815926443138}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a723c94b37ca4bc4e831394298323e1d, type: 3}
+  m_Script: {fileID: 11500000, guid: 4d338d02fba909f4886b5e842bb12347, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   holdUIPrefab: {fileID: 1339359407143525951, guid: 9bcaa3d4491803b42803ad10768aac9b, type: 3}

@@ -17,18 +17,18 @@ public class PlayerHold : MonoBehaviour
     private float startY;
     private bool isMoving;
 
-    private MiniGameBase miniGameBase;
+    private Minigame_2_1 minigame_2_1;
 
     private void Awake()
     {
-        miniGameBase = GetComponentInParent<MiniGameBase>();
+        minigame_2_1 = GetComponentInParent<Minigame_2_1>();
         startY = transform.position.y;
     }
 
     void Update()
     {
         if (isMoving) return;
-        if (miniGameBase != null && miniGameBase.IsInputLocked) return;
+        if (minigame_2_1 != null && minigame_2_1.IsInputLocked) return;
 
 #if UNITY_EDITOR || UNITY_STANDALONE
         MouseInput();
@@ -40,8 +40,9 @@ public class PlayerHold : MonoBehaviour
     private void MouseInput()
     {
         if (Input.GetMouseButtonDown(0))
-        {
+        { 
             StartHold();
+            minigame_2_1.OnPlayerInput("Hold");
         }
 
         if (Input.GetMouseButtonUp(0))
