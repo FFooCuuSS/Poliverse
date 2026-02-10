@@ -17,6 +17,7 @@ public class Minigame_2_1 : MiniGameBase
     private int totalCount = 2;
 
     private DropCake dropCake;
+    private PlayerSrChange srChange;
 
     //스코어
     private int score;
@@ -29,6 +30,7 @@ public class Minigame_2_1 : MiniGameBase
     private void Start()
     {
         dropCake = GetComponent<DropCake>();
+        srChange = GetComponentInChildren<PlayerSrChange>();
     }
     public override void StartGame()
     {
@@ -79,6 +81,7 @@ public class Minigame_2_1 : MiniGameBase
 
         if (judgement == JudgementResult.Miss)
         {
+            srChange.ChangeSpriteTemporarily();
             missCount++;
             Debug.Log($"현재 실수 횟수: {missCount}");
         }
