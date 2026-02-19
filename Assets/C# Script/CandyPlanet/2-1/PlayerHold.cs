@@ -1,18 +1,12 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using DG.Tweening;
 
 public class PlayerHold : MonoBehaviour
 {
-    [SerializeField] private float swipeThreshold = 50f;
-    [SerializeField] private float moveStep = 1f;
-    [SerializeField] private float moveDuration = 0.3f;
-
-    [SerializeField] private float followSpeed = 0.1f;
+    [SerializeField] private float moveDuration = 0.1f;
+    [SerializeField] private float stayDuration = 0.5f;   //아래에 머무는 시간
     [SerializeField] private float holdTargetY = -3.5f;
-
-    private bool isHolding;
-    private Tween holdTween;
 
     private float startY;
     private bool isMoving;
@@ -31,57 +25,36 @@ public class PlayerHold : MonoBehaviour
         if (minigame_2_1 != null && minigame_2_1.IsInputLocked) return;
 
 #if UNITY_EDITOR || UNITY_STANDALONE
-        MouseInput();
+        if (Input.GetMouseButtonDown(0))
+            StartCoroutine(DownAndUp());
 #else
-        TouchInput();
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+            StartCoroutine(DownAndUp());
 #endif
     }
 
-    private void MouseInput()
+    private IEnumerator DownAndUp()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            Debug.Log("hold");
-            StartHold();
+        isMoving = true;
+
+        if (minigame_2_1 != null)
             minigame_2_1.OnPlayerInput("Hold");
-        }
 
-        if (Input.GetMouseButtonUp(0))
-        {
-            EndHold();
-        }
-    }
-
-    private void TouchInput()
-    {
-        if (Input.touchCount == 0) return;
-
-        Touch touch = Input.GetTouch(0);
-
-        if (touch.phase == TouchPhase.Began)
-            StartHold();
-
-        if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
-            EndHold();
-    }
-
-    private void StartHold()
-    {
-        if (isMoving) return;
-
-        isHolding = true;
         transform.DOKill();
 
-        holdTween = transform.DOMoveY(holdTargetY, moveDuration)
-            .SetEase(Ease.OutCubic);
-    }
+        // 내려가기
+        yield return transform.DOMoveY(holdTargetY, moveDuration)
+            .SetEase(Ease.OutCubic)
+            .WaitForCompletion();
 
-    private void EndHold()
-    {
-        isHolding = false;
-        transform.DOKill();
-        transform.DOMoveY(startY, moveDuration)
-            .SetEase(Ease.OutCubic);
+        // 유지
+        yield return new WaitForSeconds(stayDuration);
+
+        // 다시 올라오기
+        yield return transform.DOMoveY(startY, moveDuration)
+            .SetEase(Ease.OutCubic)
+            .WaitForCompletion();
+
+        isMoving = false;
     }
 }
-
