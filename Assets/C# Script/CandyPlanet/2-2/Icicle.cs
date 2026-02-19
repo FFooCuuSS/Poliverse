@@ -1,28 +1,20 @@
-using System;
+Ôªøusing System;
 using System.Collections;
 using UnityEngine;
 
-public enum IcicleState
-{
-    Forming,    // 1¥‹∞Ë: ∏Œ»˚
-    Growing,    // 2¥‹∞Ë: ƒø¡¸
-    Falling     // 3¥‹∞Ë: ∂≥æÓ¡¸
-}
-
 public class Icicle : MonoBehaviour
 {
-    [Header("Sprites")]
-    [SerializeField] private Sprite formingSprite;
-    [SerializeField] private Sprite growingSprite;
+    public static event Action OnMoveAllowed;
+    public static event Action OnMoveBlocked;
+
+    [Header("Sprite")]
     [SerializeField] private Sprite fallingSprite;
 
-    [Header("Timing")]
-    [SerializeField] private float formingTime = 0.5f;
-    [SerializeField] private float growingTime = 0.7f;
+    [Header("Warning Move Distance")]
+    [SerializeField] private float warningMoveDistance = 0.5f;
 
     private SpriteRenderer sr;
     private Rigidbody2D rb;
-    private IcicleState state;
 
     public static event Action OnIcicleFalling;
 
@@ -30,31 +22,43 @@ public class Icicle : MonoBehaviour
     {
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
-        rb.isKinematic = true; // ∂≥æÓ¡ˆ±‚ ¿¸±Ó¡ˆ ∞Ì¡§
+        rb.isKinematic = true; //Îñ®Ïñ¥ÏßÄÍ∏∞ Ï†ÑÍπåÏßÄ Í≥†Ï†ï
     }
 
-    void OnEnable()
+    public void StartIcicle(float delay)
     {
-        StartCoroutine(StateRoutine());
+        OnMoveBlocked?.Invoke();   //ÏÉùÏÑ± Ï¶âÏãú Ïù¥Îèô Í∏àÏßÄ
+        StartCoroutine(FallRoutine(delay));
     }
 
-    private IEnumerator StateRoutine()
+    private IEnumerator FallRoutine(float delay)
     {
-        // 1¥‹∞Ë
-        state = IcicleState.Forming;
-        sr.sprite = formingSprite;
-        yield return new WaitForSeconds(formingTime);
+        Vector3 startPos = transform.position;
+        Vector3 warningPos = startPos + Vector3.down * warningMoveDistance;
 
-        // 2¥‹∞Ë
-        state = IcicleState.Growing;
-        sr.sprite = growingSprite;
-        yield return new WaitForSeconds(growingTime);
+        float timer = 0f;
+        bool moveUnlocked = false;
 
-        // 3¥‹∞Ë
-        state = IcicleState.Falling;
+        while (timer < delay)
+        {
+            timer += Time.deltaTime;
+            float t = timer / delay;
+
+            transform.position = Vector3.Lerp(startPos, warningPos, t);
+
+            //ÎÇôÌïò 1Ï¥à Ï†Ñ Ïù¥Îèô ÌóàÏö©
+            if (!moveUnlocked && timer >= delay - 1f)
+            {
+                moveUnlocked = true;
+                OnMoveAllowed?.Invoke();
+            }
+
+            yield return null;
+        }
+
         sr.sprite = fallingSprite;
-        rb.isKinematic = false; 
+        rb.isKinematic = false;
         OnIcicleFalling?.Invoke();
-
     }
+
 }

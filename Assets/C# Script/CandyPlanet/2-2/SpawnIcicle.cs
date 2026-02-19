@@ -33,8 +33,7 @@ public class SpawnIcicle : MonoBehaviour
 
     private void Start()
     {
-        //StartCoroutine(SpawnLoop());
-        StartCoroutine(DelayAndSpawn());
+        SpawnNext();
     }
 
     private void HandleIcicleFalling()
@@ -42,8 +41,25 @@ public class SpawnIcicle : MonoBehaviour
         if (waiting || index >= spawnDelays.Length)
             return;
 
-        StartCoroutine(DelayAndSpawn());
+        SpawnNext();
     }
+    private void SpawnNext()
+    {
+        waiting = true;
+
+        Vector3 pos = new Vector3(currentX, transform.position.y, transform.position.z);
+        GameObject icicle = Instantiate(iciclePrefab, pos, Quaternion.identity);
+
+        float delay = spawnDelays[index];
+        icicle.GetComponent<Icicle>().StartIcicle(delay);
+
+        currentX += step;
+        index++;
+        waiting = false;
+    }
+
+
+
 
     private IEnumerator DelayAndSpawn()
     {

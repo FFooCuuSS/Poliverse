@@ -8,11 +8,34 @@ public class PlayerMoveByClick : MonoBehaviour
     [SerializeField] private float speed = 5f;
 
     private Vector3 targetPos;
-    private bool isMoving = false;
+
+    public bool isMoving = false;
+    public bool canMove = false;
+
+
+    void OnEnable()
+    {
+        Icicle.OnMoveBlocked += BlockMove;
+        Icicle.OnMoveAllowed += AllowMove;
+    }
+
+    void OnDisable()
+    {
+        Icicle.OnMoveBlocked -= BlockMove;
+        Icicle.OnMoveAllowed -= AllowMove;
+    }
+    private void BlockMove()
+    {
+        canMove = false;
+    }
+    private void AllowMove()
+    {
+        canMove = true;
+    }
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && !isMoving)
+        if (Input.GetMouseButtonDown(0) && !isMoving && canMove)
         {
             targetPos = transform.position + Vector3.right * moveX;
             isMoving = true;
