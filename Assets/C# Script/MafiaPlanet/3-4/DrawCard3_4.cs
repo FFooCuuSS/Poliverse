@@ -7,7 +7,7 @@ public class DrawCard3_4 : MonoBehaviour
 {
     public GameObject cardPrefab; // 프리팹 연결
     public Transform[] spawnPositions; // 5장의 카드가 위치할 위치들
-    public float delay = 2f;
+    //public float delay = 2f;
     private List<GameObject> spawnedCards = new List<GameObject>();
     public GameObject suspiciousFace;
     public GameObject normalFace;
@@ -16,6 +16,15 @@ public class DrawCard3_4 : MonoBehaviour
     float movingCardSpeed=13f;
     int moveCardTurn=0;
     int CardPos = -4;
+
+
+    // 카드 이동에 걸리는 시간
+    private float moveDuration = 0.5f;
+
+    // 이동 시작 시간을 저장
+    private float moveStartTime;
+    private Vector3 startPos;
+    private Vector3 targetPos;
 
     void Start()
     {
@@ -36,32 +45,42 @@ public class DrawCard3_4 : MonoBehaviour
     }
     void MoveCard(int cardNum)
     {
-        isCardMoving = true;
-        
         GameObject card = spawnedCards[cardNum];
-        Vector3 currentPos = card.transform.position;
-        Vector3 targetPos = new Vector3(CardPos, -1.5f, 0); // 목표 위치 (-7, 0)
-        if (spawnedCards[cardNum].GetComponent<CardColor>().isTrapCard)
-        {
-            ChangeSuspicious();
-        }
-        else
-        {
-            isNotSuspicious();
-        }
-            // 이동
-            card.transform.position = Vector3.MoveTowards(currentPos, targetPos, movingCardSpeed * Time.deltaTime);
 
-        // 도착했으면 다음 카드 이동
-        if (Vector3.Distance(card.transform.position, targetPos) < 0.01f)
+        // 처음 실행될 때만 초기화
+        if (!isCardMoving)
         {
+            isCardMoving = true;
+
+            startPos = card.transform.position;
+            targetPos = new Vector3(CardPos, -1.5f, 0);
+            moveStartTime = Time.time;
+
+            if (card.GetComponent<CardColor>().isTrapCard)
+            {
+                ChangeSuspicious();
+            }
+            else
+            {
+                isNotSuspicious();
+            }
+        }
+
+        // 경과 시간 비율 계산 (0 ~ 1)
+        float t = (Time.time - moveStartTime) / moveDuration;
+
+        // 부드럽게 이동
+        card.transform.position = Vector3.Lerp(startPos, targetPos, t);
+
+        // 도착 체크
+        if (t >= 1f)
+        {
+            card.transform.position = targetPos; // 정확히 맞춰줌
             isCardMoving = false;
             CardPos += 2;
-            moveCardTurn++; // 다음 카드로 이동
+            moveCardTurn++;
             isNotSuspicious();
         }
-
-
     }
     void isNotSuspicious()
     {
