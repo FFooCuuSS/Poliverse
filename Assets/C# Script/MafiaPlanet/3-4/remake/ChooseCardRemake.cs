@@ -1,55 +1,51 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// hand에 붙이는 스크립트.
+/// - hand가 닿아있는 카드(Trigger)를 기억했다가
+/// - 좌클릭 시 Minigame에 "이 카드 클릭했음"을 전달
+/// </summary>
 public class ChooseCardRemake : MonoBehaviour
 {
-    public GameObject Stage_3_4;
-    Minigame_3_4 minigame_3_4;
-    public bool start;
-    public bool isSuccess;
-    public bool isFailure;
-    void Start()
-    {
-        minigame_3_4 = Stage_3_4.GetComponent<Minigame_3_4>();
-        start = false;
-        isSuccess = false;
-        isFailure = false;
-    }
+    [Header("Minigame Ref")]
+    [SerializeField] private Minigame_3_4_Remake minigame;
 
-    // Update is called once per frame
-    void Update()
+    [Header("Card Layer (optional)")]
+    [SerializeField] private LayerMask cardLayer;
+
+    // 현재 hand와 닿아있는 카드
+    private GameObject currentCard;
+
+    public bool start = false; // Minigame에서 true로 켜면 입력 활성
+
+    private void Update()
     {
-        if (start)
-        {
-            ChooseCardStart();
-        }
-    }
-    void ChooseCardStart()
-    {
+        if (start && Input.GetMouseButtonDown(0)) Debug.Log("CLICK DETECTED");
+        if (!start) return;
+
+        // 좌클릭
         if (Input.GetMouseButtonDown(0))
         {
-            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2 mousePos2D = new Vector2(mousePos.x, mousePos.y);
+            Debug.Log("CLICK, currentCard = " + (currentCard ? currentCard.name : "NULL"));
+            // 현재 hand가 닿아있는 카드가 있어야 "선택" 가능
+            if (currentCard == null) return;
 
-            RaycastHit2D click = Physics2D.Raycast(mousePos2D, Vector2.zero);
+            // 미니게임에 전달 (접수 성공하면 true)
+            bool accepted = minigame != null && minigame.TrySubmitByClick(currentCard);
 
-            if (click.collider != null)
-            {
-                GameObject clickedObj = click.collider.gameObject;
-                if (clickedObj.GetComponent<CardColor>().isTrapCard)
-                {
-                    isSuccess = true;
-                    minigame_3_4.Succeed();
-
-                }
-                else
-                {
-                    isFailure = true;
-                    minigame_3_4.MinigameFailed();
-                }
-                clickedObj.SetActive(false);
-            }
+            // accepted가 false면(입력창 닫힘/판정 대기/횟수초과 등) 아무것도 안 함
         }
     }
+
+    // hand가 카드에 닿았을 때
+    
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.GetComponent<CardColor>() != null)
+        {
+            currentCard = collision.gameObject;
+        }
+    }
+
+    
 }
