@@ -12,6 +12,13 @@ public class PlayerMoveByClick : MonoBehaviour
     public bool isMoving = false;
     public bool canMove = false;
 
+    private MiniGame2_2 minigame2_2;
+
+    private void Start()
+    {
+        minigame2_2 = GetComponentInParent<MiniGame2_2>();
+    }
+
 
     void OnEnable()
     {
@@ -39,6 +46,7 @@ public class PlayerMoveByClick : MonoBehaviour
         {
             targetPos = transform.position + Vector3.right * moveX;
             isMoving = true;
+            minigame2_2.OnPlayerInput("Tap");
         }
 
         if (isMoving)

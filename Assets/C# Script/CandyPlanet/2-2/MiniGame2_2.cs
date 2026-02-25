@@ -39,12 +39,10 @@ public class MiniGame2_2 : MiniGameBase
         if (ended) return;
         Debug.Log($"{gameObject.name} 리듬메세지: {action}");
         action = action.Trim();
-        if (action == "Hold")
+        if (action == "Tap")
         {
         }
-        if (action == "Show")
-        {
-        }
+        
 
     }
     public override void OnPlayerInput(string action = null)
@@ -71,16 +69,11 @@ public class MiniGame2_2 : MiniGameBase
     {
         if (IsInputLocked || ended) return;
         ended = true;
-        // 모두 Miss인 경우 실패
-        if (missCount >= totalCount)
+        // 모두 Miss 3번 이상 실패
+        if (missCount >= 3)
         {
             Debug.Log("실패");
             Failure();
-        }
-        else
-        {
-            Debug.Log("성공");
-            Succeed();
         }
     }
 }

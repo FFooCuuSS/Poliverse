@@ -102,4 +102,5 @@ public class Minigame_2_1 : MiniGameBase
             Succeed();
         }
     }
+
 }
