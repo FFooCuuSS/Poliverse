@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SpawnIcicle : MonoBehaviour
@@ -10,16 +11,23 @@ public class SpawnIcicle : MonoBehaviour
     [SerializeField] private float step = 1f;
 
     [Header("Spawn Delays")]
-    [SerializeField] private float[] spawnDelays;
+    public float[] spawnDelays;
 
-    private int index = 0;
+    public int index = 0;
     private float currentX;
     private bool waiting = false;
+
+    private MiniGame2_2 minigame2_2;
+    [SerializeField] private CapsuleCollider2D player;
+    
 
     void Awake()
     {
         currentX = startX;
+        minigame2_2 = GetComponentInParent<MiniGame2_2>();
+        player = GetComponent<CapsuleCollider2D>();
     }
+   
 
     void OnEnable()
     {
@@ -55,6 +63,7 @@ public class SpawnIcicle : MonoBehaviour
 
         currentX += step;
         index++;
+
         waiting = false;
     }
 
