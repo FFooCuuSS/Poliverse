@@ -31,6 +31,22 @@ public class MinigameUIManager : MonoBehaviour
     [SerializeField] private float gameOverFadeDuration = 1.0f;
     private bool isGameOver = false;
 
+    // ===== NEW MODE: Timeline =====
+    [Header("NEW MODE - Timeline (seconds since scene start)")]
+    [SerializeField] private List<float> startTimes = new List<float>(); // 예: 0, 7.1, 21.8 ...
+    [SerializeField] private float preEndGap = 0.5f;
+
+    [Header("NEW MODE - Black Panel")]
+    [SerializeField] private Image blackPanelImage;
+    [SerializeField] private float blackFadeDuration = 0.08f;
+
+    [Header("NEW MODE - Single BGM")]
+    [SerializeField] private AudioClip stageBGM;
+    [SerializeField] private bool loopBGM = true;
+
+    private Coroutine timelineCoroutine;
+    private bool isSwitching = false;
+
     // 라운드 흐름 내부 변수
     private int selectedPlanet;
     private float loadingTime = 2f;
@@ -56,11 +72,11 @@ public class MinigameUIManager : MonoBehaviour
     private LifeNumber lifeNumber;
     private Queue<string> minigameQueue = new Queue<string>();
 
-    private int life = 4;
+    //private int life = 4;
 
     // 사운드 및 폴리싱
-    [SerializeField] private AudioClip successBGM;
-    [SerializeField] private AudioClip failureBGM;
+    //[SerializeField] private AudioClip successBGM;
+    //[SerializeField] private AudioClip failureBGM;
     public AudioSource audioSource;
 
     void Awake()
@@ -70,8 +86,6 @@ public class MinigameUIManager : MonoBehaviour
 
     void Start()
     {
-        UpdateStageText();
-
         resultPanel.SetActive(false);
         timerSlider.gameObject.SetActive(false);
         guideText.gameObject.SetActive(false);
@@ -86,26 +100,25 @@ public class MinigameUIManager : MonoBehaviour
         playerRenderer.sprite = playerStandingSprite;
         enemyRenderer.sprite = enemyStandingSprites[selectedPlanet - 1];
         rhythmManager = GetComponent<RhythmManager>();
-        PlayBounceAnimation(playerRenderer.transform);
-        PlayBounceAnimation(enemyRenderer.transform);
+        //UpdateStageText();
+        //PlayBounceAnimation(playerRenderer.transform);
+        //PlayBounceAnimation(enemyRenderer.transform);
+
+        PlayStageBGM();
+        InitBlackPanel();
 
         switch (selectedPlanet)
         {
-            case 1:
-                SetMinigameQueue("PolicePlanet", 10);
-                break;
-            case 2:
-                SetMinigameQueue("CandyPlanet", 15);
-                break;
-            case 3:
-                SetMinigameQueue("MafiaPlanet", 15);
-                break;
-            case 4:
-                SetMinigameQueue("MusicPlanet", 15);
-                break;
-            default:
-                return;
+            case 1: SetMinigameQueue("PolicePlanet", 10); break;
+            case 2: SetMinigameQueue("CandyPlanet", 15); break;
+            case 3: SetMinigameQueue("MafiaPlanet", 15); break;
+            case 4: SetMinigameQueue("MusicPlanet", 15); break;
+            default: return;
         }
+
+        ValidateTimeline();
+        timelineCoroutine = StartCoroutine(TimelineRoutine());
+
         if (gameOverPanelImage != null)
         {
             var c = gameOverPanelImage.color;
@@ -114,7 +127,7 @@ public class MinigameUIManager : MonoBehaviour
 
             gameOverPanelImage.gameObject.SetActive(false);
         }
-        StartCoroutine(LoadNextMinigameRoutine());
+        //StartCoroutine(LoadNextMinigameRoutine());
     }
 
     void Update()
@@ -135,6 +148,181 @@ public class MinigameUIManager : MonoBehaviour
         }
     }
 
+    private void PlayStageBGM()
+    {
+        if (audioSource == null) return;
+
+        audioSource.loop = loopBGM;
+        audioSource.clip = stageBGM;
+
+        if (stageBGM != null) audioSource.Play();
+        else Debug.LogWarning("[MinigameUIManager] stageBGM is NULL");
+    }
+
+    private void InitBlackPanel()
+    {
+        if (blackPanelImage == null) return;
+
+        blackPanelImage.gameObject.SetActive(true);
+        var c = blackPanelImage.color;
+        c.a = 0f;
+        blackPanelImage.color = c;
+        blackPanelImage.gameObject.SetActive(false);
+    }
+
+    private IEnumerator FadeBlack(bool show)
+    {
+        if (blackPanelImage == null) yield break;
+
+        blackPanelImage.gameObject.SetActive(true);
+        float targetA = show ? 1f : 0f;
+
+        yield return blackPanelImage
+            .DOFade(targetA, blackFadeDuration)
+            .SetEase(Ease.Linear)
+            .WaitForCompletion();
+
+        if (!show) blackPanelImage.gameObject.SetActive(false);
+    }
+
+    private void ValidateTimeline()
+    {
+        if (startTimes == null) startTimes = new List<float>();
+
+        // startTimes가 오름차순이 아니면 경고
+        for (int i = 1; i < startTimes.Count; i++)
+        {
+            if (startTimes[i] < startTimes[i - 1])
+            {
+                Debug.LogWarning($"[Timeline] startTimes not sorted: {startTimes[i - 1]} -> {startTimes[i]}");
+                break;
+            }
+        }
+
+        // 큐보다 타임이 많으면 뒤는 못 씀
+        if (startTimes.Count > minigameQueue.Count)
+        {
+            Debug.LogWarning($"[Timeline] startTimes({startTimes.Count}) > minigameQueue({minigameQueue.Count}). Extra times will be ignored.");
+        }
+    }
+
+    private IEnumerator TimelineRoutine()
+    {
+        // 첫 미니게임을 즉시 시작하고 싶으면 startTimes[0]=0 넣어라.
+        int count = Mathf.Min(startTimes.Count, minigameQueue.Count);
+
+        for (int i = 0; i < count; i++)
+        {
+            float startT = Mathf.Max(0f, startTimes[i]);
+            float preEndT = Mathf.Max(0f, startT - preEndGap);
+
+            // (startT - 0.5) 시점: 이전 게임 종료 + 검은패널 ON
+            yield return WaitUntilLevelTime(preEndT);
+            yield return EndCurrentMinigame_ShowBlack();
+
+            // startT 시점: 새 게임 시작 + 검은패널 OFF
+            yield return WaitUntilLevelTime(startT);
+            string nextPath = minigameQueue.Dequeue();
+            yield return StartMinigameFromPath_HideBlack(nextPath);
+        }
+
+        // 끝나면 로비로. 원치 않으면 아래 2줄 주석.
+        // CameraScrollController.selectedPlanetIndex = 0;
+        // SceneManager.LoadScene("LobbyScene");
+    }
+
+    private IEnumerator WaitUntilLevelTime(float t)
+    {
+        while (Time.timeSinceLevelLoad < t)
+            yield return null;
+    }
+
+    private IEnumerator EndCurrentMinigame_ShowBlack()
+    {
+        if (isSwitching) yield break;
+        isSwitching = true;
+
+        // 입력 막기 + 타이머 정리
+        blockInputPanel.SetActive(true);
+        isTimerActive = false;
+
+        if (failCoroutine != null)
+        {
+            StopCoroutine(failCoroutine);
+            failCoroutine = null;
+        }
+
+        // 공백: 검은 패널 ON
+        yield return FadeBlack(true);
+
+        // 미니게임 제거
+        if (currentMinigame != null)
+        {
+            DOTween.Kill(currentMinigame.transform);
+
+            if (rhythmManager != null)
+                rhythmManager.ClearCurrent();
+
+            if (mainCamera != null)
+                mainCamera.transform.position = new Vector3(0f, 0f, -10f);
+
+            Destroy(currentMinigame.gameObject);
+            currentMinigame = null;
+        }
+
+        // UI 정리
+        if (resultPanel != null) resultPanel.SetActive(false);
+        if (timerSlider != null) timerSlider.gameObject.SetActive(false);
+
+        isSwitching = false;
+    }
+
+    private IEnumerator StartMinigameFromPath_HideBlack(string minigamePath)
+    {
+        var prefab = Resources.Load<GameObject>(minigamePath);
+        if (prefab == null)
+        {
+            Debug.LogError($"[Timeline] Missing prefab: {minigamePath}");
+            yield break;
+        }
+
+        GameObject obj = Instantiate(prefab);
+        currentMinigame = obj.GetComponent<MiniGameBase>();
+        if (currentMinigame == null)
+        {
+            Debug.LogError($"[Timeline] MiniGameBase not found: {minigamePath}");
+            Destroy(obj);
+            yield break;
+        }
+
+        // 가이드(원하면)
+        ShowGuide(currentMinigame.GetMinigameExplain, 1f);
+
+        // 리듬 세팅(기존 유지)
+        if (rhythmManager != null)
+        {
+            string minigameId = ExtractMinigameIdFromPath(minigamePath);
+
+            TextAsset csv = null;
+            int idx = selectedPlanet - 1;
+            if (planetCsvs != null && idx >= 0 && idx < planetCsvs.Length)
+                csv = planetCsvs[idx];
+
+            yield return ConfigureRhythmRoutine(minigameId, csv);
+            RefreshRhythmWindows();
+        }
+
+        timerDuration = currentMinigame.GetTimerDuration;
+        StartTimer(timerDuration);
+        //timerSlider.gameObject.SetActive(true);
+
+        // 검은 패널 OFF + 입력 허용
+        yield return FadeBlack(false);
+        blockInputPanel.SetActive(false);
+
+        currentMinigame.StartGame();
+    }
+
     private IEnumerator TimerEndFailDelay()
     {
         yield return new WaitForSeconds(1f);
@@ -145,44 +333,34 @@ public class MinigameUIManager : MonoBehaviour
             yield break;
         }
 
-        currentMinigame.Fail();
+        //currentMinigame.Fail();
         failCoroutine = null;
     }
 
     // 미니게임 세팅
     private void SetMinigameQueue(string planetName, int minigameCount)
     {
-        List<int> minigameIndexes = new List<int>();
+        // 기존 큐 초기화(원하면 유지)
+        minigameQueue.Clear();
 
-        for (int i = 1; i < minigameCount; i++)
+        // 1 ~ minigameCount 까지 순서대로, 단 6과 7만 교체
+        for (int i = 1; i <= minigameCount; i++)
         {
-            string path = $"MinigamePrefab/{planetName}/{selectedPlanet}_{i}minigame_remake";
+            int idx = i;
+
+            if (i == 6) idx = 7;
+            else if (i == 7) idx = 6;
+
+            string path = $"MinigamePrefab/{planetName}/{selectedPlanet}_{idx}minigame_remake";
 
             if (Resources.Load<GameObject>(path) != null)
             {
-                minigameIndexes.Add(i);
+                minigameQueue.Enqueue(path);
             }
-        }
-
-        for (int i = 0; i < minigameIndexes.Count; i++)
-        {
-            int randIndex = Random.Range(i, minigameIndexes.Count);
-            (minigameIndexes[i], minigameIndexes[randIndex]) = (minigameIndexes[randIndex], minigameIndexes[i]);
-        }
-
-        foreach (int index in minigameIndexes)
-        {
-            string path = $"MinigamePrefab/{planetName}/{selectedPlanet}_{index}minigame_remake";
-            minigameQueue.Enqueue(path);
-        }
-
-        string bossPath = $"MinigamePrefab/{planetName}/{selectedPlanet}_{minigameCount}minigame_remake";
-
-        if (Resources.Load<GameObject>(bossPath) != null)
-        {
-            minigameQueue.Enqueue(bossPath);
-            bossStageIndex = minigameIndexes.Count + 1;
-            bossMinigamePath = bossPath;
+            else
+            {
+                Debug.LogWarning($"[SetMinigameQueue] Missing prefab: {path}");
+            }
         }
     }
 
@@ -198,7 +376,7 @@ public class MinigameUIManager : MonoBehaviour
 
         yield return new WaitForSeconds(loadingTime);
 
-        timerSlider.gameObject.SetActive(true);
+        //timerSlider.gameObject.SetActive(true);
 
         string minigamePath = minigameQueue.Dequeue();
         GameObject minigameObj = Instantiate(Resources.Load<GameObject>(minigamePath));
@@ -244,11 +422,11 @@ public class MinigameUIManager : MonoBehaviour
     // 미니게임 상태 및 시간 초기화
     private void StartMinigame()
     {
-        CancelInvoke(nameof(PlayWinEffect));
-        CancelInvoke(nameof(PlayLoseEffect));
+        //CancelInvoke(nameof(PlayWinEffect));
+        //CancelInvoke(nameof(PlayLoseEffect));
 
-        currentMinigame.OnSuccess += OnMinigameSuccess;
-        currentMinigame.OnFail += OnMinigameFail;
+        //currentMinigame.OnSuccess += OnMinigameSuccess;
+        //currentMinigame.OnFail += OnMinigameFail;
         //currentMinigame.BindRhythmManager(FindObjectOfType<RhythmManager>());
 
         timerDuration = currentMinigame.GetTimerDuration;
@@ -298,7 +476,7 @@ public class MinigameUIManager : MonoBehaviour
         isTimerActive = true;
         timerSlider.value = 1f;
     }
-
+    /*
     // 미니게임 성공/실패
     private void OnMinigameSuccess()
     {
@@ -348,7 +526,7 @@ public class MinigameUIManager : MonoBehaviour
             StartCoroutine(DelayAndEndMinigame());
         }
     }
-
+    
     // 승리 실패 연출
     private void PlayWinEffect()
     {
@@ -370,6 +548,7 @@ public class MinigameUIManager : MonoBehaviour
 
         audioSource.clip = failureBGM;
     }
+    */
     private IEnumerator GameOverRoutine()
     {
         if (isGameOver) yield break;
@@ -413,7 +592,7 @@ public class MinigameUIManager : MonoBehaviour
         if (isEndingMinigame) yield break;
         isEndingMinigame = true;
 
-        UpdateStageText();
+        //UpdateStageText();
         blockInputPanel.SetActive(true);
 
         yield return new WaitForSeconds(1f);
@@ -422,8 +601,8 @@ public class MinigameUIManager : MonoBehaviour
         {
             DOTween.Kill(currentMinigame.transform);
 
-            currentMinigame.OnSuccess -= OnMinigameSuccess;
-            currentMinigame.OnFail -= OnMinigameFail;
+            //currentMinigame.OnSuccess -= OnMinigameSuccess;
+            //currentMinigame.OnFail -= OnMinigameFail;
 
             if (rhythmManager != null)
                 rhythmManager.ClearCurrent();
@@ -438,57 +617,16 @@ public class MinigameUIManager : MonoBehaviour
         isEndingMinigame = false;
         StartCoroutine(WaitAndLoadNext());
         audioSource.Play();
-    }
-
-    private IEnumerator RetryCurrentMinigame()
-    {
-        blockInputPanel.SetActive(true);
-        yield return new WaitForSeconds(1f);
-
-        if (currentMinigame != null)
-        {
-            currentMinigame.OnSuccess -= OnMinigameSuccess;
-            currentMinigame.OnFail -= OnMinigameFail;
-
-            if (rhythmManager != null)
-                rhythmManager.ClearCurrent();
-
-            Destroy(currentMinigame.gameObject);
-        }
-
-        blockInputPanel.SetActive(false);
-        timerSlider.gameObject.SetActive(false);
-
-        yield return new WaitForSeconds(loadingTime);
-
-        timerSlider.gameObject.SetActive(true);
-
-        GameObject minigameObj = Instantiate(Resources.Load<GameObject>(bossMinigamePath));
-        currentMinigame = minigameObj.GetComponent<MiniGameBase>();
-
-        ShowGuide(currentMinigame.GetMinigameExplain, 1f);
-
-        yield return new WaitForSeconds(0.5f);
-
-        StartMinigame();
-    }
+    }    
 
     private IEnumerator WaitAndLoadNext()
     {
         yield return new WaitForSeconds(2f);
         resultPanel.SetActive(false);
-
-
-        if (life > 0)
-        {
-            StartCoroutine(LoadNextMinigameRoutine());
-        }
-        else
-        {
-            StartCoroutine(GameOverRoutine());
-        }
+        StartCoroutine(LoadNextMinigameRoutine());
     }
 
+    /*
     // UI 추가 관리
     private void UpdateStageText()
     {
@@ -587,4 +725,5 @@ public class MinigameUIManager : MonoBehaviour
 
         yield return resetSeq.WaitForCompletion();
     }
+    */
 }

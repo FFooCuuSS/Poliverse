@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using static MiniGameBase;
 
@@ -23,8 +24,11 @@ public class minigame_1_1_remake : MiniGameBase
     [Header("Auto Off Time (seconds)")]
     public float autoOffSeconds = 2.5f;
 
+    [Header("Input Window")]
+    [SerializeField] private float inputWindowSeconds = 1f;
+
     private const int ENEMY_COUNT = 4;
-    private const int TOTAL_ROUND = 2;
+    private const int TOTAL_ROUND = 3;
 
     private int round;
     private int showIndex;
@@ -40,11 +44,14 @@ public class minigame_1_1_remake : MiniGameBase
     private bool[] resolvedThisRound;
     private Coroutine[] autoOffJobs;
 
+    private string lastRhythmAction = null;
+    private Coroutine inputWindowJob = null;
+    private readonly Queue<int> pendingInputs = new Queue<int>();
+
     private Camera cam;
 
     void Start()
     {
-        Debug.Log("[1-1] Start() called");
         Scope.SetActive(false);
         cam = Camera.main;
         StartGame();
@@ -72,15 +79,15 @@ public class minigame_1_1_remake : MiniGameBase
         if (autoOffJobs == null || autoOffJobs.Length != ENEMY_COUNT)
             autoOffJobs = new Coroutine[ENEMY_COUNT];
 
+        lastRhythmAction = null;
+        if (Scope != null) Scope.SetActive(false);
+
         PrepareShowPositions();
         ResetRoundObjects();
-
-        Debug.Log("[1-1] StartGame");
     }
 
     public override void BindRhythmManager(IRhythmManager manager)
     {
-        Debug.Log("[1-1] BindRhythmManager called manager=" + (manager != null));
         if (rhythmManager != null)
             rhythmManager.OnEventTriggered -= OnRhythmEvent;
 
@@ -92,13 +99,28 @@ public class minigame_1_1_remake : MiniGameBase
 
     public override void OnRhythmEvent(string action)
     {
-        Debug.Log("[1-1] OnRhythmEvent action=" + action);
         if (ended || string.IsNullOrEmpty(action)) return;
 
         action = action.Trim();
 
+        if (lastRhythmAction == "Show" && action == "Input")
+        {
+            if (Scope != null) Scope.SetActive(true);
+        }
+        else if (lastRhythmAction == "Input" && action == "Show")
+        {
+            if (Scope != null) Scope.SetActive(false);
+        }
+
+        lastRhythmAction = action;
+
         if (action == "Show") HandleShow();
         else if (action == "Input") HandleInput();
+    }
+
+    public override void OnJudgement(JudgementResult judgement)
+    {
+        Debug.Log($"{judgement}");
     }
 
     void Update()
@@ -144,20 +166,35 @@ public class minigame_1_1_remake : MiniGameBase
             return;
         }
 
-        if (inputIndex >= ENEMY_COUNT)
-            return;
-
-        if (resolvedThisRound[inputIndex])
-            return;
-
-        if (clicked != enemies[inputIndex])
+        if (!canClick || pendingInputs.Count == 0)
         {
             missCount++;
-            Debug.Log("[1-1] MISS: Wrong Enemy (expected=" + inputIndex + ")");
+            Debug.Log("[1-1] MISS: Clicked Enemy Outside Input Time");
             return;
         }
 
-        ResolveSuccess(inputIndex);
+        int expected = pendingInputs.Peek();
+
+        if (resolvedThisRound[expected])
+        {
+            pendingInputs.Dequeue();
+            return;
+        }
+
+        if (clicked != enemies[expected])
+        {
+            missCount++;
+            Debug.Log("[1-1] MISS: Wrong Enemy (expected=" + expected + ")");
+            return;
+        }
+
+        ResolveSuccess(expected);
+        pendingInputs.Dequeue();
+
+        while (inputIndex < ENEMY_COUNT && resolvedThisRound[inputIndex])
+            inputIndex++;
+
+        TryEndRound();
     }
 
     void HandleShow()
@@ -224,23 +261,52 @@ public class minigame_1_1_remake : MiniGameBase
 
         StopAutoOff(showIndex);
 
-        resolvedThisRound[showIndex] = false;
+        //resolvedThisRound[showIndex] = false;
         autoOffJobs[showIndex] = StartCoroutine(AutoOffRoutine(showIndex));
 
-        Debug.Log("[1-1] HandleShow BEFORE showIndex++");
         showIndex++;
-        Debug.Log("[1-1] HandleShow AFTER showIndex++ showIndex=" + showIndex);
-
-        if (showIndex > 3)
-        {
-            if (Scope != null) Scope.SetActive(true);
-        }
     }
 
     void HandleInput()
     {
+        if (canClick)
+            CloseInputWindow();
+
+        pendingInputs.Clear();
+
+        // 핵심: showIndex까지만, 그리고 아직 미해결인 첫 대상
+        for (int i = inputIndex; i < showIndex; i++)
+        {
+            if (!resolvedThisRound[i] && enemies[i] != null)
+            {
+                pendingInputs.Enqueue(i);
+                break;
+            }
+        }
+
+        if (pendingInputs.Count == 0)
+        {
+            Debug.LogWarning($"[1-1] INPUT IGNORED: empty queue. inputIndex={inputIndex}, showIndex={showIndex}, " +
+                             $"resolved=[{string.Join(",", resolvedThisRound)}]");
+            return;
+        }
+
         canClick = true;
-        Debug.Log("[1-1] INPUT START expected=" + inputIndex);
+
+        if (inputWindowJob != null) StopCoroutine(inputWindowJob);
+        inputWindowJob = StartCoroutine(InputWindowRoutine());
+
+        Debug.Log($"[1-1] INPUT START expected={pendingInputs.Peek()} inputIndex={inputIndex} showIndex={showIndex}");
+    }
+
+    IEnumerator InputWindowRoutine()
+    {
+        yield return new WaitForSeconds(inputWindowSeconds);
+
+        if (ended) yield break;
+
+        canClick = false;
+        inputWindowJob = null;
     }
 
     IEnumerator AutoOffRoutine(int idx)
@@ -279,15 +345,24 @@ public class minigame_1_1_remake : MiniGameBase
         StopAutoOff(idx);
 
         if (enemies[idx] != null)
-        {
-            // 원하는 흐름: FadeOut(Hide) -> SetActive(false)
             StartCoroutine(EnemyHideThenSetActiveFalse(enemies[idx]));
-        }
 
         Debug.Log("[1-1] SUCCESS: idx=" + idx);
 
+        CloseInputWindow();
+
         inputIndex++;
         TryEndRound();
+    }
+    private void CloseInputWindow()
+    {
+        canClick = false;
+        pendingInputs.Clear();
+        if (inputWindowJob != null)
+        {
+            StopCoroutine(inputWindowJob);
+            inputWindowJob = null;
+        }
     }
 
     void TryEndRound()
@@ -302,8 +377,6 @@ public class minigame_1_1_remake : MiniGameBase
     void EndRound()
     {
         round++;
-
-        Debug.Log("[1-1] ROUND END round=" + round + " success=" + successCount + " miss=" + missCount);
 
         if (round >= TOTAL_ROUND)
         {
@@ -320,6 +393,8 @@ public class minigame_1_1_remake : MiniGameBase
 
         PrepareShowPositions();
         ResetRoundObjects();
+        if (inputWindowJob != null) { StopCoroutine(inputWindowJob); inputWindowJob = null; }
+        canClick = false;
     }
 
     void ResetRoundObjects()
@@ -337,6 +412,8 @@ public class minigame_1_1_remake : MiniGameBase
                 EnemySetInactiveImmediate(enemies[i]);
             }
         }
+        canClick = false;
+        if (inputWindowJob != null) { StopCoroutine(inputWindowJob); inputWindowJob = null; }
     }
 
     void StopAutoOff(int idx)
@@ -387,8 +464,6 @@ public class minigame_1_1_remake : MiniGameBase
 
         // 먼저 켜기
         go.SetActive(true);
-        Debug.Log("AFTER SetActive(true): activeSelf=" + go.activeSelf + " activeInHierarchy=" + go.activeInHierarchy);
-
 
         // 알파를 낮은 값으로 강제로 맞춘 후 페이드 인 시작(처음 한 프레임 번쩍임 방지)
         FadeActiveToggle fade = go.GetComponent<FadeActiveToggle>();

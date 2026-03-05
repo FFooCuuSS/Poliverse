@@ -281,7 +281,6 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
         if (audioSource != null && audioSource.clip != null)
         {
             // 바로 Play()보다 scheduled가 안정적
-            audioSource.Stop();
             //audioSource.PlayScheduled(dspStartTime);
         }
         else
@@ -300,7 +299,6 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
     private void StopSongInternal()
     {
         isRunning = false;
-        if (audioSource != null) audioSource.Stop();
         OnSongStopped?.Invoke();
     }
 

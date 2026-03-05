@@ -34,6 +34,7 @@ public class PlayerSwipe : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
+            Debug.Log("Click");
             startPos = Input.mousePosition;
             isSwiping = true;
         }
