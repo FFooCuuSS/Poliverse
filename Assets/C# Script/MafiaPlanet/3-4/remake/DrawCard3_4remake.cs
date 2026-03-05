@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class DrawCard3_4remake : MonoBehaviour
 {
+    public Minigame_3_4_Remake minigame3_4;
     public GameObject cardPrefab;
     public Transform[] cardPosition;
     List<GameObject> spawnedCards = new List<GameObject>();
@@ -42,7 +43,7 @@ public class DrawCard3_4remake : MonoBehaviour
         }
         else
         {
-            GetComponent<ChooseCardRemake>().start = true;
+            minigame3_4.StartGame();
         }
     }
     void PopCard()

@@ -31,7 +31,7 @@ public class ChooseCardRemake : MonoBehaviour
             if (currentCard == null) return;
 
             // 미니게임에 전달 (접수 성공하면 true)
-            bool accepted = minigame != null && minigame.TrySubmitByClick(currentCard);
+            //bool accepted = minigame != null && minigame.TrySubmitByClick(currentCard);
 
             // accepted가 false면(입력창 닫힘/판정 대기/횟수초과 등) 아무것도 안 함
         }

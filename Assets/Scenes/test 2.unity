@@ -196,9 +196,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6176092377696615717, guid: 23ac8571abf8ecc45ba1b622a4f47b88, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1878008790}
-    - targetCorrespondingSourceObject: {fileID: 6176092377696615717, guid: 23ac8571abf8ecc45ba1b622a4f47b88, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1878008791}
     - targetCorrespondingSourceObject: {fileID: 6630037409909465813, guid: 23ac8571abf8ecc45ba1b622a4f47b88, type: 3}
       insertIndex: -1
       addedObject: {fileID: 754945146}
@@ -394,6 +391,9 @@ GameObject:
   - component: {fileID: 585179209}
   - component: {fileID: 585179210}
   - component: {fileID: 585179211}
+  - component: {fileID: 585179213}
+  - component: {fileID: 585179212}
+  - component: {fileID: 585179214}
   m_Layer: 9
   m_Name: Square
   m_TagString: Untagged
@@ -540,6 +540,53 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &585179212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 585179207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f760faf7975a5e24ab452f5333f6ab89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minigame: {fileID: 1878008788}
+  cardLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  start: 0
+--- !u!114 &585179213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 585179207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 921c35dc20fe31e44bf25e4721dd383b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hand: {fileID: 585179207}
+--- !u!114 &585179214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 585179207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89bb073089469a843b685a63ab19bb59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  game: {fileID: 1878008788}
+  start: 0
+  checkIsSuspicious: 0
+  clickCount: 0
+  suspiciousClickCount: 0
 --- !u!1 &754945143 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6630037409909465813, guid: 23ac8571abf8ecc45ba1b622a4f47b88, type: 3}
@@ -557,6 +604,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60e983741f4db2f46920da22ee53b817, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minigame3_4: {fileID: 1878008788}
   cardPrefab: {fileID: 5054586211692714608, guid: a3834cbea125f5d45af149077bb53958, type: 3}
   cardPosition:
   - {fileID: 1076515019}
@@ -573,7 +621,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 754945143}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f760faf7975a5e24ab452f5333f6ab89, type: 3}
   m_Name: 
@@ -942,9 +990,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   handTransform: {fileID: 585179208}
-  chooser: {fileID: 754945146}
-  maxClickCount: 5
+  handMover: {fileID: 585179214}
   handStopX: 6
+  expectedInputCount: 5
+  requiredGoodOrPerfectCount: 1
 --- !u!4 &1878008789 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8454373390283149279, guid: 23ac8571abf8ecc45ba1b622a4f47b88, type: 3}
@@ -962,19 +1011,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0c09f55cbd4ae046a7970acab7d4901, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1878008791
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1878008787}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 921c35dc20fe31e44bf25e4721dd383b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hand: {fileID: 585179207}
 --- !u!1 &2023685663
 GameObject:
   m_ObjectHideFlags: 0

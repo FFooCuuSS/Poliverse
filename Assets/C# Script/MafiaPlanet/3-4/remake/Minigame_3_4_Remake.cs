@@ -1,34 +1,44 @@
 using UnityEngine;
 
+/// <summary>
+/// Minigame 3-4 Remake (판정 전용)
+/// - StartGame: 초기화 + (선택) handMover.start = true
+/// - SubmitInput: 클릭 순간 호출 -> OnPlayerInput("Input") 전달
+/// - OnJudgement: RhythmManagerTest가 계산한 Good/Perfect/Miss 카운트만 누적
+/// - FinalJudge: handStopX 도달 시 Success/Fail 결정
+/// </summary>
 public class Minigame_3_4_Remake : MiniGameBase
 {
     [Header("Refs")]
-    [SerializeField] private Transform handTransform;          // hand 트랜스폼
-    [SerializeField] private ChooseCardRemake chooser;      // hand에 붙은 ChooseCard 스크립트
+    [SerializeField] private Transform handTransform;     // hand 트랜스폼(최종 판정 트리거용)
+    [SerializeField] private HandMover handMover;         // 있으면 start on/off로 hand 제어
 
-    [Header("Counts")]
-    [SerializeField] private int maxClickCount = 5;            // 총 5회 클릭 제한
-    [SerializeField] private float handStopX = 6f;             // hand x가 6이면 최종판정
+    [Header("Finish Condition")]
+    [SerializeField] private float handStopX = 6f;        // hand x가 이 값 이상이면 최종판정
 
-    // ====== 상태/카운트 ======
+    [Header("Judge Rule")]
+    [Tooltip("CSV에 Input이 총 몇 번 있는지(예: 5). 체크를 원치 않으면 0으로 두기.")]
+    [SerializeField] private int expectedInputCount = 5;
+
+    [Tooltip("성공으로 인정할 Good/Perfect 횟수. (예: 트랩 1번만 맞추는 게임이면 1)")]
+    [SerializeField] private int requiredGoodOrPerfectCount = 1;
+
+    // ===== 상태 =====
     private bool ended;
 
-    private int successCnt;
-    private int failCnt;
-    private int usedClickCnt;
+    // ===== 판정 카운트 =====
+    private int perfectCnt;
+    private int goodCnt;
+    private int missCnt;
 
-    // “현재 Input 슬롯” 상태
-    private bool slotActive;               // 지금 Input 이벤트가 떠서 슬롯이 활성 상태인지
-    private bool slotResolved;             // 이 슬롯을 이미 처리했는지(성공/실패 카운트 했는지)
-    private bool playerTriedThisSlot;      // 이 슬롯에서 플레이어가 클릭 시도를 했는지
-
-    // 이번 클릭이 trap이었는지 저장 (판정 결과 들어올 때 같이 평가)
-    private bool pendingIsTrap;
+    // 클릭(입력) 시도 횟수(원하면 디버그/제한에 활용 가능)
+    private int submittedInputCnt;
 
     private void Start()
     {
-        StartGame();
+        //StartGame(); // 자동 시작 원하면 주석 해제
     }
+
     public override void StartGame()
     {
         Debug.Log("[3-4] StartGame called");
@@ -36,17 +46,13 @@ public class Minigame_3_4_Remake : MiniGameBase
 
         ended = false;
 
-        successCnt = 0;
-        failCnt = 0;
-        usedClickCnt = 0;
+        perfectCnt = 0;
+        goodCnt = 0;
+        missCnt = 0;
+        submittedInputCnt = 0;
 
-        slotActive = false;
-        slotResolved = false;
-        playerTriedThisSlot = false;
-        pendingIsTrap = false;
-
-        // choosecard 입력 시작
-        if (chooser != null) chooser.start = true;
+        // hand 이동 시작(선택)
+        if (handMover != null) handMover.start = true;
     }
 
     private void Update()
@@ -61,151 +67,92 @@ public class Minigame_3_4_Remake : MiniGameBase
     }
 
     /// <summary>
-    /// RhythmManagerTest → MiniGameBase.OnRhythmEvent 로 들어오는 action
-    /// CSV에서 Input 시간이 6.5,7.5,8.5,9.5,10.5 라고 했으니
-    /// 그 타이밍에 "Input" action이 들어온다고 가정.
+    /// (다른 스크립트에 있는) GetMouseButtonDown에서 이거 호출하면 됨.
+    /// 클릭 -> RhythmManagerTest에 "Input"을 전달 -> 판정 결과는 OnJudgement로 돌아옴.
     /// </summary>
-    public override void OnRhythmEvent(string action)
+    public void SubmitInput()
     {
-        Debug.Log("[3-4] OnRhythmEvent: " + action);
         if (ended) return;
-        if (string.IsNullOrEmpty(action)) return;
+        if (IsInputLocked) return;     // 리듬매니저 입력 잠금(쿨다운 등)일 때 무시
 
-        action = action.Trim();
+        submittedInputCnt++;
 
-        if (action == "Input")
-        {
-            // 새 Input 슬롯 시작
-            slotActive = true;
-            slotResolved = false;
-            playerTriedThisSlot = false;
-
-            // (선택) Debug
-            // Debug.Log("[3-4] Input slot opened");
-        }
-    }
-
-    /// <summary>
-    /// ChooseCard가 좌클릭했을 때 호출하는 진입점.
-    /// “현재 hand와 닿아있는 카드”를 받아서
-    /// - 클릭 제한/슬롯 상태 체크 후
-    /// - 리듬매니저에 입력 전달(OnPlayerInput)
-    /// </summary>
-    public bool TrySubmitByClick(GameObject cardObj)
-    {
-        Debug.Log($"TrySubmitByClick slotActive={slotActive}, slotResolved={slotResolved}, used={usedClickCnt}, locked={IsInputLocked}, cardColor={(cardObj.GetComponent<CardColor>() != null)}");
-        if (ended) return false;
-        if (IsInputLocked) return false;
-
-        // Input 슬롯이 열려있을 때만 시도 가능
-        if (!slotActive) return false;
-
-        // 이미 처리한 슬롯이면 무시(중복 카운트 방지)
-        if (slotResolved) return false;
-
-        // 총 클릭 횟수 제한
-        if (usedClickCnt >= maxClickCount) return false;
-
-        // 카드 정보 확인
-        var cc = cardObj.GetComponent<CardColor>();
-        if (cc == null) return false;
-
-        usedClickCnt++;
-        playerTriedThisSlot = true;
-        pendingIsTrap = cc.isTrapCard;
-
-        // 리듬매니저에 "Input" 전달 → 판정(Perfect/Good/Miss)은 매니저가 함
+        // 핵심 연결: 리듬매니저에게 입력이 들어왔다고 알림
         OnPlayerInput("Input");
-
-        return true;
     }
 
     /// <summary>
-    /// RhythmManagerTest → OnPlayerJudged 로 들어오는 판정 결과
-    /// - 클릭으로 들어온 판정이면: trap + Good 이상이면 success++, 아니면 fail++
-    /// - 클릭 안 했는데 Miss가 들어오면(자동 미스): fail++
-    /// 단, "같은 슬롯에서 클릭 미스 후 자동 미스가 한 번 더 들어오는" 중복을 막기 위해
-    /// slotResolved로 한번만 카운트.
+    /// RhythmManagerTest가 CSV 시간과 입력 시간을 ±윈도우로 비교해서
+    /// Perfect/Good/Miss를 계산한 뒤 여기로 보내줌.
     /// </summary>
     public override void OnJudgement(JudgementResult judgement)
     {
         if (ended) return;
 
-        // 슬롯이 활성 상태가 아니면 무시(다른 노트/이벤트로 온 판정일 가능성)
-        if (!slotActive) return;
-
-        // 이미 이 슬롯 처리 끝났으면(성공/실패 카운트 완료) 중복 방지
-        if (slotResolved) return;
-
-        // ===== 이 슬롯은 이제 한 번만 처리하고 끝 =====
-        slotResolved = true;
-        slotActive = false; // 슬롯 닫기
-
-        bool timingGoodOrBetter = (judgement == JudgementResult.Good || judgement == JudgementResult.Perfect);
-
-        if (playerTriedThisSlot)
+        switch (judgement)
         {
-            // 플레이어가 클릭을 했던 슬롯: 규칙 A 적용
-            if (pendingIsTrap && timingGoodOrBetter)
-            {
-                successCnt++;
-                // Debug.Log($"[3-4] SUCCESS ++ (success={successCnt})");
-            }
-            else
-            {
-                failCnt++;
-                // Debug.Log($"[3-4] FAIL ++ (fail={failCnt}) trap={pendingIsTrap}, judge={judgement}");
-            }
-        }
-        else
-        {
-            // 클릭 안 했는데 판정이 들어온 케이스(대부분 자동 Miss)
-            // "타이밍에서 miss"로 fail++
-            if (judgement == JudgementResult.Miss)
-            {
-                failCnt++;
-                // Debug.Log($"[3-4] AUTO MISS FAIL ++ (fail={failCnt})");
-            }
-            else
-            {
-                // 이 케이스는 거의 없겠지만 안전상 처리
-                failCnt++;
-            }
+            case JudgementResult.Perfect:
+                perfectCnt++;
+                break;
+
+            case JudgementResult.Good:
+                goodCnt++;
+                break;
+
+            case JudgementResult.Miss:
+                missCnt++;
+                break;
         }
 
-        // 다음 슬롯 대비 초기화
-        playerTriedThisSlot = false;
-        pendingIsTrap = false;
+        //Debug.Log($"[3-4] Judge={judgement} (P={perfectCnt}, G={goodCnt}, M={missCnt}, Submit={submittedInputCnt})");
     }
 
     /// <summary>
-    /// hand x가 6 도달했을 때 호출됨.
-    /// failCnt != 0 이면 실패
-    /// failCnt == 0 이면서 successCnt == 1 이면 성공
+    /// handStopX 도달 시 최종 판정.
+    /// 기본 룰:
+    /// 1) Miss가 1개라도 있으면 Fail
+    /// 2) (Good+Perfect) == requiredGoodOrPerfectCount 이면 Success
+    /// 3) expectedInputCount > 0 이면, 제출 횟수/판정 횟수 부족한 경우 Fail 처리(안전장치)
     /// </summary>
     public void FinalJudge()
     {
         if (ended) return;
         ended = true;
 
-        if (chooser != null) chooser.start = false;
+        if (handMover != null) handMover.start = false;
 
-        Debug.Log($"[3-4] FinalJudge: success={successCnt}, fail={failCnt}, usedClick={usedClickCnt}");
+        int goodOrPerfect = goodCnt + perfectCnt;
 
-        // 너가 말한 조건 그대로
-        if (failCnt != 0)
+        Debug.Log($"[3-4] FinalJudge: P={perfectCnt}, G={goodCnt}, M={missCnt}, GP={goodOrPerfect}, Submit={submittedInputCnt}");
+
+        // 1) Miss 있으면 무조건 실패
+        if (missCnt > 0)
         {
             Fail();
             return;
         }
 
-        if (failCnt == 0 && successCnt == 1)
+        // (선택) CSV에 Input이 expectedInputCount번인데, 판정/제출이 너무 적으면 실패로 방지
+        // - 리듬매니저가 자동 Miss를 쏴주는 구조면 submittedInputCnt 체크는 굳이 안 해도 됨
+        if (expectedInputCount > 0)
+        {
+            int totalJudge = perfectCnt + goodCnt + missCnt;
+            if (totalJudge < expectedInputCount)
+            {
+                // 아직 판정이 덜 들어왔는데 손이 끝나버린 케이스 방지
+                Fail();
+                return;
+            }
+        }
+
+        // 2) Good/Perfect 합이 요구치면 성공
+        if (goodOrPerfect == requiredGoodOrPerfectCount)
         {
             Success();
             return;
         }
 
-        // 그 외 케이스(예: fail 0인데 success 0이거나, success 2 이상 등)는 실패 처리로 두는게 안전
+        // 3) 그 외는 실패
         Fail();
     }
 }
