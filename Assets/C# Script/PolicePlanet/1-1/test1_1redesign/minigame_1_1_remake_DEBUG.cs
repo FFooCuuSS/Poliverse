@@ -130,7 +130,8 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
         Vector3 w = cam.ScreenToWorldPoint(Input.mousePosition);
         w.z = 0;
 
-        targetScope.position = w;
+        if (targetScope != null)
+            targetScope.position = w;
 
         Collider2D col = Physics2D.OverlapPoint(w);
 
@@ -171,13 +172,12 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
             missCount++;
             return;
         }
+
+        // 먼저 큐에서 제거
         pendingInputs.Dequeue();
+
+        // 그 다음 성공 처리
         ResolveSuccess(expected);
-
-        while (inputIndex < ENEMY_COUNT && resolvedThisRound[inputIndex])
-            inputIndex++;
-
-        TryEndRound();
     }
 
     void HandleShow()
