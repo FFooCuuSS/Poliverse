@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 368065449}
   - component: {fileID: 368065448}
   - component: {fileID: 368065447}
+  - component: {fileID: 368065450}
   m_Layer: 0
   m_Name: RhythmManager
   m_TagString: Untagged
@@ -150,7 +151,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 11198e0f0b7504f48b97277d27ceecde, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -274,6 +275,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &368065450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 368065446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aef7d7847a56924eb3ee8fd33e00c77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &423545860 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 9039606845292696258, guid: 0823ce189d06e7f4089022735f8a8cb9, type: 3}

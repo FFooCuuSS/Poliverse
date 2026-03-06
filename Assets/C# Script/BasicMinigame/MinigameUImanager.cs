@@ -71,6 +71,9 @@ public class MinigameUIManager : MonoBehaviour
     private MiniGameBase currentMinigame;
     private LifeNumber lifeNumber;
     private Queue<string> minigameQueue = new Queue<string>();
+    private MiniGameBase preparedMinigame;
+    private string preparedMinigamePath;
+    private bool preparedReady = false;
 
     //private int life = 4;
 
@@ -208,7 +211,6 @@ public class MinigameUIManager : MonoBehaviour
 
     private IEnumerator TimelineRoutine()
     {
-        // 첫 미니게임을 즉시 시작하고 싶으면 startTimes[0]=0 넣어라.
         int count = Mathf.Min(startTimes.Count, minigameQueue.Count);
 
         for (int i = 0; i < count; i++)
@@ -216,19 +218,84 @@ public class MinigameUIManager : MonoBehaviour
             float startT = Mathf.Max(0f, startTimes[i]);
             float preEndT = Mathf.Max(0f, startT - preEndGap);
 
-            // (startT - 0.5) 시점: 이전 게임 종료 + 검은패널 ON
+            string nextPath = minigameQueue.Dequeue();
+
             yield return WaitUntilLevelTime(preEndT);
             yield return EndCurrentMinigame_ShowBlack();
+            yield return PrepareNextMinigame(nextPath);
 
-            // startT 시점: 새 게임 시작 + 검은패널 OFF
+            // startT 시점: 실제 시작
             yield return WaitUntilLevelTime(startT);
-            string nextPath = minigameQueue.Dequeue();
-            yield return StartMinigameFromPath_HideBlack(nextPath);
+            yield return StartPreparedMinigame();
+        }
+    }
+
+    private IEnumerator PrepareNextMinigame(string minigamePath)
+    {
+        preparedReady = false;
+        preparedMinigame = null;
+        preparedMinigamePath = minigamePath;
+
+        var prefab = Resources.Load<GameObject>(minigamePath);
+        if (prefab == null)
+        {
+            Debug.LogError($"[Timeline] Missing prefab: {minigamePath}");
+            yield break;
         }
 
-        // 끝나면 로비로. 원치 않으면 아래 2줄 주석.
-        // CameraScrollController.selectedPlanetIndex = 0;
-        // SceneManager.LoadScene("LobbyScene");
+        GameObject obj = Instantiate(prefab);
+        preparedMinigame = obj.GetComponent<MiniGameBase>();
+
+        if (preparedMinigame == null)
+        {
+            Debug.LogError($"[Timeline] MiniGameBase not found: {minigamePath}");
+            Destroy(obj);
+            yield break;
+        }
+
+        // 아직 시작 전이므로 입력 막아두기
+        blockInputPanel.SetActive(true);
+
+        ShowGuide(preparedMinigame.GetMinigameExplain, 1f);
+
+        if (rhythmManager != null)
+        {
+            string minigameId = ExtractMinigameIdFromPath(minigamePath);
+
+            TextAsset csv = null;
+            int idx = selectedPlanet - 1;
+            if (planetCsvs != null && idx >= 0 && idx < planetCsvs.Length)
+                csv = planetCsvs[idx];
+
+            yield return ConfigureRhythmRoutine(preparedMinigame, minigameId, csv);
+            RefreshRhythmWindows();
+        }
+
+        preparedReady = true;
+    }
+
+    private IEnumerator StartPreparedMinigame()
+    {
+        if (!preparedReady || preparedMinigame == null)
+        {
+            Debug.LogError("[Timeline] Prepared minigame is not ready.");
+            yield break;
+        }
+
+        currentMinigame = preparedMinigame;
+        preparedMinigame = null;
+        preparedReady = false;
+
+        yield return FadeBlack(false);
+        blockInputPanel.SetActive(false);
+
+        timerDuration = currentMinigame.GetTimerDuration;
+        StartTimer(timerDuration);
+
+        if (rhythmManager != null)
+            rhythmManager.StartSong();
+
+        currentMinigame.StartGame();
     }
 
     private IEnumerator WaitUntilLevelTime(float t)
@@ -275,52 +342,6 @@ public class MinigameUIManager : MonoBehaviour
         if (timerSlider != null) timerSlider.gameObject.SetActive(false);
 
         isSwitching = false;
-    }
-
-    private IEnumerator StartMinigameFromPath_HideBlack(string minigamePath)
-    {
-        var prefab = Resources.Load<GameObject>(minigamePath);
-        if (prefab == null)
-        {
-            Debug.LogError($"[Timeline] Missing prefab: {minigamePath}");
-            yield break;
-        }
-
-        GameObject obj = Instantiate(prefab);
-        currentMinigame = obj.GetComponent<MiniGameBase>();
-        if (currentMinigame == null)
-        {
-            Debug.LogError($"[Timeline] MiniGameBase not found: {minigamePath}");
-            Destroy(obj);
-            yield break;
-        }
-
-        // 가이드(원하면)
-        ShowGuide(currentMinigame.GetMinigameExplain, 1f);
-
-        // 리듬 세팅(기존 유지)
-        if (rhythmManager != null)
-        {
-            string minigameId = ExtractMinigameIdFromPath(minigamePath);
-
-            TextAsset csv = null;
-            int idx = selectedPlanet - 1;
-            if (planetCsvs != null && idx >= 0 && idx < planetCsvs.Length)
-                csv = planetCsvs[idx];
-
-            yield return ConfigureRhythmRoutine(minigameId, csv);
-            RefreshRhythmWindows();
-        }
-
-        timerDuration = currentMinigame.GetTimerDuration;
-        StartTimer(timerDuration);
-        //timerSlider.gameObject.SetActive(true);
-
-        // 검은 패널 OFF + 입력 허용
-        yield return FadeBlack(false);
-        blockInputPanel.SetActive(false);
-
-        currentMinigame.StartGame();
     }
 
     private IEnumerator TimerEndFailDelay()
@@ -376,8 +397,6 @@ public class MinigameUIManager : MonoBehaviour
 
         yield return new WaitForSeconds(loadingTime);
 
-        //timerSlider.gameObject.SetActive(true);
-
         string minigamePath = minigameQueue.Dequeue();
         GameObject minigameObj = Instantiate(Resources.Load<GameObject>(minigamePath));
         currentMinigame = minigameObj.GetComponent<MiniGameBase>();
@@ -385,12 +404,10 @@ public class MinigameUIManager : MonoBehaviour
         ShowGuide(currentMinigame.GetMinigameExplain, 1f);
         yield return new WaitForSeconds(0.5f);
 
-        // 여기 추가: 리듬 매니저 준비
         if (rhythmManager != null)
         {
             string minigameId = ExtractMinigameIdFromPath(minigamePath);
 
-            // 여기: 행성별 CSV 선택
             TextAsset csv = null;
             int idx = selectedPlanet - 1;
             if (planetCsvs != null && idx >= 0 && idx < planetCsvs.Length)
@@ -399,16 +416,16 @@ public class MinigameUIManager : MonoBehaviour
             if (csv == null)
                 Debug.LogWarning($"[MinigameUIManager] planetCsvs[{idx}] is NULL. 리듬 차트 로드 실패 가능");
 
-            yield return ConfigureRhythmRoutine(minigameId, csv);
+            yield return ConfigureRhythmRoutine(currentMinigame, minigameId, csv);
             RefreshRhythmWindows();
         }
 
         StartMinigame();
     }
 
-    private IEnumerator ConfigureRhythmRoutine(string minigameId, TextAsset csv)
+    private IEnumerator ConfigureRhythmRoutine(MiniGameBase targetMinigame, string minigameId, TextAsset csv)
     {
-        var task = rhythmManager.ConfigureForMinigameAsync(currentMinigame, minigameId, csv);
+        var task = rhythmManager.ConfigureForMinigameAsync(targetMinigame, minigameId, csv);
         while (!task.IsCompleted) yield return null;
     }
 

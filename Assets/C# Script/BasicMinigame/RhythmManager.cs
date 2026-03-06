@@ -92,34 +92,26 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
         if (audioSource == null)
             throw new NullReferenceException("[RhythmManager] audioSource is NULL");
 
-        // 0) 이전 미니게임 정리
         UnbindCurrentMinigame();
         StopSongInternal();
 
         currentMinigame = minigame;
         currentMinigameId = minigameId;
 
-        // 1) CSV 주입
         if (csv == null)
             throw new NullReferenceException("[RhythmManager] csv(TextAsset) is NULL");
 
-        // loadMode를 TextAsset로 강제 (행성별 CSV면 Addressables키 필요 없음)
         loadMode = ChartLoadMode.TextAsset;
         chartFile = csv;
 
-        // 2) 차트 로드
         await LoadChartAsync(currentMinigameId);
 
-        // 3) 바인딩
         if (currentMinigame != null)
             currentMinigame.BindRhythmManager(this);
 
         ApplyWindowsFromMinigame();
 
-        // 4) 시작
-        
-        // 나중에 audioSource랑 음악 확정되면 사용
-        StartSong();
+        // StartSong();
     }
 
     public void RefreshWindowsFromCurrentMinigame()

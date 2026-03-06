@@ -138,10 +138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa0034220b580ab4e85687d86d50a6e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stage_1_2: {fileID: 3017536596071447263}
-  objectToDestroy_1: {fileID: 6654843241941395401}
-  objectToDestroy_2: {fileID: 5740879924671178433}
-  objectToSpawn: {fileID: 6991148598153946591}
+  minigame: {fileID: 6392151933770905370}
   handColliders:
   - {fileID: 8076192000081770606}
   - {fileID: 3187027208396221911}
@@ -512,8 +509,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   totalMoveDistance: 7
-  moveDuration: 1
-  pauseDuration: 0.5
+  steps: 4
+  pauseBetweenSteps: 0.2
+  totalTravelTime: 1.65
+  punchDuration: 0.08
+  punchStrengthY: 0.08
+  punchVibrato: 6
+  punchElasticity: 0.6
 --- !u!1 &2910513271250986642
 GameObject:
   m_ObjectHideFlags: 0
@@ -561,8 +563,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   totalMoveDistance: 7
-  moveDuration: 1
-  pauseDuration: 0.5
+  steps: 4
+  pauseBetweenSteps: 0.1
+  totalTravelTime: 1.65
+  punchDuration: 0.08
+  punchStrengthY: 0.08
+  punchVibrato: 6
+  punchElasticity: 0.6
 --- !u!1 &3017536596071447263
 GameObject:
   m_ObjectHideFlags: 0
@@ -617,6 +624,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d17c7740fc9bd41458983f18017dd34e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sequence: {fileID: 6658938432188598086}
+  cuffs: []
+  inputWindowSeconds: 0.3
+  despawnFadeSeconds: 0.05
 --- !u!114 &6658938432188598086
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -631,11 +642,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftHand: {fileID: 7355482659069172711}
   rightHand: {fileID: 715889241897249678}
-  leftCuff: {fileID: 4275712946937975648}
   leftHandCollider: {fileID: 8076192000081770606}
   rightHandCollider: {fileID: 3187027208396221911}
+  cuffs:
+  - {fileID: 7184838558020538625}
+  - {fileID: 4275712946937975648}
+  cuff1: {fileID: 7184838558020538625}
+  cuff2: {fileID: 4275712946937975648}
   chainGenerator: {fileID: 1503856696520320065}
-  rightCuffDrag: {fileID: 1416842417430334025}
+  cuff2LeftHandArrivedWorldPos: {x: -4.5, y: 0, z: 0}
+  delayBetweenHands: 0.2
 --- !u!1 &3159021568148757785
 GameObject:
   m_ObjectHideFlags: 0
@@ -803,7 +819,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &674550797906443198
 Transform:
   m_ObjectHideFlags: 0
@@ -1741,10 +1757,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa0034220b580ab4e85687d86d50a6e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stage_1_2: {fileID: 3017536596071447263}
-  objectToDestroy_1: {fileID: 6654843241941395401}
-  objectToDestroy_2: {fileID: 5740879924671178433}
-  objectToSpawn: {fileID: 6991148598153946591}
+  minigame: {fileID: 6392151933770905370}
   handColliders:
   - {fileID: 8076192000081770606}
   - {fileID: 3187027208396221911}

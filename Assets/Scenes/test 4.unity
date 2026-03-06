@@ -419,6 +419,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1263245654 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6658938432188598086, guid: 65a3c6d81b1e71647baf2b5faab4a3f5, type: 3}
+  m_PrefabInstance: {fileID: 1500306871}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0583a55e41a541e458dae2ad74e4acf1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1263245655 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6392151933770905370, guid: 65a3c6d81b1e71647baf2b5faab4a3f5, type: 3}
@@ -438,6 +449,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 715889241897249678, guid: 65a3c6d81b1e71647baf2b5faab4a3f5, type: 3}
+      propertyPath: pauseBetweenSteps
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: 3017536596071447263, guid: 65a3c6d81b1e71647baf2b5faab4a3f5, type: 3}
       propertyPath: m_Name
       value: 1_2minigame_remake
@@ -481,6 +496,18 @@ PrefabInstance:
     - target: {fileID: 4363515895095703469, guid: 65a3c6d81b1e71647baf2b5faab4a3f5, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5134420252416786272, guid: 65a3c6d81b1e71647baf2b5faab4a3f5, type: 3}
+      propertyPath: m_SortingOrder
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6392151933770905370, guid: 65a3c6d81b1e71647baf2b5faab4a3f5, type: 3}
+      propertyPath: sequence
+      value: 
+      objectReference: {fileID: 1263245654}
+    - target: {fileID: 6658938432188598086, guid: 65a3c6d81b1e71647baf2b5faab4a3f5, type: 3}
+      propertyPath: autoStartDebug
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

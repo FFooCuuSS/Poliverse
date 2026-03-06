@@ -1066,7 +1066,7 @@ MonoBehaviour:
   - 150.5
   preEndGap: 0.5
   blackPanelImage: {fileID: 1586313778}
-  blackFadeDuration: 0.08
+  blackFadeDuration: 0.05
   stageBGM: {fileID: 8300000, guid: 43a99a66d7e1b1141bf04dc6a0e845a9, type: 3}
   loopBGM: 1
   audioSource: {fileID: 559817386}
@@ -1180,7 +1180,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioSource: {fileID: 0}
   loadMode: 1
-  chartFile: {fileID: 0}
+  chartFile: {fileID: 4900000, guid: d69b17f77d95b8b48b88f46175f2c750, type: 3}
   addressablesKey: 
   perfectWindow: 0.03
   goodWindow: 0.07
