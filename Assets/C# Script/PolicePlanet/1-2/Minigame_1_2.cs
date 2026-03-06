@@ -13,17 +13,20 @@ public class Minigame_1_2 : MiniGameBase
     [Header("Sequence Controller")]
     [SerializeField] private HandcuffSequenceController sequence;
 
+    [Header("Round Objects (2 cuffs used in this minigame)")]
+    [SerializeField] private HandcuffFitChecker[] cuffs; // 반드시 2개 연결
+
     [Header("Timing")]
-    [SerializeField] private float secondHandMustArriveWithin = 3.5f;
-    [SerializeField] private float inputWindowSeconds = 0.3f;        
-    [SerializeField] private float despawnFadeSeconds = 0.05f;       
+    [SerializeField] private float inputWindowSeconds = 0.3f;
+    [SerializeField] private float despawnFadeSeconds = 0.05f;
 
-    private bool ended;
-    private int showCount;
-    private float firstShowTime = -1f;
+    private const int TOTAL_ROUNDS = 4;
 
+    private int roundIndex;                 // 0~3
+    private bool waitingShowForNextRound;   // round1~3 시작 대기
     public bool IsInputWindowOpen { get; private set; }
-    private Coroutine inputDeadlineJob;
+
+    private Coroutine inputJob;
 
     private void Start()
     {
@@ -33,126 +36,100 @@ public class Minigame_1_2 : MiniGameBase
     public override void StartGame()
     {
         base.StartGame();
-        ended = false;
-        showCount = 0;
-        firstShowTime = -1f;
+        roundIndex = 0;
+        waitingShowForNextRound = false;
         IsInputWindowOpen = false;
 
-        if (inputDeadlineJob != null) StopCoroutine(inputDeadlineJob);
-        inputDeadlineJob = null;
+        if (inputJob != null) StopCoroutine(inputJob);
+        inputJob = null;
 
-        // 시작하자마자 손 내려오는 건 OK 라 했으니,
-        // 테스트용 자동 시작이 필요하면 sequence.AutoStartDebug 켜서 처리(아래 컨트롤러 수정 참고)
-    }
+        // FitChecker에 minigame 연결
+        if (cuffs != null)
+        {
+            foreach (var c in cuffs)
+            {
+                if (c == null) continue;
+                c.minigame = this;
+            }
+        }
 
-    public void Succeed()
-    {
-        ended = true;
-        IsInputWindowOpen = false;
-        if (inputDeadlineJob != null) StopCoroutine(inputDeadlineJob);
-        Success();
-    }
-
-    public void Failure()
-    {
-        ended = true;
-        IsInputWindowOpen = false;
-        if (inputDeadlineJob != null) StopCoroutine(inputDeadlineJob);
-        Fail();
+        StartRoundNow();
     }
 
     public override void OnRhythmEvent(string action)
     {
-        if (ended) return;
         action = action.Trim();
 
         if (action == "Show")
         {
-            HandleShow();
+            if (!waitingShowForNextRound) return;
+            if (roundIndex >= TOTAL_ROUNDS) return;
+
+            waitingShowForNextRound = false;
+            StartRoundNow();
             return;
         }
 
         if (action == "Input")
         {
-            HandleInput();
+            if (roundIndex >= TOTAL_ROUNDS) return;
+            if (IsInputWindowOpen) return;
+
+            if (inputJob != null) StopCoroutine(inputJob);
+            inputJob = StartCoroutine(InputWindowCo());
             return;
         }
     }
 
-    private void HandleShow()
+    private void StartRoundNow()
     {
-        showCount++;
+        // 스폰/리셋 (손/수갑 모두)
+        if (sequence != null) sequence.SpawnRound();
 
-        if (showCount == 1)
-        {
-            firstShowTime = Time.time;
-
-            HandcuffFitChecker.ResetRound();     // static reset
-            if (sequence != null) sequence.ResetForRound(); // 오브젝트/콜라이더/상태 리셋
-
-            // 첫 손(왼손) 시작
-            if (sequence != null)
-                sequence.StartLeftMove(secondHandMustArriveWithin); // 일단 넉넉히(3.5초)로 내려오게
-        }
-        else if (showCount == 2)
-        {
-            float deadline = firstShowTime + secondHandMustArriveWithin;
-            float remaining = Mathf.Max(0.1f, deadline - Time.time);
-
-            if (sequence != null)
-                sequence.StartRightMove(remaining);
-        }
-        else
-        {
-            // Show가 더 온다면, 다시 라운드로 보고 리셋하는 쪽이 안전
-            firstShowTime = Time.time;
-            showCount = 1;
-
-            HandcuffFitChecker.ResetRound();
-            if (sequence != null) sequence.ResetForRound();
-            if (sequence != null) sequence.StartLeftMove(secondHandMustArriveWithin);
-        }
+        // 연출 시작: 왼손→0.2→오른손 자동
+        if (sequence != null) sequence.StartRoundSequence();
     }
 
-    private void HandleInput()
-    {
-        if (inputDeadlineJob != null) StopCoroutine(inputDeadlineJob);
-        inputDeadlineJob = StartCoroutine(InputDeadlineCo());
-    }
-
-    private IEnumerator InputDeadlineCo()
+    private IEnumerator InputWindowCo()
     {
         IsInputWindowOpen = true;
 
-        // 입력 윈도우 (0.3s)
+        // 0.3초 동안만 스냅 허용
         yield return new WaitForSeconds(inputWindowSeconds);
 
         IsInputWindowOpen = false;
 
-        // 아직 종료 안 됐으면 실패 + 디스폰
-        if (!ended)
+        // 0.3초 끝나면 무조건 디스폰(연출+수갑)
+        if (sequence != null) sequence.DespawnRound(despawnFadeSeconds);
+
+        // 다음 라운드로
+        roundIndex++;
+
+        if (roundIndex < TOTAL_ROUNDS)
         {
-            Failure();
-            if (sequence != null) sequence.DespawnAll(despawnFadeSeconds);
+            // Round1~3은 Show를 기다린다
+            waitingShowForNextRound = true;
         }
 
-        inputDeadlineJob = null;
+        inputJob = null;
     }
 
-    public override void OnPlayerInput(string action = null)
+    // FitChecker들이 스냅될 때마다 호출
+    public void TryResolveRound()
     {
-        if (IsInputLocked) return;
-        base.OnPlayerInput(action);
+        if (!IsInputWindowOpen) return;
+        if (cuffs == null || cuffs.Length < 2) return;
+
+        if (!cuffs[0].IsSnapped || !cuffs[1].IsSnapped) return;
+        if (cuffs[0].SnappedHand == cuffs[1].SnappedHand) return;
+
+        // 리듬 매니저에 "입력했다"만 전달 (게임 멈추는 권한 없음)
+        OnPlayerInput("Input");
     }
 
     public override void OnJudgement(JudgementResult judgement)
     {
-        if (IsInputLocked || ended) return;
-        base.OnJudgement(judgement);
-
-        if (judgement == JudgementResult.Miss)
-            Failure();
-        else
-            Succeed();
+        // 여기서 Success/Fail 금지 (세션 제어 X)
+        Debug.Log($"Judge: {judgement}");
     }
 }

@@ -23,6 +23,11 @@ public class ChainGenerator : MonoBehaviour
 
     void Start()
     {
+        InitChain();
+    }
+
+    public void InitChain()
+    {
         leftDrag = leftCuff.GetComponent<DragAndDrop>();
         rightDrag = rightCuff.GetComponent<DragAndDrop>();
 
