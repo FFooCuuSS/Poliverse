@@ -30,7 +30,6 @@ public class Macaron : MonoBehaviour
 
             if (dist < 1.0f)
             {
-                bowl.AddMacaron(this);
                 isStacked = true;
                 drag.banDragging = true;
             }
@@ -56,5 +55,16 @@ public class Macaron : MonoBehaviour
     public Vector3 GetOriginalPosition()
     {
         return originalPos;
+    }
+
+    void OnMouseDown()
+    {
+        Minigame_2_11 minigame = FindObjectOfType<Minigame_2_11>();
+        if (minigame != null)
+            minigame.OnPlayerInput("Tap");
+
+        Fork_2_11 fork = FindObjectOfType<Fork_2_11>();
+        if (fork != null)
+            fork.GrabMacaron(gameObject);
     }
 }
