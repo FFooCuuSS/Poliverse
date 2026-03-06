@@ -24,6 +24,7 @@ TagManager:
   - Food
   - DragZone
   - CorrectZone
+  - Macaron
   layers:
   - Default
   - TransparentFX
