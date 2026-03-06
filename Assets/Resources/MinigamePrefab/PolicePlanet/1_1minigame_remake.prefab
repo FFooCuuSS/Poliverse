@@ -93,7 +93,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8046472587115707616}
-  - component: {fileID: 4313581356794400018}
+  - component: {fileID: 7642298194690040242}
   m_Layer: 0
   m_Name: 1_1minigame_remake
   m_TagString: Untagged
@@ -126,7 +126,7 @@ Transform:
   - {fileID: 7817661914423865948}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4313581356794400018
+--- !u!114 &7642298194690040242
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -135,7 +135,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1244798297180689767}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84155e5ec34d6bd43ac9a8d986e4acb7, type: 3}
+  m_Script: {fileID: 11500000, guid: 2dcce73cda07fc446b46f4b01a1171b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   enemies:
@@ -151,7 +151,7 @@ MonoBehaviour:
   targetScope: {fileID: 7094457886735114223}
   Scope: {fileID: 3715002526221623325}
   autoOffSeconds: 2.5
-  inputWindowSeconds: 0.25
+  inputWindowSeconds: 1
 --- !u!1 &1995058189454874920
 GameObject:
   m_ObjectHideFlags: 0
