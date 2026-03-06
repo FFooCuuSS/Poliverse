@@ -43,7 +43,7 @@ public class ChooseCardRemake : MonoBehaviour
     {
         if (collision.GetComponent<CardColor>() != null)
         {
-            currentCard = collision.gameObject;
+            //currentCard = collision.gameObject;
         }
     }
 

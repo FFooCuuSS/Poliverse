@@ -125,14 +125,10 @@ public class Minigame_3_4_Remake : MiniGameBase
 
         Debug.Log($"[3-4] FinalJudge: P={perfectCnt}, G={goodCnt}, M={missCnt}, GP={goodOrPerfect}, Submit={submittedInputCnt}");
 
-        // 1) Miss 있으면 무조건 실패
-        if (missCnt > 0)
-        {
-            Fail();
-            return;
-        }
 
-        // (선택) CSV에 Input이 expectedInputCount번인데, 판정/제출이 너무 적으면 실패로 방지
+
+        /*
+         * // (선택) CSV에 Input이 expectedInputCount번인데, 판정/제출이 너무 적으면 실패로 방지
         // - 리듬매니저가 자동 Miss를 쏴주는 구조면 submittedInputCnt 체크는 굳이 안 해도 됨
         if (expectedInputCount > 0)
         {
@@ -144,14 +140,14 @@ public class Minigame_3_4_Remake : MiniGameBase
                 return;
             }
         }
-
+         */
+        HandMover handmover = GetComponent<HandMover>();
         // 2) Good/Perfect 합이 요구치면 성공
-        if (goodOrPerfect == requiredGoodOrPerfectCount)
+        if (goodOrPerfect == requiredGoodOrPerfectCount && handMover.suspiciousClickCount==1)
         {
             Success();
             return;
         }
-
         // 3) 그 외는 실패
         Fail();
     }

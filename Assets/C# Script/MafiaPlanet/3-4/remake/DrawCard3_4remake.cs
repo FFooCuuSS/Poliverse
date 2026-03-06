@@ -25,6 +25,7 @@ public class DrawCard3_4remake : MonoBehaviour
     float cardPopSize = 1.2f;
     bool isPoped = false;
     bool moveCard = false;
+    bool minigame3_4_started = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -41,8 +42,9 @@ public class DrawCard3_4remake : MonoBehaviour
             if(moveCard) MoveCard(moveCardTurn);
             else if(!isPoped) PopCard();
         }
-        else
+        else if(!minigame3_4_started)
         {
+            minigame3_4_started |= true;
             minigame3_4.StartGame();
         }
     }
