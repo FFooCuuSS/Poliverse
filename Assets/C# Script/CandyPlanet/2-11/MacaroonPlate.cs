@@ -10,40 +10,19 @@ public class MacaroonPlate : MonoBehaviour
 
     public Minigame_2_11 minigame;
 
-    void Start()
-    {
-        SpriteRenderer sr = GetComponent<SpriteRenderer>();
-        if (sr != null)
-            sr.sortingOrder = -1;
-    }
-
     public void AddMacaron(Macaron macaron)
     {
         stackedMacarons.Add(macaron);
 
         int order = stackedMacarons.Count;
-        macaron.SetOrder(order);
 
         macaron.transform.SetParent(transform);
         macaron.transform.localPosition = new Vector3(0, yOffset * (order - 1), 0);
 
-        if (stackedMacarons.Count == 5)
-            CheckAnswer();
+        SpriteRenderer sr = macaron.GetComponent<SpriteRenderer>();
+
+        sr.sortingLayerName = "Macaron";   // 마카롱 레이어
+        sr.sortingOrder = order;           // 쌓인 순서대로 증가
     }
 
-    private void CheckAnswer()
-    {
-        CompletedMacaroon answer = FindObjectOfType<CompletedMacaroon>();
-
-        for (int i = 0; i < 5; i++)
-        {
-            if (stackedMacarons[i].index != answer.answerOrder[i])
-            {
-                minigame.Failure();
-                return;
-            }
-        }
-
-        minigame.Succeed();
-    }
 }

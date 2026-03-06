@@ -229,6 +229,7 @@ public class RhythmManagerTest : MonoBehaviour, MiniGameBase.IRhythmManager
         events.Sort((a, b) => a.time.CompareTo(b.time));
         eventIndex = 0;
     }
+
     private static bool IsShowType(string type)
     {
         return string.Equals(type, "Show", StringComparison.OrdinalIgnoreCase);
