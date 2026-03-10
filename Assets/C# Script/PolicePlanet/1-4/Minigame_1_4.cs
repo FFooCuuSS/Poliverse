@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-
 public class Minigame_1_4 : MiniGameBase
 {
-    // 판정 범위 오버라이드
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.4f;
     public override float hitWindowOverride => 0.8f;
@@ -12,29 +10,39 @@ public class Minigame_1_4 : MiniGameBase
     protected override float TimerDuration => 10f;
     protected override string MinigameExplain => "리듬에 맞춰 악세서리를 제거하세요.";
 
-    private List<Accessory> orderedAccessories;
-    private int missCount = 0;
-    private int processedCount = 0;
+    [Header("Round Setting")]
+    public int totalRound = 3;
+    public int accessoryPerRound = 3;
+
+    private int currentRound;
+    private int accessoryIndex;
+    private int totalSuccess;
+
+    private bool inputOpen;
+    private bool awaitingJudge;
     private bool ended;
 
-    private void Start()
+    private List<Accessory> orderedAccessories;
+    [SerializeField] private SpawnManager spawnManager;
+
+    void Start()
     {
         StartGame();
     }
 
-    public override void OnRhythmEvent(string action)
+    public override void StartGame()
     {
-        if (ended) return;
-        
-        Debug.Log($"{gameObject.name} 리듬메세지: {action}");
-        action = action.Trim();
+        base.StartGame();
 
-        if (action == "Swipe")
-        {
-            // 판정 결과와 상관없이 현재 순서의 악세서리는 제거 (다음 단계를 위해)
-            RemoveNextAccessory();
-            //processedCount++;
-        }
+        currentRound = 0;
+        accessoryIndex = 0;
+        totalSuccess = 0;
+
+        inputOpen = false;
+        awaitingJudge = false;
+        ended = false;
+
+        
     }
 
     public void SetAccessoryOrder(List<Accessory> accessories)
@@ -43,46 +51,74 @@ public class Minigame_1_4 : MiniGameBase
 
         foreach (var acc in orderedAccessories)
             acc.Init(this);
+
+        StartRound();
     }
 
-    public override void StartGame()
+    void StartRound()
     {
-        base.StartGame();
-        missCount = 0;
-        processedCount = 0;
-        ended = false;
+        Debug.Log("StartRound : " + (currentRound + 1));
+
+        accessoryIndex = 0;
+        inputOpen = false;
+        awaitingJudge = false;
+
+        foreach (var acc in orderedAccessories)
+            acc.ResetAccessory();
+    }
+
+    public override void OnRhythmEvent(string action)
+    {
+        if (ended) return;
+
+        action = action.Trim();
+        Debug.Log($"{gameObject.name} 리듬메세지: {action}");
+
+        if (action == "Swipe")
+        {
+            inputOpen = true;
+            awaitingJudge = false;
+        }
     }
 
     public override void OnPlayerInput(string action = null)
     {
-        // 입력 잠금 상태면 무시
         if (IsInputLocked) return;
+        if (!inputOpen || awaitingJudge) return;
+
+        awaitingJudge = true;
+
         base.OnPlayerInput(action);
     }
 
-    // RhythmManager로부터 판정 결과를 전달받음
     public override void OnJudgement(JudgementResult judgement)
     {
-        if(IsInputLocked || IsSuccess || ended) return;
+        if (!inputOpen) return;
 
-        base.OnJudgement(judgement);
+        inputOpen = false;
+        awaitingJudge = false;
 
-        if (judgement == JudgementResult.Miss)
+        switch (judgement)
         {
-            missCount++;
-            Debug.Log($"현재 실수 횟수: {missCount}");
-        }
-        
-        processedCount++;
+            case JudgementResult.Perfect:
+            case JudgementResult.Good:
 
-        // 모든 악세서리(3개)가 처리되었는지 확인
-        if (processedCount >= orderedAccessories.Count)
-        {
-            CheckGameResult();
+                totalSuccess++;
+                RemoveNextAccessory();
+                break;
+
+            case JudgementResult.Miss:
+
+                RemoveNextAccessory();
+                break;
         }
+
+        accessoryIndex++;
+
+        CheckRoundEnd();
     }
 
-    private void RemoveNextAccessory()
+    void RemoveNextAccessory()
     {
         foreach (var acc in orderedAccessories)
         {
@@ -93,20 +129,39 @@ public class Minigame_1_4 : MiniGameBase
             }
         }
     }
-    private void CheckGameResult()
+
+    void CheckRoundEnd()
     {
-        if (IsInputLocked || ended) return;
-        ended = true;
-        // 3개 모두 Miss인 경우 실패
-        if (missCount >= 3)
+        if (accessoryIndex < accessoryPerRound)
+            return;
+
+        Debug.Log("Round End");
+
+        currentRound++;
+
+        if (currentRound >= totalRound)
         {
-            Debug.Log("실패");
-            Fail();
+            EndGame();
         }
         else
         {
-            Debug.Log("성공");
-            Success();
+            spawnManager.SpawnNewRound();
+            StartRound();
         }
+    }
+
+
+    void EndGame()
+    {
+        if (ended) return;
+
+        ended = true;
+
+        Debug.Log("Game End success = " + totalSuccess);
+
+        if (totalSuccess >= 3)
+            Success();
+        else
+            Fail();
     }
 }
