@@ -94,4 +94,10 @@ public class Accessory : MonoBehaviour
             gameObject.SetActive(false);
         });
     }
+
+    public void ResetAccessory()
+    {
+        IsRemoved = false;
+        gameObject.SetActive(true);
+    }
 }
