@@ -6,7 +6,7 @@ public class HoldCheck1_7 : MonoBehaviour
 {
     [Header("UI Prefab & Settings")]
     public GameObject holdUIPrefab;
-    public int maxHoldCount = 4;
+    public int maxHoldCount = 3;
     [SerializeField] private float successTolerance = 0.2f;
 
     [Header("Timing Control")]
@@ -30,10 +30,24 @@ public class HoldCheck1_7 : MonoBehaviour
 
     private bool currentHoldSuccess = false;
 
+    private Transform cachedPrisoner;
+
+    // 라운드 시작용
     public void StartAllHolds(Transform prisoner)
     {
+        Debug.Log("StartAllHolds 호출");
+
+        cachedPrisoner = prisoner;
         CurrentUINode = 0;
-        SpawnNextUI(prisoner);
+        SpawnNextUI();
+    }
+
+    // 라운드 리셋용
+    public void ResetHoldNodes()
+    {
+        CleanupUI();
+        CurrentUINode = 0;
+        isHolding = false;
     }
 
     public bool CanHold()
@@ -41,13 +55,21 @@ public class HoldCheck1_7 : MonoBehaviour
         return !isHolding && CurrentUINode < maxHoldCount;
     }
 
-    private void SpawnNextUI(Transform prisoner)
+    private void SpawnNextUI()
     {
-        if (CurrentUINode >= maxHoldCount) return;
-
+        if (CurrentUINode >= maxHoldCount || cachedPrisoner == null) 
+        {
+            return;
+        }
+          
         CleanupUI();
 
-        currentHoldUI = Instantiate(holdUIPrefab);
+        currentHoldUI = Instantiate(
+            holdUIPrefab,
+            cachedPrisoner.position + new Vector3(Random.Range(-0.5f, 0.5f), Random.Range(1.0f, 1.5f), 0f),
+            Quaternion.identity,
+            minigame.transform // 여기가 부모 지정 부분
+        );
 
         SpriteRenderer[] renderers = currentHoldUI.GetComponentsInChildren<SpriteRenderer>();
         foreach (var sr in renderers)
@@ -56,7 +78,7 @@ public class HoldCheck1_7 : MonoBehaviour
             sr.sortingOrder = 200;
         }
 
-        currentHoldUI.transform.position = prisoner.position + new Vector3(
+        currentHoldUI.transform.position = cachedPrisoner.position + new Vector3(
             Random.Range(-0.5f, 0.5f),
             Random.Range(1.0f, 1.5f),
             0f
@@ -64,9 +86,6 @@ public class HoldCheck1_7 : MonoBehaviour
 
         targetCircle = currentHoldUI.transform.Find("TargetCircle");
         shrinkingCircle = currentHoldUI.transform.Find("ShrinkingCircle");
-
-        //if (shrinkingCircle != null) shrinkingCircle.localScale = Vector3.one * 4f;
-        //if (targetCircle != null) targetCircle.localScale = Vector3.one * 3f;
 
         shrinkTimer = 0f;
         startScale = shrinkingCircle.localScale.x;
@@ -112,15 +131,20 @@ public class HoldCheck1_7 : MonoBehaviour
 
         CleanupUI();
 
-        minigame.RecordHoldResult(currentHoldSuccess);
+        // 미니게임에 판정 전달
+        if (minigame != null)
+        {
+            if (currentHoldSuccess)
+                minigame.OnJudgement(MiniGameBase.JudgementResult.Good);
+            else
+                minigame.OnJudgement(MiniGameBase.JudgementResult.Miss);
+        }
 
         CurrentUINode++;
 
         if (CurrentUINode < maxHoldCount)
         {
-            PrisonerController1_7 prisoner = FindObjectOfType<PrisonerController1_7>();
-            if (prisoner != null)
-                SpawnNextUI(prisoner.transform);
+            SpawnNextUI();
         }
     }
 

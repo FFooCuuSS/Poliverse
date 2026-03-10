@@ -64,19 +64,6 @@ public class Minigame_1_8 : MiniGameBase
             case "Tap":
                 canTap = true;
                 Debug.Log("Tap");
-                manager_1_8.SpawnPrisoner();
-                //ShowTapPrompt();
-                break;
-
-            case "Hold":
-                Debug.Log("Hold");
-                manager_1_8.SpawnPrisoner();
-                //ShowHoldPrompt();
-                break;
-
-            case "Swipe":
-                Debug.Log("Swipe");
-                //ShowSwipePrompt();
                 break;
         }
     }

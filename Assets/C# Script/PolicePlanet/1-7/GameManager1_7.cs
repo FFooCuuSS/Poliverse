@@ -42,7 +42,11 @@ public class GameManager1_7 : MonoBehaviour
         if (currentPrisoner == null)
         {
             Debug.LogError("PrisonerController1_7 없음");
+            return;
         }
+
+        //미니게임에 전달
+        minigame_1_7.SetPrisoner(currentPrisoner);
     }
 
     public void IncreaseSuccessCount()
