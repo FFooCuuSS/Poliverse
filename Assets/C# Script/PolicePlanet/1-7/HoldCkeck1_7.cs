@@ -12,10 +12,11 @@ public class HoldCheck1_7 : MonoBehaviour
     [Header("Timing Control")]
     [SerializeField] private float shrinkDuration = 0.9f;
     [SerializeField] private float vanishMargin = 0.05f;
+    [SerializeField] private float holdInterval = 0.5f;
 
     [Header("게임 참조")]
     public Minigame_1_7 minigame;
-
+    
     public int CurrentUINode { get; private set; } = 0;
 
     private GameObject currentHoldUI;
@@ -57,18 +58,22 @@ public class HoldCheck1_7 : MonoBehaviour
 
     private void SpawnNextUI()
     {
-        if (CurrentUINode >= maxHoldCount || cachedPrisoner == null) 
+        if (CurrentUINode >= maxHoldCount || cachedPrisoner == null)
         {
             return;
         }
-          
+
         CleanupUI();
+
+        // 중앙 기준 위치 만들기
+        Vector3 centerPos = cachedPrisoner.position;
+        centerPos.x = 0f;
 
         currentHoldUI = Instantiate(
             holdUIPrefab,
-            cachedPrisoner.position + new Vector3(Random.Range(-0.5f, 0.5f), Random.Range(1.0f, 1.5f), 0f),
+            centerPos + new Vector3(Random.Range(-0.5f, 0.5f), Random.Range(1.0f, 1.5f), 0f),
             Quaternion.identity,
-            minigame.transform // 여기가 부모 지정 부분
+            minigame.transform
         );
 
         SpriteRenderer[] renderers = currentHoldUI.GetComponentsInChildren<SpriteRenderer>();
@@ -78,7 +83,7 @@ public class HoldCheck1_7 : MonoBehaviour
             sr.sortingOrder = 200;
         }
 
-        currentHoldUI.transform.position = cachedPrisoner.position + new Vector3(
+        currentHoldUI.transform.position = centerPos + new Vector3(
             Random.Range(-0.5f, 0.5f),
             Random.Range(1.0f, 1.5f),
             0f
@@ -131,7 +136,6 @@ public class HoldCheck1_7 : MonoBehaviour
 
         CleanupUI();
 
-        // 미니게임에 판정 전달
         if (minigame != null)
         {
             if (currentHoldSuccess)
@@ -145,6 +149,9 @@ public class HoldCheck1_7 : MonoBehaviour
         if (CurrentUINode < maxHoldCount)
         {
             SpawnNextUI();
+        }
+        else
+        {
         }
     }
 

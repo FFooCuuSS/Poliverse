@@ -8,14 +8,20 @@ public class PrisonerController1_7 : MonoBehaviour
 
     private GameObject prohibitedItem;
 
+    public System.Action OnArrived;
+
     void Start()
     {
         float targetX = 0;
         float distance = transform.position.x - targetX;
-        float duration = distance / moveSpeed;
+        float duration = Mathf.Abs(distance / moveSpeed);
 
         transform.DOMoveX(targetX, duration)
-                 .SetEase(Ease.InOutSine);
+            .SetEase(Ease.InOutSine)
+            .OnComplete(() =>
+            {
+                OnArrived?.Invoke();
+            });
     }
 
     public void SetProhibitedItem(GameObject item)
@@ -83,5 +89,10 @@ public class PrisonerController1_7 : MonoBehaviour
     public GameObject GetProhibitedItem()
     {
         return prohibitedItem;
+    }
+
+    private void OnDestroy()
+    {
+        transform.DOKill();  // 진행중인 트윈 전부 종료
     }
 }

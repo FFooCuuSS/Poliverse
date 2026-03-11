@@ -143,7 +143,9 @@ MonoBehaviour:
   - {fileID: 892478601395926057, guid: 967913bb653082943abb35cefd7ec1f9, type: 3}
   basket: {fileID: 1114006704717622196}
   holdJudge: {fileID: 6633415375601139176}
-  maxHoldCount: 4
+  totalRound: 3
+  holdPerRound: 4
+  prisonerSpawner: {fileID: 8328137765551624356}
 --- !u!114 &6584522784603379527
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -520,8 +522,9 @@ MonoBehaviour:
   holdUIPrefab: {fileID: 1339359407143525951, guid: 9bcaa3d4491803b42803ad10768aac9b, type: 3}
   maxHoldCount: 4
   successTolerance: 0.2
-  shrinkDuration: 0.9
+  shrinkDuration: 0.7
   vanishMargin: 0.05
+  holdInterval: 0.5
   minigame: {fileID: 6803564812893199740}
 --- !u!1 &4514964588818708058
 GameObject:
