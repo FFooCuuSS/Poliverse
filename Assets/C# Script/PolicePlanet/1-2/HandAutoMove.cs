@@ -42,17 +42,14 @@ public class HandAutoMove : MonoBehaviour
 
         float stepDistance = totalMoveDistance / safeSteps;
 
-        // pause 총합은 총 이동시간 안에 포함된다
         float totalPause = pauseBetweenSteps * Mathf.Max(0, safeSteps - 1);
-
-        // 실제 step 이동에 쓸 수 있는 총 시간
         float moveTimeTotal = Mathf.Max(0.01f, totalTravelTime - totalPause);
-
-        // step 하나당 이동 시간
         float moveDurationPerStep = moveTimeTotal / safeSteps;
 
-        Vector3 basePos = transform.position;
+        Vector3 basePos = startPos; // ★ 중요
         Vector3 finalPos = basePos + Vector3.down * totalMoveDistance;
+
+        transform.position = basePos;
 
         seq = DOTween.Sequence();
 
@@ -60,30 +57,30 @@ public class HandAutoMove : MonoBehaviour
         {
             Vector3 to = basePos + Vector3.down * stepDistance * (i + 1);
 
-            // 핵심: 이동 시간이 totalTravelTime을 정확히 구성해야 함
-            Tween moveTween = transform.DOMove(to, moveDurationPerStep).SetEase(Ease.OutCubic);
-            seq.Append(moveTween);
+            seq.Append(
+                transform.DOMove(to, moveDurationPerStep)
+                .SetEase(Ease.OutCubic)
+            );
 
-            // punch는 시간을 추가로 먹지 않게 Join으로 겹친다
             if (punchDuration > 0f)
             {
-                Tween punchTween = transform.DOPunchPosition(
-                    new Vector3(0f, punchStrengthY, 0f),
-                    punchDuration,
-                    punchVibrato,
-                    punchElasticity
+                seq.Join(
+                    transform.DOPunchPosition(
+                        Vector3.up * punchStrengthY,
+                        punchDuration,
+                        punchVibrato,
+                        punchElasticity
+                    )
+                    .SetEase(Ease.OutQuad)
                 );
-
-                seq.Join(punchTween);
             }
 
-            if (i < safeSteps - 1 && pauseBetweenSteps > 0f)
+            if (i < safeSteps - 1)
                 seq.AppendInterval(pauseBetweenSteps);
         }
 
         seq.OnComplete(() =>
         {
-            // 마지막에 정확한 위치 보정
             transform.position = finalPos;
             hasArrived = true;
             seq = null;
