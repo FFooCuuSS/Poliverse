@@ -1,5 +1,7 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class HandcuffSequenceController : MonoBehaviour
 {
@@ -25,14 +27,21 @@ public class HandcuffSequenceController : MonoBehaviour
     [Header("Delay")]
     [SerializeField] private float delayBetweenHands = 0.2f;
 
+    [Header("Snap Fade")]
+    [SerializeField] private float snapFadeStartDelay = 0f;
+    [SerializeField] private float snapFadeDuration = 0.1f;
+
     public enum State { Idle, LeftMoving, RightMoving, PlayerDrag }
     public State curState { get; private set; } = State.Idle;
 
     private Coroutine seqJob;
+    private Tween snapFadeTween;
+    private SpriteRenderer[] cachedRenderers;
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
+        CacheRenderers();
     }
 
     private void OnDestroy()
@@ -41,12 +50,86 @@ public class HandcuffSequenceController : MonoBehaviour
             Instance = null;
     }
 
+    private void CacheRenderers()
+    {
+        var list = new List<SpriteRenderer>();
+
+        if (leftHand != null)
+            list.AddRange(leftHand.GetComponentsInChildren<SpriteRenderer>(true));
+
+        if (rightHand != null)
+            list.AddRange(rightHand.GetComponentsInChildren<SpriteRenderer>(true));
+
+        if (cuffs != null)
+        {
+            foreach (var c in cuffs)
+            {
+                if (c == null) continue;
+                list.AddRange(c.GetComponentsInChildren<SpriteRenderer>(true));
+            }
+        }
+
+        if (chainGenerator != null)
+            list.AddRange(chainGenerator.GetComponentsInChildren<SpriteRenderer>(true));
+
+        cachedRenderers = list.ToArray();
+    }
+
+    private void SetWholeAlpha(float alpha)
+    {
+        if (cachedRenderers == null) return;
+
+        foreach (var sr in cachedRenderers)
+        {
+            if (sr == null) continue;
+
+            Color c = sr.color;
+            c.a = alpha;
+            sr.color = c;
+        }
+    }
+
+    public void BeginSnapFadeAll()
+    {
+        if (snapFadeTween != null && snapFadeTween.IsActive())
+        {
+            snapFadeTween.Kill();
+            snapFadeTween = null;
+        }
+
+        CacheRenderers();
+
+        if (cachedRenderers == null || cachedRenderers.Length == 0)
+            return;
+
+        Sequence seq = DOTween.Sequence();
+
+        if (snapFadeStartDelay > 0f)
+            seq.AppendInterval(snapFadeStartDelay);
+
+        foreach (var sr in cachedRenderers)
+        {
+            if (sr == null) continue;
+            seq.Join(sr.DOFade(0f, snapFadeDuration));
+        }
+
+        snapFadeTween = seq;
+    }
+
     public void SpawnRound()
     {
+        CacheRenderers();
+
         if (seqJob != null)
         {
             StopCoroutine(seqJob);
             seqJob = null;
+        }
+
+        if (snapFadeTween != null && snapFadeTween.IsActive())
+        {
+            snapFadeTween.Kill();
+            snapFadeTween = null;
         }
 
         curState = State.Idle;
@@ -65,11 +148,11 @@ public class HandcuffSequenceController : MonoBehaviour
             foreach (var c in cuffs)
             {
                 if (c == null) continue;
-
                 c.ResetForRound();
-                c.gameObject.SetActive(true);
             }
         }
+
+        SetWholeAlpha(1f);
     }
 
     public void StartRoundSequence()

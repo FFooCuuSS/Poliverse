@@ -21,16 +21,12 @@ public class HandControlerTest : MonoBehaviour
                     StartCoroutine(Move2());
                     chooseCase = true;
                     break;
-
             }
         }
-        
     }
     void Start()
     {
         //chooseCase = false;
-
-        
     }
 
     IEnumerator Move1()

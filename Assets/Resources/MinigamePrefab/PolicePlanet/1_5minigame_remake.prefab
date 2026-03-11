@@ -157,6 +157,8 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &446322564873067274
 GameObject:
   m_ObjectHideFlags: 0
@@ -712,6 +714,8 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &2512127380254364688
 GameObject:
   m_ObjectHideFlags: 0
@@ -893,7 +897,7 @@ Transform:
   m_GameObject: {fileID: 3290474821832749423}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 17, y: 4, z: 0.2150525}
+  m_LocalPosition: {x: 10, y: 0.6, z: 0.2150525}
   m_LocalScale: {x: 0.5875, y: 1.7, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -958,7 +962,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3290474821832749423}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5a671719ddc75f64f95ae8dddc96745e, type: 3}
   m_Name: 
@@ -1361,6 +1365,8 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &4955934922279721680
 GameObject:
   m_ObjectHideFlags: 0
@@ -1638,6 +1644,8 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &6382035987184040646
 GameObject:
   m_ObjectHideFlags: 0
@@ -1806,16 +1814,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ec0c55fb9291d549bbfa8d5de2388c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handControler: {fileID: 3335849018560967387}
-  mainHand: {fileID: 9198725016839572853}
+  hand: {fileID: 9198725016839572853}
+  mainCam: {fileID: 0}
+  mainParent: {fileID: 6799748189946725150}
   case1_Obj: {fileID: 1565932494567966548}
   case2_Obj: {fileID: 2512127380254364688}
-  handSpawn: {fileID: 2754741594792196426, guid: 1a5323fe766c0874d84328aafe0568e0, type: 3}
-  mainParent: {fileID: 6799748189946725150}
-  rhythm: {fileID: 0}
-  inputCooldown: 0.15
-  collideCnt: 0
-  lastJudgeGoodOrPerfect: 0
+  clickEffectPrefab: {fileID: 2754741594792196426, guid: 1a5323fe766c0874d84328aafe0568e0, type: 3}
+  case1Move:
+    startPos: {x: 10, y: 0}
+    endPos: {x: -10, y: 0}
+    moveTime: 1.9
+    waitTime: 1.5
+  case2Move:
+    startPos: {x: 10, y: 0}
+    endPos: {x: -10, y: 0}
+    moveTime: 2
+    waitTime: 1.1
+  roundCycleTime: 4
+  successRangeX: 0.6
 --- !u!1 &6827938551070454749
 GameObject:
   m_ObjectHideFlags: 0
@@ -1973,6 +1989,8 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &7621586563719668400
 GameObject:
   m_ObjectHideFlags: 0
@@ -2130,6 +2148,8 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &9169600275481452391
 GameObject:
   m_ObjectHideFlags: 0
@@ -2287,3 +2307,5 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
