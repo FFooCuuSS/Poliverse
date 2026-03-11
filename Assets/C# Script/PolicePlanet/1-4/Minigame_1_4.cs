@@ -93,7 +93,7 @@ public class Minigame_1_4 : MiniGameBase
 
     public override void OnJudgement(JudgementResult judgement)
     {
-        if (!inputOpen) return;
+        //if (!inputOpen) return;
 
         inputOpen = false;
         awaitingJudge = false;

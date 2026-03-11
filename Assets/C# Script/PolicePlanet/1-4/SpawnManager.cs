@@ -31,6 +31,7 @@ public class SpawnManager : MonoBehaviour
         ClearCurrentObjects();
 
         accessories.Clear();
+        blinkManager.ClearAccessories();
 
         Spawn(hatPrefabs, hatSpawnPoint);
         Spawn(glassesPrefabs, glassesSpawnPoint);
