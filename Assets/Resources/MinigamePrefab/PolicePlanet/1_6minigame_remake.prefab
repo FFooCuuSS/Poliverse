@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 354957519866493649}
   - component: {fileID: 3549139740359251185}
   - component: {fileID: 5092327181554927329}
+  - component: {fileID: 4075429219434944991}
+  - component: {fileID: 2617466096159358735}
   m_Layer: 0
   m_Name: container1
   m_TagString: Untagged
@@ -250,6 +252,8 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &2253214604651361042
 GameObject:
   m_ObjectHideFlags: 0
@@ -260,6 +264,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9106849129359481783}
   - component: {fileID: 4993246990863108086}
+  - component: {fileID: 2052935986248706628}
   m_Layer: 0
   m_Name: 1_6minigame_remake
   m_TagString: Untagged
@@ -319,11 +324,25 @@ MonoBehaviour:
   - -3
   containerXMin: -7
   containerXMax: 7
+  containerStartX: 12
+  containerMoveTime: 1
   policeStartX: 10
   travelTime: 1
   perfectWindow: 0.2
   goodWindow: 0.3
   destroyX: -8
+--- !u!114 &2052935986248706628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2253214604651361042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba025ae908a68a74b89d3fd506a14f0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8257416561575040706
 GameObject:
   m_ObjectHideFlags: 0
@@ -599,8 +618,50 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6894316192171189137, guid: 41edb96c7e83bad4d8ae73608c2f1184, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4075429219434944991}
+    - targetCorrespondingSourceObject: {fileID: 6894316192171189137, guid: 41edb96c7e83bad4d8ae73608c2f1184, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2617466096159358735}
   m_SourcePrefab: {fileID: 100100000, guid: 41edb96c7e83bad4d8ae73608c2f1184, type: 3}
+--- !u!114 &4075429219434944991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1886323660530783108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b91f33a50463384ea39a1c1dc0acf3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startX: 12
+--- !u!114 &2617466096159358735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1886323660530783108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.5
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1001 &6062105696637812395
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -682,3 +743,5 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
