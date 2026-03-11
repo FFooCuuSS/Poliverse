@@ -142,6 +142,7 @@ MonoBehaviour:
   handColliders:
   - {fileID: 8076192000081770606}
   - {fileID: 3187027208396221911}
+  hiddenWorldPos: {x: 9999, y: 9999, z: 0}
 --- !u!58 &6717803861390508200
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -650,8 +651,10 @@ MonoBehaviour:
   cuff1: {fileID: 7184838558020538625}
   cuff2: {fileID: 4275712946937975648}
   chainGenerator: {fileID: 1503856696520320065}
-  cuff2LeftHandArrivedWorldPos: {x: -4.5, y: 0, z: 0}
+  cuff2LeftHandArrivedWorldPos: {x: -3.68, y: 2.45, z: 0}
   delayBetweenHands: 0.2
+  snapFadeStartDelay: 0
+  snapFadeDuration: 0.1
 --- !u!1 &3159021568148757785
 GameObject:
   m_ObjectHideFlags: 0
@@ -716,9 +719,9 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.010377963, y: 0.6023039}
+  m_Offset: {x: 0.68074304, y: 0.12634978}
   serializedVersion: 2
-  m_Radius: 1.3931265
+  m_Radius: 2.3450298
 --- !u!1 &3243724064011633519
 GameObject:
   m_ObjectHideFlags: 0
@@ -1701,7 +1704,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9112010128705886894}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a8725f7aabbc2d141bd7ae8043cf5147, type: 3}
   m_Name: 
@@ -1761,6 +1764,7 @@ MonoBehaviour:
   handColliders:
   - {fileID: 8076192000081770606}
   - {fileID: 3187027208396221911}
+  hiddenWorldPos: {x: 9999, y: 9999, z: 0}
 --- !u!50 &3735643748721292146
 Rigidbody2D:
   serializedVersion: 4

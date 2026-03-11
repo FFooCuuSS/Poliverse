@@ -17,17 +17,19 @@ public class AccessoryBlinkManager : MonoBehaviour
         if (acc == null) return;
         accessories.Add(acc);
         acc.LockInput();
-
+        if (accessories.Count == 3)
+        {
+            StartCoroutine(BlinkSequence());
+        }
         // 전부 항상 보이게 유지
         acc.gameObject.SetActive(true);
         SetAlpha(acc, 1f);
-    }
 
-    void Start()
+    }
+    public void ClearAccessories()
     {
-        StartCoroutine(BlinkSequence());
+        accessories.Clear();
     }
-
     IEnumerator BlinkSequence()
     {
         yield return new WaitUntil(() => accessories.Count == 3);
@@ -61,8 +63,6 @@ public class AccessoryBlinkManager : MonoBehaviour
         foreach (var acc in accessories)
             acc.UnlockInput();
 
-        FindObjectOfType<Minigame_1_4>()
-            .SetAccessoryOrder(accessories);
     }
 
     void SetAlpha(Accessory acc, float alpha)

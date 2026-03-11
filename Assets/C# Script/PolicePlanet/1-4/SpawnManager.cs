@@ -23,13 +23,37 @@ public class SpawnManager : MonoBehaviour
 
     void Start()
     {
+        SpawnNewRound();
+    }
+
+    public void SpawnNewRound()
+    {
+        ClearCurrentObjects();
+
+        accessories.Clear();
+        blinkManager.ClearAccessories();
+
         Spawn(hatPrefabs, hatSpawnPoint);
         Spawn(glassesPrefabs, glassesSpawnPoint);
         Spawn(mustachePrefabs, mustacheSpawnPoint);
+
         SpawnMontage();
     }
+    void ClearCurrentObjects() //기존 오브젝트 삭제
+    {
+        foreach (var acc in accessories)
+        {
+            if (acc != null)
+                Destroy(acc.gameObject);
+        }
 
-    void Spawn(List<GameObject> prefabs, Transform point)
+        if (selectedMontage != null)
+        {
+            Destroy(selectedMontage);
+        }
+    }
+
+    public void Spawn(List<GameObject> prefabs, Transform point)
     {
         GameObject selected = Instantiate(
             prefabs[Random.Range(0, prefabs.Count)],
@@ -40,7 +64,7 @@ public class SpawnManager : MonoBehaviour
         accessories.Add(acc);
         blinkManager.RegisterAccessory(acc);
     }
-    void SpawnMontage()
+    public void SpawnMontage()
     {
         selectedMontage = Instantiate(
             montagePrefabs[Random.Range(0, montagePrefabs.Count)],

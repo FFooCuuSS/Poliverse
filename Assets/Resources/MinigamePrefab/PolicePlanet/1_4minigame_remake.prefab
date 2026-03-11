@@ -542,6 +542,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95bfa4a7c2f94294797a0155f87477f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  totalRound: 3
+  accessoryPerRound: 3
+  spawnManager: {fileID: 1907244580169404489}
 --- !u!1 &6168629653516308300
 GameObject:
   m_ObjectHideFlags: 0

@@ -61,7 +61,6 @@ public class Accessory : MonoBehaviour
         if (curMontage != null)
         {
             curMontage.PlayHit();
-            Debug.Log("피격표정");
         }
         minigame.OnPlayerInput("Swipe");
 
@@ -93,5 +92,11 @@ public class Accessory : MonoBehaviour
         {
             gameObject.SetActive(false);
         });
+    }
+
+    public void ResetAccessory()
+    {
+        IsRemoved = false;
+        gameObject.SetActive(true);
     }
 }

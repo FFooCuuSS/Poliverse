@@ -10,13 +10,18 @@ public class Minigame_1_7 : MiniGameBase
 
     [Header("Hold System")]
     public HoldCheck1_7 holdJudge;
-    public int maxHoldCount = 4;              // 전체 UI 노드 수
 
-    private List<bool> holdResults = new List<bool>();
+    [Header("게임 설정")]
+    public int totalRound = 3;     // 총 라운드
+    public int holdPerRound = 3;  // 라운드당 Hold 수
+
+    private int currentRound = 0;
+    private int holdIndex = 0;
+    private int totalSuccess = 0;
 
     private PrisonerController1_7 prisoner;
 
-    private int holdSuccessCount = 0;         // 성공한 노드 수
+    [SerializeField] private PrisonerSpawner1_7 prisonerSpawner;
 
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.4f;
@@ -25,45 +30,52 @@ public class Minigame_1_7 : MiniGameBase
     protected override float TimerDuration => 10f;
     protected override string MinigameExplain => "금지야!";
 
-    //private bool ended;
     private bool inputOpen;          // Input 구간인지
     private bool awaitingJudge;      // 입력 후 판정 대기중(중복 입력 방지용)
+
+    public void SetPrisoner(PrisonerController1_7 p)
+    {
+        prisoner = p;
+
+        StartRound();
+    }
 
     public override void StartGame()
     {
         base.StartGame();
-        holdResults.Clear();
 
-        // 죄수 캐싱
-        prisoner = FindObjectOfType<PrisonerController1_7>();
-        if (prisoner != null && holdJudge != null)
+        currentRound = 0;
+        holdIndex = 0;
+        totalSuccess = 0;
+
+        if (holdJudge != null)
         {
-            holdJudge.StartAllHolds(prisoner.transform);
+            holdJudge.minigame = this;
         }
     }
 
-    private void Start()
+    private void StartRound()
     {
-        // Hold UI 노드 시작
-        prisoner = FindObjectOfType<PrisonerController1_7>();
-        if (prisoner != null)
+        Debug.Log("StartRound 실행 : " + (currentRound + 1));
+
+        holdIndex = 0;
+
+        if (prisoner != null && holdJudge != null)
         {
+            holdJudge.ResetHoldNodes();
             holdJudge.StartAllHolds(prisoner.transform);
         }
     }
 
     public override void OnRhythmEvent(string action)
     {
-        //if (ended) return;
-        Debug.Log($"{gameObject.name} 리듬메세지: {action}");
         action = action.Trim();
+        Debug.Log($"{gameObject.name} 리듬메세지: {action}");
 
         if (action == "Hold")
         {
             inputOpen = true;
             awaitingJudge = false;
-
-            HandleHold();
         }
     }
 
@@ -81,61 +93,91 @@ public class Minigame_1_7 : MiniGameBase
         inputOpen = false;
         awaitingJudge = false;
 
-        //holdJudge.ResolveAndProceed();
 
         switch (judgement)
         {
             case JudgementResult.Perfect:
             case JudgementResult.Good:
-                RegisterHoldSuccess();
+                totalSuccess++;
                 break;
+
             case JudgementResult.Miss:
-                RegisterHoldFail();
                 break;
         }
+
+        holdIndex++;
+
+        CheckRoundEnd();
     }
 
-    private void HandleHold()
+    private void CheckRoundEnd()
     {
-        if (prisoner == null) return;
-        if (holdJudge.CanHold())
+        if (holdIndex < holdPerRound)
+            return;
+
+        // 한 라운드 홀드 모두 끝남
+        // 아이템 떨어뜨리고 범인 제거
+        if (prisoner != null && prisoner.GetProhibitedItem() != null)
         {
-            //holdJudge.OnHoldStart(prisoner.transform);
+            prisoner.DropToBasket(basket);
+        }
+
+        Destroy(prisoner.gameObject);
+        prisoner = null;
+
+        currentRound++;
+
+        Debug.Log("Round End");
+
+        if (currentRound >= totalRound)
+        {
+            EndGame();
+        }
+        else
+        {
+            SpawnNewPrisonerAndStartRound();
         }
     }
 
-    public void RegisterHoldSuccess()
+    private void SpawnNewPrisonerAndStartRound()
     {
-        holdSuccessCount++;
-        CheckMinigameEnd();
-    }
-
-    public void RegisterHoldFail()
-    {
-        CheckMinigameEnd();
-    }
-
-    private void CheckMinigameEnd()
-    {
-        if (holdJudge == null) return;
-
-        if (holdJudge.CurrentUINode >= maxHoldCount)
+        if (prisonerSpawner == null)
         {
-            PrisonerController1_7 prisoner = FindObjectOfType<PrisonerController1_7>();
+            Debug.LogError("PrisonerSpawner가 할당되어 있지 않습니다.");
+            return;
+        }
 
-            if (holdSuccessCount >= 1/*>= maxHoldCount*/)
-            {
-                if (prisoner != null)
-                {
-                    GiveRandomProhibitToPrisoner();
-                }
+        // Minigame_1_7 오브젝트를 부모로 지정
+        GameObject newPrisonerObj = prisonerSpawner.SpawnRandomPrisoner(this.transform);
+        if (newPrisonerObj == null)
+        {
+            Debug.LogError("새로운 죄수 생성 실패");
+            return;
+        }
 
-                Success();
-            }
-            else
-            {
-                Fail();
-            }
+        prisoner = newPrisonerObj.GetComponent<PrisonerController1_7>();
+        if (prisoner == null)
+        {
+            Debug.LogError("PrisonerController1_7 컴포넌트가 새로 생성된 죄수에 없음");
+            return;
+        }
+
+        StartRound();
+    }
+
+
+    private void EndGame()
+    {
+        Debug.Log("Game End. Success count = " + totalSuccess);
+
+        if (totalSuccess >= 3)
+        {
+            GameManager1_7.instance.OnMinigameSuccess(basket);
+            Success();
+        }
+        else
+        {
+            Fail();
         }
     }
 
@@ -145,27 +187,6 @@ public class Minigame_1_7 : MiniGameBase
 
         awaitingJudge = true;
         OnPlayerInput("Hold");
-    }
-
-    public void RecordHoldResult(bool success)
-    {
-        holdResults.Add(success);
-
-        // 모든 UI 종료 시 최종 판정
-        if (holdResults.Count >= maxHoldCount)
-        {
-            bool anySuccess = holdResults.Contains(true);
-
-            if (anySuccess)
-            {
-                GiveRandomProhibitToPrisoner();
-                Success();
-            }
-            else
-            {
-                Fail();
-            }
-        }
     }
 
     private void GiveRandomProhibitToPrisoner()

@@ -18,7 +18,7 @@ public class Manager_1_8 : MonoBehaviour
     private List<GameObject> prisonerList = new List<GameObject>();
 
     [Header("Spawn Settings")]
-    public int maxPrisonerCount = 3;
+    //public int maxPrisonerCount = 3;
     public float spawnY = -3.5f;
 
     [Header("Timing Settings")]
@@ -34,66 +34,68 @@ public class Manager_1_8 : MonoBehaviour
     public int endedPrisoner = 0;
     private bool isEnded = false;
 
+    [Header("Round Settings")]
+    public int totalRounds = 3;          // 총 라운드
+    public int prisonersPerRound = 4;    // 라운드당 범인 수
+
+    private int currentRound = 0;
+    private int spawnedThisRound = 0;
+
+    private int successRounds = 0;
+    private int failRounds = 0;
+
     private void Start()
     {
         minigame_1_8 = stage_1_8.GetComponent<Minigame_1_8>();
         prisonTrigger = prisonObj.GetComponent<PrisonTrigger>();
 
-        prisonTrigger.totalPrisoners = numberOfPrisoners;
         prisonTrigger.manager = this;
-        prisonPos = prisonObj.transform.position;
 
-        StartGame();
+        StartRound();
+    }
+
+    void StartRound()
+    {
+        Debug.Log("Round Start : " + (currentRound + 1));
+
+        spawnedThisRound = 0;
+        endedPrisoner = 0;
+
+        StartCoroutine(SpawnRoutine());
+    }
+
+    IEnumerator SpawnRoutine()
+    {
+        for (int i = 0; i < prisonersPerRound; i++)
+        {
+            SpawnPrisoner();
+            yield return new WaitForSeconds(0.5f);
+        }
     }
 
     private void Update()
     {
-        if (endedPrisoner == maxPrisonerCount && !isEnded) 
+        if (endedPrisoner >= prisonersPerRound && !isEnded)
         {
             isEnded = true;
-            minigame_1_8.ResultJudge();
+
+            if (hasAnySuccess)
+                successRounds++;
+            else
+                failRounds++;
+
+            currentRound++;
+
+            if (currentRound >= totalRounds)
+            {
+                FinalResult();
+            }
+            else
+            {
+                StartCoroutine(StartNextRound());
+            }
         }
     }
-
-    void StartGame()
-    {
-        //for (int i = 0; i < numberOfPrisoners; i++)
-        //{
-        //    Vector2 spawnPos = new Vector2(7f, Random.Range(-2f, 2f));
-
-        //    GameObject prisonerObj = Instantiate(prisonerPrefab[i], spawnPos, Quaternion.identity);
-        //    Prisoner_1_8 prisoner_1_8 = prisonerObj.GetComponent<Prisoner_1_8>();
-
-        //    prisoner_1_8.prison = prisonObj;
-
-        //    prisonerList.Add(prisonerObj);
-        //}
-    }
-
-    Vector2 GetValidSpawnPosition(Vector2 center, float fixedY)
-    {
-        float spawnRadiusMin = 4f;
-        float spawnRadiusMax = 6f;
-
-        // x축에서만 거리 유지
-        float randomDistance = Random.Range(spawnRadiusMin, spawnRadiusMax);
-        float direction = Random.value < 0.5f ? -1f : 1f;
-        float offsetX = randomDistance * direction;
-
-        return new Vector2(center.x + offsetX, fixedY);
-    }
-
-    //public void GameSuccess()
-    //{
-    //    minigame_1_8.Succeed();
-
-    //    DestroyAllPrisoners();
-    //}
-
-    //public void GameFail()
-    //{
-    //    DestroyAllPrisoners();
-    //}
 
     public void DestroyAllPrisoners()
     {
@@ -122,16 +124,14 @@ public class Manager_1_8 : MonoBehaviour
 
     public void SpawnPrisoner()
     {
-        if (spawnedCount >= maxPrisonerCount)
+        if (spawnedThisRound >= prisonersPerRound)
             return;
 
         Camera cam = Camera.main;
 
-        // 화면 오른쪽 바깥 기준 스폰 X
         float baseSpawnX =
             cam.ViewportToWorldPoint(new Vector3(0.9f, 0f, 0f)).x;
 
-        // 거리 차이를 위한 오프셋
         float offsetX = Random.Range(spawnXOffsetMin, spawnXOffsetMax);
 
         float spawnX = baseSpawnX + offsetX;
@@ -139,15 +139,14 @@ public class Manager_1_8 : MonoBehaviour
 
         Vector2 spawnPos = new Vector2(spawnX, spawnY);
 
-        // 프리팹 선택
-        int prefabIndex = spawnedCount % prisonerPrefab.Length;
+        int prefabIndex = spawnedThisRound % prisonerPrefab.Length;
+
         GameObject prisonerObj =
-            Instantiate(prisonerPrefab[prefabIndex], spawnPos, Quaternion.identity);
+            Instantiate(prisonerPrefab[prefabIndex], spawnPos, Quaternion.identity, transform);
 
         Prisoner_1_8 prisoner = prisonerObj.GetComponent<Prisoner_1_8>();
         prisoner.prison = prisonObj;
 
-        // 핵심: 도착 시간 기준 속도 계산
         float prisonX = prisonObj.transform.position.x;
         float distance = spawnX - prisonX;
 
@@ -157,7 +156,8 @@ public class Manager_1_8 : MonoBehaviour
         prisoner.SetSpeed(speed);
 
         prisonerList.Add(prisonerObj);
-        spawnedCount++;
+
+        spawnedThisRound++;
     }
 
     private IEnumerator FadeAndDestroy(GameObject obj, float duration)
@@ -194,8 +194,23 @@ public class Manager_1_8 : MonoBehaviour
         minigame_1_8.OnPlayerInput();
     }
 
-    public void NotifyMiss()
+    IEnumerator StartNextRound()
     {
-        //minigame_1_8.OnMiss();
+        yield return new WaitForSeconds(1f);
+
+        isEnded = false;
+        hasAnySuccess = false;
+
+        StartRound();
+    }
+
+    void FinalResult()
+    {
+        Debug.Log("Success Rounds : " + successRounds);
+
+        if (successRounds >= 3)
+            minigame_1_8.Success();
+        else
+            minigame_1_8.Fail();
     }
 }

@@ -2,23 +2,31 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using UnityEngine.SocialPlatforms.Impl;
-
 
 public class Score : MonoBehaviour
 {
     public TextMeshProUGUI myText;
 
     public int nScore;
+    public int maxScore = 5;
 
     void Start()
     {
-        myText.text = $"{nScore} / 5";
+        UpdateText();
     }
 
     void Update()
     {
-        if (nScore > 15) return;
-        myText.text = $"{nScore} / 5";
+        UpdateText();
+    }
+
+    void UpdateText()
+    {
+        myText.text = $"{nScore} / {maxScore}";
+    }
+
+    public void SetMaxScore(int value)
+    {
+        maxScore = value;
     }
 }

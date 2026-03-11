@@ -6,6 +6,18 @@ using TMPro;
 
 public class Minigame_1_9 : MiniGameBase
 {
+    [Header("Round Settings")]
+    [SerializeField] private int totalRounds = 3;
+    [SerializeField] private int actionsPerRound = 3; // Show + Input 세트 수
+
+    private int currentRound = 0;
+    private int currentAction = 0;
+
+    private int successRounds = 0;
+    private int failRounds = 0;
+
+    private bool roundSuccess = false;
+
     [Header("Visual")]
     [SerializeField] private Rope rope;
 
@@ -42,7 +54,14 @@ public class Minigame_1_9 : MiniGameBase
         ended = false;
         inputOpen = false;
         awaitingJudge = false;
-        hasAnySuccess = false;
+
+        currentRound = 0;
+        currentAction = 0;
+
+        successRounds = 0;
+        failRounds = 0;
+
+        roundSuccess = false;
 
         StopBlink();
     }
@@ -109,14 +128,45 @@ public class Minigame_1_9 : MiniGameBase
         {
             case JudgementResult.Perfect:
             case JudgementResult.Good:
+
                 Debug.Log("판정 성공");
-                hasAnySuccess = true;
+                roundSuccess = true;
                 break;
 
             case JudgementResult.Miss:
+
                 Debug.Log("판정 미스");
                 break;
         }
+
+        currentAction++;
+
+        if (currentAction >= actionsPerRound)
+        {
+            EndRound();
+        }
+    }
+
+    void EndRound()
+    {
+        Debug.Log("Round End : " + (currentRound + 1));
+
+        if (roundSuccess)
+            successRounds++;
+        else
+            failRounds++;
+
+        currentRound++;
+
+        if (currentRound >= totalRounds)
+        {
+            FinalJudge();
+            return;
+        }
+
+        // 다음 라운드 준비
+        currentAction = 0;
+        roundSuccess = false;
     }
 
     /// <summary>
@@ -125,16 +175,15 @@ public class Minigame_1_9 : MiniGameBase
     public void FinalJudge()
     {
         if (ended) return;
+
         ended = true;
 
-        if (hasAnySuccess)
-        {
+        Debug.Log("Success Rounds : " + successRounds);
+
+        if (successRounds >= totalRounds)
             Success();
-        }
         else
-        {
             Fail();
-        }
     }
 
     #region 연출

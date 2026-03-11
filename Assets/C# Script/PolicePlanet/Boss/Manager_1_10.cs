@@ -33,7 +33,6 @@ public class Manager_1_10 : MonoBehaviour
     [SerializeField] private GameObject clearObject;
     [SerializeField] private GameObject failObject;
 
-    // runtime
     private UpDown upPlatform;
     private UpDown downPlatform;
 
@@ -43,31 +42,27 @@ public class Manager_1_10 : MonoBehaviour
     private bool inputOpen = false;
     private bool awaitingJudge = false;
     private bool moveEventRunning = false;
-
+    private int moveCount = 0;
     private int consecutiveShowCount = 0;
 
-    // =========================
-    // 데이터 구조: FIFO 큐 + 보낸 사람 목록
-    // =========================
     private struct PersonEntry
     {
         public GameObject go;
         public bool isSinner;
-        public PersonEntry(GameObject go, bool isSinner) { this.go = go; this.isSinner = isSinner; }
+        public PersonEntry(GameObject go, bool isSinner)
+        {
+            this.go = go;
+            this.isSinner = isSinner;
+        }
     }
 
-    // Show로 생긴 사람들(대기열) - FIFO
     private readonly Queue<PersonEntry> waitingQueue = new Queue<PersonEntry>();
-
-    // 성공/실패 여부와 상관없이 "플랫폼 쪽으로 보낸 사람들" (Move 이벤트 때도 같이 움직여야 함)
     private readonly List<PersonEntry> sentPeople = new List<PersonEntry>();
 
-    // 현재 판정 대기중인 1명 (Input 1회당 1명)
     private PersonEntry? current = null;
     private bool pendingGoUp = false;
     private bool pendingCorrect = false;
 
-    // 플랫폼 배치 카운트
     private int sentCountUp = 0;
     private int sentCountDown = 0;
 
@@ -89,6 +84,8 @@ public class Manager_1_10 : MonoBehaviour
         sentCountUp = 0;
         sentCountDown = 0;
 
+        ResetSessionVisualState();
+        ResetScore();
         ClearAllImmediate();
     }
 
@@ -119,11 +116,31 @@ public class Manager_1_10 : MonoBehaviour
         return ud;
     }
 
+    private void ResetSessionVisualState()
+    {
+        if (clearObject != null) clearObject.SetActive(true);
+        if (failObject != null) failObject.SetActive(false);
+    }
+
+    private void ShowFailState()
+    {
+        if (clearObject != null) clearObject.SetActive(true);
+        if (failObject != null) failObject.SetActive(true);
+    }
+
+    private void ResetScore()
+    {
+        if (score != null)
+            score.nScore = 0;
+    }
+
     // =========================
     // Minigame 이벤트
     // =========================
     public void SpawnPersonForShow()
     {
+        if (moveEventRunning) return;
+
         SpawnPersonInternal(offsetX: consecutiveShowCount * showSpawnStepX);
         inputOpen = false;
         awaitingJudge = false;
@@ -132,10 +149,11 @@ public class Manager_1_10 : MonoBehaviour
 
     public void OnInputWindowOpened()
     {
+        if (moveEventRunning) return;
+
         inputOpen = true;
         awaitingJudge = false;
         consecutiveShowCount = 0;
-
         pendingCorrect = false;
     }
 
@@ -151,32 +169,33 @@ public class Manager_1_10 : MonoBehaviour
 
         GameObject person = Instantiate(prefab, pos, Quaternion.identity, spawnParent);
 
-        var sr = person.GetComponent<SpriteRenderer>();
-        if (sr != null)
+        var rootSr = person.GetComponent<SpriteRenderer>();
+        if (rootSr != null)
         {
             if (spawnSinner)
             {
-                int idx = Random.Range(0, sinnerBodySprites.Length);
-
-                // 1) 몸통(루트 SpriteRenderer) 교체
-                if (sr != null && sinnerBodySprites != null && sinnerBodySprites.Length > 0)
-                    sr.sprite = sinnerBodySprites[idx];
-
-                // 2) 머리(자식 SpriteRenderer) 교체
-                var headSr = sr.transform.GetChild(0).GetComponent<SpriteRenderer>();
-                if (headSr != null && sinnerHeadSprites != null && sinnerHeadSprites.Length > 0)
-                    headSr.sprite = sinnerHeadSprites[idx];
-
-                // 3) 페이드도 머리까지 같이
-                if (headSr != null)
+                if (sinnerBodySprites != null && sinnerBodySprites.Length > 0 &&
+                    sinnerHeadSprites != null && sinnerHeadSprites.Length > 0)
                 {
-                    headSr.color = new Color(headSr.color.r, headSr.color.g, headSr.color.b, 0f);
-                    headSr.DOFade(1f, 0.1f);
+                    int idx = Random.Range(0, Mathf.Min(sinnerBodySprites.Length, sinnerHeadSprites.Length));
+
+                    rootSr.sprite = sinnerBodySprites[idx];
+
+                    if (rootSr.transform.childCount > 0)
+                    {
+                        var headSr = rootSr.transform.GetChild(0).GetComponent<SpriteRenderer>();
+                        if (headSr != null)
+                        {
+                            headSr.sprite = sinnerHeadSprites[idx];
+                            headSr.color = new Color(headSr.color.r, headSr.color.g, headSr.color.b, 0f);
+                            headSr.DOFade(1f, 0.1f);
+                        }
+                    }
                 }
             }
 
-            sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 0f);
-            sr.DOFade(1f, 0.1f);
+            rootSr.color = new Color(rootSr.color.r, rootSr.color.g, rootSr.color.b, 0f);
+            rootSr.DOFade(1f, 0.1f);
         }
 
         waitingQueue.Enqueue(new PersonEntry(person, spawnSinner));
@@ -196,7 +215,6 @@ public class Manager_1_10 : MonoBehaviour
 
         pendingGoUp = goUp;
         current = entry;
-
         pendingCorrect = (goUp && !entry.isSinner) || (!goUp && entry.isSinner);
 
         awaitingJudge = true;
@@ -205,7 +223,6 @@ public class Manager_1_10 : MonoBehaviour
 
     private bool TryDequeueAlive(out PersonEntry entry)
     {
-        // 큐 앞에서부터 null 제거하면서 유효한 사람 찾기
         while (waitingQueue.Count > 0)
         {
             var e = waitingQueue.Dequeue();
@@ -215,6 +232,7 @@ public class Manager_1_10 : MonoBehaviour
                 return true;
             }
         }
+
         entry = default;
         return false;
     }
@@ -225,23 +243,23 @@ public class Manager_1_10 : MonoBehaviour
     public void OnAccepted(JudgementResult judgement)
     {
         if (!awaitingJudge) return;
+
         awaitingJudge = false;
         inputOpen = false;
 
         MoveCurrentToLane(pendingGoUp);
 
-        if (pendingCorrect) AddScoreAndCheckWin();
+        if (pendingCorrect)
+            AddScore();
 
         current = null;
     }
 
     public void OnMiss()
     {
-        // Miss는 무입력 Miss도 들어오므로 awaitingJudge로 막지 말자.
         awaitingJudge = false;
         inputOpen = false;
 
-        // 1) 클릭으로 잡고 있던 current가 있으면 그걸 삭제
         if (current.HasValue && current.Value.go != null)
         {
             StartCoroutine(FadeOutAndDestroyOne(current.Value.go));
@@ -249,20 +267,20 @@ public class Manager_1_10 : MonoBehaviour
             return;
         }
 
-        // 2) 무입력 Miss면 큐에서 "가장 앞" 1명을 삭제(FIFO)
         if (TryDequeueAlive(out var e))
         {
-            if (e.go != null) StartCoroutine(FadeOutAndDestroyOne(e.go));
+            if (e.go != null)
+                StartCoroutine(FadeOutAndDestroyOne(e.go));
         }
     }
 
     private void MoveCurrentToLane(bool goUp)
     {
         if (!current.HasValue) return;
+
         var e = current.Value;
         if (e.go == null) return;
 
-        // 목표 X: -6f 시작 / 4.5f 시작 + 0.4씩 누적
         float baseX = goUp ? 4.5f : -5.7f;
         int idx = goUp ? sentCountUp : sentCountDown;
         float targetX = baseX + (0.5f * idx);
@@ -270,7 +288,6 @@ public class Manager_1_10 : MonoBehaviour
         if (goUp) sentCountUp++;
         else sentCountDown++;
 
-        // 트윈 정리 후 이동
         DOTween.Kill(e.go.transform);
 
         e.go.transform.DOMoveX(targetX, moveEventDuration)
@@ -279,11 +296,10 @@ public class Manager_1_10 : MonoBehaviour
         sentPeople.Add(e);
     }
 
-    private void AddScoreAndCheckWin()
+    private void AddScore()
     {
-        if (score != null) score.nScore++;
-        if (score != null && score.nScore >= 10)
-            minigame?.Succeed();
+        if (score != null)
+            score.nScore++;
     }
 
     private IEnumerator FadeOutAndDestroyOne(GameObject target)
@@ -292,69 +308,69 @@ public class Manager_1_10 : MonoBehaviour
 
         if (target != null)
         {
-            // 트윈 정리 (Transform + SpriteRenderer 둘 다)
             DOTween.Kill(target.transform);
 
             var srs = target.GetComponentsInChildren<SpriteRenderer>(true);
             for (int i = 0; i < srs.Length; i++)
             {
                 if (srs[i] == null) continue;
-                srs[i].DOKill(); // 기존 페이드/트윈 제거
+                srs[i].DOKill();
                 srs[i].DOFade(0f, dur).SetEase(Ease.OutQuad);
             }
         }
 
         yield return new WaitForSeconds(dur);
 
-        if (target != null) Destroy(target);
+        if (target != null)
+            Destroy(target);
     }
 
-
     // =========================
-    // Move 이벤트 (전체 리프트)
+    // Move 이벤트 (세션 종료용)
     // =========================
     public void MoveBothPlatforms()
     {
         if (moveEventRunning) return;
         moveEventRunning = true;
 
-        // 판정/입력 중단
         awaitingJudge = false;
         inputOpen = false;
 
         if (upPlatform != null) upPlatform.TryMovePlatformImmediate();
         if (downPlatform != null) downPlatform.TryMovePlatformImmediate();
 
-        if (score.nScore <= 2)
+        bool sessionFail = (score != null && score.nScore <= 2);
+
+        moveCount++;
+
+        if (score != null)
         {
-            if (clearObject != null) clearObject.SetActive(false);
-            if (failObject != null) failObject.SetActive(true);
-            minigame.Fail();
-            return;
+            if (moveCount == 1)
+                score.SetMaxScore(6);
+            else if (moveCount == 2)
+                score.SetMaxScore(8);
         }
+
+        if (sessionFail)
+            ShowFailState();
+        else
+            ResetSessionVisualState();
 
         sentCountUp = 0;
         sentCountDown = 0;
 
         MoveAllPeopleY(waitingQueue, sentPeople);
-        StartCoroutine(ClearAllAfterMoveEvent(moveEventDuration + moveEventClearDelay));
-        minigame.Success();
+        StartCoroutine(FinishSessionAfterMove(moveEventDuration + moveEventClearDelay));
     }
 
     private void MoveAllPeopleY(Queue<PersonEntry> q, List<PersonEntry> sent)
     {
-        // 큐는 순회가 되지만, null은 그냥 스킵
         foreach (var p in q)
-        {
             MoveOneY(p);
-        }
 
         for (int i = 0; i < sent.Count; i++)
-        {
             MoveOneY(sent[i]);
-        }
 
-        // current도 남아있다면 같이 이동 (클릭 직후 Move가 올 수 있으니)
         if (current.HasValue)
             MoveOneY(current.Value);
     }
@@ -372,10 +388,22 @@ public class Manager_1_10 : MonoBehaviour
           .SetUpdate(false);
     }
 
-    private IEnumerator ClearAllAfterMoveEvent(float wait)
+    private IEnumerator FinishSessionAfterMove(float wait)
     {
         yield return new WaitForSeconds(wait);
+
         ClearAllImmediate();
+
+        consecutiveShowCount = 0;
+        inputOpen = false;
+        awaitingJudge = false;
+        pendingGoUp = false;
+        pendingCorrect = false;
+        current = null;
+
+        ResetScore();
+        ResetSessionVisualState();
+
         moveEventRunning = false;
     }
 
@@ -384,21 +412,21 @@ public class Manager_1_10 : MonoBehaviour
     // =========================
     private void ClearAllImmediate()
     {
-        // current
-        if (current.HasValue && current.Value.go != null) Destroy(current.Value.go);
+        if (current.HasValue && current.Value.go != null)
+            Destroy(current.Value.go);
         current = null;
 
-        // queue
         while (waitingQueue.Count > 0)
         {
             var e = waitingQueue.Dequeue();
-            if (e.go != null) Destroy(e.go);
+            if (e.go != null)
+                Destroy(e.go);
         }
 
-        // sent
         for (int i = sentPeople.Count - 1; i >= 0; i--)
         {
-            if (sentPeople[i].go != null) Destroy(sentPeople[i].go);
+            if (sentPeople[i].go != null)
+                Destroy(sentPeople[i].go);
             sentPeople.RemoveAt(i);
         }
     }

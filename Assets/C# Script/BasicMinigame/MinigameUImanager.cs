@@ -44,6 +44,11 @@ public class MinigameUIManager : MonoBehaviour
     [SerializeField] private AudioClip stageBGM;
     [SerializeField] private bool loopBGM = true;
 
+    [Header("NEW MODE - Final Event")]
+    [SerializeField] private GameObject finalObject; // 마지막에 보여줄 오브젝트
+    [SerializeField] private float finalBgmTargetVolume = 0.5f;
+    [SerializeField] private float finalBgmFadeTime = 5f;
+
     private Coroutine timelineCoroutine;
     private bool isSwitching = false;
 
@@ -211,23 +216,43 @@ public class MinigameUIManager : MonoBehaviour
 
     private IEnumerator TimelineRoutine()
     {
-        int count = Mathf.Min(startTimes.Count, minigameQueue.Count);
+        int gameCount = minigameQueue.Count;
 
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < startTimes.Count; i++)
         {
             float startT = Mathf.Max(0f, startTimes[i]);
             float preEndT = Mathf.Max(0f, startT - preEndGap);
 
-            string nextPath = minigameQueue.Dequeue();
-
             yield return WaitUntilLevelTime(preEndT);
             yield return EndCurrentMinigame_ShowBlack();
+
+            // 마지막 이벤트
+            if (i >= gameCount)
+            {
+                yield return FadeBlack(false);
+
+                if (finalObject != null)
+                    finalObject.SetActive(true);
+
+                FadeBGM(finalBgmTargetVolume, finalBgmFadeTime);
+
+                yield break;
+            }
+
+            string nextPath = minigameQueue.Dequeue();
+
             yield return PrepareNextMinigame(nextPath);
 
-            // startT 시점: 실제 시작
             yield return WaitUntilLevelTime(startT);
             yield return StartPreparedMinigame();
         }
+    }
+
+    private void FadeBGM(float target, float duration)
+    {
+        if (audioSource == null) return;
+
+        audioSource.DOFade(target, duration);
     }
 
     private IEnumerator PrepareNextMinigame(string minigamePath)
