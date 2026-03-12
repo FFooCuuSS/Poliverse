@@ -1823,13 +1823,13 @@ MonoBehaviour:
   case1Move:
     startPos: {x: 10, y: 0}
     endPos: {x: -10, y: 0}
-    moveTime: 1.9
-    waitTime: 1.5
+    moveTime: 1.8
+    waitTime: 1.25
   case2Move:
     startPos: {x: 10, y: 0}
     endPos: {x: -10, y: 0}
-    moveTime: 2
-    waitTime: 1.1
+    moveTime: 1.9
+    waitTime: 1.05
   roundCycleTime: 4
   successRangeX: 0.6
 --- !u!1 &6827938551070454749

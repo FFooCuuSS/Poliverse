@@ -56,6 +56,11 @@ public class Minigame1_5_Manager_remake : MiniGameBase
     protected override float TimerDuration => 16f;
     protected override string MinigameExplain => "¼ûÀº ÁË¼ö¸¦ Ã£¾Æ¶ó!";
 
+    private void Start()
+    {
+        StartGame();
+    }
+
     public override void StartGame()
     {
         if (mainCam == null) mainCam = Camera.main;

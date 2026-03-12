@@ -511,12 +511,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   totalMoveDistance: 7
   steps: 4
-  pauseBetweenSteps: 0.2
+  pauseBetweenSteps: 0.1
   totalTravelTime: 1.65
-  punchDuration: 0.08
-  punchStrengthY: 0.08
-  punchVibrato: 6
-  punchElasticity: 0.6
 --- !u!1 &2910513271250986642
 GameObject:
   m_ObjectHideFlags: 0
@@ -567,10 +563,6 @@ MonoBehaviour:
   steps: 4
   pauseBetweenSteps: 0.1
   totalTravelTime: 1.65
-  punchDuration: 0.08
-  punchStrengthY: 0.08
-  punchVibrato: 6
-  punchElasticity: 0.6
 --- !u!1 &3017536596071447263
 GameObject:
   m_ObjectHideFlags: 0

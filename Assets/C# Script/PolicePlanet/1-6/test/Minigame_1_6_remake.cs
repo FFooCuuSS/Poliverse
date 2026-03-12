@@ -9,9 +9,13 @@ public class Minigame_1_6_remake : MiniGameBase
     [Header("Prefabs")]
     public ContainerTarget containerPrefab;
     public PoliceMover policePrefab;
+
+    [Header("Container Sprites")]
     public Sprite blueSprite;
     public Sprite greenSprite;
     public Sprite whiteSprite;
+
+    [Header("Police Base Sprites")]
     public Sprite bluePolice;
     public Sprite greenPolice;
     public Sprite whitePolice;
@@ -24,7 +28,7 @@ public class Minigame_1_6_remake : MiniGameBase
     public Sprite whitePoliceSuccess;
     public Sprite whitePoliceFail;
 
-    [Header("set parent")]
+    [Header("Set Parent")]
     public Transform mainParent;
 
     [Header("Lane Y Positions")]
@@ -34,10 +38,14 @@ public class Minigame_1_6_remake : MiniGameBase
     public float containerXMin = -6f;
     public float containerXMax = 5f;
 
+    [Header("Container Move")]
+    public float containerStartX = 12f;
+    public float containerMoveTime = 1f;
+
     [Header("Police Start X")]
     public float policeStartX = 10f;
 
-    [Header("Move Timing")]
+    [Header("Police Move Timing")]
     public float travelTime = 1f;
 
     [Header("Judgement Windows (seconds)")]
@@ -48,6 +56,9 @@ public class Minigame_1_6_remake : MiniGameBase
     public float destroyX = -8f;
 
     private ContainerTarget[] containers;
+    private float[] containerTargetXs;          // 각 컨테이너 최종 목표 x 저장
+    private int nextContainerMoveIndex = 0;    // 다음에 움직일 컨테이너 인덱스
+
     private List<int> laneOrder;
 
     private PoliceMover currentPolice;
@@ -92,8 +103,46 @@ public class Minigame_1_6_remake : MiniGameBase
     {
         if (finished) return;
 
-        if (action == "Spawn") SpawnPolice();
-        else if (action == "Input") EnableInputNow();
+        if (action == "Container")
+        {
+            MoveNextContainer();
+        }
+        else if (action == "Spawn")
+        {
+            SpawnPolice();
+        }
+        else if (action == "Input")
+        {
+            EnableInputNow();
+        }
+    }
+
+    private void MoveNextContainer()
+    {
+        // 0,1,2 순서대로 한 번씩만 이동
+        if (nextContainerMoveIndex >= containers.Length) return;
+
+        ContainerTarget c = containers[nextContainerMoveIndex];
+        if (c == null)
+        {
+            nextContainerMoveIndex++;
+            return;
+        }
+
+        MoveContainer1_6 mover = c.GetComponent<MoveContainer1_6>();
+        if (mover != null)
+        {
+            float y = laneYs[nextContainerMoveIndex];
+            float targetX = containerTargetXs[nextContainerMoveIndex];
+
+            mover.InitMove(containerStartX, targetX, y, containerMoveTime);
+        }
+        else
+        {
+            Debug.LogWarning("[1-6] MoveContainer1_6 컴포넌트가 containerPrefab에 없음");
+        }
+
+        nextContainerMoveIndex++;
     }
 
     private void SpawnPolice()
@@ -114,9 +163,10 @@ public class Minigame_1_6_remake : MiniGameBase
 
         ApplyPoliceBaseSpriteAndCacheType(p);
 
-        float targetX = containers[lane].transform.position.x;
-        p.InitMoveToTarget(policeStartX, targetX, travelTime);
+        MoveContainer1_6 mover = containers[lane].GetComponent<MoveContainer1_6>();
+        float targetX = (mover != null) ? mover.GetTargetX() : containers[lane].transform.position.x;
 
+        p.InitMoveToTarget(policeStartX, targetX, travelTime);
         p.OnAutoDestroyed += OnPoliceAutoDestroyed;
 
         currentPolice = p;
@@ -206,32 +256,50 @@ public class Minigame_1_6_remake : MiniGameBase
         }
 
         containers = new ContainerTarget[laneYs.Length];
+        containerTargetXs = new float[laneYs.Length];
 
         for (int i = 0; i < laneYs.Length; i++)
         {
-            float x = Random.Range(containerXMin, containerXMax);
+            float targetX = Random.Range(containerXMin, containerXMax);
             float y = laneYs[i];
 
             ContainerTarget c = Instantiate(containerPrefab, mainParent);
-            c.transform.position = new Vector3(x, y, 0f);
+
+            // 처음엔 모두 시작 위치에서 대기
+            c.transform.position = new Vector3(containerStartX, y, 0f);
 
             SpriteRenderer sr = c.GetComponent<SpriteRenderer>();
             if (sr != null)
             {
-                if (Mathf.Approximately(y, -3f)) sr.sprite = blueSprite;
-                else if (Mathf.Approximately(y, 3f)) sr.sprite = greenSprite;
-                else sr.sprite = whiteSprite;
+                if (Mathf.Approximately(y, -3f))
+                {
+                    sr.sprite = blueSprite;
+                }
+                else if (Mathf.Approximately(y, 3f))
+                {
+                    sr.sprite = greenSprite;
+                }
+                else
+                {
+                    sr.sprite = whiteSprite;
+                }
             }
 
             c.gameObject.SetActive(true);
             c.laneIndex = i;
             containers[i] = c;
+
+            // 나중에 Container 액션 때 쓰려고 목표 x 저장만 해둠
+            containerTargetXs[i] = targetX;
         }
+
+        nextContainerMoveIndex = 0;
     }
 
     private void BuildLaneOrder()
     {
         laneOrder = new List<int> { 0, 1, 2 };
+
         for (int i = 0; i < laneOrder.Count; i++)
         {
             int r = Random.Range(i, laneOrder.Count);
@@ -262,23 +330,22 @@ public class Minigame_1_6_remake : MiniGameBase
         if (sr == null) return;
 
         float y = p.transform.position.y;
-
-        // y 기준으로 타입 결정 (laneYs가 3,0,-3인 구조니까)
         int type;
+
         if (Mathf.Approximately(y, -3f))
         {
             sr.sprite = bluePolice;
-            type = 0; // Blue
+            type = 0;
         }
         else if (Mathf.Approximately(y, 3f))
         {
             sr.sprite = greenPolice;
-            type = 2; // Green
+            type = 2;
         }
         else
         {
             sr.sprite = whitePolice;
-            type = 1; // White
+            type = 1;
         }
 
         policeTypeByObj[p] = type;
@@ -298,10 +365,10 @@ public class Minigame_1_6_remake : MiniGameBase
         SpriteRenderer sr = p.GetComponent<SpriteRenderer>();
         if (sr == null) return;
 
-        // 혹시 캐시가 안 잡힌 예외 상황 대비(보험)
         if (!policeTypeByObj.TryGetValue(p, out int type))
         {
             float y = p.transform.position.y;
+
             if (Mathf.Approximately(y, -3f)) type = 0;
             else if (Mathf.Approximately(y, 3f)) type = 2;
             else type = 1;
@@ -309,13 +376,15 @@ public class Minigame_1_6_remake : MiniGameBase
 
         switch (type)
         {
-            case 0: // Blue
+            case 0:
                 sr.sprite = success ? bluePoliceSuccess : bluePoliceFail;
                 break;
-            case 2: // Green
+
+            case 2:
                 sr.sprite = success ? greenPoliceSuccess : greenPoliceFail;
                 break;
-            default: // White
+
+            default:
                 sr.sprite = success ? whitePoliceSuccess : whitePoliceFail;
                 break;
         }
