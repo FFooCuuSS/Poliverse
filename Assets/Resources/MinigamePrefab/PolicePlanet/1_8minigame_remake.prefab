@@ -135,15 +135,16 @@ MonoBehaviour:
   - {fileID: 8994401564694592256, guid: 43f66bb40abcdce4781d2743e5cc8441, type: 3}
   prisonObj: {fileID: 8598709807105546593}
   numberOfPrisoners: 3
-  maxPrisonerCount: 4
   spawnY: -1.9
-  timeToReachPrison: 0.5
+  timeToReachPrison: 1
   spawnXOffsetMin: 0
-  spawnXOffsetMax: 1
-  minMoveSpeed: 5
+  spawnXOffsetMax: 0
+  minMoveSpeed: 9
   maxMoveSpeed: 9
   hasAnySuccess: 0
   endedPrisoner: 0
+  totalRounds: 3
+  prisonersPerRound: 3
 --- !u!1 &8598709807105546593
 GameObject:
   m_ObjectHideFlags: 0

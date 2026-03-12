@@ -63,7 +63,10 @@ public class Minigame_1_7 : MiniGameBase
         if (prisoner != null && holdJudge != null)
         {
             holdJudge.ResetHoldNodes();
-            holdJudge.StartAllHolds(prisoner.transform);
+
+            // 기존 이벤트 제거 후 새로 등록
+            prisoner.OnArrived -= StartHoldSequence;
+            prisoner.OnArrived += StartHoldSequence;
         }
     }
 
@@ -88,6 +91,7 @@ public class Minigame_1_7 : MiniGameBase
 
     public override void OnJudgement(JudgementResult judgement)
     {
+        if (prisoner == null) return;
         if (!inputOpen) return;
 
         inputOpen = false;
@@ -110,33 +114,16 @@ public class Minigame_1_7 : MiniGameBase
         CheckRoundEnd();
     }
 
-    private void CheckRoundEnd()
+    public void CheckRoundEnd()
     {
+        if (prisoner == null)
+            return;
+
         if (holdIndex < holdPerRound)
             return;
 
         // 한 라운드 홀드 모두 끝남
-        // 아이템 떨어뜨리고 범인 제거
-        if (prisoner != null && prisoner.GetProhibitedItem() != null)
-        {
-            prisoner.DropToBasket(basket);
-        }
-
-        Destroy(prisoner.gameObject);
-        prisoner = null;
-
-        currentRound++;
-
-        Debug.Log("Round End");
-
-        if (currentRound >= totalRound)
-        {
-            EndGame();
-        }
-        else
-        {
-            SpawnNewPrisonerAndStartRound();
-        }
+        StartCoroutine(EndCurrentPrisonerRound());
     }
 
     private void SpawnNewPrisonerAndStartRound()
@@ -172,7 +159,6 @@ public class Minigame_1_7 : MiniGameBase
 
         if (totalSuccess >= 3)
         {
-            GameManager1_7.instance.OnMinigameSuccess(basket);
             Success();
         }
         else
@@ -194,5 +180,39 @@ public class Minigame_1_7 : MiniGameBase
         if (prisoner == null || basket == null) return;
         prisoner.DropToBasket(basket);
         Debug.Log("금지물품이 바구니로 날아갑니다!");
+    }
+
+    private void StartHoldSequence()
+    {
+        if (prisoner != null && holdJudge != null)
+        {
+            holdJudge.StartAllHolds(prisoner.transform);
+        }
+    }
+
+    private IEnumerator EndCurrentPrisonerRound()
+    {
+        if (prisoner != null)
+        {
+            var item = prisoner.GetProhibitedItem();
+            if (item != null)
+                prisoner.DropToBasket(basket);
+        }
+
+        // 아이템 이동 시간 확보
+        yield return new WaitForSeconds(0.1f);
+
+        if (prisoner != null)
+            Destroy(prisoner.gameObject);
+
+        prisoner = null;
+
+        currentRound++;
+        Debug.Log("Round End");
+
+        if (currentRound >= totalRound)
+            EndGame();
+        else
+            SpawnNewPrisonerAndStartRound();
     }
 }

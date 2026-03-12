@@ -100,9 +100,6 @@ public class Minigame_1_9 : MiniGameBase
         }
     }
 
-    /// <summary>
-    /// 화면 터치 시 Manager나 UI에서 호출
-    /// </summary>
     public void SubmitPlayerInput(string action = "Input")
     {
         // 연출은 항상 실행
@@ -213,33 +210,29 @@ public class Minigame_1_9 : MiniGameBase
         blinkTween = null;
     }
 
-    private void StartShaking()
-    {
-        if (movingObject == null) return;
+    //private void StartShaking()
+    //{
+    //    if (movingObject == null) return;
 
-        movingObject.transform
-            .DOShakePosition(
-                duration: 1f,
-                strength: 0.1f,
-                vibrato: 20,
-                randomness: 90,
-                snapping: false,
-                fadeOut: false
-            )
-            .SetLoops(-1);
-    }
+    //    movingObject.transform
+    //        .DOShakePosition(
+    //            duration: 1f,
+    //            strength: 0.1f,
+    //            vibrato: 20,
+    //            randomness: 90,
+    //            snapping: false,
+    //            fadeOut: false
+    //        )
+    //        .SetLoops(-1);
+    //}
 
-    private void ActivateObject()
-    {
-        if (activateObject != null)
-        {
-            activateObject.SetActive(true);
-            activateObject.GetComponent<SpriteRenderer>().color = Color.white;
-        }
-
-        if (lightEffect != null)
-            lightEffect.SetActive(true);
-    }
+    //private void ActivateObject()
+    //{
+    //    if (activateObject != null)
+    //    {
+    //        activateObject.SetActive(true);
+    //        activateObject.GetComponent<SpriteRenderer>().color = Color.white;
+    //    }
 
     #endregion
 }
