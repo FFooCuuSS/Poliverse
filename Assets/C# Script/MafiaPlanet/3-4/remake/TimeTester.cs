@@ -14,5 +14,9 @@ public class TimeTester : MonoBehaviour
             timer = 0f; // √ ±‚»≠
             counter+=0.5f;
         }
+        if(Input.GetMouseButtonDown(0))
+        {
+            Debug.Log("CLICK DETECTED AT: " + Time.time);
+        }
     }
 }
