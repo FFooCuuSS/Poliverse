@@ -1,166 +1,193 @@
-using System.Collections;
-using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 public class HoldCheck1_7 : MonoBehaviour
 {
-    [Header("UI Prefab & Settings")]
-    public GameObject holdUIPrefab;
-    public int maxHoldCount = 3;
-    [SerializeField] private float successTolerance = 0.2f;
+    [Header("UI Prefab")]
+    [SerializeField] private GameObject holdUIPrefab;
 
-    [Header("Timing Control")]
-    [SerializeField] private float shrinkDuration = 0.9f;
-    [SerializeField] private float vanishMargin = 0.05f;
-    [SerializeField] private float holdInterval = 0.5f;
+    [Header("Triangle Random Offset")]
+    [SerializeField] private float minDownOffset = 0.6f;
+    [SerializeField] private float maxDownOffset = 1.8f;
+    [SerializeField] private float maxSideOffset = 1f;
 
-    [Header("게임 참조")]
-    public Minigame_1_7 minigame;
-    
-    public int CurrentUINode { get; private set; } = 0;
+    [Header("Timing")]
+    [SerializeField] private float previewDuration = 0.5f;
+    [SerializeField] private float judgeFadeDuration = 0.2f;
+
+    private Minigame_1_7 minigame;
 
     private GameObject currentHoldUI;
-    private Transform targetCircle;
-    private Transform shrinkingCircle;
-
-    private bool isHolding = false;
-
-    private float shrinkTimer = 0f;
-    private float startScale;
-    private float endScale;
-
-    private bool currentHoldSuccess = false;
-
     private Transform cachedPrisoner;
 
-    // 라운드 시작용
-    public void StartAllHolds(Transform prisoner)
-    {
-        Debug.Log("StartAllHolds 호출");
+    private Transform targetCircle;
+    private Transform shrinkingCircle;
+    private Tween shrinkTween;
 
+    private SpriteRenderer[] cachedRenderers;
+    private Collider2D currentCollider;
+
+    public void SetMinigame(Minigame_1_7 target)
+    {
+        minigame = target;
+    }
+
+    public void PrepareRound(Transform prisoner, int holdCount)
+    {
         cachedPrisoner = prisoner;
-        CurrentUINode = 0;
-        SpawnNextUI();
-    }
-
-    // 라운드 리셋용
-    public void ResetHoldNodes()
-    {
         CleanupUI();
-        CurrentUINode = 0;
-        isHolding = false;
     }
 
-    public bool CanHold()
+    public void ShowPreviewUI(int inputIndex, Transform prisoner)
     {
-        return !isHolding && CurrentUINode < maxHoldCount;
-    }
+        cachedPrisoner = prisoner;
+        CleanupUI();
 
-    private void SpawnNextUI()
-    {
-        if (CurrentUINode >= maxHoldCount || cachedPrisoner == null)
-        {
+        if (holdUIPrefab == null || cachedPrisoner == null || minigame == null)
             return;
-        }
 
-        CleanupUI();
+        Vector3 apexPos = cachedPrisoner.position;
+        apexPos.x = 0f;
 
-        // 중앙 기준 위치 만들기
-        Vector3 centerPos = cachedPrisoner.position;
-        centerPos.x = 0f;
+        Vector3 spawnPos = GetTriangleRandomPosition(apexPos);
 
         currentHoldUI = Instantiate(
             holdUIPrefab,
-            centerPos + new Vector3(Random.Range(-0.5f, 0.5f), Random.Range(1.0f, 1.5f), 0f),
+            spawnPos,
             Quaternion.identity,
             minigame.transform
         );
 
-        SpriteRenderer[] renderers = currentHoldUI.GetComponentsInChildren<SpriteRenderer>();
-        foreach (var sr in renderers)
+        var relay = currentHoldUI.GetComponent<HoldUIClickRelay1_7>();
+        if (relay == null)
+            relay = currentHoldUI.AddComponent<HoldUIClickRelay1_7>();
+
+        relay.SetOwner(this);
+
+        currentCollider = currentHoldUI.GetComponent<Collider2D>();
+        if (currentCollider == null)
+            currentCollider = currentHoldUI.AddComponent<CircleCollider2D>();
+
+        currentCollider.isTrigger = true;
+        currentCollider.enabled = true;   // 즉시 클릭 가능
+
+        cachedRenderers = currentHoldUI.GetComponentsInChildren<SpriteRenderer>(true);
+        foreach (var sr in cachedRenderers)
         {
             sr.sortingLayerName = "UI";
             sr.sortingOrder = 200;
-        }
 
-        currentHoldUI.transform.position = centerPos + new Vector3(
-            Random.Range(-0.5f, 0.5f),
-            Random.Range(1.0f, 1.5f),
-            0f
-        );
+            Color c = sr.color;
+            c.a = 1f;
+            sr.color = c;
+        }
 
         targetCircle = currentHoldUI.transform.Find("TargetCircle");
         shrinkingCircle = currentHoldUI.transform.Find("ShrinkingCircle");
 
-        shrinkTimer = 0f;
-        startScale = shrinkingCircle.localScale.x;
-        endScale = targetCircle.localScale.x + vanishMargin;
-
-        isHolding = true;
-        currentHoldSuccess = false;
-    }
-
-    void Update()
-    {
-        if (!isHolding || shrinkingCircle == null || targetCircle == null)
+        if (targetCircle == null || shrinkingCircle == null)
             return;
 
-        shrinkTimer += Time.deltaTime;
-        float k = Mathf.Clamp01(shrinkTimer / Mathf.Max(0.01f, shrinkDuration));
+        float targetScale = targetCircle.localScale.x;
+        float startScale = targetScale * 2.2f;
 
-        float currentScale = Mathf.Lerp(startScale, endScale, k);
-        shrinkingCircle.localScale = Vector3.one * currentScale;
+        shrinkingCircle.localScale = Vector3.one * startScale;
 
-        float diff = Mathf.Abs(currentScale - targetCircle.localScale.x);
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (diff <= successTolerance)
-            {
-                currentHoldSuccess = true;
-                EndCurrentHold();
-                return;
-            }
-        }
-
-        if (k >= 1f)
-        {
-            currentHoldSuccess = false;
-            EndCurrentHold();
-        }
+        shrinkTween = shrinkingCircle.DOScale(Vector3.one * targetScale, previewDuration)
+            .SetEase(Ease.Linear);
     }
 
-    private void EndCurrentHold()
+    private Vector3 GetTriangleRandomPosition(Vector3 apexPos)
     {
-        isHolding = false;
+        float down = Random.Range(minDownOffset, maxDownOffset);
+        float t = Mathf.InverseLerp(minDownOffset, maxDownOffset, down);
+        float sideLimit = Mathf.Lerp(0.04f, maxSideOffset, t);
+        float side = Random.Range(-sideLimit, sideLimit);
 
-        CleanupUI();
+        return apexPos + new Vector3(side, -down, 0f);
+    }
 
-        if (minigame != null)
+    public void OpenJudgeWindow()
+    {
+        // 이제 사실상 의미 없음. 호환용으로만 둠.
+        if (currentCollider != null)
+            currentCollider.enabled = true;
+    }
+
+    public void CloseJudgeWindow()
+    {
+        if (currentCollider != null)
+            currentCollider.enabled = false;
+    }
+
+    public void OnHoldUIClicked()
+    {
+        if (minigame == null) return;
+        if (currentHoldUI == null) return;
+
+        minigame.OnHoldButtonPressed();
+    }
+
+    public void PlayJudgeFeedback(MiniGameBase.JudgementResult judgement)
+    {
+        CloseJudgeWindow();
+
+        if (currentHoldUI == null) return;
+
+        if (shrinkTween != null && shrinkTween.IsActive())
         {
-            if (currentHoldSuccess)
-                minigame.OnJudgement(MiniGameBase.JudgementResult.Good);
-            else
-                minigame.OnJudgement(MiniGameBase.JudgementResult.Miss);
+            shrinkTween.Kill();
+            shrinkTween = null;
         }
 
-        CurrentUINode++;
-
-        if (CurrentUINode < maxHoldCount)
+        if (cachedRenderers == null || cachedRenderers.Length == 0)
         {
-            SpawnNextUI();
+            CleanupUI();
+            return;
+        }
+
+        Sequence seq = DOTween.Sequence();
+
+        if (judgement == MiniGameBase.JudgementResult.Perfect ||
+            judgement == MiniGameBase.JudgementResult.Good)
+        {
+            foreach (var sr in cachedRenderers)
+                seq.Join(sr.DOFade(0f, judgeFadeDuration));
         }
         else
         {
+            currentHoldUI.transform.DOShakePosition(0.08f, 0.08f, 8, 90f, false, true);
+
+            foreach (var sr in cachedRenderers)
+                seq.Join(sr.DOFade(0f, judgeFadeDuration));
         }
+
+        seq.OnComplete(CleanupUI);
+    }
+
+    public void ResetAll()
+    {
+        cachedPrisoner = null;
+        CleanupUI();
     }
 
     private void CleanupUI()
     {
+        if (shrinkTween != null && shrinkTween.IsActive())
+        {
+            shrinkTween.Kill();
+            shrinkTween = null;
+        }
+
         if (currentHoldUI != null)
         {
             Destroy(currentHoldUI);
             currentHoldUI = null;
         }
+
+        currentCollider = null;
+        cachedRenderers = null;
+        targetCircle = null;
+        shrinkingCircle = null;
     }
 }

@@ -213,7 +213,7 @@ MonoBehaviour:
   flipInterval: 0.5
   captureRangeX: 0.7
   captureRangeY: 0.8
-  moveSpeed: 1
+  moveSpeed: 2
   destroyX: -11
   prison: {fileID: 0}
 --- !u!50 &2600053328646365007

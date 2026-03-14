@@ -128,23 +128,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4bd5aaf28cec5842bf9767f038a03f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stage_1_8: {fileID: 8828454147527212713}
-  prisonerPrefab:
+  minigame: {fileID: 1064967376988596968}
+  prisonObj: {fileID: 8598709807105546593}
+  prisonerPrefabs:
   - {fileID: 7922007419614909789, guid: c13616db1e05f03408f6949d28bfc1e4, type: 3}
   - {fileID: 7347824996176220860, guid: 0f01e5a01bd21444fb51b6ee3eaa5f45, type: 3}
   - {fileID: 8994401564694592256, guid: 43f66bb40abcdce4781d2743e5cc8441, type: 3}
-  prisonObj: {fileID: 8598709807105546593}
-  numberOfPrisoners: 3
   spawnY: -1.9
-  timeToReachPrison: 1
-  spawnXOffsetMin: 0
-  spawnXOffsetMax: 0
-  minMoveSpeed: 9
-  maxMoveSpeed: 9
-  hasAnySuccess: 0
-  endedPrisoner: 0
-  totalRounds: 3
-  prisonersPerRound: 3
+  spawnXOffsetFromRightEdge: 1.2
+  slowSpeed: 7.5
+  fastSpeed: 15
+  spawnCount: 0
+  capturedCount: 0
+  escapedCount: 0
 --- !u!1 &8598709807105546593
 GameObject:
   m_ObjectHideFlags: 0
@@ -159,7 +155,6 @@ GameObject:
   - component: {fileID: 1425517295368964698}
   - component: {fileID: 8098382608747204187}
   - component: {fileID: 7967251355986387368}
-  - component: {fileID: 8329217561923396548}
   - component: {fileID: 3074040877156209213}
   m_Layer: 0
   m_Name: RealJail
@@ -223,7 +218,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 10
+  m_SortingOrder: 400
   m_Sprite: {fileID: 21300000, guid: 20babf2c97122264ab04099a2dd9d5ca, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -247,7 +242,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd89961a736fe0645b4029612bf8d4ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  totalPrisoners: 3
   manager: {fileID: 7306850845612836780}
 --- !u!61 &1425517295368964698
 BoxCollider2D:
@@ -281,7 +275,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.27152455, y: -5.5285897}
+  m_Offset: {x: -0.100492716, y: -5.5285897}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -292,7 +286,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 3.7331045, y: 5.734473}
+  m_Size: {x: 5.1013627, y: 5.734473}
   m_EdgeRadius: 0
 --- !u!50 &8098382608747204187
 Rigidbody2D:
@@ -339,18 +333,6 @@ MonoBehaviour:
   upDuration: 0.5
   slamOvershoot: 0.25
   upBounce: 2
---- !u!114 &8329217561923396548
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8598709807105546593}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7185aaaf28dbc684bb6d4932c0014ab6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &3074040877156209213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -421,4 +403,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9daa829b24c367e4dac9643873b46336, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  manager: {fileID: 1220244823359239421}
+  manager: {fileID: 7306850845612836780}

@@ -6,91 +6,109 @@ public class HandAutoMove : MonoBehaviour
     [Header("Motion")]
     public float totalMoveDistance = 7f;
     public int steps = 4;
-    public float pauseBetweenSteps = 0.2f;
     public float totalTravelTime = 1.65f;
 
-    [Header("Polish")]
-    public float punchDuration = 0.08f;
-    public float punchStrengthY = 0.08f;
-    public int punchVibrato = 6;
-    public float punchElasticity = 0.6f;
+    [Header("Step Feel")]
+    public float stepMoveDuration = 0.14f; // 실제로 내려가는 시간
 
     public bool hasArrived { get; private set; }
 
     private Vector3 startPos;
-    private Sequence seq;
+    private Tween currentTween;
+    private Tween despawnTween;
+
+    private int currentStep = 0;
+    private float stepDistance;
 
     private void Awake()
     {
         startPos = transform.position;
+        Recalculate();
+    }
+
+    private void Recalculate()
+    {
+        int safeSteps = Mathf.Max(1, steps);
+        stepDistance = totalMoveDistance / safeSteps;
+    }
+
+    public float GetStepInterval()
+    {
+        int safeSteps = Mathf.Max(1, steps);
+        return totalTravelTime / safeSteps;
+    }
+
+    public float GetActualStepMoveDuration()
+    {
+        float interval = GetStepInterval();
+        return Mathf.Min(stepMoveDuration, interval);
     }
 
     public void ResetToStart(bool active = true)
     {
-        KillTween();
+        KillDespawnTween();
+        KillCurrentTween(false);
+        Recalculate();
+
         hasArrived = false;
+        currentStep = 0;
+
         gameObject.SetActive(active);
         transform.position = startPos;
     }
 
-    public void StartMove()
+    public void ForceStep(int stepIndex)
     {
-        KillTween();
-        hasArrived = false;
+        Recalculate();
 
         int safeSteps = Mathf.Max(1, steps);
+        stepIndex = Mathf.Clamp(stepIndex, 0, safeSteps);
 
-        float stepDistance = totalMoveDistance / safeSteps;
+        KillDespawnTween();
+        KillCurrentTween(true);
 
-        float totalPause = pauseBetweenSteps * Mathf.Max(0, safeSteps - 1);
-        float moveTimeTotal = Mathf.Max(0.01f, totalTravelTime - totalPause);
-        float moveDurationPerStep = moveTimeTotal / safeSteps;
+        currentStep = stepIndex;
+        transform.position = startPos + Vector3.down * stepDistance * currentStep;
 
-        Vector3 basePos = startPos; // ★ 중요
-        Vector3 finalPos = basePos + Vector3.down * totalMoveDistance;
-
-        transform.position = basePos;
-
-        seq = DOTween.Sequence();
-
-        for (int i = 0; i < safeSteps; i++)
+        if (currentStep >= safeSteps)
         {
-            Vector3 to = basePos + Vector3.down * stepDistance * (i + 1);
-
-            seq.Append(
-                transform.DOMove(to, moveDurationPerStep)
-                .SetEase(Ease.OutCubic)
-            );
-
-            if (punchDuration > 0f)
-            {
-                seq.Join(
-                    transform.DOPunchPosition(
-                        Vector3.up * punchStrengthY,
-                        punchDuration,
-                        punchVibrato,
-                        punchElasticity
-                    )
-                    .SetEase(Ease.OutQuad)
-                );
-            }
-
-            if (i < safeSteps - 1)
-                seq.AppendInterval(pauseBetweenSteps);
+            hasArrived = true;
+            return;
         }
 
-        seq.OnComplete(() =>
-        {
-            transform.position = finalPos;
-            hasArrived = true;
-            seq = null;
-        });
+        Vector3 nextPos = startPos + Vector3.down * stepDistance * (currentStep + 1);
+        float moveDur = GetActualStepMoveDuration();
+
+        currentTween = transform.DOMove(nextPos, moveDur)
+            .SetEase(Ease.Linear)
+            .OnComplete(() =>
+            {
+                currentStep++;
+                if (currentStep >= safeSteps)
+                    hasArrived = true;
+
+                currentTween = null;
+            });
+    }
+
+    public void ForceFinish()
+    {
+        Recalculate();
+        KillDespawnTween();
+        KillCurrentTween(false);
+
+        currentStep = Mathf.Max(1, steps);
+        transform.position = startPos + Vector3.down * totalMoveDistance;
+        hasArrived = true;
     }
 
     public void Despawn(float delay = 0.05f)
     {
-        KillTween();
+        KillDespawnTween();
+        KillCurrentTween(false);
+
         hasArrived = false;
+        currentStep = 0;
 
         if (delay <= 0f)
         {
@@ -98,17 +116,40 @@ public class HandAutoMove : MonoBehaviour
             return;
         }
 
-        DOVirtual.DelayedCall(delay, () => gameObject.SetActive(false));
+        despawnTween = DOVirtual.DelayedCall(delay, () =>
+        {
+            gameObject.SetActive(false);
+            despawnTween = null;
+        });
     }
 
-    private void KillTween()
+    private void KillCurrentTween(bool complete)
     {
-        if (seq != null)
+        if (currentTween != null)
         {
-            seq.Kill();
-            seq = null;
+            if (currentTween.IsActive())
+            {
+                if (complete) currentTween.Complete();
+                else currentTween.Kill();
+            }
+            currentTween = null;
         }
+    }
 
-        DOTween.Kill(transform);
+    private void KillDespawnTween()
+    {
+        if (despawnTween != null)
+        {
+            if (despawnTween.IsActive())
+                despawnTween.Kill();
+
+            despawnTween = null;
+        }
+    }
+
+    private void OnDisable()
+    {
+        KillDespawnTween();
+        KillCurrentTween(false);
     }
 }

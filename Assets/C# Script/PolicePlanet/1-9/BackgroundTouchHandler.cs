@@ -1,22 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BackgroundTouchHandler : MonoBehaviour
 {
     [SerializeField] private Minigame_1_9 minigame;
-    [SerializeField] private Rope rope;
-    [SerializeField] private Vector3 stretchOffset = new Vector3(2f, 0, 0);
-    [SerializeField] private float stretchDuration = 0.3f;
 
     [Header("Input Cooldown")]
-    [SerializeField] private float inputCooldown = 0.5f;
+    [SerializeField] private float inputCooldown = 0.15f;
 
     private float lastInputTime = -999f;
 
-    void Update()
+    private void Update()
     {
-        // ÄðÅ¸ÀÓ Ã¼Å©
         if (Time.time - lastInputTime < inputCooldown)
             return;
 
@@ -29,20 +23,8 @@ public class BackgroundTouchHandler : MonoBehaviour
             if (hitCollider != null && hitCollider.gameObject == gameObject)
             {
                 lastInputTime = Time.time;
-                OnBackgroundTouch();
+                minigame?.SubmitPlayerInput("Input");
             }
         }
-    }
-
-    //public void OnBackgroundTouch()
-    //{
-    //    minigame?.OnScreenTouch();
-    //    rope?.PlayStretch(stretchOffset);
-    //}
-
-    public void OnBackgroundTouch()
-    {
-        minigame?.SubmitPlayerInput("Input");
-        rope?.PlayStretch(stretchOffset);
     }
 }

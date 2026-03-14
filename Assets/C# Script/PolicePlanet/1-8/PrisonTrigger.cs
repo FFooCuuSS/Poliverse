@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class PrisonTrigger : MonoBehaviour
 {
-    public int totalPrisoners;
     public Manager_1_8 manager;
 
     private PrisonController_1_8 prisonController;
@@ -28,7 +27,6 @@ public class PrisonTrigger : MonoBehaviour
 
             if (!controller.IsActive) return;
 
-            //Debug.Log("¿‚æ“¥Ÿ!");
             prisoner.Capture();
         }
     }

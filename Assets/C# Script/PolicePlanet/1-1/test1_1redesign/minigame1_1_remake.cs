@@ -54,7 +54,8 @@ public class minigame_1_1_remake : MiniGameBase
     {
         Scope.SetActive(false);
         cam = Camera.main;
-        StartGame();
+        //StartGame();
+
         /*if (Scope != null) Scope.SetActive(false);
         cam = Camera.main;
         StartGame();

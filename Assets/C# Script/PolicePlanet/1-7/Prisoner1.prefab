@@ -168,6 +168,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 25
+  arriveX: 0
+  exitOffsetX: -5
+  enterEase: 4
+  exitEase: 2
 --- !u!114 &6455217280111380398
 MonoBehaviour:
   m_ObjectHideFlags: 0

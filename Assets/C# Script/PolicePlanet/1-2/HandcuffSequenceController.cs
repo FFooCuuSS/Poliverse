@@ -163,44 +163,66 @@ public class HandcuffSequenceController : MonoBehaviour
 
     private IEnumerator SequenceCo()
     {
+        if (leftHand == null || rightHand == null)
+        {
+            curState = State.Idle;
+            seqJob = null;
+            yield break;
+        }
+
+        int leftSteps = Mathf.Max(1, leftHand.steps);
+        float leftStepInterval = leftHand.GetStepInterval();
+
+        int rightSteps = Mathf.Max(1, rightHand.steps);
+        float rightStepInterval = rightHand.GetStepInterval();
+
         curState = State.LeftMoving;
 
-        if (leftHand != null)
-            leftHand.StartMove();
+        for (int i = 0; i < leftSteps; i++)
+        {
+            leftHand.ForceStep(i);
 
-        float attachDelay = 0f;
-        if (leftHand != null)
-            attachDelay = Mathf.Max(0f, leftHand.totalTravelTime - 0.1f);
+            // 마지막 스텝 직전에 붙여도 되고, 마지막 스텝 시작 시 붙여도 됨
+            if (i == leftSteps - 1)
+            {
+                Invoke("delayedCuffMove", 0.2f);
 
-        yield return new WaitForSeconds(attachDelay);
+                if (chainGenerator != null)
+                    chainGenerator.isLeftCuffLocked = true;
+            }
 
-        if (cuff2 != null)
-            cuff2.transform.position = cuff2LeftHandArrivedWorldPos;
+            yield return new WaitForSeconds(leftStepInterval);
+        }
 
-        if (chainGenerator != null)
-            chainGenerator.isLeftCuffLocked = true;
-
-        while (leftHand != null && !leftHand.hasArrived)
-            yield return null;
+        leftHand.ForceFinish();
 
         if (leftHandCollider != null)
             leftHandCollider.enabled = false;
 
-        yield return new WaitForSeconds(delayBetweenHands);
+        if (delayBetweenHands > 0f)
+            yield return new WaitForSeconds(delayBetweenHands);
 
         curState = State.RightMoving;
 
-        if (rightHand != null)
-            rightHand.StartMove();
+        for (int i = 0; i < rightSteps; i++)
+        {
+            rightHand.ForceStep(i);
+            yield return new WaitForSeconds(rightStepInterval);
+        }
 
-        while (rightHand != null && !rightHand.hasArrived)
-            yield return null;
+        rightHand.ForceFinish();
 
         if (rightHandCollider != null)
             rightHandCollider.enabled = true;
 
         curState = State.PlayerDrag;
         seqJob = null;
+    }
+
+    private void delayedCuffMove()
+    {
+        if (cuff2 != null)
+            cuff2.transform.position = cuff2LeftHandArrivedWorldPos;
     }
 
     public void DespawnRound(float fadeSeconds = 0.05f)

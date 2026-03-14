@@ -20,7 +20,7 @@ public class Minigame_1_3 : MiniGameBase
 
     private void Start()
     {
-        StartGame();
+        //StartGame();
     }
 
     public override void StartGame()

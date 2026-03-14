@@ -328,7 +328,7 @@ public class RhythmManagerTest : MonoBehaviour, MiniGameBase.IRhythmManager
             events[i] = e;
 
             OnPlayerJudged?.Invoke(MiniGameBase.JudgementResult.Miss);
-            Debug.Log("CheckMiss");
+            //Debug.Log("CheckMiss");
         }
     }
 }

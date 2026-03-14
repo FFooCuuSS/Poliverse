@@ -26,7 +26,9 @@ public class ProhibitedItemManager1_7 : MonoBehaviour
         CurrentItem = prohibitedItems.GetChild(index).gameObject;
         CurrentItem.SetActive(true);
 
-        // 물리 초기화 (들고 있는 상태)
+        CurrentItem.transform.SetParent(spawnedPrisoner.transform, true);
+
+        // 물리 초기화
         Rigidbody2D rb = CurrentItem.GetComponent<Rigidbody2D>();
         if (rb == null)
             rb = CurrentItem.AddComponent<Rigidbody2D>();
@@ -47,5 +49,4 @@ public class ProhibitedItemManager1_7 : MonoBehaviour
 
         controller.SetProhibitedItem(CurrentItem);
     }
-
 }

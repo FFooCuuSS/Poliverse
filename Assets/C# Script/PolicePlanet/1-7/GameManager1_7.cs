@@ -24,9 +24,9 @@ public class GameManager1_7 : MonoBehaviour
 
         minigame_1_7 = stage_1_7.GetComponent<Minigame_1_7>();
 
-        SpawnPrisonerAndItems();
+        //SpawnPrisonerAndItems();
     }
-
+    /*
     public void SpawnPrisonerAndItems()
     {
         GameObject prisonerObj = prisonerSpawner.SpawnRandomPrisoner();
@@ -48,7 +48,7 @@ public class GameManager1_7 : MonoBehaviour
         //미니게임에 전달
         minigame_1_7.SetPrisoner(currentPrisoner);
     }
-
+    
     public void IncreaseSuccessCount()
     {
         successCount++;
@@ -72,4 +72,5 @@ public class GameManager1_7 : MonoBehaviour
             Debug.LogError("현재 죄수 참조 없음");
         }
     }
+    */
 }

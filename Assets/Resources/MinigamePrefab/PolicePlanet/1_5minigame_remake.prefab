@@ -1823,8 +1823,8 @@ MonoBehaviour:
   case1Move:
     startPos: {x: 10, y: 0}
     endPos: {x: -10, y: 0}
-    moveTime: 1.8
-    waitTime: 1.25
+    moveTime: 1.85
+    waitTime: 1.35
   case2Move:
     startPos: {x: 10, y: 0}
     endPos: {x: -10, y: 0}

@@ -129,17 +129,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9654933da3ea214d9e491e3b3ceb5e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prohibitedSprites:
-  - {fileID: 21300000, guid: 107fec35b6549914aa1d9c2c88cbefb2, type: 3}
-  - {fileID: 21300000, guid: 2b1631925329a6c4f9d57636bc96eec8, type: 3}
-  - {fileID: 21300000, guid: 49b6db3e5325b654daff91883b402570, type: 3}
-  prohibitedMarkSprites:
-  - {fileID: 21300000, guid: 5c363765eb155d6499c6f07f7dac74b2, type: 3}
-  - {fileID: 21300000, guid: b84536bb12f9f3e49bd1933a9cb37fca, type: 3}
-  - {fileID: 21300000, guid: 35bfadb7c4a27214f94d332cc0fa43b4, type: 3}
-  prohibitedMarkRenderer: {fileID: 1207393657773955878}
-  itemSpawner: {fileID: 8413167506416684573}
-  gameManager: {fileID: 2212625529278810842}
 --- !u!114 &8413167506416684573
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -152,15 +141,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01aef568d7147e043a60b361ddbfb4e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prohibitedItemPrefabs:
-  - {fileID: 6228572483370876363, guid: 009a9947019bfd74eb9377c8ed869ef0, type: 3}
-  - {fileID: 2995635012953968395, guid: fb95d14468cd8a946a530625f0ed4e33, type: 3}
-  - {fileID: 5364975643095373470, guid: 3e60fed6584cb2b448a6a4b9e2f9679b, type: 3}
-  prohibitedMarkSprites:
-  - {fileID: 21300000, guid: 5c363765eb155d6499c6f07f7dac74b2, type: 3}
-  - {fileID: 21300000, guid: b84536bb12f9f3e49bd1933a9cb37fca, type: 3}
-  - {fileID: 21300000, guid: 35bfadb7c4a27214f94d332cc0fa43b4, type: 3}
-  spawnParent: {fileID: 2666380669790755793}
+  itemManager: {fileID: 0}
+  targetPosition: {fileID: 0}
 --- !u!1 &1567276990849095386
 GameObject:
   m_ObjectHideFlags: 0
@@ -209,7 +191,7 @@ MonoBehaviour:
   - {fileID: 265879921070085338, guid: fe6c8908797624a4fa0c68c49f21487b, type: 3}
   - {fileID: 865242890287121849, guid: 6a78935d605c2b64bbb62de47e95d9d7, type: 3}
   spawnPoint: {fileID: 3606430246951421503}
-  isSpawning: 1
+  itemManager: {fileID: 0}
 --- !u!1 &5759495456402620090
 GameObject:
   m_ObjectHideFlags: 0
@@ -430,7 +412,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70ee45b8b217e894e9a47ad0ffec542e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ProhibitSpawner: {fileID: 619246204587314829}
+  prisonerSpawner: {fileID: 1416467333491341911}
+  holdJudge: {fileID: 0}
+  basket: {fileID: 6446892628071894480}
+  totalRound: 3
+  inputPerRound: 4
+  throwToExitDelay: 0.15
+  prisonerExitDuration: 0.45
 --- !u!114 &2212625529278810842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -444,7 +432,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prisonerSpawner: {fileID: 1416467333491341911}
-  prohibitedItemManager: {fileID: 1696547736843204279}
   stage_1_7: {fileID: 7921393188866996866}
   successCount: 0
 --- !u!1 &8951585916593944020
@@ -542,7 +529,6 @@ GameObject:
   - component: {fileID: 6446892628071894480}
   - component: {fileID: 2821634770458145928}
   - component: {fileID: 2713656476007276679}
-  - component: {fileID: 1348886425641200613}
   - component: {fileID: 5282336704040330430}
   m_Layer: 0
   m_Name: ProhibitedItemTray
@@ -663,18 +649,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 10.14, y: 3.02}
   m_EdgeRadius: 0
---- !u!114 &1348886425641200613
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8993201312601435623}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff56bc088ede7d8489e1b83af261a38f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!50 &5282336704040330430
 Rigidbody2D:
   serializedVersion: 4

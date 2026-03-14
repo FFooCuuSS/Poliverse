@@ -6,17 +6,11 @@ using TMPro;
 
 public class Minigame_1_9 : MiniGameBase
 {
-    [Header("Round Settings")]
-    [SerializeField] private int totalRounds = 3;
-    [SerializeField] private int actionsPerRound = 3; // Show + Input 세트 수
+    [Header("Input Count")]
+    [SerializeField] private int totalInputs = 6;
 
-    private int currentRound = 0;
-    private int currentAction = 0;
-
-    private int successRounds = 0;
-    private int failRounds = 0;
-
-    private bool roundSuccess = false;
+    [Header("Success Condition")]
+    [SerializeField] private int endingSuccessThreshold = 4;
 
     [Header("Visual")]
     [SerializeField] private Rope rope;
@@ -25,7 +19,7 @@ public class Minigame_1_9 : MiniGameBase
     [SerializeField] private GameObject brightBackground;
     [SerializeField] private HandleMover_1_9 handleMover;
 
-    [Header("성공 연출")]
+    [Header("엔딩 연출")]
     [SerializeField] private GameObject movingObject;
     [SerializeField] private GameObject activateObject;
     [SerializeField] private GameObject lightEffect;
@@ -36,15 +30,33 @@ public class Minigame_1_9 : MiniGameBase
     private bool ended;
     private bool inputOpen;
     private bool awaitingJudge;
-    private bool hasAnySuccess;
+
+    private int judgedCount;
+    private int successCount;
 
     private SpriteRenderer bgRenderer;
     private Tween blinkTween;
+    private Tween shakeTween;
 
     private void Awake()
     {
         if (brightBackground != null)
             bgRenderer = brightBackground.GetComponent<SpriteRenderer>();
+    }
+
+    private void Start()
+    {
+        //StartGame();
+    }
+
+    private void Update()
+    {
+        if (ended) return;
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            SubmitPlayerInput("Input");
+        }
     }
 
     public override void StartGame()
@@ -55,21 +67,29 @@ public class Minigame_1_9 : MiniGameBase
         inputOpen = false;
         awaitingJudge = false;
 
-        currentRound = 0;
-        currentAction = 0;
-
-        successRounds = 0;
-        failRounds = 0;
-
-        roundSuccess = false;
+        judgedCount = 0;
+        successCount = 0;
 
         StopBlink();
+        StopShaking();
+
+        if (activateObject != null)
+        {
+            activateObject.SetActive(false);
+            RestoreAlpha(activateObject);
+        }
+
+        if (lightEffect != null)
+            lightEffect.SetActive(false);
+
+        handleMover?.ResetHandle();
+        rope?.ResetRope();
     }
 
     public override void OnRhythmEvent(string action)
     {
         if (ended) return;
-        if (string.IsNullOrEmpty(action)) return;
+        if (string.IsNullOrWhiteSpace(action)) return;
 
         action = action.Trim();
         Debug.Log($"{gameObject.name} 리듬메세지: {action}");
@@ -77,7 +97,7 @@ public class Minigame_1_9 : MiniGameBase
         switch (action)
         {
             case "Show":
-                inputOpen = false;
+                inputOpen = true;
                 awaitingJudge = false;
                 PlayBlinkOnce();
                 break;
@@ -87,28 +107,28 @@ public class Minigame_1_9 : MiniGameBase
                 awaitingJudge = false;
                 break;
 
-            case "InputEnd":
-                if (inputOpen && !awaitingJudge)
-                {
-                    // 입력 안 했으므로 강제 Miss
-                    Debug.Log("입력 없음 → 강제 Miss");
-                    OnJudgement(JudgementResult.Miss);
-                }
-
+            case "End":
                 inputOpen = false;
+                awaitingJudge = false;
+                ended = true;
+
+                Debug.Log($"최종 성공 수: {successCount} / {totalInputs}");
+
+                if (successCount >= endingSuccessThreshold)
+                {
+                    PlayEndingEffect();
+                }
                 break;
         }
     }
 
     public void SubmitPlayerInput(string action = "Input")
     {
-        // 연출은 항상 실행
-        handleMover?.PlayStretch();
-        rope?.PlayStretch(new Vector3(2f, 0, 0));
-
         if (ended) return;
         if (!inputOpen) return;
         if (awaitingJudge) return;
+
+        handleMover?.PlayStretch();
 
         awaitingJudge = true;
         OnPlayerInput(action);
@@ -121,66 +141,20 @@ public class Minigame_1_9 : MiniGameBase
         awaitingJudge = false;
         inputOpen = false;
 
+        judgedCount++;
+
         switch (judgement)
         {
             case JudgementResult.Perfect:
             case JudgementResult.Good:
-
-                Debug.Log("판정 성공");
-                roundSuccess = true;
+                successCount++;
+                Debug.Log($"판정 성공 / {judgedCount} / {totalInputs} / {judgement}");
                 break;
 
             case JudgementResult.Miss:
-
-                Debug.Log("판정 미스");
+                Debug.Log($"판정 미스 / {judgedCount} / {totalInputs} / {judgement}");
                 break;
         }
-
-        currentAction++;
-
-        if (currentAction >= actionsPerRound)
-        {
-            EndRound();
-        }
-    }
-
-    void EndRound()
-    {
-        Debug.Log("Round End : " + (currentRound + 1));
-
-        if (roundSuccess)
-            successRounds++;
-        else
-            failRounds++;
-
-        currentRound++;
-
-        if (currentRound >= totalRounds)
-        {
-            FinalJudge();
-            return;
-        }
-
-        // 다음 라운드 준비
-        currentAction = 0;
-        roundSuccess = false;
-    }
-
-    /// <summary>
-    /// 타이머 종료 or 차트 종료 시 외부에서 호출
-    /// </summary>
-    public void FinalJudge()
-    {
-        if (ended) return;
-
-        ended = true;
-
-        Debug.Log("Success Rounds : " + successRounds);
-
-        if (successRounds >= totalRounds)
-            Success();
-        else
-            Fail();
     }
 
     #region 연출
@@ -195,9 +169,9 @@ public class Minigame_1_9 : MiniGameBase
         bgRenderer.color = new Color(bgRenderer.color.r, bgRenderer.color.g, bgRenderer.color.b, 0f);
 
         blinkTween = DOTween.Sequence()
-            .Append(bgRenderer.DOFade(1f, 0.2f))
+            .Append(bgRenderer.DOFade(0.7f, 0.1f))
             .AppendInterval(0.1f)
-            .Append(bgRenderer.DOFade(0f, 0.2f))
+            .Append(bgRenderer.DOFade(0f, 0.1f))
             .OnComplete(() =>
             {
                 brightBackground.SetActive(false);
@@ -208,31 +182,71 @@ public class Minigame_1_9 : MiniGameBase
     {
         blinkTween?.Kill();
         blinkTween = null;
+
+        if (brightBackground != null)
+            brightBackground.SetActive(false);
     }
 
-    //private void StartShaking()
-    //{
-    //    if (movingObject == null) return;
+    private void PlayEndingEffect()
+    {
+        ActivateObject();
+        StartShaking();
+    }
 
-    //    movingObject.transform
-    //        .DOShakePosition(
-    //            duration: 1f,
-    //            strength: 0.1f,
-    //            vibrato: 20,
-    //            randomness: 90,
-    //            snapping: false,
-    //            fadeOut: false
-    //        )
-    //        .SetLoops(-1);
-    //}
+    private void StartShaking()
+    {
+        if (movingObject == null) return;
 
-    //private void ActivateObject()
-    //{
-    //    if (activateObject != null)
-    //    {
-    //        activateObject.SetActive(true);
-    //        activateObject.GetComponent<SpriteRenderer>().color = Color.white;
-    //    }
+        shakeTween?.Kill();
+
+        shakeTween = movingObject.transform
+            .DOShakePosition(
+                duration: 1f,
+                strength: 0.1f,
+                vibrato: 20,
+                randomness: 90,
+                snapping: false,
+                fadeOut: false
+            )
+            .SetLoops(-1);
+    }
+
+    private void StopShaking()
+    {
+        shakeTween?.Kill();
+        shakeTween = null;
+    }
+
+    private void ActivateObject()
+    {
+        if (activateObject != null)
+        {
+            activateObject.SetActive(true);
+            RestoreAlpha(activateObject);
+        }
+
+        if (lightEffect != null)
+            lightEffect.SetActive(true);
+    }
+
+    private void RestoreAlpha(GameObject target)
+    {
+        if (target == null) return;
+
+        SpriteRenderer[] spriteRenderers = target.GetComponentsInChildren<SpriteRenderer>(true);
+        foreach (var sr in spriteRenderers)
+        {
+            Color c = sr.color;
+            c.a = 1f;
+            sr.color = c;
+        }
+
+        CanvasGroup[] canvasGroups = target.GetComponentsInChildren<CanvasGroup>(true);
+        foreach (var cg in canvasGroups)
+        {
+            cg.alpha = 1f;
+        }
+    }
 
     #endregion
 }

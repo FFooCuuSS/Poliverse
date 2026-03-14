@@ -8,70 +8,46 @@ public class Prisoner_1_8 : MonoBehaviour
     [SerializeField] private Sprite spriteB;
     [SerializeField] private float flipInterval = 0.5f;
 
-    [Header("Capture Range")]
-    public float captureRangeX = 0.7f;
-    public float captureRangeY = 0.8f;
+    [Header("Move")]
+    [SerializeField] private float destroyX = -9f;
 
-    public float moveSpeed = 2f;
-    public float destroyX = -9f;
-
-    public GameObject prison;
-
-    // 감옥에 들어갈 수 있는 상태인지
-    // public bool canBeCaptured = false;
+    private Manager_1_8 manager;
+    private GameObject prison;
 
     private bool isCaptured = false;
-
     public bool IsCaptured => isCaptured;
 
     private SpriteRenderer sr;
-
     private Vector2 moveDir;
+    private float moveSpeed;
 
-    void Awake()
+    private void Awake()
     {
         moveDir = new Vector2(-1f, -0.05f).normalized;
         sr = GetComponent<SpriteRenderer>();
-
         StartCoroutine(SpriteFlipRoutine());
     }
 
-    void Update()
+    public void Initialize(Manager_1_8 owner, GameObject prisonObj, float speed)
+    {
+        manager = owner;
+        prison = prisonObj;
+        moveSpeed = speed;
+    }
+
+    private void Update()
     {
         if (isCaptured) return;
 
-        transform.Translate(moveDir * moveSpeed * Time.deltaTime);
+        transform.Translate(moveDir * moveSpeed * Time.deltaTime, Space.World);
 
         if (transform.position.x < destroyX)
         {
-            Manager_1_8 manager = FindObjectOfType<Manager_1_8>();
-            manager.endedPrisoner++;
+            if (manager != null)
+                manager.NotifyEscaped(this);
+
             Destroy(gameObject);
         }
-
-        //CheckPrisonRange();
-    }
-
-    void CheckPrisonRange()
-    {
-        if (prison == null) return;
-
-        Vector2 prisonerPos = transform.position;
-        Vector2 prisonPos = prison.transform.position;
-
-        float distanceX = Mathf.Abs(prisonerPos.x - prisonPos.x);
-        float distanceY = Mathf.Abs(prisonerPos.y - prisonPos.y);
-
-        /*
-        canBeCaptured =
-            distanceX <= captureRangeX &&
-            distanceY <= captureRangeY;
-        */
-    }
-
-    public void SetSpeed(float speed)
-    {
-        moveSpeed = speed;
     }
 
     public void Capture()
@@ -81,13 +57,8 @@ public class Prisoner_1_8 : MonoBehaviour
         isCaptured = true;
         moveSpeed = 0f;
 
-        // 성공 알림
-        Manager_1_8 manager = FindObjectOfType<Manager_1_8>();
         if (manager != null)
-        {
-            manager.hasAnySuccess = true;
-            manager.endedPrisoner++;
-        }
+            manager.NotifyCaptured(this);
 
         SpriteRenderer[] srs = GetComponentsInChildren<SpriteRenderer>();
         foreach (var r in srs)
@@ -99,18 +70,16 @@ public class Prisoner_1_8 : MonoBehaviour
         StartCoroutine(FadeOutAndDestroy());
     }
 
-
-    IEnumerator FadeOutAndDestroy()
+    private IEnumerator FadeOutAndDestroy()
     {
-        yield return new WaitForSeconds(0.4f); // 멈춘 상태 보여주기
+        yield return new WaitForSeconds(0.4f);
 
         float t = 0f;
         float duration = 0.4f;
 
         SpriteRenderer[] srs = GetComponentsInChildren<SpriteRenderer>();
-
-        // 시작 색(각자 컬러가 다를 수 있으니 각각 저장)
         Color[] starts = new Color[srs.Length];
+
         for (int i = 0; i < srs.Length; i++)
             starts[i] = srs[i].color;
 
@@ -131,15 +100,16 @@ public class Prisoner_1_8 : MonoBehaviour
         Destroy(gameObject);
     }
 
-    IEnumerator SpriteFlipRoutine()
+    private IEnumerator SpriteFlipRoutine()
     {
         bool toggle = false;
 
-        while (!isCaptured)   // 잡히면 멈추게
+        while (!isCaptured)
         {
-            sr.sprite = toggle ? spriteA : spriteB;
-            toggle = !toggle;
+            if (sr != null)
+                sr.sprite = toggle ? spriteA : spriteB;
 
+            toggle = !toggle;
             yield return new WaitForSeconds(flipInterval);
         }
     }

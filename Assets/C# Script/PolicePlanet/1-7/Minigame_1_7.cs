@@ -1,43 +1,43 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Minigame_1_7 : MiniGameBase
 {
-    [Header("금지물품 Prefabs & Basket")]
-    public GameObject[] ProhibitPrefabs;      // 여러 금지물품 Prefab
-    public Transform basket;                  // 떨어질 위치 (선택적)
+    [Header("Refs")]
+    [SerializeField] private PrisonerSpawner1_7 prisonerSpawner;
+    [SerializeField] private HoldCheck1_7 holdJudge;
+    [SerializeField] private Transform basket;
 
-    [Header("Hold System")]
-    public HoldCheck1_7 holdJudge;
+    [Header("Round Settings")]
+    [SerializeField] private int totalRound = 3;
+    [SerializeField] private int inputPerRound = 4;
 
-    [Header("게임 설정")]
-    public int totalRound = 3;     // 총 라운드
-    public int holdPerRound = 3;  // 라운드당 Hold 수
-
-    private int currentRound = 0;
-    private int holdIndex = 0;
-    private int totalSuccess = 0;
+    [Header("Flow Timing")]
+    [SerializeField] private float throwToExitDelay = 0.15f;
+    [SerializeField] private float prisonerExitDuration = 0.45f;
 
     private PrisonerController1_7 prisoner;
 
-    [SerializeField] private PrisonerSpawner1_7 prisonerSpawner;
+    private int currentRound = 0;
+    private int inputIndex = 0;
+    private int totalSuccess = 0;
+
+    private bool awaitingJudge = false;
+    private bool roundActive = false;
+    private bool gameEnded = false;
+    private bool transitionRunning = false;
+    private bool pendingShow = false;
 
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.4f;
-    public override float hitWindowOverride => 0.8f;
+    public override float hitWindowOverride => 1f;
 
     protected override float TimerDuration => 10f;
     protected override string MinigameExplain => "금지야!";
 
-    private bool inputOpen;          // Input 구간인지
-    private bool awaitingJudge;      // 입력 후 판정 대기중(중복 입력 방지용)
-
-    public void SetPrisoner(PrisonerController1_7 p)
+    private void Start()
     {
-        prisoner = p;
-
-        StartRound();
+        //StartGame();
     }
 
     public override void StartGame()
@@ -45,174 +45,227 @@ public class Minigame_1_7 : MiniGameBase
         base.StartGame();
 
         currentRound = 0;
-        holdIndex = 0;
+        inputIndex = 0;
         totalSuccess = 0;
+
+        awaitingJudge = false;
+        roundActive = false;
+        gameEnded = false;
+        transitionRunning = false;
+        pendingShow = false;
 
         if (holdJudge != null)
         {
-            holdJudge.minigame = this;
+            holdJudge.SetMinigame(this);
+            holdJudge.ResetAll();
         }
-    }
 
-    private void StartRound()
-    {
-        Debug.Log("StartRound 실행 : " + (currentRound + 1));
-
-        holdIndex = 0;
-
-        if (prisoner != null && holdJudge != null)
-        {
-            holdJudge.ResetHoldNodes();
-
-            // 기존 이벤트 제거 후 새로 등록
-            prisoner.OnArrived -= StartHoldSequence;
-            prisoner.OnArrived += StartHoldSequence;
-        }
+        SpawnAndEnterNextPrisoner();
     }
 
     public override void OnRhythmEvent(string action)
     {
+        if (gameEnded) return;
+        if (string.IsNullOrWhiteSpace(action)) return;
+
         action = action.Trim();
+
         Debug.Log($"{gameObject.name} 리듬메세지: {action}");
 
-        if (action == "Hold")
+        switch (action)
         {
-            inputOpen = true;
-            awaitingJudge = false;
+            case "Move":
+                HandleMoveEvent();
+                break;
+
+            case "Show":
+                HandleShowEvent();
+                break;
+
+            case "Input":
+                HandleInputEvent();
+                break;
         }
+    }
+
+    private void HandleMoveEvent()
+    {
+        if (transitionRunning || gameEnded) return;
+
+        pendingShow = false;
+
+        if (prisoner != null)
+            StartCoroutine(Co_MoveTransition());
+        else
+            SpawnAndEnterNextPrisoner();
+    }
+
+    private void HandleShowEvent()
+    {
+        if (prisoner == null) return;
+        if (inputIndex >= inputPerRound) return;
+
+        if (!roundActive)
+        {
+            pendingShow = true;
+            return;
+        }
+
+        pendingShow = false;
+        awaitingJudge = false;
+
+        holdJudge?.ShowPreviewUI(inputIndex, prisoner.transform);
+    }
+
+    private void HandleInputEvent()
+    {
+        // 더 이상 입력 허용 타이밍으로 쓰지 않음.
+        // 리듬 기준점은 RhythmManager가 이미 알고 있으므로 여기선 아무것도 안 함.
+        Debug.Log("Input 이벤트 도착");
     }
 
     public override void OnPlayerInput(string action = null)
     {
-        // 입력 잠금 상태면 무시
         if (IsInputLocked) return;
-        base.OnPlayerInput(action);
-    }
-
-    public override void OnJudgement(JudgementResult judgement)
-    {
+        if (!roundActive) return;
+        if (transitionRunning) return;
+        if (gameEnded) return;
         if (prisoner == null) return;
-        if (!inputOpen) return;
+        if (inputIndex >= inputPerRound) return;
+        if (awaitingJudge) return;
 
-        inputOpen = false;
-        awaitingJudge = false;
+        awaitingJudge = true;
 
+        Debug.Log("Minigame_1_7 OnPlayerInput 호출됨");
 
-        switch (judgement)
-        {
-            case JudgementResult.Perfect:
-            case JudgementResult.Good:
-                totalSuccess++;
-                break;
-
-            case JudgementResult.Miss:
-                break;
-        }
-
-        holdIndex++;
-
-        CheckRoundEnd();
-    }
-
-    public void CheckRoundEnd()
-    {
-        if (prisoner == null)
-            return;
-
-        if (holdIndex < holdPerRound)
-            return;
-
-        // 한 라운드 홀드 모두 끝남
-        StartCoroutine(EndCurrentPrisonerRound());
-    }
-
-    private void SpawnNewPrisonerAndStartRound()
-    {
-        if (prisonerSpawner == null)
-        {
-            Debug.LogError("PrisonerSpawner가 할당되어 있지 않습니다.");
-            return;
-        }
-
-        // Minigame_1_7 오브젝트를 부모로 지정
-        GameObject newPrisonerObj = prisonerSpawner.SpawnRandomPrisoner(this.transform);
-        if (newPrisonerObj == null)
-        {
-            Debug.LogError("새로운 죄수 생성 실패");
-            return;
-        }
-
-        prisoner = newPrisonerObj.GetComponent<PrisonerController1_7>();
-        if (prisoner == null)
-        {
-            Debug.LogError("PrisonerController1_7 컴포넌트가 새로 생성된 죄수에 없음");
-            return;
-        }
-
-        StartRound();
-    }
-
-
-    private void EndGame()
-    {
-        Debug.Log("Game End. Success count = " + totalSuccess);
-
-        if (totalSuccess >= 3)
-        {
-            Success();
-        }
-        else
-        {
-            Fail();
-        }
+        base.OnPlayerInput(action ?? "Input");
     }
 
     public void OnHoldButtonPressed()
     {
-        if (!inputOpen || awaitingJudge) return;
-
-        awaitingJudge = true;
-        OnPlayerInput("Hold");
+        OnPlayerInput("Input");
     }
 
-    private void GiveRandomProhibitToPrisoner()
+    public override void OnJudgement(JudgementResult judgement)
     {
-        if (prisoner == null || basket == null) return;
-        prisoner.DropToBasket(basket);
-        Debug.Log("금지물품이 바구니로 날아갑니다!");
-    }
+        if (!roundActive) return;
+        if (prisoner == null) return;
 
-    private void StartHoldSequence()
-    {
-        if (prisoner != null && holdJudge != null)
+        Debug.Log($"OnJudgement : {judgement}");
+
+        awaitingJudge = false;
+
+        holdJudge?.PlayJudgeFeedback(judgement);
+
+        if (judgement == JudgementResult.Perfect || judgement == JudgementResult.Good)
+            totalSuccess++;
+
+        inputIndex++;
+
+        if (inputIndex >= inputPerRound)
         {
-            holdJudge.StartAllHolds(prisoner.transform);
+            roundActive = false;
+            pendingShow = false;
+            Debug.Log("라운드 종료. 다음 Move에서 전환.");
         }
     }
 
-    private IEnumerator EndCurrentPrisonerRound()
+    private IEnumerator Co_MoveTransition()
     {
+        transitionRunning = true;
+
+        roundActive = false;
+        awaitingJudge = false;
+        pendingShow = false;
+
         if (prisoner != null)
         {
             var item = prisoner.GetProhibitedItem();
+
             if (item != null)
                 prisoner.DropToBasket(basket);
+
+            yield return new WaitForSeconds(throwToExitDelay);
+
+            yield return prisoner.ExitToLeftAndDestroy(prisonerExitDuration);
+
+            prisoner = null;
         }
 
-        // 아이템 이동 시간 확보
-        yield return new WaitForSeconds(0.1f);
-
-        if (prisoner != null)
-            Destroy(prisoner.gameObject);
-
-        prisoner = null;
+        holdJudge?.ResetAll();
 
         currentRound++;
-        Debug.Log("Round End");
 
         if (currentRound >= totalRound)
-            EndGame();
+        {
+            gameEnded = true;
+            Debug.Log($"Game End. totalSuccess = {totalSuccess}");
+            EndMinigameOnly();
+        }
         else
-            SpawnNewPrisonerAndStartRound();
+        {
+            inputIndex = 0;
+            SpawnAndEnterNextPrisoner();
+        }
+
+        transitionRunning = false;
+    }
+
+    private void SpawnAndEnterNextPrisoner()
+    {
+        if (prisonerSpawner == null)
+        {
+            Debug.LogError("PrisonerSpawner1_7 미할당");
+            return;
+        }
+
+        GameObject newPrisonerObj = prisonerSpawner.SpawnRandomPrisoner(transform);
+
+        if (newPrisonerObj == null)
+        {
+            Debug.LogError("새 죄수 생성 실패");
+            return;
+        }
+
+        prisoner = newPrisonerObj.GetComponent<PrisonerController1_7>();
+
+        if (prisoner == null)
+        {
+            Debug.LogError("PrisonerController1_7 없음");
+            return;
+        }
+
+        prisoner.OnArrived -= OnPrisonerArrived;
+        prisoner.OnArrived += OnPrisonerArrived;
+
+        roundActive = false;
+        awaitingJudge = false;
+        inputIndex = 0;
+        pendingShow = false;
+
+        holdJudge?.ResetAll();
+
+        prisoner.EnterFromRight();
+    }
+
+    private void OnPrisonerArrived()
+    {
+        if (prisoner == null) return;
+
+        roundActive = true;
+        awaitingJudge = false;
+
+        holdJudge?.PrepareRound(prisoner.transform, inputPerRound);
+
+        if (pendingShow && inputIndex < inputPerRound)
+        {
+            pendingShow = false;
+            holdJudge?.ShowPreviewUI(inputIndex, prisoner.transform);
+        }
+    }
+
+    private void EndMinigameOnly()
+    {
+        Debug.Log("Minigame 1_7 finished.");
     }
 }

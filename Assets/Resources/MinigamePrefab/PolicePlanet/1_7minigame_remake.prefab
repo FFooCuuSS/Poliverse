@@ -135,17 +135,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70ee45b8b217e894e9a47ad0ffec542e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ProhibitPrefabs:
-  - {fileID: 6228572483370876363, guid: 009a9947019bfd74eb9377c8ed869ef0, type: 3}
-  - {fileID: 4829609381255049112, guid: 68cdae8dc350add49a1358d1b02b87d2, type: 3}
-  - {fileID: 2995635012953968395, guid: fb95d14468cd8a946a530625f0ed4e33, type: 3}
-  - {fileID: 5364975643095373470, guid: 3e60fed6584cb2b448a6a4b9e2f9679b, type: 3}
-  - {fileID: 892478601395926057, guid: 967913bb653082943abb35cefd7ec1f9, type: 3}
-  basket: {fileID: 1114006704717622196}
-  holdJudge: {fileID: 6633415375601139176}
-  totalRound: 3
-  holdPerRound: 4
   prisonerSpawner: {fileID: 8328137765551624356}
+  holdJudge: {fileID: 6633415375601139176}
+  basket: {fileID: 1114006704717622196}
+  totalRound: 3
+  inputPerRound: 4
+  throwToExitDelay: 0
+  prisonerExitDuration: 0.25
 --- !u!114 &6584522784603379527
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -274,7 +270,7 @@ Transform:
   m_GameObject: {fileID: 1251052605248761245}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.18, y: -0.66, z: -0.71}
+  m_LocalPosition: {x: 6.56, y: -0.99, z: -0.71}
   m_LocalScale: {x: 0.56, y: 0.56, z: 0.8}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -364,7 +360,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -2.89}
+  m_Offset: {x: 2.924131, y: -3.5138156}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -375,7 +371,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 10.14, y: 3.02}
+  m_Size: {x: 15.988261, y: 1.7723689}
   m_EdgeRadius: 0
 --- !u!50 &3226970345010877608
 Rigidbody2D:
@@ -426,7 +422,6 @@ GameObject:
   m_Component:
   - component: {fileID: 272661145886218287}
   - component: {fileID: 7165679566525968247}
-  - component: {fileID: 8610549162199787063}
   m_Layer: 0
   m_Name: ProhibitedItemManager
   m_TagString: Untagged
@@ -461,20 +456,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9654933da3ea214d9e491e3b3ceb5e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &8610549162199787063
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2057269779248561557}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 01aef568d7147e043a60b361ddbfb4e7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemManager: {fileID: 7165679566525968247}
-  targetPosition: {fileID: 1114006704717622196}
 --- !u!1 &3084337815926443138
 GameObject:
   m_ObjectHideFlags: 0
@@ -520,12 +501,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   holdUIPrefab: {fileID: 1339359407143525951, guid: 9bcaa3d4491803b42803ad10768aac9b, type: 3}
-  maxHoldCount: 4
-  successTolerance: 0.2
-  shrinkDuration: 0.7
-  vanishMargin: 0.05
-  holdInterval: 0.5
-  minigame: {fileID: 6803564812893199740}
+  minDownOffset: 0
+  maxDownOffset: 1.5
+  maxSideOffset: 2
+  previewDuration: 0.5
+  judgeFadeDuration: 0.2
 --- !u!1 &4514964588818708058
 GameObject:
   m_ObjectHideFlags: 0
@@ -659,6 +639,7 @@ MonoBehaviour:
   prisonerPrefabs:
   - {fileID: 265879921070085338, guid: fe6c8908797624a4fa0c68c49f21487b, type: 3}
   - {fileID: 865242890287121849, guid: 6a78935d605c2b64bbb62de47e95d9d7, type: 3}
+  - {fileID: 865242890287121849, guid: e13b12514b7826740852b1d875e39e72, type: 3}
   spawnPoint: {fileID: 827015306164567116}
   itemManager: {fileID: 7165679566525968247}
 --- !u!1 &8933431926371867399

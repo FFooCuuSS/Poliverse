@@ -80,7 +80,6 @@ public class HandcuffFitChecker : MonoBehaviour
     private void Update()
     {
         if (minigame == null) return;
-        if (!minigame.IsInputWindowOpen) return;
         if (isSnapped) return;
 
         CheckAndSnap();

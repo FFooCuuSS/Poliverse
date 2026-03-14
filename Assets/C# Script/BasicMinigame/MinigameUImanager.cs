@@ -17,6 +17,7 @@ public class MinigameUIManager : MonoBehaviour
     [SerializeField] private GameObject lifeManager;
     [SerializeField] private GameObject mainCamera;
     [SerializeField] private GameObject standingArea;
+    [SerializeField] private GameStartEnd gameStartEnd;
 
     [Header("Planet CSVs (index: 0=1번행성, 1=2번행성, 2=3번행성, 3=4번행성)")]
     [SerializeField] private TextAsset[] planetCsvs;
@@ -29,6 +30,8 @@ public class MinigameUIManager : MonoBehaviour
     [Header("GameOver Fade")]
     [SerializeField] private Image gameOverPanelImage; // 패널의 Image
     [SerializeField] private float gameOverFadeDuration = 1.0f;
+    [SerializeField] private GameObject[] FadeAwayObject;
+
     private bool isGameOver = false;
 
     // ===== NEW MODE: Timeline =====
@@ -80,6 +83,9 @@ public class MinigameUIManager : MonoBehaviour
     private string preparedMinigamePath;
     private bool preparedReady = false;
 
+    private double bgmStartDspTime;
+    private bool bgmScheduled = false;
+    private const double BgmStartDelay = 0.1f;
     //private int life = 4;
 
     // 사운드 및 폴리싱
@@ -111,6 +117,7 @@ public class MinigameUIManager : MonoBehaviour
         //UpdateStageText();
         //PlayBounceAnimation(playerRenderer.transform);
         //PlayBounceAnimation(enemyRenderer.transform);
+        StartCoroutine(HideFadeAwayObjectsAfterDelay(10f));
 
         PlayStageBGM();
         InitBlackPanel();
@@ -158,13 +165,33 @@ public class MinigameUIManager : MonoBehaviour
 
     private void PlayStageBGM()
     {
-        if (audioSource == null) return;
+        if (audioSource == null)
+        {
+            Debug.LogWarning("[MinigameUIManager] AudioSource is NULL");
+            return;
+        }
 
-        audioSource.loop = loopBGM;
+        if (stageBGM == null)
+        {
+            Debug.LogWarning("[MinigameUIManager] stageBGM is NULL");
+            return;
+        }
+
+        audioSource.Stop();
         audioSource.clip = stageBGM;
+        audioSource.loop = loopBGM;
 
-        if (stageBGM != null) audioSource.Play();
-        else Debug.LogWarning("[MinigameUIManager] stageBGM is NULL");
+        bgmStartDspTime = AudioSettings.dspTime + BgmStartDelay;
+        audioSource.PlayScheduled(bgmStartDspTime);
+        bgmScheduled = true;
+    }
+
+    private double GetBGMElapsedTime()
+    {
+        if (!bgmScheduled) return 0.0;
+
+        double elapsed = AudioSettings.dspTime - bgmStartDspTime;
+        return Mathf.Max(0f, (float)elapsed);
     }
 
     private void InitBlackPanel()
@@ -231,8 +258,8 @@ public class MinigameUIManager : MonoBehaviour
             {
                 yield return FadeBlack(false);
 
-                if (finalObject != null)
-                    finalObject.SetActive(true);
+                if (gameStartEnd != null)
+                    gameStartEnd.ShowFinalPanel();
 
                 FadeBGM(finalBgmTargetVolume, finalBgmFadeTime);
 
@@ -460,6 +487,18 @@ public class MinigameUIManager : MonoBehaviour
         rhythmManager.RefreshWindowsFromCurrentMinigame();
     }
 
+    private IEnumerator HideFadeAwayObjectsAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (FadeAwayObject == null) yield break;
+
+        foreach (var obj in FadeAwayObject)
+        {
+            if (obj != null)
+                obj.SetActive(false);
+        }
+    }
 
     // 미니게임 상태 및 시간 초기화
     private void StartMinigame()
@@ -740,7 +779,7 @@ public class MinigameUIManager : MonoBehaviour
         }
     }
 
-    // 패배 모션
+    // 패배 모션    
     private IEnumerator PlayDefeatedEffect(SpriteRenderer targetRenderer, float rotationAmount, float moveXAmount)
     {
         Vector3 originalPos = targetRenderer.transform.localPosition;

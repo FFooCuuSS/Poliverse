@@ -1,27 +1,64 @@
+using System;
+using System.Collections;
 using DG.Tweening;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 public class PrisonerController1_7 : MonoBehaviour
 {
-    public float moveSpeed = 2f;
+    [Header("Move")]
+    [SerializeField] private float moveSpeed = 2f;
+    [SerializeField] private float arriveX = 0f;
+    [SerializeField] private float exitOffsetX = -3f;
+    [SerializeField] private Ease enterEase = Ease.InOutSine;
+    [SerializeField] private Ease exitEase = Ease.InSine;
 
     private GameObject prohibitedItem;
+    private Tween moveTween;
 
-    public System.Action OnArrived;
+    public Action OnArrived;
 
-    void Start()
+    public void EnterFromRight()
     {
-        float targetX = 0;
-        float distance = transform.position.x - targetX;
-        float duration = Mathf.Abs(distance / moveSpeed);
+        KillMoveTween();
 
-        transform.DOMoveX(targetX, duration)
-            .SetEase(Ease.InOutSine)
+        float distance = Mathf.Abs(transform.position.x - arriveX);
+        float duration = (moveSpeed <= 0f) ? 0f : distance / moveSpeed;
+
+        moveTween = transform.DOMoveX(arriveX, duration)
+            .SetEase(enterEase)
             .OnComplete(() =>
             {
+                moveTween = null;
                 OnArrived?.Invoke();
             });
+    }
+
+    public IEnumerator ExitToLeftAndDestroy(float duration)
+    {
+        KillMoveTween();
+
+        float targetX = transform.position.x + exitOffsetX;
+
+        moveTween = transform.DOMoveX(targetX, duration)
+            .SetEase(exitEase);
+
+        yield return moveTween.WaitForCompletion();
+
+        moveTween = null;
+        float fadeTime = 0.25f;
+
+        SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>(true);
+
+        Sequence fadeSeq = DOTween.Sequence();
+
+        foreach (var sr in renderers)
+        {
+            fadeSeq.Join(sr.DOFade(0f, fadeTime));
+        }
+
+        yield return fadeSeq.WaitForCompletion();
+
+        Destroy(gameObject);
     }
 
     public void SetProhibitedItem(GameObject item)
@@ -30,15 +67,18 @@ public class PrisonerController1_7 : MonoBehaviour
         if (prohibitedItem == null) return;
 
         Rigidbody2D rb = prohibitedItem.GetComponent<Rigidbody2D>();
-        if (rb == null) rb = prohibitedItem.AddComponent<Rigidbody2D>();
+        if (rb == null)
+            rb = prohibitedItem.AddComponent<Rigidbody2D>();
 
         rb.simulated = false;
         rb.gravityScale = 0f;
         rb.velocity = Vector2.zero;
+        rb.angularVelocity = 0f;
 
-        // Collider2D 확인
         Collider2D col = prohibitedItem.GetComponent<Collider2D>();
-        if (col == null) col = prohibitedItem.AddComponent<BoxCollider2D>();
+        if (col == null)
+            col = prohibitedItem.AddComponent<BoxCollider2D>();
+
         col.isTrigger = false;
     }
 
@@ -49,40 +89,50 @@ public class PrisonerController1_7 : MonoBehaviour
         Rigidbody2D rb = prohibitedItem.GetComponent<Rigidbody2D>();
         if (rb == null) return;
 
-        // 부모 해제
         prohibitedItem.transform.SetParent(null);
+        Destroy(prohibitedItem, 3f);
 
-        // Rigidbody 활성화
         rb.simulated = true;
-        rb.gravityScale = 1.5f;
+        rb.gravityScale = 1.6f;
         rb.velocity = Vector2.zero;
+        rb.angularVelocity = 0f;
 
-        // 다른 콜라이더 무시
         Collider2D itemCollider = prohibitedItem.GetComponent<Collider2D>();
-        Collider2D[] allColliders = FindObjectsOfType<Collider2D>();
-        foreach (Collider2D col in allColliders)
+        if (itemCollider != null)
         {
-            if (col != itemCollider && !col.isTrigger)
-                Physics2D.IgnoreCollision(col, itemCollider, true);
+            Collider2D[] allColliders = FindObjectsOfType<Collider2D>();
+            foreach (Collider2D col in allColliders)
+            {
+                if (col != itemCollider && !col.isTrigger)
+                    Physics2D.IgnoreCollision(col, itemCollider, true);
+            }
         }
 
-        // 포물선 계산
         Vector2 start = prohibitedItem.transform.position;
         Vector2 end = basket.position;
 
         float gravity = Physics2D.gravity.y * rb.gravityScale;
-        float time = 1f;              // 비행 시간
-        float heightBoost = 1.8f;     // 포물선 높이
+
+        // 기존보다 더 부드럽고 짧은 포물선
+        float time = 0.65f;
+
+        // "먼저 위로 튄다"는 느낌을 주는 추가 상승량
+        float extraUp = 1.2f;
 
         float vx = (end.x - start.x) / time;
-        float vy = (end.y - start.y - 0.5f * gravity * time * time) / time + heightBoost;
+
+        // 기본 포물선 속도 + 위로 살짝 더 띄우기
+        float vy = (end.y - start.y - 0.5f * gravity * time * time) / time + extraUp;
 
         rb.AddForce(new Vector2(vx, vy), ForceMode2D.Impulse);
 
-        // 바구니 도착 감지 스크립트 추가
+        // 회전도 너무 과하지 않게
+        rb.AddTorque(-80f, ForceMode2D.Impulse);
+
         ProhibitItemDestroy1_7 destroyScript = prohibitedItem.GetComponent<ProhibitItemDestroy1_7>();
         if (destroyScript == null)
             destroyScript = prohibitedItem.AddComponent<ProhibitItemDestroy1_7>();
+
         destroyScript.Init(basket);
     }
 
@@ -91,8 +141,19 @@ public class PrisonerController1_7 : MonoBehaviour
         return prohibitedItem;
     }
 
+    private void KillMoveTween()
+    {
+        if (moveTween != null && moveTween.IsActive())
+        {
+            moveTween.Kill();
+            moveTween = null;
+        }
+
+        transform.DOKill();
+    }
+
     private void OnDestroy()
     {
-        transform.DOKill();  // 진행중인 트윈 전부 종료
+        KillMoveTween();
     }
 }

@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 1075705149877603808}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.45, y: 0.3, z: 0}
+  m_LocalPosition: {x: -0.013, y: 0.466, z: 0}
   m_LocalScale: {x: 0.2001547, y: 0.20812184, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -300,6 +300,7 @@ MonoBehaviour:
   mustacheSpawnPoint: {fileID: 6606089454469853169}
   montageSpawnPoint: {fileID: 3854437293685386950}
   blinkManager: {fileID: 5266598415895584858}
+  minigame: {fileID: 9107784826734523122}
 --- !u!1 &4215404672832041196
 GameObject:
   m_ObjectHideFlags: 0
@@ -328,7 +329,7 @@ Transform:
   m_GameObject: {fileID: 4215404672832041196}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.45, y: 0, z: 0}
+  m_LocalPosition: {x: -0.013, y: 0, z: 0}
   m_LocalScale: {x: 0.2001547, y: 0.20812184, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -491,7 +492,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18d09834c31c6a04abf5b0dbc2d3d58b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minAlpha: 0.6
+  minAlpha: 0.2
   fadeDuration: 0.2
 --- !u!1 &4942495309295192213
 GameObject:
@@ -542,7 +543,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95bfa4a7c2f94294797a0155f87477f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  totalRound: 3
+  totalRound: 2
   accessoryPerRound: 3
   spawnManager: {fileID: 1907244580169404489}
 --- !u!1 &6168629653516308300
@@ -573,7 +574,7 @@ Transform:
   m_GameObject: {fileID: 6168629653516308300}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.45, y: -0.2, z: 0}
+  m_LocalPosition: {x: -0.013, y: -0.2, z: 0}
   m_LocalScale: {x: 0.2001547, y: 0.20812184, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

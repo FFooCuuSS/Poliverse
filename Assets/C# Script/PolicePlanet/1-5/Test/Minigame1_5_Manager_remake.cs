@@ -58,7 +58,7 @@ public class Minigame1_5_Manager_remake : MiniGameBase
 
     private void Start()
     {
-        StartGame();
+        //StartGame();
     }
 
     public override void StartGame()

@@ -24,13 +24,12 @@ public class Minigame_1_2 : MiniGameBase
 
     private int roundIndex;
     private bool waitingShowForNextRound;
-    public bool IsInputWindowOpen { get; private set; }
 
     private Coroutine inputJob;
 
     private void Start()
     {
-        StartGame();
+        //StartGame();
     }
 
     public override void StartGame()
@@ -38,7 +37,6 @@ public class Minigame_1_2 : MiniGameBase
         base.StartGame();
         roundIndex = 0;
         waitingShowForNextRound = false;
-        IsInputWindowOpen = false;
 
         if (inputJob != null) StopCoroutine(inputJob);
         inputJob = null;
@@ -72,7 +70,6 @@ public class Minigame_1_2 : MiniGameBase
         if (action == "Input")
         {
             if (roundIndex >= TOTAL_ROUNDS) return;
-            if (IsInputWindowOpen) return;
 
             if (inputJob != null) StopCoroutine(inputJob);
             inputJob = StartCoroutine(InputWindowCo());
@@ -88,11 +85,8 @@ public class Minigame_1_2 : MiniGameBase
 
     private IEnumerator InputWindowCo()
     {
-        IsInputWindowOpen = true;
-
         yield return new WaitForSeconds(inputWindowSeconds);
 
-        IsInputWindowOpen = false;
 
         if (sequence != null) sequence.DespawnRound(despawnFadeSeconds);
 
@@ -106,11 +100,7 @@ public class Minigame_1_2 : MiniGameBase
 
     public void TryResolveRound()
     {
-        if (!IsInputWindowOpen) return;
         if (cuffs == null || cuffs.Length < 2) return;
-
-        if (!cuffs[0].IsSnapped || !cuffs[1].IsSnapped) return;
-        if (cuffs[0].SnappedHand == cuffs[1].SnappedHand) return;
 
         if (sequence != null)
             sequence.BeginSnapFadeAll();

@@ -2,13 +2,17 @@ using UnityEngine;
 
 public class PrisonerSpawner1_7 : MonoBehaviour
 {
-    public GameObject[] prisonerPrefabs;
-    public Transform spawnPoint;
-
+    [SerializeField] private GameObject[] prisonerPrefabs;
+    [SerializeField] private Transform spawnPoint;
     [SerializeField] private ProhibitedItemManager1_7 itemManager;
 
     public GameObject SpawnRandomPrisoner(Transform parent = null)
     {
+        if (prisonerPrefabs == null || prisonerPrefabs.Length == 0)
+        {
+            return null;
+        }
+
         int randomIndex = Random.Range(0, prisonerPrefabs.Length);
 
         GameObject spawnedPrisoner = Instantiate(
@@ -18,7 +22,8 @@ public class PrisonerSpawner1_7 : MonoBehaviour
             parent
         );
 
-        itemManager.ActivateRandomItem(spawnedPrisoner);
+        if (itemManager != null)
+            itemManager.ActivateRandomItem(spawnedPrisoner);
 
         return spawnedPrisoner;
     }

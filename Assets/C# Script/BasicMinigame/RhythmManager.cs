@@ -76,6 +76,20 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
         }
     }
 
+    private static bool IsCueType(string type)
+    {
+        return string.Equals(type, "Show", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(type, "Move", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsJudgeType(string type)
+    {
+        return string.Equals(type, "Input", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(type, "Tap", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(type, "Hold", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(type, "Swipe", StringComparison.OrdinalIgnoreCase);
+    }
+
     // =========================
     // ¿ÜºÎ(·Îµå¾À)¿¡¼­ È£ÃâÇÒ API
     // =========================
@@ -339,8 +353,8 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
         {
             var e = events[i];
             if (e.consumed) continue;
-            if (IsShowType(e.type)) continue;
-            if (action != null && e.action != action) continue;
+            if (!IsJudgeType(e.type)) continue;   // ÇÙ½É
+            if (action != null && !string.Equals(e.action, action, StringComparison.OrdinalIgnoreCase)) continue;
 
             double delta = Math.Abs(e.time - now);
             if (delta > hitWindow) continue;
@@ -371,14 +385,14 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
         {
             var e = events[i];
             if (e.consumed) continue;
-            if (IsShowType(e.type)) continue;
+            if (!IsJudgeType(e.type)) continue;   // ÇÙ½É
             if (now <= e.time + hitWindow) break;
 
             e.consumed = true;
             events[i] = e;
 
             OnPlayerJudged?.Invoke(MiniGameBase.JudgementResult.Miss);
-            Debug.Log("CheckMiss");
+            Debug.Log($"CheckMiss : {e.type} @ {e.time:F3}");
         }
     }
 

@@ -1,216 +1,117 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Manager_1_8 : MonoBehaviour
 {
-    public GameObject stage_1_8;
-    public GameObject[] prisonerPrefab;
-    public GameObject prisonObj;
+    [Header("Refs")]
+    [SerializeField] private Minigame_1_8 minigame;
+    [SerializeField] private GameObject prisonObj;
 
-    private Minigame_1_8 minigame_1_8;
-    private PrisonTrigger prisonTrigger;
-    private Vector2 prisonPos;
+    [Header("Prisoner Prefabs (3 types)")]
+    [SerializeField] private GameObject[] prisonerPrefabs;
 
-    public int numberOfPrisoners = 3;
+    [Header("Spawn")]
+    [SerializeField] private float spawnY = -3.5f;
+    [SerializeField] private float spawnXOffsetFromRightEdge = 1.2f;
 
-    private int spawnedCount = 0;
-    private List<GameObject> prisonerList = new List<GameObject>();
+    [Header("Speed (2 types only)")]
+    [SerializeField] private float slowSpeed = 8f;
+    [SerializeField] private float fastSpeed = 16f;
 
-    [Header("Spawn Settings")]
-    //public int maxPrisonerCount = 3;
-    public float spawnY = -3.5f;
+    [Header("Debug Counters")]
+    [SerializeField] private int spawnCount = 0;
+    [SerializeField] private int capturedCount = 0;
+    [SerializeField] private int escapedCount = 0;
 
-    [Header("Timing Settings")]
-    public float timeToReachPrison = 1f;
-    public float spawnXOffsetMin = 0f;
-    public float spawnXOffsetMax = 1f;
+    private readonly List<Prisoner_1_8> alivePrisoners = new();
 
-    [Header("Speed Clamp Settings")]
-    public float minMoveSpeed = 6f;
-    public float maxMoveSpeed = 10f;
-
-    public bool hasAnySuccess = false;
-    public int endedPrisoner = 0;
-    private bool isEnded = false;
-
-    [Header("Round Settings")]
-    public int totalRounds = 3;          // 총 라운드
-    public int prisonersPerRound = 4;    // 라운드당 범인 수
-
-    private int currentRound = 0;
-    private int spawnedThisRound = 0;
-
-    private int successRounds = 0;
-    private int failRounds = 0;
-
-    private void Start()
+    private void Awake()
     {
-        minigame_1_8 = stage_1_8.GetComponent<Minigame_1_8>();
-        prisonTrigger = prisonObj.GetComponent<PrisonTrigger>();
-
-        prisonTrigger.manager = this;
-
-        StartRound();
+        PrisonTrigger prisonTrigger = prisonObj.GetComponent<PrisonTrigger>();
+        if (prisonTrigger != null)
+            prisonTrigger.manager = this;
     }
 
-    void StartRound()
+    public void ResetRoundState()
     {
-        Debug.Log("Round Start : " + (currentRound + 1));
+        spawnCount = 0;
+        capturedCount = 0;
+        escapedCount = 0;
 
-        spawnedThisRound = 0;
-        endedPrisoner = 0;
+        ClearAllPrisoners();
 
-        StartCoroutine(SpawnRoutine());
+        Debug.Log("[Manager_1_8] 상태 초기화 완료");
     }
 
-    IEnumerator SpawnRoutine()
+    public void SpawnNextPrisoner()
     {
-        for (int i = 0; i < prisonersPerRound; i++)
+        if (prisonerPrefabs == null || prisonerPrefabs.Length == 0)
         {
-            SpawnPrisoner();
-            yield return new WaitForSeconds(0.8f);
-        }
-    }
-
-    private void Update()
-    {
-        if (endedPrisoner >= prisonersPerRound && !isEnded)
-        {
-            isEnded = true;
-
-            if (hasAnySuccess)
-                successRounds++;
-            else
-                failRounds++;
-
-            currentRound++;
-
-            if (currentRound >= totalRounds)
-            {
-                FinalResult();
-            }
-            else
-            {
-                StartCoroutine(StartNextRound());
-            }
-        }
-    }
-
-    public void DestroyAllPrisoners()
-    {
-        foreach (GameObject prisoner in prisonerList)
-        {
-            if (prisoner == null) continue;
-
-            Prisoner_1_8 p = prisoner.GetComponent<Prisoner_1_8>();
-
-            // 잡힌 범인은 즉시 제거하지 않음
-            if (p != null && p.IsCaptured)
-                continue;
-
-            StartCoroutine(FadeAndDestroy(prisoner, 0.3f));
-        }
-
-        // 리스트에서 살아있는 것만 유지
-        prisonerList.RemoveAll(p =>
-        {
-            if (p == null) return true;
-            Prisoner_1_8 pr = p.GetComponent<Prisoner_1_8>();
-            return pr != null && pr.IsCaptured;
-        });
-    }
-
-
-    public void SpawnPrisoner()
-    {
-        if (spawnedThisRound >= prisonersPerRound)
+            Debug.LogWarning("[Manager_1_8] prisonerPrefabs가 비어있음");
             return;
+        }
 
         Camera cam = Camera.main;
-
-        float baseSpawnX =
-            cam.ViewportToWorldPoint(new Vector3(0.9f, 0f, 0f)).x;
-
-        float offsetX = Random.Range(spawnXOffsetMin, spawnXOffsetMax);
-
-        float spawnX = baseSpawnX + offsetX;
-        float spawnY = this.spawnY;
-
-        Vector2 spawnPos = new Vector2(spawnX, spawnY);
-
-        int prefabIndex = spawnedThisRound % prisonerPrefab.Length;
-
-        GameObject prisonerObj =
-            Instantiate(prisonerPrefab[prefabIndex], spawnPos, Quaternion.identity, transform);
-
-        Prisoner_1_8 prisoner = prisonerObj.GetComponent<Prisoner_1_8>();
-        prisoner.prison = prisonObj;
-
-        float prisonX = prisonObj.transform.position.x;
-        float distance = spawnX - prisonX;
-
-        float rawSpeed = distance / Mathf.Max(timeToReachPrison, 0.01f);
-        float speed = Mathf.Clamp(rawSpeed, minMoveSpeed, maxMoveSpeed);
-
-        prisoner.SetSpeed(speed);
-
-        prisonerList.Add(prisonerObj);
-
-        spawnedThisRound++;
-    }
-
-    private IEnumerator FadeAndDestroy(GameObject obj, float duration)
-    {
-        if (obj == null) yield break;
-
-        SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
-        if (sr == null)
+        if (cam == null)
         {
-            Destroy(obj);
-            yield break;
+            Debug.LogError("[Manager_1_8] Camera.main 없음");
+            return;
         }
 
-        float timer = 0f;
-        Color startColor = sr.color;
-        Color endColor = new Color(startColor.r, startColor.g, startColor.b, 0f);
+        float rightEdgeX = cam.ViewportToWorldPoint(new Vector3(1f, 0f, 0f)).x;
+        float spawnX = rightEdgeX + spawnXOffsetFromRightEdge;
+        Vector3 spawnPos = new Vector3(spawnX, spawnY, 0f);
 
-        while (timer < duration)
+        int prefabIndex = spawnCount % prisonerPrefabs.Length;
+        GameObject obj = Instantiate(prisonerPrefabs[prefabIndex], spawnPos, Quaternion.identity, transform);
+
+        Prisoner_1_8 prisoner = obj.GetComponent<Prisoner_1_8>();
+        if (prisoner == null)
         {
-            if (sr == null || obj == null)
-                yield break;
-
-            timer += Time.deltaTime;
-            sr.color = Color.Lerp(startColor, endColor, timer / duration);
-            yield return null;
+            Debug.LogError("[Manager_1_8] Prisoner_1_8 컴포넌트 없음");
+            Destroy(obj);
+            return;
         }
 
-        if (obj != null)
-            Destroy(obj);
+        // 2개씩 묶어서 속도 배정
+        int speedGroup = (spawnCount / 2) % 2;
+        float assignedSpeed = (speedGroup == 0) ? slowSpeed : fastSpeed;
+
+        prisoner.Initialize(this, prisonObj, assignedSpeed);
+        alivePrisoners.Add(prisoner);
+
+        spawnCount++;
+        Debug.Log($"[Manager_1_8] Spawn #{spawnCount} | prefabIndex={prefabIndex} | speed={assignedSpeed}");
     }
 
-    public void SendRhythmInput()
+    public void NotifyCaptured(Prisoner_1_8 prisoner)
     {
-        minigame_1_8.OnPlayerInput();
+        if (prisoner == null) return;
+
+        capturedCount++;
+        alivePrisoners.Remove(prisoner);
+
+        Debug.Log($"[Manager_1_8] 포획 성공 +1 | capturedCount={capturedCount} | escapedCount={escapedCount} | alive={alivePrisoners.Count}");
     }
 
-    IEnumerator StartNextRound()
+    public void NotifyEscaped(Prisoner_1_8 prisoner)
     {
-        yield return new WaitForSeconds(1f);
+        if (prisoner == null) return;
 
-        isEnded = false;
-        hasAnySuccess = false;
+        escapedCount++;
+        alivePrisoners.Remove(prisoner);
 
-        StartRound();
+        Debug.Log($"[Manager_1_8] 탈출 +1 | capturedCount={capturedCount} | escapedCount={escapedCount} | alive={alivePrisoners.Count}");
     }
 
-    void FinalResult()
+    public void ClearAllPrisoners()
     {
-        Debug.Log("Success Rounds : " + successRounds);
+        for (int i = alivePrisoners.Count - 1; i >= 0; i--)
+        {
+            if (alivePrisoners[i] != null)
+                Destroy(alivePrisoners[i].gameObject);
+        }
 
-        if (successRounds >= 3)
-            minigame_1_8.Success();
-        else
-            minigame_1_8.Fail();
+        alivePrisoners.Clear();
     }
 }

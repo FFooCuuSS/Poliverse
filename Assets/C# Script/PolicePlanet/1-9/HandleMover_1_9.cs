@@ -1,27 +1,34 @@
 using DG.Tweening;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class HandleMover_1_9 : MonoBehaviour
 {
     private Vector3 initialLocalPosition;
+    private Tween moveTween;
 
-    [SerializeField] private Vector3 stretchOffset = new Vector3(0, 2f, 0);
-    [SerializeField] private float stretchDuration = 0.15f;
-    [SerializeField] private float shrinkDuration = 0.15f;
+    [SerializeField] private Vector3 stretchOffset = new Vector3(1.2f, 0f, 0f);
+    [SerializeField] private float stretchDuration = 0.12f;
+    [SerializeField] private float shrinkDuration = 0.12f;
 
-    void Awake()
+    private void Awake()
     {
         initialLocalPosition = transform.localPosition;
     }
 
     public void PlayStretch()
     {
-        transform.DOLocalMove(initialLocalPosition + stretchOffset, stretchDuration)
-            .OnComplete(() =>
-            {
-                transform.DOLocalMove(initialLocalPosition, shrinkDuration);
-            });
+        moveTween?.Kill();
+        transform.localPosition = initialLocalPosition;
+
+        moveTween = DOTween.Sequence()
+            .Append(transform.DOLocalMove(initialLocalPosition + stretchOffset, stretchDuration))
+            .Append(transform.DOLocalMove(initialLocalPosition, shrinkDuration));
+    }
+
+    public void ResetHandle()
+    {
+        moveTween?.Kill();
+        moveTween = null;
+        transform.localPosition = initialLocalPosition;
     }
 }

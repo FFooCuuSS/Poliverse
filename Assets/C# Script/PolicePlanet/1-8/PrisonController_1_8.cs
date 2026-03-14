@@ -34,6 +34,11 @@ public class PrisonController_1_8 : MonoBehaviour
         PlaySlamAndReturn();
     }
 
+    private void OnMouseDown()
+    {
+        ActivatePrison();
+    }
+
     private void PlaySlamAndReturn()
     {
         isMoving = true;

@@ -340,7 +340,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 25
-  prisonerSpawner: {fileID: 0}
+  arriveX: 0
+  exitOffsetX: -5
+  enterEase: 4
+  exitEase: 2
 --- !u!114 &6051094530913140221
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -362,6 +365,8 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &1136837349314751266
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,22 +2,51 @@ using UnityEngine;
 
 public class UILimitPosition : MonoBehaviour
 {
-    public Vector2 minPosition; // 제한 최소 좌표
-    public Vector2 maxPosition; // 제한 최대 좌표
+    [Header("Position Limit")]
+    [SerializeField] private Vector2 minPosition;
+    [SerializeField] private Vector2 maxPosition;
 
-    public float returnSpeed = 5f; // 복귀 속도
+    [Header("Return")]
+    [SerializeField] private float returnSpeed = 5f;
 
     private Vector3 initialPosition;
+    private bool isDragging;
+    private float dragZ;
+    private Vector3 dragOffset;
 
-    void Awake()
+    private Camera mainCam;
+
+    private void Awake()
     {
         initialPosition = transform.position;
+        mainCam = Camera.main;
     }
 
-    void Update()
+    private void Update()
     {
-        ClampPosition();
-        ReturnToInitialPosition();
+        if (isDragging)
+        {
+            FollowMouse();
+            ClampPosition();
+        }
+        else
+        {
+            ReturnToInitialPosition();
+        }
+    }
+
+    private void FollowMouse()
+    {
+        if (mainCam == null) return;
+
+        Vector3 mouseScreenPos = Input.mousePosition;
+        mouseScreenPos.z = dragZ;
+
+        Vector3 worldPos = mainCam.ScreenToWorldPoint(mouseScreenPos);
+        worldPos += dragOffset;
+        worldPos.z = initialPosition.z;
+
+        transform.position = worldPos;
     }
 
     private void ClampPosition()
@@ -26,12 +55,39 @@ public class UILimitPosition : MonoBehaviour
 
         newPos.x = Mathf.Clamp(newPos.x, minPosition.x, maxPosition.x);
         newPos.y = Mathf.Clamp(newPos.y, minPosition.y, maxPosition.y);
+        newPos.z = initialPosition.z;
 
         transform.position = newPos;
     }
 
     private void ReturnToInitialPosition()
     {
-        transform.position = Vector3.MoveTowards(transform.position, initialPosition, returnSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            initialPosition,
+            returnSpeed * Time.deltaTime
+        );
+    }
+
+    private void OnMouseDown()
+    {
+        isDragging = true;
+
+        if (mainCam == null)
+            mainCam = Camera.main;
+
+        Vector3 screenPos = mainCam.WorldToScreenPoint(transform.position);
+        dragZ = screenPos.z;
+
+        Vector3 mouseWorld = mainCam.ScreenToWorldPoint(
+            new Vector3(Input.mousePosition.x, Input.mousePosition.y, dragZ)
+        );
+
+        dragOffset = transform.position - mouseWorld;
+    }
+
+    private void OnMouseUp()
+    {
+        isDragging = false;
     }
 }
