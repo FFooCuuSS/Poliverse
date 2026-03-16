@@ -1,3 +1,4 @@
+using System.Reflection;
 using UnityEngine;
 
 public class Minigame3_8remake : MiniGameBase
@@ -33,9 +34,7 @@ public class Minigame3_8remake : MiniGameBase
 
         switch (action)
         {
-            case "Show":
-                OnShowEvent();
-                break;
+            
 
             case "Input":
                 Debug.Log("[3-8] Input 이벤트 도착");
@@ -60,6 +59,7 @@ public class Minigame3_8remake : MiniGameBase
     }
 
     // ===== 리듬매니저 판정 결과 로그 =====
+
 
     public void OnJudgePerfect()
     {
