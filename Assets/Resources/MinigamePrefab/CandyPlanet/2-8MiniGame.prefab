@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 2189029283515320303}
   - component: {fileID: 5893138592238969815}
   m_Layer: 0
-  m_Name: 2-8minigame
+  m_Name: 2-8MiniGame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -130,6 +130,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e2da54c113ad9445915e0e551fc59b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  missCount: 0
 --- !u!1 &6660957409767744344
 GameObject:
   m_ObjectHideFlags: 0
