@@ -22,6 +22,8 @@ public class Minigame1_5_Manager_remake : MiniGameBase
     [Header("Case Objects")]
     [SerializeField] private GameObject case1_Obj;
     [SerializeField] private GameObject case2_Obj;
+    [SerializeField] private PrisonerVisual[] case1Prisoners;
+    [SerializeField] private PrisonerVisual[] case2Prisoners;
 
     [Header("Click Effect")]
     [SerializeField] private GameObject clickEffectPrefab;
@@ -105,11 +107,30 @@ public class Minigame1_5_Manager_remake : MiniGameBase
         for (int i = 0; i < roundSuccessCounts.Length; i++)
             roundSuccessCounts[i] = 0;
 
+        ResetAllCaseVisuals();
+
         if (case1_Obj != null) case1_Obj.SetActive(false);
         if (case2_Obj != null) case2_Obj.SetActive(false);
 
         if (hand != null)
             hand.position = Vector3.zero;
+    }
+
+    private void ResetAllCaseVisuals()
+    {
+        ResetPrisonerArray(case1Prisoners);
+        ResetPrisonerArray(case2Prisoners);
+    }
+
+    private void ResetPrisonerArray(PrisonerVisual[] prisoners)
+    {
+        if (prisoners == null) return;
+
+        for (int i = 0; i < prisoners.Length; i++)
+        {
+            if (prisoners[i] != null)
+                prisoners[i].ResetVisual();
+        }
     }
 
     private void CacheTargets()
@@ -118,6 +139,22 @@ public class Minigame1_5_Manager_remake : MiniGameBase
         case2Targets = GetChildren(case2_Obj != null ? case2_Obj.transform : null);
 
         Debug.Log($"[Minigame1_5] case1 target count = {case1Targets.Length}, case2 target count = {case2Targets.Length}");
+    }
+
+    private PrisonerVisual[] GetPrisonerVisuals(Transform[] targets)
+    {
+        if (targets == null || targets.Length == 0)
+            return new PrisonerVisual[0];
+
+        PrisonerVisual[] result = new PrisonerVisual[targets.Length];
+
+        for (int i = 0; i < targets.Length; i++)
+        {
+            if (targets[i] != null)
+                result[i] = targets[i].GetComponent<PrisonerVisual>();
+        }
+
+        return result;
     }
 
     private Transform[] GetChildren(Transform root)
@@ -141,6 +178,7 @@ public class Minigame1_5_Manager_remake : MiniGameBase
             currentRoundHitIndices.Clear();
 
             SetCaseVisible(currentCaseNum);
+            ResetCurrentCaseVisuals();
 
             CaseMoveData moveData = GetCurrentMoveData();
             if (moveData == null)
@@ -173,6 +211,28 @@ public class Minigame1_5_Manager_remake : MiniGameBase
         roundLoopCoroutine = null;
     }
 
+    private void ResetCurrentCaseVisuals()
+    {
+        PrisonerVisual[] prisoners = GetCurrentPrisoners();
+
+        if (prisoners == null) return;
+
+        for (int i = 0; i < prisoners.Length; i++)
+        {
+            if (prisoners[i] != null)
+                prisoners[i].ResetVisual();
+        }
+    }
+
+    private PrisonerVisual[] GetCurrentPrisoners()
+    {
+        switch (currentCaseNum)
+        {
+            case 1: return case1Prisoners;
+            case 2: return case2Prisoners;
+            default: return null;
+        }
+    }
     private IEnumerator MoveHand(Vector2 startPos, Vector2 endPos, float moveTime)
     {
         float elapsed = 0f;
@@ -236,7 +296,7 @@ public class Minigame1_5_Manager_remake : MiniGameBase
             return;
         }
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < case1Prisoners.Length; i++)
         {
             if (currentRoundHitIndices.Contains(i))
                 continue;
@@ -250,6 +310,11 @@ public class Minigame1_5_Manager_remake : MiniGameBase
                 totalSuccessCount++;
                 roundSuccessCounts[currentRoundIndex]++;
 
+                if (case1Prisoners != null && i < case1Prisoners.Length && case1Prisoners[i] != null)
+                {
+                    case1Prisoners[i].PlayHit();
+                }
+
                 Debug.Log($"[Minigame1_5] CASE1 SUCCESS | TargetIndex={i}, HandX={handX:F2}, TargetX={targetX:F2}, Diff={diff:F2}, TotalSuccess={totalSuccessCount}");
                 return;
             }
@@ -260,13 +325,13 @@ public class Minigame1_5_Manager_remake : MiniGameBase
 
     private void CheckCase2Success(float handX)
     {
-        if (case2Targets == null || case2Targets.Length < 3)
+        if (case2Targets == null || case2Targets.Length < 7)
         {
             Debug.LogWarning("[Minigame1_5] case2 target ºÎÁ·");
             return;
         }
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < case2Prisoners.Length; i++)
         {
             if (currentRoundHitIndices.Contains(i))
                 continue;
@@ -279,6 +344,9 @@ public class Minigame1_5_Manager_remake : MiniGameBase
                 currentRoundHitIndices.Add(i);
                 totalSuccessCount++;
                 roundSuccessCounts[currentRoundIndex]++;
+
+                if (case2Prisoners != null && i < case2Prisoners.Length && case2Prisoners[i] != null)
+                    case2Prisoners[i].PlayHit();
 
                 Debug.Log($"[Minigame1_5] CASE2 SUCCESS | TargetIndex={i}, HandX={handX:F2}, TargetX={targetX:F2}, Diff={diff:F2}, TotalSuccess={totalSuccessCount}");
                 return;

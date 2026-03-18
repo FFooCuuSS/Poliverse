@@ -3,115 +3,54 @@ using UnityEngine;
 
 public class SpawnedHandControler : MonoBehaviour
 {
-    [SerializeField] private float lifeTime = 0.5f; 
-    private void Start() 
-    { 
-        Destroy(gameObject, lifeTime); 
+    [SerializeField] private float visibleTime = 0.08f;
+    [SerializeField] private float fadeOutTime = 0.2f;
+
+    private SpriteRenderer sr;
+
+    private void Awake()
+    {
+        sr = GetComponent<SpriteRenderer>();
+
+        if (sr == null)
+            sr = GetComponentInChildren<SpriteRenderer>();
     }
 
-    //public Minigame1_5_Manager_remake minigameManager1_5;
+    private void Start()
+    {
+        StartCoroutine(FadeOutRoutine());
+    }
 
-    //private SpriteRenderer sr;
-    //private bool isCollidingEnemy;
-    //private bool hitProcessed;
+    private IEnumerator FadeOutRoutine()
+    {
+        if (sr == null)
+        {
+            Destroy(gameObject);
+            yield break;
+        }
 
-    //[Header("Flash Settings")]
-    //public float flashInTime = 0.04f;
-    //public float flashOutTime = 0.06f;
+        Color c = sr.color;
+        c.a = 1f;
+        sr.color = c;
 
-    //private FaceChange currentFace; // 충돌한 Enemy의 FaceChange
+        if (visibleTime > 0f)
+            yield return new WaitForSeconds(visibleTime);
 
-    //private void Awake()
-    //{
-    //    sr = GetComponent<SpriteRenderer>();
-    //}
+        float elapsed = 0f;
+        while (elapsed < fadeOutTime)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / fadeOutTime);
 
-    //private void Start()
-    //{
-    //    StartCoroutine(FlashAndDestroy());
-    //}
+            c.a = Mathf.Lerp(1f, 0f, t);
+            sr.color = c;
 
-    //private IEnumerator FlashAndDestroy()
-    //{
-    //    if (sr == null)
-    //    {
-    //        Destroy(gameObject);
-    //        yield break;
-    //    }
+            yield return null;
+        }
 
-    //    Color c = sr.color;
+        c.a = 0f;
+        sr.color = c;
 
-    //    c.a = 0f;
-    //    sr.color = c;
-
-    //    float t = 0f;
-    //    while (t < flashInTime)
-    //    {
-    //        t += Time.deltaTime;
-    //        c.a = Mathf.Lerp(0f, 1f, t / flashInTime);
-    //        sr.color = c;
-    //        yield return null;
-    //    }
-
-    //    c.a = 1f;
-    //    sr.color = c;
-
-    //    t = 0f;
-    //    while (t < flashOutTime)
-    //    {
-    //        t += Time.deltaTime;
-    //        c.a = Mathf.Lerp(1f, 0f, t / flashOutTime);
-    //        sr.color = c;
-    //        yield return null;
-    //    }
-
-    //    c.a = 0f;
-    //    sr.color = c;
-
-    //    Destroy(gameObject);
-    //}
-
-    //private void OnTriggerEnter2D(Collider2D collision)
-    //{
-    //    if (!collision.CompareTag("Enemy")) return;
-
-    //    isCollidingEnemy = true;
-
-    //    if (minigameManager1_5 != null)
-    //        minigameManager1_5.collideCnt++;
-
-    //    // 맞은 Enemy의 FaceChange 캐싱
-    //    currentFace = collision.GetComponent<FaceChange>();
-
-    //    TryChangeFace();
-    //}
-
-    //private void OnTriggerExit2D(Collider2D collision)
-    //{
-    //    if (collision.CompareTag("Enemy"))
-    //    {
-    //        isCollidingEnemy = false;
-    //        currentFace = null;
-    //    }
-    //}
-
-    //private void Update()
-    //{
-    //    // 판정이 충돌 이후에 들어오는 경우 대비
-    //    TryChangeFace();
-    //}
-
-    //private void TryChangeFace()
-    //{
-    //    if (hitProcessed) return;
-    //    if (!isCollidingEnemy) return;
-    //    if (currentFace == null) return;
-    //    if (minigameManager1_5 == null) return;
-    //    if (!minigameManager1_5.lastJudgeGoodOrPerfect) return;
-
-    //    // 여기서 얼굴 변경
-    //    currentFace.ChangeToHit();
-
-    //    hitProcessed = true;
-    //}
+        Destroy(gameObject);
+    }
 }

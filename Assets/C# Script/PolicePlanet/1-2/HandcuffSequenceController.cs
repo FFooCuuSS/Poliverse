@@ -31,6 +31,13 @@ public class HandcuffSequenceController : MonoBehaviour
     [SerializeField] private float snapFadeStartDelay = 0f;
     [SerializeField] private float snapFadeDuration = 0.1f;
 
+    [Header("Auto Attach Toggle (왼손 자동 장착 시점)")]
+    [SerializeField] private GameObject autoAttachDisableObject;
+    [SerializeField] private GameObject autoAttachEnableObject;
+
+    [Header("Player Snap Toggle (플레이어 스냅 성공 시점)")]
+    [SerializeField] private GameObject playerSnapDisableObject;
+    [SerializeField] private GameObject playerSnapEnableObject;
     public enum State { Idle, LeftMoving, RightMoving, PlayerDrag }
     public State curState { get; private set; } = State.Idle;
 
@@ -223,6 +230,8 @@ public class HandcuffSequenceController : MonoBehaviour
     {
         if (cuff2 != null)
             cuff2.transform.position = cuff2LeftHandArrivedWorldPos;
+
+        ApplyAutoAttachVisual();
     }
 
     public void DespawnRound(float fadeSeconds = 0.05f)
@@ -238,6 +247,8 @@ public class HandcuffSequenceController : MonoBehaviour
         if (leftHand != null) leftHand.Despawn(fadeSeconds);
         if (rightHand != null) rightHand.Despawn(fadeSeconds);
 
+        ResetRoundVisuals();
+
         if (cuffs != null)
         {
             foreach (var c in cuffs)
@@ -246,5 +257,38 @@ public class HandcuffSequenceController : MonoBehaviour
                 c.Despawn(fadeSeconds);
             }
         }
+    }
+
+    private void ApplyAutoAttachVisual()
+    {
+        if (autoAttachDisableObject != null)
+            autoAttachDisableObject.SetActive(false);
+
+        if (autoAttachEnableObject != null)
+            autoAttachEnableObject.SetActive(true);
+    }
+
+    public void ApplyPlayerSnapVisual()
+    {
+        if (playerSnapDisableObject != null)
+            playerSnapDisableObject.SetActive(false);
+
+        if (playerSnapEnableObject != null)
+            playerSnapEnableObject.SetActive(true);
+    }
+
+    private void ResetRoundVisuals()
+    {
+        if (autoAttachDisableObject != null)
+            autoAttachDisableObject.SetActive(true);
+
+        if (autoAttachEnableObject != null)
+            autoAttachEnableObject.SetActive(false);
+
+        if (playerSnapDisableObject != null)
+            playerSnapDisableObject.SetActive(true);
+
+        if (playerSnapEnableObject != null)
+            playerSnapEnableObject.SetActive(false);
     }
 }

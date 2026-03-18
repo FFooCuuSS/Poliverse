@@ -4126,13 +4126,14 @@ MonoBehaviour:
   planetMove: {fileID: 699328040}
   planetListObj: {fileID: 1033379177}
   panels:
-  - {fileID: 1411796451}
+  - {fileID: 17983675}
   - {fileID: 1860611474}
   - {fileID: 1577341557}
   smoothSpeed: 5
   autoMoveDelay: 3
   selectedPlanet: {fileID: 0}
   fadeTarget: {fileID: 1398113140}
+  planetText: {fileID: 193791205}
 --- !u!1 &1042759802
 GameObject:
   m_ObjectHideFlags: 0

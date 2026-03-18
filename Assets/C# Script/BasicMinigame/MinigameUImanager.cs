@@ -30,6 +30,7 @@ public class MinigameUIManager : MonoBehaviour
     [Header("GameOver Fade")]
     [SerializeField] private Image gameOverPanelImage; // 패널의 Image
     [SerializeField] private float gameOverFadeDuration = 1.0f;
+    [SerializeField] private float sceneStartFadeDuration = 1.0f;
     [SerializeField] private GameObject[] FadeAwayObject;
 
     private bool isGameOver = false;
@@ -85,6 +86,8 @@ public class MinigameUIManager : MonoBehaviour
 
     private double bgmStartDspTime;
     private bool bgmScheduled = false;
+    private bool bgmActuallyStarted = false;
+    private double gameplayStartDspTime;
     private const double BgmStartDelay = 0.1f;
     //private int life = 4;
 
@@ -137,12 +140,32 @@ public class MinigameUIManager : MonoBehaviour
         if (gameOverPanelImage != null)
         {
             var c = gameOverPanelImage.color;
-            c.a = 0f;
+            c.a = 1f;
             gameOverPanelImage.color = c;
 
-            gameOverPanelImage.gameObject.SetActive(false);
+            gameOverPanelImage.gameObject.SetActive(true);
         }
+        StartCoroutine(SceneStartFadeRoutine());
         //StartCoroutine(LoadNextMinigameRoutine());
+    }
+
+    private IEnumerator SceneStartFadeRoutine()
+    {
+        if (gameOverPanelImage == null)
+            yield break;
+
+        gameOverPanelImage.gameObject.SetActive(true);
+
+        var c = gameOverPanelImage.color;
+        c.a = 1f;
+        gameOverPanelImage.color = c;
+
+        yield return gameOverPanelImage
+            .DOFade(0f, sceneStartFadeDuration)
+            .SetEase(Ease.Linear)
+            .WaitForCompletion();
+
+        gameOverPanelImage.gameObject.SetActive(false);
     }
 
     void Update()
@@ -190,8 +213,11 @@ public class MinigameUIManager : MonoBehaviour
     {
         if (!bgmScheduled) return 0.0;
 
-        double elapsed = AudioSettings.dspTime - bgmStartDspTime;
-        return Mathf.Max(0f, (float)elapsed);
+        double now = AudioSettings.dspTime;
+        double elapsed = now - bgmStartDspTime;
+
+        if (elapsed < 0.0) return 0.0;
+        return elapsed;
     }
 
     private void InitBlackPanel()
@@ -245,13 +271,20 @@ public class MinigameUIManager : MonoBehaviour
     {
         int gameCount = minigameQueue.Count;
 
+        // BGM이 실제로 시작될 때까지 대기
+        while (GetBGMElapsedTime() <= 0.0)
+            yield return null;
+
+        bgmActuallyStarted = true;
+        gameplayStartDspTime = bgmStartDspTime;
+
         for (int i = 0; i < startTimes.Count; i++)
         {
             float startT = Mathf.Max(0f, startTimes[i]);
             float preEndT = Mathf.Max(0f, startT - preEndGap);
 
-            yield return WaitUntilLevelTime(preEndT);
-            yield return EndCurrentMinigame_ShowBlack();
+            yield return WaitUntilBGMTime(startT);
+            yield return StartPreparedMinigame();
 
             // 마지막 이벤트
             if (i >= gameCount)
@@ -350,9 +383,9 @@ public class MinigameUIManager : MonoBehaviour
         currentMinigame.StartGame();
     }
 
-    private IEnumerator WaitUntilLevelTime(float t)
+    private IEnumerator WaitUntilBGMTime(float t)
     {
-        while (Time.timeSinceLevelLoad < t)
+        while (GetBGMElapsedTime() < t)
             yield return null;
     }
 
@@ -659,7 +692,7 @@ public class MinigameUIManager : MonoBehaviour
             c.a = 0f;
             gameOverPanelImage.color = c;
 
-            yield return gameOverPanelImage.DOFade(2f, gameOverFadeDuration)
+            yield return gameOverPanelImage.DOFade(1f, gameOverFadeDuration)
                                            .SetEase(Ease.Linear)
                                            .WaitForCompletion();
         }

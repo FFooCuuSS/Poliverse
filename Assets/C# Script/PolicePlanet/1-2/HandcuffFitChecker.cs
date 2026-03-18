@@ -102,6 +102,9 @@ public class HandcuffFitChecker : MonoBehaviour
                 if (cuffCollider != null)
                     cuffCollider.enabled = false;
 
+                if (HandcuffSequenceController.Instance != null)
+                    HandcuffSequenceController.Instance.ApplyPlayerSnapVisual();
+
                 minigame.TryResolveRound();
                 break;
             }

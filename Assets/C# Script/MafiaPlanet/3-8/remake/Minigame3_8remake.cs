@@ -6,6 +6,9 @@ public class Minigame3_8remake : MiniGameBase
     // ===== 미니게임 기본 정보 =====
     protected override float TimerDuration => 10f;
     protected override string MinigameExplain => "미니게임 3-8 설명을 여기에 넣기";
+    public override float perfectWindowOverride => 0.1f;
+    public override float goodWindowOverride => 0.3f;
+    public override float hitWindowOverride => 0.5f;
 
     [Header("Input Settings")]
     public KeyCode inputKey = KeyCode.Mouse0;   // 좌클릭 입력

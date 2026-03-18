@@ -24,9 +24,9 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
     public string addressablesKey;
 
     [Header("Judgement Settings (seconds)")]
-    public float perfectWindow = 0.03f;
-    public float goodWindow = 0.07f;
-    public float hitWindow = 0.12f;
+    public float perfectWindow = 0.1f;
+    public float goodWindow = 0.3f;
+    public float hitWindow = 1f;
 
     public class RhythmEvent
     {

@@ -1,10 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
+using System.Collections;
 
 public class CameraScrollController : MonoBehaviour
 {
@@ -26,10 +26,12 @@ public class CameraScrollController : MonoBehaviour
     public GameObject selectedPlanet;
     public static int selectedPlanetIndex;
 
-    [Header("페이드 타겟 (CanvasGroup)")]
+    [Header("페이드 타겟")]
     public GameObject fadeTarget;
+    [SerializeField] private TextMeshProUGUI planetText;
 
     private Image fadeImage;
+    private CanvasGroup planetTextCanvasGroup;
 
     private Vector3 targetPosition;
     private int currentPanelIndex = 0;
@@ -41,10 +43,15 @@ public class CameraScrollController : MonoBehaviour
         fadeImage = fadeTarget.GetComponent<Image>();
         planetList = planetListObj.GetComponent<PlanetList>();
 
-        if (panels.Length > 0)
+        if (planetText != null)
         {
-            targetPosition = transform.position;
+            Color c = planetText.color;
+            c.a = 1f;
+            planetText.color = c;
         }
+
+        if (panels.Length > 0)
+            targetPosition = transform.position;
     }
 
     void Update()
@@ -61,9 +68,7 @@ public class CameraScrollController : MonoBehaviour
             targetPosition = new Vector3(transform.position.x, panelPos.y, transform.position.z);
 
             if (index == 1 && !isAutoMoving)
-            {
                 StartCoroutine(AutoMoveToNextPanelAfterDelay());
-            }
         }
     }
 
@@ -73,34 +78,36 @@ public class CameraScrollController : MonoBehaviour
         yield return new WaitForSeconds(autoMoveDelay);
 
         if (currentPanelIndex == 1 && panels.Length > 2)
-        {
             MoveToPanel(2);
-        }
     }
 
-    // 매개변수 없이 실행 가능한 버튼용 함수
     public void planetButtonClick()
     {
-        upDownMove.StopMoving();
         selectedPlanetIndex = planetList.CallingCurrentIndex();
+
+        if (planetText != null)
+        {
+            planetText.DOKill();
+
+            Color c = planetText.color;
+            planetText.color = c;
+        }
+        /*
         GameObject clickedButton = EventSystem.current.currentSelectedGameObject;
         if (clickedButton != null)
         {
             Transform child = clickedButton.transform.Find("planetResource");
             if (child != null)
             {
-                // 예: 100만큼 아래로 이동 (anchoredPosition 기준)
                 RectTransform rect = child.GetComponent<RectTransform>();
                 if (rect != null)
                 {
-                    rect.DOAnchorPos(rect.anchoredPosition + new Vector2(0, -350f), 1f).SetEase(Ease.InOutQuad);
+                    rect.DOAnchorPos(rect.anchoredPosition + new Vector2(0, -350f), 1f)
+                        .SetEase(Ease.InOutQuad);
                 }
             }
         }
-
-        MovingCamera(1);
-
-        // 2. 연출 코루틴 시작
+        */
         StartCoroutine(PlanetSelectionSequence());
     }
 
@@ -110,21 +117,28 @@ public class CameraScrollController : MonoBehaviour
 
         Vector3 targetPos = new Vector3(transform.position.x, panels[index].position.y, transform.position.z);
         transform.DOMove(targetPos, 1f).SetEase(Ease.InOutQuad);
-
-        // Lerp 대상도 바꿔줌
         targetPosition = targetPos;
     }
 
-
     private IEnumerator PlanetSelectionSequence()
     {
-        yield return new WaitForSeconds(2f);
+        if (planetText != null)
+        {
+            planetText.DOKill();
+
+            Color c = planetText.color;
+            planetText.color = c;
+
+            planetText.DOFade(0f, 0.15f);
+        }
+
+        yield return new WaitForSeconds(1.5f);
 
         fadeTarget.SetActive(true);
         fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, 0f);
         fadeImage.DOFade(1f, 1f);
 
-        yield return new WaitForSeconds(1f); // (페이드 완료 + 대기 포함)
+        yield return new WaitForSeconds(1f);
 
         SceneManager.LoadScene("MinigameLoad");
     }
