@@ -283,7 +283,7 @@ public class MinigameUIManager : MonoBehaviour
             float startT = Mathf.Max(0f, startTimes[i]);
             float preEndT = Mathf.Max(0f, startT - preEndGap);
 
-            yield return WaitUntilBGMTime(startT);
+            yield return WaitUntilBGMTime(preEndT);
             yield return StartPreparedMinigame();
 
             // 마지막 이벤트
@@ -303,7 +303,7 @@ public class MinigameUIManager : MonoBehaviour
 
             yield return PrepareNextMinigame(nextPath);
 
-            yield return WaitUntilLevelTime(startT);
+            yield return WaitUntilBGMTime(startT);
             yield return StartPreparedMinigame();
         }
     }
