@@ -31,10 +31,10 @@ public class MacaroonSpawn : MonoBehaviour
         for (int i = 0; i < macaronCount; i++)
             indices.Add(i);
 
-        // 랜덤 섞기
         for (int i = 0; i < indices.Count; i++)
         {
             int rand = Random.Range(i, indices.Count);
+
             int temp = indices[i];
             indices[i] = indices[rand];
             indices[rand] = temp;
@@ -53,7 +53,7 @@ public class MacaroonSpawn : MonoBehaviour
             GameObject obj = Instantiate(macaronPrefab, pos, Quaternion.identity, this.transform);
 
             Macaron macaron = obj.GetComponent<Macaron>();
-            macaron.index = indices[i];
+            macaron.index = i;
 
             //이미지 비율 유지하며 크기 조정
             SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
@@ -64,6 +64,7 @@ public class MacaroonSpawn : MonoBehaviour
                 Vector2 targetSize = prefabSR.bounds.size;
 
                 // 스프라이트 교체
+                int randomIndex = Random.Range(0, macaronSprites.Length);
                 sr.sprite = macaronSprites[indices[i]];
 
                 // 새 스프라이트 실제 크기
@@ -73,12 +74,10 @@ public class MacaroonSpawn : MonoBehaviour
                 float scaleX = targetSize.x / spriteSize.x;
                 float scaleY = targetSize.y / spriteSize.y;
 
-                float finalScale = Mathf.Min(scaleX, scaleY); // 비율 유지
+                float finalScale = Mathf.Min(scaleX, scaleY);// 비율 유지
 
                 obj.transform.localScale = new Vector3(finalScale, finalScale, 1f);
             }
-
         }
     }
-
 }

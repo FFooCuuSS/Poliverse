@@ -1,94 +1,169 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Fork_2_11 : MonoBehaviour
 {
+    [Header("Move Settings")]
+    public float moveSpeedX = 3f;
+    public float leftX = -8f;
+    public float rightX = 6f;
+
+    private bool isDropping = false;
+
+    private List<GameObject> skeweredMacarons = new List<GameObject>();
+    public float stackSpacing = 0.3f;
+
+
     public float moveDistance = 2f;
     public float moveSpeed = 8f;
 
     private Vector3 startPos;
     private bool isMoving = false;
 
-    private GameObject grabbedMacaron;
-
     private MacaroonPlate plate;
+
+    private int macaronLayer;
 
     void Start()
     {
+        transform.position = new Vector3(leftX, transform.position.y, transform.position.z);
+
         startPos = transform.position;
         plate = FindObjectOfType<MacaroonPlate>();
+
+        macaronLayer = LayerMask.GetMask("Macaron");
     }
 
-    public void GrabMacaron(GameObject macaron)
+    void Update()
     {
-        if (isMoving) return;
+        if (isDropping || isMoving) return;
 
-        StartCoroutine(MoveFork(macaron));
+        transform.position += Vector3.right * moveSpeedX * Time.deltaTime;
+
+        if (transform.position.x >= rightX && !isDropping)
+        {
+            StartCoroutine(DropAllMacarons());
+        }
     }
 
-    IEnumerator MoveFork(GameObject macaron)
+    public void GrabMacaron(GameObject macaron, Vector2 clickWorldPos)
+    {
+        if (isDropping || isMoving) return;
+        StartCoroutine(GrabRoutine(macaron, clickWorldPos));
+    }
+
+    IEnumerator GrabRoutine(GameObject macaron, Vector2 clickPos)
     {
         isMoving = true;
 
-        // ∏∂ƒ´∑’ ¿ßƒ°∑Œ ¿Ãµø
-        Vector3 targetPos = new Vector3(macaron.transform.position.x, startPos.y, startPos.z);
-
-        while (Vector3.Distance(transform.position, targetPos) > 0.01f)
+        // 1. Ìè¨ÌÅ¨ X Ïù¥Îèô
+        Vector3 targetPos = new Vector3(clickPos.x, transform.position.y, 0);
+        while (Vector3.Distance(transform.position, targetPos) > 0.05f)
         {
             transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * moveSpeed);
             yield return null;
         }
 
-        startPos = transform.position;
-
-        Vector3 downPos = startPos + Vector3.down * moveDistance;
-
-        // ≥ª∑¡∞°±‚
-        while (Vector3.Distance(transform.position, downPos) > 0.01f)
+        // 2. ÏïÑÎûòÎ°ú ÎÇ¥Î†§Í∞ÄÍ∏∞
+        Vector3 downPos = transform.position + Vector3.down * moveDistance;
+        while (Vector3.Distance(transform.position, downPos) > 0.05f)
         {
             transform.position = Vector3.Lerp(transform.position, downPos, Time.deltaTime * moveSpeed);
             yield return null;
         }
+        transform.position = downPos;
 
-        // ∏∂ƒ´∑’ ¡˝±‚
-        grabbedMacaron = macaron;
-        grabbedMacaron.transform.SetParent(transform);
-        grabbedMacaron.transform.localPosition = new Vector3(0, 0.2f, 0);
+        // ÎÇ¥Î†§Í∞Ñ ÌõÑ OverlapCircleÎ°ú ÎßàÏπ¥Î°± Í∞êÏßÄ
+        Vector3 checkPos = transform.position + Vector3.down * moveDistance;
+        float checkRadius = 0.7f;
 
-        yield return new WaitForSeconds(0.1f);
+        Collider2D[] hits = Physics2D.OverlapCircleAll(checkPos, checkRadius, macaronLayer);
 
-        // ø√∂Û∞°±‚
-        while (Vector3.Distance(transform.position, startPos) > 0.01f)
+        GameObject target = null;
+        float minDist = float.MaxValue;
+
+        foreach (var h in hits)
         {
-            transform.position = Vector3.Lerp(transform.position, startPos, Time.deltaTime * moveSpeed);
-            yield return null;
+            Macaron m = h.GetComponent<Macaron>();
+
+            if (m.isStacked) continue; // Ïù¥ÎØ∏ Ïû°ÏùÄ ÎßàÏπ¥Î°± Î¨¥Ïãú
+
+            float dist = Vector2.Distance(checkPos, h.transform.position);
+
+            if (dist < minDist)
+            {
+                minDist = dist;
+                target = h.gameObject;
+            }
         }
 
-        // ¡¢Ω√ ¿ßƒ°∑Œ ¿Ãµø
-        Vector3 platePos = new Vector3(plate.transform.position.x, transform.position.y, transform.position.z);
+        if (target != null)
+        {
+            Debug.Log("Ïû°ÏùÄ ÎßàÏπ¥Î°±: " + target.name);
 
-        while (Vector3.Distance(transform.position, platePos) > 0.01f)
+            Macaron macScript = target.GetComponent<Macaron>();
+            macScript.isStacked = true;
+
+            target.layer = LayerMask.NameToLayer("Ignore Raycast");
+
+            skeweredMacarons.Add(target);
+            target.transform.SetParent(transform);
+
+            int index = skeweredMacarons.Count - 1;
+            target.transform.localPosition = new Vector3(0, -index * stackSpacing, 0);
+        }
+        else
+        {
+            Debug.Log("ÎßàÏπ¥Î°± ÏóÜÏùå");
+        }
+
+        // 3. Îã§Ïãú Ïò¨ÎùºÍ∞ÄÍ∏∞
+        Vector3 upPos = new Vector3(transform.position.x, startPos.y, transform.position.z);
+        while (Vector3.Distance(transform.position, upPos) > 0.05f)
+        {
+            transform.position = Vector3.Lerp(transform.position, upPos, Time.deltaTime * moveSpeed);
+            yield return null;
+        }
+        transform.position = upPos;
+
+        isMoving = false;
+    }
+
+    IEnumerator DropAllMacarons()
+    {
+        isDropping = true;
+
+        // Ï†ëÏãú ÏúÑÏπòÎ°ú Ïù¥Îèô
+        Vector3 platePos = new Vector3(plate.transform.position.x, transform.position.y, 0);
+
+        while (Vector3.Distance(transform.position, platePos) > 0.05f)
         {
             transform.position = Vector3.Lerp(transform.position, platePos, Time.deltaTime * moveSpeed);
             yield return null;
         }
 
-        // ∏∂ƒ´∑’ ∂≥æÓ∂ﬂ∏Æ±‚
-        DropMacaron();
+        // ÏïÑÎûò(Î®ºÏ†Ä ÍΩÇÌûå Í≤É)Î∂ÄÌÑ∞ Îñ®Ïñ¥Îú®Î¶¨Í∏∞
+        while (skeweredMacarons.Count > 0)
+        {
+            int lastIndex = skeweredMacarons.Count - 1;
 
-        isMoving = false;
+            GameObject macaron = skeweredMacarons[lastIndex];
+            skeweredMacarons.RemoveAt(lastIndex);
+
+            macaron.transform.SetParent(null);
+
+            Macaron m = macaron.GetComponent<Macaron>();
+            plate.AddMacaron(m);
+
+            yield return new WaitForSeconds(0.2f);
+        }
     }
 
-    void DropMacaron()
+    // Ìè¨ÌÅ¨ ÏúÑÏπò ÏãúÍ∞ÅÌôîÏö©
+    private void OnDrawGizmos()
     {
-        if (grabbedMacaron == null) return;
-
-        grabbedMacaron.transform.SetParent(null);
-
-        Macaron macaronScript = grabbedMacaron.GetComponent<Macaron>();
-        plate.AddMacaron(macaronScript);
-
-        grabbedMacaron = null;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position + Vector3.down * moveDistance, 0.5f);
     }
 }

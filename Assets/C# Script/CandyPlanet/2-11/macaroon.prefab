@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 56490454574346626}
   - component: {fileID: 8807897462366154657}
   - component: {fileID: 2730530763117259143}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: macaroon
   m_TagString: Macaron
   m_Icon: {fileID: 0}
@@ -94,7 +94,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5609612390775840238}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a8725f7aabbc2d141bd7ae8043cf5147, type: 3}
   m_Name: 
@@ -116,6 +116,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   index: 0
+  isStacked: 0
 --- !u!61 &2730530763117259143
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -148,7 +149,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.01110703, y: -0.02776623}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -159,5 +160,5 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2.665977, y: 2.321675}
   m_EdgeRadius: 0
