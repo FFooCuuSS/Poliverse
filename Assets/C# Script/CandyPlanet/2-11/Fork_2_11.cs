@@ -161,9 +161,9 @@ public class Fork_2_11 : MonoBehaviour
     }
 
     // 포크 위치 시각화용
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position + Vector3.down * moveDistance, 0.5f);
-    }
+    //private void OnDrawGizmos()
+    //{
+    //    Gizmos.color = Color.red;
+    //    Gizmos.DrawWireSphere(transform.position + Vector3.down * moveDistance, 0.5f);
+    //}
 }
