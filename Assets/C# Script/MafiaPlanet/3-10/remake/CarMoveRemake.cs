@@ -19,7 +19,6 @@ public class CarMoveRemake : MonoBehaviour
     private bool isFinished;
 
     public GameObject Stage_3_10;
-    Minigame_3_10_remake minigame_3_10;
 
 
     Rigidbody2D rb;
@@ -29,7 +28,6 @@ public class CarMoveRemake : MonoBehaviour
     {
         targetPosition = lanes[currentLane];
         isFinished = false;
-        minigame_3_10 = Stage_3_10.GetComponent<Minigame_3_10_remake>();
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
     }
