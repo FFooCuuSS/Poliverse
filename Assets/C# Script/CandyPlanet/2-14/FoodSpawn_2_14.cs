@@ -7,7 +7,7 @@ public class FoodSpawn_2_14 : MonoBehaviour
     public GameObject foodPrefab;
     public int foodCount = 5;
 
-    public float spawnRangeX = 7f;
+    public float spawnRangeX = 9f;
     public float spawnRangeY = 4f;
 
     public float avoidRadius = 2f;

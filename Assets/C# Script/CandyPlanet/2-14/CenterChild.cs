@@ -39,7 +39,7 @@ public class CenterChild : MonoBehaviour
     {
         if (col.CompareTag("Food"))
         {
-            miniGame?.Failure();
+            //miniGame?.Failure();
         }
     }
 }
