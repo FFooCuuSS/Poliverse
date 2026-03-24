@@ -41,8 +41,8 @@ public class Minigame_2_11 : MiniGameBase
 
         switch (action)
         {
-            case "Tap":
-                Debug.Log("Tap");
+            case "Input":
+                Debug.Log("Input");
                 inputOpen = true;
                 break;
         }
@@ -52,10 +52,9 @@ public class Minigame_2_11 : MiniGameBase
     {
         if (ended) return;
 
-        // 탭 입력만 처리
-        if (action == "Tap")
+        if (action == "Input")
         {
-            rhythmManager?.ReceivePlayerInput("Tap");
+            rhythmManager?.ReceivePlayerInput("Input");
         }
     }
 
@@ -79,12 +78,10 @@ public class Minigame_2_11 : MiniGameBase
             if (nodeResults.Contains(true))
             {
                 Debug.Log("미니게임 성공! 1번이라도 성공함");
-                Success();
             }
             else
             {
                 Debug.Log("미니게임 실패! 한 번도 성공 못함");
-                Fail();
             }
         }
     }
