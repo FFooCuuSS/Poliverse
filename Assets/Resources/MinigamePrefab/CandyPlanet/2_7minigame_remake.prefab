@@ -47,6 +47,7 @@ MonoBehaviour:
   jellyTypes:
   - {fileID: 11400000, guid: bf4eabedb03a2cc41aa693c50702e50a, type: 2}
   - {fileID: 11400000, guid: 73e2fec76b9530b4e82d0ee54d08a15e, type: 2}
+  - {fileID: 11400000, guid: fe25d05b672e9594faa0596578d76295, type: 2}
   stone: {fileID: 6258117725939743227}
   jellyParent: {fileID: 3003990924431626474}
 --- !u!1 &3003990924431626474

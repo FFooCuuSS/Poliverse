@@ -34,15 +34,15 @@ public class PlayerRotate : MonoBehaviour
             if (Input.mousePosition.x < centerX) // 왼쪽 클릭
             {
                 // 현재 오른쪽(-20)이면 중앙(0)으로, 중앙(0)이면 왼쪽(20)으로
-                if (targetAngle <= 0) targetAngle += angle;
+                targetAngle += angle;
             }
             else // 오른쪽 클릭
             {
                 // 현재 왼쪽(20)이면 중앙(0)으로, 중앙(0)이면 오른쪽(-20)으로
-                if (targetAngle >= 0) targetAngle -= angle;
+                targetAngle -= angle;
             }
 
-            // [중요] 각도가 20, 0, -20 범위를 벗어나지 않도록 고정
+            // 각도가 20, 0, -20 범위를 벗어나지 않도록 고정
             targetAngle = Mathf.Clamp(targetAngle, -maxAngle, maxAngle);
         }
     }
@@ -59,7 +59,7 @@ public class PlayerRotate : MonoBehaviour
         float curAngle = transform.eulerAngles.z;
         if (curAngle > 180f) curAngle -= 360f;
 
-        // 장애물 등에 의해 maxAngle(45도)을 넘어가면 실패
+        // 장애물 등에 의해 maxAngle을 넘어가면 실패
         if (Mathf.Abs(curAngle) > maxAngle)
         {
             minigame_2_8.Failure();
