@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab0f6c19a579a2347b509d568f62b9a0, type: 3}
   m_Name: Jelly3
   m_EditorClassIdentifier: 
-  moveSpeed: 0
-  bounceForce: 0
-  xStep: 0
+  moveSpeed: 3
+  bounceForce: 5
+  xStep: 3
   waveAmount: 0
   waveSpeed: 0
-  sr: {fileID: 0}
+  sr: {fileID: 21300000, guid: 662709eda81abe64381e96a400c28931, type: 3}
   jellyPrefab: {fileID: 5723074829663138133, guid: 8e5b5165945466444890d73d49bf7d09, type: 3}

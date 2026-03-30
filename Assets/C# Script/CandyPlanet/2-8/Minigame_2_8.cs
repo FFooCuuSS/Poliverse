@@ -10,9 +10,12 @@ public class Minigame_2_8 : MiniGameBase
     public override float hitWindowOverride => 1f;
     protected override float TimerDuration => 5f;
     protected override string MinigameExplain => "조심해라!";
+
     private bool ended;
     public int missCount = 0;
     private int totalCount = 5;
+
+    [SerializeField] private ObstacleSpawner obstacleSpawner;
 
     private void Start()
     {
@@ -41,8 +44,13 @@ public class Minigame_2_8 : MiniGameBase
         if (ended) return;
         Debug.Log($"{gameObject.name} 리듬메세지: {action}");
         action = action.Trim();
-        if (action == "Slide")
+        if (action == "Show")
         {
+            obstacleSpawner.SpawnObstacle();
+        }
+        if (action == "Input")
+        {
+            obstacleSpawner.DropNextObstacle();
         }
 
 

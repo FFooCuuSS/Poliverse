@@ -17,5 +17,5 @@ MonoBehaviour:
   xStep: 4
   waveAmount: 0
   waveSpeed: 0
-  sr: {fileID: 0}
+  sr: {fileID: 21300000, guid: f4c5f239d35ae6a47917bbdf4fb4c5bb, type: 3}
   jellyPrefab: {fileID: 5723074829663138133, guid: 8e5b5165945466444890d73d49bf7d09, type: 3}
