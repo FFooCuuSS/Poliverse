@@ -25,6 +25,7 @@ public class Minigame_2_8 : MiniGameBase
     {
         base.StartGame();
         ended = false;
+        obstacleSpawner.Init();
 
         // 추가 초기화
         // 예: instructionText.text = MinigameExplain;
@@ -48,9 +49,12 @@ public class Minigame_2_8 : MiniGameBase
         {
             obstacleSpawner.SpawnObstacle();
         }
-        if (action == "Input")
+        if(action == "Drop")
         {
             obstacleSpawner.DropNextObstacle();
+        }
+        if (action == "Input")
+        {
         }
 
 
