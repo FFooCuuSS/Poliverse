@@ -16,19 +16,16 @@ public class CenterChild : MonoBehaviour
 
     void Update()
     {
-        if (miniGame == null || miniGame.IsSuccess || miniGame.IsInputLocked)
-            return;
+        if (miniGame == null) return;
 
         GameObject[] foods = GameObject.FindGameObjectsWithTag("Food");
+
         foreach (GameObject food in foods)
         {
-            DragAndDrop drag = food.GetComponent<DragAndDrop>();
-            if (drag != null && drag.isDragging) continue;
-
-            Vector3 dir = transform.position - food.transform.position;
+            Vector3 dir = transform.position - food.transform.position; // 플레이어 중심 방향
             float dist = dir.magnitude;
 
-            if (dist < attractionRadius)
+            if (dist < attractionRadius) // 끌어당김 범위 내
             {
                 food.transform.position += dir.normalized * attractionForce * Time.deltaTime;
             }
@@ -37,9 +34,18 @@ public class CenterChild : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.CompareTag("Food"))
+        if (!col.CompareTag("Food")) return;
+
+        Debug.Log("음식이 가운데 닿음 → 실패 처리");
+
+        if (miniGame != null)
         {
-            //miniGame?.Failure();
+            // 실패 카운트 추가 등 처리 가능
+            // 예: miniGame.FailCount++;
+
+            // 필요 시 실패 이벤트 호출 등
         }
+
+        Destroy(col.gameObject);
     }
 }

@@ -21,11 +21,16 @@ public class Minigame_2_14 : MiniGameBase
     private List<bool> nodeResults; // 각 노드 성공 여부 저장
     private int currentNode = 0;
 
+    public int successCount = 0;
+
+    public bool IsInputOpen => inputOpen;
+
     public override void StartGame()
     {
 
-        // 추가 초기화
-        // 예: instructionText.text = MinigameExplain;
+        nodeResults = new List<bool>();
+        currentNode = 0;
+        ended = false;
     }
 
 
@@ -40,11 +45,30 @@ public class Minigame_2_14 : MiniGameBase
 
         switch (action)
         {
+            case "Show":
+                float showInputWindow = 0.5f; // show 기준 ±0.5초 판정
+                StartCoroutine(OpenInputWindowAroundShow(showInputWindow));
+
+                float timeToHit = 1f; // 음식 이동 시간
+                FindObjectOfType<FoodSpawn_2_14>()?.SpawnOneFood(timeToHit);
+                break;
             case "Input":
-                Debug.Log("Input");
+                Debug.Log("Input → 판정 가능");
                 inputOpen = true;
+                StartCoroutine(CloseInputWindow(0.5f)); // 판정 시간
                 break;
         }
+    }
+
+    IEnumerator OpenInputWindowAroundShow(float halfWindow)
+    {
+        // 0.5초 전 input 가능 (미리 true)
+        yield return new WaitForSeconds(halfWindow);
+        inputOpen = true;
+
+        // 0.5초 후 판정 종료
+        yield return new WaitForSeconds(halfWindow * 2);
+        inputOpen = false;
     }
 
     public override void OnPlayerInput(string action = null)
@@ -57,8 +81,15 @@ public class Minigame_2_14 : MiniGameBase
         }
     }
 
+    IEnumerator CloseInputWindow(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        inputOpen = false;
+    }
+
     public override void OnJudgement(JudgementResult judgement)
     {
+        /*
         if (ended) return;
 
         bool success = judgement == JudgementResult.Perfect || judgement == JudgementResult.Good;
@@ -81,5 +112,7 @@ public class Minigame_2_14 : MiniGameBase
                 Debug.Log("미니게임 실패! 한 번도 성공 못함");
             }
         }
+        */
+        return;
     }
 }
