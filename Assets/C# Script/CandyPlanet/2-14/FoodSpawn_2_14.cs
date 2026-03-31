@@ -12,27 +12,26 @@ public class FoodSpawn_2_14 : MonoBehaviour
 
     public float avoidRadius = 2f;
 
-    void Start()
-    {
-        SpawnFoods();
-    }
+    public Transform player; // 중심
+    public float shieldRadius = 2f;
 
-    private void SpawnFoods()
+
+    public void SpawnOneFood(float timeToHit)
     {
-        for (int i = 0; i < foodCount; i++)
+        Vector2 spawnPos;
+
+        do
         {
-            Vector2 spawnPos;
-
-            do
-            {
-                spawnPos = new Vector2(
-                    Random.Range(-spawnRangeX, spawnRangeX),
-                    Random.Range(-spawnRangeY, spawnRangeY)
-                );
-            }
-            while (spawnPos.magnitude < avoidRadius);
-
-            Instantiate(foodPrefab, spawnPos, Quaternion.identity);
+            spawnPos = new Vector2(
+                Random.Range(-spawnRangeX, spawnRangeX),
+                Random.Range(-spawnRangeY, spawnRangeY)
+            );
         }
+        while (spawnPos.magnitude < avoidRadius);
+
+        GameObject food = Instantiate(foodPrefab, spawnPos, Quaternion.identity);
+
+        // 목표 위치 고정 (0,0,0) 으로 이동시키도록 Init 호출
+        food.GetComponent<FoodMove_2_14>()?.Init(timeToHit);
     }
 }
