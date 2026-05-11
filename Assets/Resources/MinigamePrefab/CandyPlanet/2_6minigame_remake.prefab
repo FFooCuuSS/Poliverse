@@ -46,7 +46,7 @@ GameObject:
   - component: {fileID: 6416512514021469333}
   - component: {fileID: 5736290813781831692}
   - component: {fileID: 7113768003458226953}
-  - component: {fileID: 1735512241071495470}
+  - component: {fileID: 7051847727924114579}
   m_Layer: 0
   m_Name: Baumquhen
   m_TagString: Player
@@ -193,7 +193,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &1735512241071495470
+--- !u!114 &7051847727924114579
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -202,14 +202,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 658372949963265106}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d37f28b516727f44f9b4cc2ba4f86d1c, type: 3}
+  m_Script: {fileID: 11500000, guid: c5605602c981d8e4fa584adfc9a353d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxX: 3.19
-  maxY: 4
-  isDragging: 0
-  banDragging: 0
-  angleInDegrees: 0
+  moveSpeed: 10
+  returnSpeed: 300
+  maxX: 10
 --- !u!1 &4662656246976697096
 GameObject:
   m_ObjectHideFlags: 0
@@ -476,10 +474,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefab: {fileID: 2171634754819248133, guid: 4ec0dc7761f33eb48a18f92fb3860f7b, type: 3}
-  leftOffset: -5
-  rightOffset: 5
-  minInterval: 1
-  maxInterval: 2
+  leftX: -10
+  rightX: 10
+  spawnY: -7
+  minigame: {fileID: 5196859919152116805}
 --- !u!1 &7395547448137142780
 GameObject:
   m_ObjectHideFlags: 0
@@ -611,3 +609,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fa5327b6f5e26b4c8424e4461798844, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spawner: {fileID: 7677333301235730519}

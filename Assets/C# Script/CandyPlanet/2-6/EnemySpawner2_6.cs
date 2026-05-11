@@ -2,12 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 public class EnemySpawner2_6 : MonoBehaviour
 {
     [Header("Prefab to Spawn")]
-    public GameObject prefab; // 생성할 프리팹
+    public GameObject prefab;
 
     [Header("Spawn Range (Local X)")]
     public float leftX = -300f;
@@ -19,25 +20,32 @@ public class EnemySpawner2_6 : MonoBehaviour
 
     public void SpawnObstacle()
     {
-        // 3등분 중 하나 선택
-        int lane = Random.Range(0, 3);
-
         float width = (rightX - leftX) / 3f;
-        float startX = leftX + lane * width;
-
-        // 2/3 크기 장애물
         float obstacleWidth = width * (2f / 3f);
 
-        float spawnX = startX + (width / 2f);
+        int emptyLane = Random.Range(0, 3);
 
-        Vector3 spawnPos = new Vector3(spawnX, spawnY, 0f);
+        for (int lane = 0; lane < 3; lane++)
+        {
+            if (lane == emptyLane) continue;
 
-        GameObject obj = Instantiate(prefab, spawnPos, Quaternion.identity, transform);
+            float startX = leftX + lane * width;
+            float spawnX = startX + (width / 2f);
 
-        Enemy2_6 enemy = obj.GetComponent<Enemy2_6>();
-        enemy.Init(minigame);
+            Vector3 spawnPos = new Vector3(spawnX, spawnY, 0f);
 
-        // 크기 조절
-        obj.transform.localScale = new Vector3(obstacleWidth, obj.transform.localScale.y, 1f);
+            GameObject obj = Instantiate(prefab, spawnPos, Quaternion.identity, transform);
+
+            Enemy2_6 enemy = obj.GetComponent<Enemy2_6>();
+            enemy.Init(minigame);
+
+            SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
+
+            float spriteWidth = sr.bounds.size.x;
+            float extraWidth = 1.2f;
+            float scale = (obstacleWidth / spriteWidth) * extraWidth;
+
+            obj.transform.localScale = new Vector3(scale, 0.7f, 1f);
+        }
     }
 }
