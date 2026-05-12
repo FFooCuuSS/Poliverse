@@ -4,78 +4,75 @@ using UnityEngine;
 public class enemy_1_1_test : MonoBehaviour
 {
     private SpriteRenderer sr;
-    private Color originalColor;
+    private Sprite originalSprite;
+
+    [Header("Hit Visual")]
+    public Sprite hitSprite;
 
     private FadeActiveToggle fade;
 
     void Awake()
     {
-        sr = GetComponent<SpriteRenderer>();
-        if (sr != null)
-            originalColor = sr.color;
+        sr = GetComponentInChildren<SpriteRenderer>(true);
 
-        // 페이드 컴포넌트 캐싱(없어도 동작)
+        if (sr != null)
+            originalSprite = sr.sprite;
+
         fade = GetComponent<FadeActiveToggle>();
     }
 
-    public void Highlight(bool on)
+    public void SetHitSprite()
+    {
+        if (sr == null) return;
+        if (hitSprite == null) return;
+
+        sr.sprite = hitSprite;
+    }
+
+    public void ResetSprite()
     {
         if (sr == null) return;
 
-        // 필요하면 여기서 색 변경 로직을 다시 살리면 됨
-        // Color c = on ? Color.yellow : originalColor;
-        // c.a = sr.color.a; // 알파는 페이드가 관리하니까 유지
-        // sr.color = c;
+        sr.sprite = originalSprite;
     }
 
-    // Clear는 "표현 정리 + 페이드 아웃"만 담당
-    // SetActive(false)는 minigame에서 원하는 타이밍에 처리
     public void Clear()
     {
-        Highlight(false);
+        SetHitSprite();
 
         if (fade != null)
         {
-            // FadeActiveToggle이 SetActive를 만지지 않는 버전일 때 사용
             fade.FadeOut();
+            return;
         }
-        else
-        {
-            // 페이드가 없다면 그냥 알파만 낮춰둠(즉시 꺼지는 건 바깥에서)
-            if (sr != null)
-            {
-                Color c = sr.color;
-                c.a = 0.15f;
-                sr.color = c;
-            }
-        }
+
+        SetAlphaFallback(0.15f);
     }
 
-    // 라운드 시작/리셋 시 상태 초기화
     public void ResetEnemy()
     {
-        Highlight(false);
+        ResetSprite();
 
-        // 리셋 시 "낮은 알파"로 시작시키고 싶으면 여기서 맞춰둠
-        // (SetActive(false) 상태여도 값은 저장되니까 다음 SetActive(true) 후에 그대로 적용됨)
         if (fade != null)
         {
             fade.SetAlphaImmediate(fade.inactiveAlpha);
+            return;
         }
-        else
-        {
-            if (sr != null)
-            {
-                Color c = sr.color;
-                c.a = 0.15f;
-                sr.color = c;
-            }
-        }
+
+        SetAlphaFallback(0.15f);
     }
 
-    // 바깥 코드에서 필요하면 fade에 접근할 수 있게 제공
     public FadeActiveToggle TryGetFade()
     {
         return fade;
+    }
+
+    private void SetAlphaFallback(float alpha)
+    {
+        if (sr == null) return;
+
+        Color c = sr.color;
+        c.a = alpha;
+        sr.color = c;
     }
 }

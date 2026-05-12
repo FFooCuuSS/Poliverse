@@ -9,8 +9,6 @@ public class Basket1_7 : MonoBehaviour
     {
         if (!other.CompareTag("Item")) return;
 
-        Debug.Log("아이템이 바구니에 닿음 → 고정 후 페이드");
-
         GameObject root = other.transform.root.gameObject;
 
         // 1) 이동/물리 정지

@@ -38,9 +38,40 @@ public abstract class MiniGameBase : MonoBehaviour
 
         // 미니게임이 "입력했음"만 알리면, 매니저가 판정한다
         void ReceivePlayerInput(string action = null);
+        int GetTotalNodeCount();
     }
 
     protected IRhythmManager rhythmManager;
+
+
+    [Header("Score")]
+    [SerializeField] private bool printScoreDebugOnEnd = true;
+    // 미니게임당 점수판 집계용 (미니게임 하나 끝난 후 uimanager가 읽어갈 것임)
+    public struct ScoreResult
+    {
+        public int totalNode;
+        public int perfect;
+        public int good;
+        public int miss;
+
+        public ScoreResult(int totalNode, int perfect, int good, int miss)
+        {
+            this.totalNode = totalNode;
+            this.perfect = perfect;
+            this.good = good;
+            this.miss = miss;
+        }
+    }
+    private int totalNodeCount;
+    private int perfectCount;
+    private int goodCount;
+    private int missCount;
+
+    private int manualSuccessCount;
+    private int manualFailCount;
+
+    private bool scoreFinalized = false;
+
 
     protected virtual void Awake()
     {
@@ -59,9 +90,10 @@ public abstract class MiniGameBase : MonoBehaviour
         IsSuccess = false;
         IsInputLocked = false;
 
-        Debug.Log($"{gameObject.name} 게임 시작!");
-        Debug.Log($"설명: {MinigameExplain}");
-        Debug.Log($"타이머: {TimerDuration}초");
+        ResetScoreSession();
+
+        if (rhythmManager != null)
+            totalNodeCount = rhythmManager.GetTotalNodeCount();
     }
 
     public virtual void ResetGame()
@@ -69,6 +101,21 @@ public abstract class MiniGameBase : MonoBehaviour
         IsSuccess = false;
         OnSuccess = null;
         OnFail = null;
+
+        ResetScoreSession();
+    }
+
+    protected virtual void ResetScoreSession()
+    {
+        totalNodeCount = 0;
+        perfectCount = 0;
+        goodCount = 0;
+        missCount = 0;
+
+        manualSuccessCount = 0;
+        manualFailCount = 0;
+
+        scoreFinalized = false;
     }
 
     public virtual void BindRhythmManager(IRhythmManager rm)
@@ -120,7 +167,57 @@ public abstract class MiniGameBase : MonoBehaviour
     // RhythmManager → 미니게임 (Perfect/Good/Miss)
     public virtual void OnJudgement(JudgementResult judgement)
     {
+        AddJudgementCount(judgement);
         Debug.Log($"{judgement}");
+    }
+    protected virtual void AddJudgementCount(JudgementResult judgement)
+    {
+        if (scoreFinalized) return;
+
+        switch (judgement)
+        {
+            case JudgementResult.Perfect:
+                perfectCount++;
+                break;
+
+            case JudgementResult.Good:
+                goodCount++;
+                break;
+
+            case JudgementResult.Miss:
+                missCount++;
+                break;
+        }
+    }
+    public virtual ScoreResult FinalizeScoreSession()
+    {
+        if (!scoreFinalized)
+        {
+            scoreFinalized = true;
+
+            perfectCount += manualSuccessCount;
+            missCount += manualFailCount;
+
+            int judgedTotal = perfectCount + goodCount + missCount;
+
+            if (totalNodeCount <= 0)
+                totalNodeCount = judgedTotal;
+
+            if (printScoreDebugOnEnd)
+            {
+                Debug.Log(
+                    $"[MiniGame Score] {gameObject.name}\n" +
+                    $"- Total Nodes : {totalNodeCount}\n" +
+                    $"- Perfect     : {perfectCount}\n" +
+                    $"- Good        : {goodCount}\n" +
+                    $"- Miss        : {missCount}\n" +
+                    $"- JudgedTotal : {judgedTotal}\n" +
+                    $"- Manual S/F  : {manualSuccessCount}/{manualFailCount}"
+                );
+            }
+        }
+
+        return new ScoreResult(totalNodeCount, perfectCount, goodCount, missCount);
     }
 
     // 미니게임 내부 오브젝트 → 미니게임(Base)
@@ -129,6 +226,19 @@ public abstract class MiniGameBase : MonoBehaviour
     {
         if (IsInputLocked) return;
         rhythmManager?.ReceivePlayerInput(action);
+    }
+
+    // input 판정 안쓰는 미니게임들 점수 처리
+    public virtual void ReportManualSuccess()
+    {
+        if (scoreFinalized) return;
+        manualSuccessCount++;
+    }
+
+    public virtual void ReportManualFail()
+    {
+        if (scoreFinalized) return;
+        manualFailCount++;
     }
 
     public virtual void Success()

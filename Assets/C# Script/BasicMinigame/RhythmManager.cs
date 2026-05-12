@@ -75,7 +75,18 @@ public class RhythmManager : MonoBehaviour, MiniGameBase.IRhythmManager
             loadedHandle = null;
         }
     }
+    public int GetTotalNodeCount()
+    {
+        int count = 0;
 
+        for (int i = 0; i < events.Count; i++)
+        {
+            if (IsJudgeType(events[i].type))
+                count++;
+        }
+
+        return count;
+    }
     private static bool IsCueType(string type)
     {
         return string.Equals(type, "Show", StringComparison.OrdinalIgnoreCase)

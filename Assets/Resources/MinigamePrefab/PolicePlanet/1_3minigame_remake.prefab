@@ -4689,8 +4689,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   swipeThreshold: 50
-  moveStep: 3
   moveDuration: 0.2
+  bottomY: -1.44
+  laneDistance: 3
+  currentLane: 0
 --- !u!114 &7290277962758416243
 MonoBehaviour:
   m_ObjectHideFlags: 0

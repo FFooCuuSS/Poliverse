@@ -136,8 +136,6 @@ public class Minigame_1_7 : MiniGameBase
 
         awaitingJudge = true;
 
-        Debug.Log("Minigame_1_7 OnPlayerInput 호출됨");
-
         base.OnPlayerInput(action ?? "Input");
     }
 
@@ -166,7 +164,6 @@ public class Minigame_1_7 : MiniGameBase
         {
             roundActive = false;
             pendingShow = false;
-            Debug.Log("라운드 종료. 다음 Move에서 전환.");
         }
     }
 
@@ -200,7 +197,6 @@ public class Minigame_1_7 : MiniGameBase
         {
             gameEnded = true;
             Debug.Log($"Game End. totalSuccess = {totalSuccess}");
-            EndMinigameOnly();
         }
         else
         {
@@ -262,10 +258,5 @@ public class Minigame_1_7 : MiniGameBase
             pendingShow = false;
             holdJudge?.ShowPreviewUI(inputIndex, prisoner.transform);
         }
-    }
-
-    private void EndMinigameOnly()
-    {
-        Debug.Log("Minigame 1_7 finished.");
     }
 }
