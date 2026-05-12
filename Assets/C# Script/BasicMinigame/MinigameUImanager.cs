@@ -53,6 +53,19 @@ public class MinigameUIManager : MonoBehaviour
     [SerializeField] private float finalBgmTargetVolume = 0.5f;
     [SerializeField] private float finalBgmFadeTime = 5f;
 
+    [Header("NEW MODE - Timeline Offset")]
+    [SerializeField] private bool useStartTimeOffset = false;
+    [SerializeField] private float startTimeOffset = 0f;
+
+    [Header("Score Debug")]
+    [SerializeField] private bool printTotalScoreDebug = true;
+
+    private int totalNodeSum;
+    private int totalPerfectSum;
+    private int totalGoodSum;
+    private int totalMissSum;
+    private int endedMinigameCount;
+
     private Coroutine timelineCoroutine;
     private bool isSwitching = false;
 
@@ -245,6 +258,18 @@ public class MinigameUIManager : MonoBehaviour
 
         if (!show) blackPanelImage.gameObject.SetActive(false);
     }
+    private float GetTimelineStartTime(int index)
+    {
+        if (startTimes == null || index < 0 || index >= startTimes.Count)
+            return 0f;
+
+        float t = startTimes[index];
+
+        if (useStartTimeOffset)
+            t += startTimeOffset;
+
+        return Mathf.Max(0f, t);
+    }
 
     private void ValidateTimeline()
     {
@@ -260,10 +285,17 @@ public class MinigameUIManager : MonoBehaviour
             }
         }
 
-        // 큐보다 타임이 많으면 뒤는 못 씀
-        if (startTimes.Count > minigameQueue.Count)
+        int gameCount = minigameQueue.Count;
+
+        // startTimes는 미니게임 개수와 같거나,
+        // 마지막 엔딩 타이밍 포함해서 gameCount + 1까지 허용
+        if (startTimes.Count < gameCount)
         {
-            Debug.LogWarning($"[Timeline] startTimes({startTimes.Count}) > minigameQueue({minigameQueue.Count}). Extra times will be ignored.");
+            Debug.LogError($"[Timeline] startTimes({startTimes.Count}) < minigameQueue({gameCount}). Not enough start times.");
+        }
+        else if (startTimes.Count > gameCount + 1)
+        {
+            Debug.LogWarning($"[Timeline] startTimes({startTimes.Count}) > minigameQueue({gameCount}) + final event(1). Extra times will be ignored.");
         }
     }
 
@@ -278,33 +310,70 @@ public class MinigameUIManager : MonoBehaviour
         bgmActuallyStarted = true;
         gameplayStartDspTime = bgmStartDspTime;
 
-        for (int i = 0; i < startTimes.Count; i++)
+        // 미니게임 개수보다 startTimes가 적으면 진행 불가
+        if (startTimes.Count < gameCount)
         {
-            float startT = Mathf.Max(0f, startTimes[i]);
+            Debug.LogError($"[Timeline] startTimes({startTimes.Count}) < gameCount({gameCount}).");
+            yield break;
+        }
+
+        // 미니게임 순차 실행
+        for (int i = 0; i < gameCount; i++)
+        {
+            float startT = GetTimelineStartTime(i);
             float preEndT = Mathf.Max(0f, startT - preEndGap);
 
+            // 시작 직전 검은 패널 띄우고 이전 미니게임 제거
             yield return WaitUntilBGMTime(preEndT);
-            yield return StartPreparedMinigame();
+            yield return EndCurrentMinigame_ShowBlack();
 
-            // 마지막 이벤트
-            if (i >= gameCount)
-            {
-                yield return FadeBlack(false);
-
-                if (gameStartEnd != null)
-                    gameStartEnd.ShowFinalPanel();
-
-                FadeBGM(finalBgmTargetVolume, finalBgmFadeTime);
-
-                yield break;
-            }
-
+            // 다음 미니게임 준비
             string nextPath = minigameQueue.Dequeue();
-
             yield return PrepareNextMinigame(nextPath);
 
+            // 정확한 시작 시간까지 대기
             yield return WaitUntilBGMTime(startT);
+
+            // 준비된 미니게임 시작
             yield return StartPreparedMinigame();
+        }
+
+        // 마지막 엔딩 이벤트 시간
+        // startTimes가 gameCount + 1개면 마지막 값을 엔딩 타이밍으로 사용
+        if (startTimes.Count > gameCount)
+        {
+            float finalT = GetTimelineStartTime(gameCount);
+            float finalPreEndT = Mathf.Max(0f, finalT - preEndGap);
+
+            yield return WaitUntilBGMTime(finalPreEndT);
+            yield return EndCurrentMinigame_ShowBlack();
+
+            yield return WaitUntilBGMTime(finalT);
+
+            yield return FadeBlack(false);
+
+            if (finalObject != null)
+                finalObject.SetActive(true);
+
+            if (gameStartEnd != null)
+                gameStartEnd.ShowFinalPanel();
+
+            FadeBGM(finalBgmTargetVolume, finalBgmFadeTime);
+        }
+        else
+        {
+            // 엔딩 타이밍이 따로 없으면 마지막 미니게임 끝난 뒤 바로 종료 처리
+            yield return EndCurrentMinigame_ShowBlack();
+
+            yield return FadeBlack(false);
+
+            if (finalObject != null)
+                finalObject.SetActive(true);
+
+            if (gameStartEnd != null)
+                gameStartEnd.ShowFinalPanel();
+
+            FadeBGM(finalBgmTargetVolume, finalBgmFadeTime);
         }
     }
 
@@ -410,6 +479,8 @@ public class MinigameUIManager : MonoBehaviour
         // 미니게임 제거
         if (currentMinigame != null)
         {
+            CollectMinigameScore(currentMinigame);
+
             DOTween.Kill(currentMinigame.transform);
 
             if (rhythmManager != null)
@@ -429,6 +500,30 @@ public class MinigameUIManager : MonoBehaviour
         isSwitching = false;
     }
 
+    // 점수 책정 디버그
+    private void CollectMinigameScore(MiniGameBase minigame)
+    {
+        if (minigame == null) return;
+
+        MiniGameBase.ScoreResult result = minigame.FinalizeScoreSession();
+
+        totalNodeSum += result.totalNode;
+        totalPerfectSum += result.perfect;
+        totalGoodSum += result.good;
+        totalMissSum += result.miss;
+        endedMinigameCount++;
+
+        if (printTotalScoreDebug)
+        {
+            Debug.Log(
+                $"UI[Total Score After Minigame {endedMinigameCount}]\n" +
+                $"- Total Nodes : {totalNodeSum}\n" +
+                $"- Perfect     : {totalPerfectSum}\n" +
+                $"- Good        : {totalGoodSum}\n" +
+                $"- Miss        : {totalMissSum}"
+            );
+        }
+    }
     private IEnumerator TimerEndFailDelay()
     {
         yield return new WaitForSeconds(1f);
@@ -711,12 +806,11 @@ public class MinigameUIManager : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
-        if (currentMinigame != null)
-        {
-            DOTween.Kill(currentMinigame.transform);
+        if(currentMinigame != null)
+{
+            CollectMinigameScore(currentMinigame);
 
-            //currentMinigame.OnSuccess -= OnMinigameSuccess;
-            //currentMinigame.OnFail -= OnMinigameFail;
+            DOTween.Kill(currentMinigame.transform);
 
             if (rhythmManager != null)
                 rhythmManager.ClearCurrent();

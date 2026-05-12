@@ -124,7 +124,7 @@ public class Manager_1_10 : MonoBehaviour
 
     private void ShowFailState()
     {
-        if (clearObject != null) clearObject.SetActive(true);
+        if (clearObject != null) clearObject.SetActive(false);
         if (failObject != null) failObject.SetActive(true);
     }
 

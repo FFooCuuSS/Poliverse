@@ -10,6 +10,9 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
     private IRhythmManager rhythmManager;
 
+    [Header("Debug")]
+    [SerializeField] private bool debugLog = false;
+
     [Header("Enemies (0~3 정답 순서)")]
     public enemy_1_1_test[] enemies;
 
@@ -49,18 +52,24 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
     private Camera cam;
 
+    private void Log(string msg)
+    {
+        if (!debugLog) return;
+        Debug.Log(msg);
+    }
+
     void Start()
     {
-        Debug.Log("[1-1] START");
+        if (Scope != null)
+            Scope.SetActive(false);
 
-        Scope.SetActive(false);
         cam = Camera.main;
         StartGame();
     }
 
     public override void StartGame()
     {
-        Debug.Log("[1-1] StartGame");
+        base.StartGame();
 
         ended = false;
         canClick = false;
@@ -76,15 +85,16 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
         autoOffJobs = new Coroutine[ENEMY_COUNT];
 
         lastRhythmAction = null;
+        pendingInputs.Clear();
 
         PrepareShowPositions();
         ResetRoundObjects();
+
+        Log("[1-1] StartGame");
     }
 
     public override void BindRhythmManager(IRhythmManager manager)
     {
-        Debug.Log("[1-1] BindRhythmManager");
-
         if (rhythmManager != null)
             rhythmManager.OnEventTriggered -= OnRhythmEvent;
 
@@ -93,32 +103,37 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
         if (rhythmManager != null)
         {
             rhythmManager.OnEventTriggered += OnRhythmEvent;
-            Debug.Log("[1-1] RhythmManager bind complete");
+            Log("[1-1] RhythmManager bound");
         }
-        else
-        {
-            Debug.LogError("[1-1] RhythmManager NULL");
-        }
+
+        // manager가 null이어도 에러 안 띄움.
+        // 리듬매니저 분리/전환 중에는 정상적으로 null일 수 있음.
     }
 
     public override void OnRhythmEvent(string action)
     {
-        Debug.Log("[1-1] RhythmEvent = " + action);
-
         if (ended || string.IsNullOrEmpty(action)) return;
 
+        base.OnRhythmEvent(action);
         action = action.Trim();
 
         if (lastRhythmAction == "Show" && action == "Input")
-            Scope.SetActive(true);
-
+        {
+            if (Scope != null)
+                Scope.SetActive(true);
+        }
         else if (lastRhythmAction == "Input" && action == "Show")
-            Scope.SetActive(false);
+        {
+            if (Scope != null)
+                Scope.SetActive(false);
+        }
 
         lastRhythmAction = action;
 
-        if (action == "Show") HandleShow();
-        else if (action == "Input") HandleInput();
+        if (action == "Show")
+            HandleShow();
+        else if (action == "Input")
+            HandleInput();
     }
 
     void Update()
@@ -137,9 +152,9 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
         if (col == null)
         {
-            Debug.Log("[1-1] Click empty");
+            if (canClick)
+                missCount++;
 
-            if (canClick) missCount++;
             return;
         }
 
@@ -147,49 +162,53 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
         if (clicked == null)
         {
-            Debug.Log("[1-1] Click non enemy");
+            if (canClick)
+                missCount++;
 
-            if (canClick) missCount++;
             return;
         }
 
-        Debug.Log("[1-1] Click enemy = " + clicked.name);
-
         if (!canClick || pendingInputs.Count == 0)
         {
-            Debug.Log("[1-1] Click outside input window");
             missCount++;
             return;
         }
 
         int expected = pendingInputs.Peek();
 
-        Debug.Log("[1-1] Expected enemy index = " + expected);
-
-        if (clicked != enemies[expected])
+        if (!IsValidEnemyIndex(expected))
         {
-            Debug.Log("[1-1] Wrong enemy");
+            pendingInputs.Dequeue();
             missCount++;
             return;
         }
 
-        // 먼저 큐에서 제거
-        pendingInputs.Dequeue();
+        if (clicked != enemies[expected])
+        {
+            missCount++;
+            return;
+        }
 
-        // 그 다음 성공 처리
+        pendingInputs.Dequeue();
         ResolveSuccess(expected);
     }
 
     void HandleShow()
     {
-        Debug.Log("[1-1] HandleShow index=" + showIndex);
-
         if (showIndex >= ENEMY_COUNT) return;
+        if (!IsValidEnemyIndex(showIndex)) return;
+        if (showPositions == null || showPositions.Length < ENEMY_COUNT) return;
+        if (shuffledPosIndex == null || shuffledPosIndex.Length < ENEMY_COUNT) return;
 
         int posIdx = shuffledPosIndex[showIndex];
 
+        if (posIdx < 0 || posIdx >= showPositions.Length) return;
+        if (showPositions[posIdx] == null) return;
+
         var e = enemies[showIndex];
         var p = showPositions[posIdx];
+
+        if (e == null) return;
 
         e.transform.position = p.position;
 
@@ -203,8 +222,6 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
     void HandleInput()
     {
-        Debug.Log("[1-1] HandleInput");
-
         if (canClick)
             CloseInputWindow();
 
@@ -212,7 +229,7 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
         for (int i = inputIndex; i < showIndex; i++)
         {
-            if (!resolvedThisRound[i] && enemies[i] != null)
+            if (IsValidEnemyIndex(i) && !resolvedThisRound[i] && enemies[i] != null)
             {
                 pendingInputs.Enqueue(i);
                 break;
@@ -220,24 +237,19 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
         }
 
         if (pendingInputs.Count == 0)
-        {
-            Debug.LogWarning("[1-1] Input ignored (queue empty)");
             return;
-        }
 
         canClick = true;
 
-        Debug.Log("[1-1] Input start expected=" + pendingInputs.Peek());
+        if (inputWindowJob != null)
+            StopCoroutine(inputWindowJob);
 
-        if (inputWindowJob != null) StopCoroutine(inputWindowJob);
         inputWindowJob = StartCoroutine(InputWindowRoutine());
     }
 
     IEnumerator InputWindowRoutine()
     {
         yield return new WaitForSeconds(inputWindowSeconds);
-
-        Debug.Log("[1-1] Input window close");
 
         canClick = false;
         inputWindowJob = null;
@@ -247,12 +259,11 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
     {
         yield return new WaitForSeconds(autoOffSeconds);
 
+        if (!IsValidEnemyIndex(idx)) yield break;
         if (resolvedThisRound[idx]) yield break;
 
         resolvedThisRound[idx] = true;
         missCount++;
-
-        Debug.Log("[1-1] Auto miss idx=" + idx);
 
         yield return EnemyHideThenSetActiveFalse(enemies[idx]);
 
@@ -265,19 +276,37 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
     void ResolveSuccess(int idx)
     {
-        Debug.Log("[1-1] SUCCESS idx=" + idx);
+        if (!IsValidEnemyIndex(idx)) return;
+        StartCoroutine(ResolveSuccessRoutine(idx));
+    }
 
+    IEnumerator ResolveSuccessRoutine(int idx)
+    {
         resolvedThisRound[idx] = true;
         successCount++;
 
         StopAutoOff(idx);
-
-        StartCoroutine(EnemyHideThenSetActiveFalse(enemies[idx]));
-
         CloseInputWindow();
+
+        yield return EnemySuccessHideThenSetActiveFalse(enemies[idx]);
 
         inputIndex++;
         TryEndRound();
+    }
+
+    IEnumerator EnemySuccessHideThenSetActiveFalse(enemy_1_1_test e)
+    {
+        if (e == null) yield break;
+
+        FadeActiveToggle fade = e.TryGetFade();
+
+        e.Clear();
+
+        if (fade != null)
+            yield return new WaitForSeconds(fade.GetFadeTime());
+
+        e.ResetEnemy();
+        e.gameObject.SetActive(false);
     }
 
     void CloseInputWindow()
@@ -296,26 +325,27 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
     {
         if (inputIndex < ENEMY_COUNT) return;
 
-        Debug.Log("[1-1] Round End");
-
         EndRound();
 
-        Scope.SetActive(false);
-        targetScope.position = Vector2.zero;
+        if (Scope != null)
+            Scope.SetActive(false);
+
+        if (targetScope != null)
+            targetScope.position = Vector2.zero;
     }
 
     void EndRound()
     {
         round++;
 
-        Debug.Log("[1-1] Round = " + round);
-
         if (round >= TOTAL_ROUND)
         {
-            Debug.Log("[1-1] FINAL success=" + successCount + " miss=" + missCount);
+            Log($"[1-1] FINAL success={successCount}, miss={missCount}");
 
-            if (successCount >= 7) Succeed();
-            else Failure();
+            if (successCount >= 7)
+                Succeed();
+            else
+                Failure();
 
             return;
         }
@@ -323,6 +353,7 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
         canClick = false;
         showIndex = 0;
         inputIndex = 0;
+        pendingInputs.Clear();
 
         PrepareShowPositions();
         ResetRoundObjects();
@@ -330,11 +361,20 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
     void ResetRoundObjects()
     {
+        if (resolvedThisRound == null || resolvedThisRound.Length < ENEMY_COUNT)
+            resolvedThisRound = new bool[ENEMY_COUNT];
+
+        if (autoOffJobs == null || autoOffJobs.Length < ENEMY_COUNT)
+            autoOffJobs = new Coroutine[ENEMY_COUNT];
+
         for (int i = 0; i < ENEMY_COUNT; i++)
         {
             resolvedThisRound[i] = false;
 
             StopAutoOff(i);
+
+            if (!IsValidEnemyIndex(i)) continue;
+            if (enemies[i] == null) continue;
 
             enemies[i].ResetEnemy();
             EnemySetInactiveImmediate(enemies[i]);
@@ -343,6 +383,9 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
     void StopAutoOff(int idx)
     {
+        if (autoOffJobs == null) return;
+        if (idx < 0 || idx >= autoOffJobs.Length) return;
+
         if (autoOffJobs[idx] != null)
         {
             StopCoroutine(autoOffJobs[idx]);
@@ -367,6 +410,7 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
     public void Succeed()
     {
         if (ended) return;
+
         ended = true;
         Success();
     }
@@ -374,17 +418,19 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
     public void Failure()
     {
         if (ended) return;
+
         ended = true;
         Fail();
     }
 
     void EnemySetActiveTrueThenShow(enemy_1_1_test e)
     {
-        GameObject go = e.gameObject;
+        if (e == null) return;
 
+        GameObject go = e.gameObject;
         go.SetActive(true);
 
-        FadeActiveToggle fade = go.GetComponent<FadeActiveToggle>();
+        FadeActiveToggle fade = e.TryGetFade();
 
         if (fade != null)
         {
@@ -395,7 +441,9 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
     IEnumerator EnemyHideThenSetActiveFalse(enemy_1_1_test e)
     {
-        FadeActiveToggle fade = e.GetComponent<FadeActiveToggle>();
+        if (e == null) yield break;
+
+        FadeActiveToggle fade = e.TryGetFade();
 
         if (fade != null)
         {
@@ -403,16 +451,24 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
             yield return new WaitForSeconds(fade.GetFadeTime());
         }
 
+        e.ResetEnemy();
         e.gameObject.SetActive(false);
     }
 
     void EnemySetInactiveImmediate(enemy_1_1_test e)
     {
-        FadeActiveToggle fade = e.GetComponent<FadeActiveToggle>();
+        if (e == null) return;
+
+        FadeActiveToggle fade = e.TryGetFade();
 
         if (fade != null)
             fade.SetAlphaImmediate(fade.inactiveAlpha);
 
         e.gameObject.SetActive(false);
+    }
+
+    private bool IsValidEnemyIndex(int idx)
+    {
+        return enemies != null && idx >= 0 && idx < enemies.Length && idx < ENEMY_COUNT;
     }
 }

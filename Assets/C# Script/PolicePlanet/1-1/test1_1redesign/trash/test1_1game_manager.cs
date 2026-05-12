@@ -52,7 +52,7 @@ public class test1_1game_manager : MonoBehaviour
             expected++;
 
             Debug.Log("Success: " + tag.orderIndex);
-
+            
             Destroy(tag.transform.root.gameObject);
 
             //if (expected >= pos.Length) Debug.Log("All Clear!");

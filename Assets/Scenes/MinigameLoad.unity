@@ -1483,17 +1483,17 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   startTimes:
-  - 7.5
-  - 23.85
-  - 39.9
-  - 55.7
-  - 72
-  - 88
-  - 103.7
-  - 119.5
-  - 135.2
-  - 151.5
-  - 198.5
+  - 8.5
+  - 24.85
+  - 40.9
+  - 56.7
+  - 73.1
+  - 89
+  - 104.65
+  - 120.6
+  - 136.2
+  - 152.5
+  - 199.5
   preEndGap: 0.5
   blackPanelImage: {fileID: 1586313778}
   blackFadeDuration: 0.05
@@ -1502,6 +1502,8 @@ MonoBehaviour:
   finalObject: {fileID: 0}
   finalBgmTargetVolume: 0.5
   finalBgmFadeTime: 5
+  useStartTimeOffset: 1
+  startTimeOffset: -0.25
   audioSource: {fileID: 559817386}
 --- !u!82 &559817386
 AudioSource:
@@ -1644,7 +1646,7 @@ MonoBehaviour:
   button1: {fileID: 497064895}
   button2: {fileID: 1406874418}
   sameTimeObject: {fileID: 1497851931}
-  fadePanel: {fileID: 0}
+  fadePanel: {fileID: 1586313778}
   fadeDuration: 1
   menuSceneName: LobbyScene
 --- !u!1 &610214542

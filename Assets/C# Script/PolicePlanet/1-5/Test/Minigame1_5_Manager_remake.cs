@@ -190,7 +190,7 @@ public class Minigame1_5_Manager_remake : MiniGameBase
 
             hand.position = moveData.startPos;
 
-            Debug.Log($"[Minigame1_5] Round {i + 1} START / Case {currentCaseNum}");
+            //Debug.Log($"[Minigame1_5] Round {i + 1} START / Case {currentCaseNum}");
             DebugCurrentCaseTargetPositions();
 
             acceptInput = true;
@@ -204,7 +204,7 @@ public class Minigame1_5_Manager_remake : MiniGameBase
             if (remain > 0f)
                 yield return new WaitForSeconds(remain);
 
-            Debug.Log($"[Minigame1_5] Round {i + 1} END / RoundSuccess = {roundSuccessCounts[i]} / TotalSuccess = {totalSuccessCount}");
+            //Debug.Log($"[Minigame1_5] Round {i + 1} END / RoundSuccess = {roundSuccessCounts[i]} / TotalSuccess = {totalSuccessCount}");
         }
 
         EndByRule();
@@ -315,12 +315,12 @@ public class Minigame1_5_Manager_remake : MiniGameBase
                     case1Prisoners[i].PlayHit();
                 }
 
-                Debug.Log($"[Minigame1_5] CASE1 SUCCESS | TargetIndex={i}, HandX={handX:F2}, TargetX={targetX:F2}, Diff={diff:F2}, TotalSuccess={totalSuccessCount}");
+                //Debug.Log($"[Minigame1_5] CASE1 SUCCESS | TargetIndex={i}, HandX={handX:F2}, TargetX={targetX:F2}, Diff={diff:F2}, TotalSuccess={totalSuccessCount}");
                 return;
             }
         }
 
-        Debug.Log($"[Minigame1_5] CASE1 MISS | HandX={handX:F2}");
+        //Debug.Log($"[Minigame1_5] CASE1 MISS | HandX={handX:F2}");
     }
 
     private void CheckCase2Success(float handX)
@@ -348,12 +348,12 @@ public class Minigame1_5_Manager_remake : MiniGameBase
                 if (case2Prisoners != null && i < case2Prisoners.Length && case2Prisoners[i] != null)
                     case2Prisoners[i].PlayHit();
 
-                Debug.Log($"[Minigame1_5] CASE2 SUCCESS | TargetIndex={i}, HandX={handX:F2}, TargetX={targetX:F2}, Diff={diff:F2}, TotalSuccess={totalSuccessCount}");
+                //Debug.Log($"[Minigame1_5] CASE2 SUCCESS | TargetIndex={i}, HandX={handX:F2}, TargetX={targetX:F2}, Diff={diff:F2}, TotalSuccess={totalSuccessCount}");
                 return;
             }
         }
 
-        Debug.Log($"[Minigame1_5] CASE2 MISS | HandX={handX:F2}");
+        //Debug.Log($"[Minigame1_5] CASE2 MISS | HandX={handX:F2}");
     }
 
     private void DebugCurrentCaseTargetPositions()

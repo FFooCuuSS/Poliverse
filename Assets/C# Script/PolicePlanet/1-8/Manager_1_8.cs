@@ -39,8 +39,6 @@ public class Manager_1_8 : MonoBehaviour
         escapedCount = 0;
 
         ClearAllPrisoners();
-
-        Debug.Log("[Manager_1_8] 상태 초기화 완료");
     }
 
     public void SpawnNextPrisoner()
@@ -81,7 +79,6 @@ public class Manager_1_8 : MonoBehaviour
         alivePrisoners.Add(prisoner);
 
         spawnCount++;
-        Debug.Log($"[Manager_1_8] Spawn #{spawnCount} | prefabIndex={prefabIndex} | speed={assignedSpeed}");
     }
 
     public void NotifyCaptured(Prisoner_1_8 prisoner)
@@ -90,8 +87,6 @@ public class Manager_1_8 : MonoBehaviour
 
         capturedCount++;
         alivePrisoners.Remove(prisoner);
-
-        Debug.Log($"[Manager_1_8] 포획 성공 +1 | capturedCount={capturedCount} | escapedCount={escapedCount} | alive={alivePrisoners.Count}");
     }
 
     public void NotifyEscaped(Prisoner_1_8 prisoner)
@@ -100,8 +95,6 @@ public class Manager_1_8 : MonoBehaviour
 
         escapedCount++;
         alivePrisoners.Remove(prisoner);
-
-        Debug.Log($"[Manager_1_8] 탈출 +1 | capturedCount={capturedCount} | escapedCount={escapedCount} | alive={alivePrisoners.Count}");
     }
 
     public void ClearAllPrisoners()

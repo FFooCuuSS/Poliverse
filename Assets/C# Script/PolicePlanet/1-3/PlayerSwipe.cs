@@ -4,8 +4,14 @@ using DG.Tweening;
 public class PlayerSwipe : MonoBehaviour
 {
     [SerializeField] private float swipeThreshold = 50f;
-    [SerializeField] private float moveStep = 1f;
     [SerializeField] private float moveDuration = 0.2f;
+
+    [Header("Lane Settings")]
+    [SerializeField] private float bottomY = 0f;
+    [SerializeField] private float laneDistance = 1f;
+    [SerializeField] private int currentLane = 0;
+    // 0 = 아래, 1 = 위
+    // 시작 y가 0이면 currentLane = 0
 
     private Vector2 startPos;
     private bool isSwiping;
@@ -13,9 +19,16 @@ public class PlayerSwipe : MonoBehaviour
 
     private MiniGameBase miniGameBase;
 
+    private float TopY => bottomY + laneDistance;
+
     private void Awake()
     {
         miniGameBase = GetComponentInParent<MiniGameBase>();
+
+        // 시작 위치 보정
+        Vector3 pos = transform.position;
+        pos.y = GetLaneY(currentLane);
+        transform.position = pos;
     }
 
     void Update()
@@ -34,7 +47,6 @@ public class PlayerSwipe : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            Debug.Log("Click");
             startPos = Input.mousePosition;
             isSwiping = true;
         }
@@ -72,10 +84,24 @@ public class PlayerSwipe : MonoBehaviour
         if (Mathf.Abs(deltaY) < swipeThreshold)
             return;
 
-        //miniGameBase?.OnPlayerInput("Swipe");
+        int nextLane = currentLane;
 
-        float direction = deltaY > 0 ? 1f : -1f;
-        Vector3 targetPos = transform.position + Vector3.up * moveStep * direction;
+        if (deltaY > 0)
+        {
+            nextLane = 1;
+        }
+        else
+        {
+            nextLane = 0;
+        }
+
+        if (nextLane == currentLane)
+            return;
+
+        currentLane = nextLane;
+
+        Vector3 targetPos = transform.position;
+        targetPos.y = GetLaneY(currentLane);
 
         isMoving = true;
         transform.DOKill();
@@ -83,5 +109,10 @@ public class PlayerSwipe : MonoBehaviour
         transform.DOMove(targetPos, moveDuration)
             .SetEase(Ease.OutCubic)
             .OnComplete(() => isMoving = false);
+    }
+
+    private float GetLaneY(int lane)
+    {
+        return lane == 0 ? bottomY : TopY;
     }
 }
