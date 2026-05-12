@@ -41,7 +41,7 @@ public class BushSpawner3_8 : MonoBehaviour
     void SpawnBush()
     {
         enemyWatch.PlayWatchRoutine();
-        GameObject obj = Instantiate(bushPrefab, spawnPosition, Quaternion.identity);
+        GameObject obj = Instantiate(bushPrefab, spawnPosition, Quaternion.identity,transform);
 
         BushMover3_8 mover = obj.GetComponent<BushMover3_8>();
 
