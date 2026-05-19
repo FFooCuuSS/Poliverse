@@ -12,15 +12,11 @@ public class Minigame_2_9 : MiniGameBase
     protected override string MinigameExplain => "論嬴塭!";
 
     private bool ended;
-    public int missCount = 0;
     private int totalCount = 5;
 
     [SerializeField] private CloudSpawner cloudSpawner;
 
-    private void Start()
-    {
-        StartGame();
-    }
+
     public override void StartGame()
     {
         base.StartGame();
@@ -67,8 +63,7 @@ public class Minigame_2_9 : MiniGameBase
         switch (judgement)
         {
             case JudgementResult.Miss:
-                missCount++;
-                Debug.Log($"⑷營 褒熱 �蝦�: {missCount}");
+
                 break;
 
             case JudgementResult.Good:
