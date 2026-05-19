@@ -6,13 +6,14 @@ public class Debris : MonoBehaviour
 {
     public float fallSpeed = 5f;
     public float destroyY = -3f;
+    public int debrisCount = 0;
 
-    void Update()
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-
-        if (transform.position.y < destroyY)
+        if (collision.CompareTag("Bowl"))
         {
             Destroy(gameObject);
+            debrisCount++;
         }
     }
 }

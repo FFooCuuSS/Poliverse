@@ -25,6 +25,7 @@ TagManager:
   - DragZone
   - CorrectZone
   - Macaron
+  - Bowl
   layers:
   - Default
   - TransparentFX

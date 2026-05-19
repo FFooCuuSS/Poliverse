@@ -44,10 +44,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63ac23e69f70a45468c6782d48818313, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabs:
+  normalPrefabs:
   - {fileID: 4982613521882794214, guid: 71941eb07d2cf424198f330ef94cd6bd, type: 3}
   - {fileID: 4026747689770146215, guid: eb5c3fbefe9a78e4083c6eef037da8c5, type: 3}
   - {fileID: 8262754569691398252, guid: 8ae44e5b77b698b4e8a30a89e140da03, type: 3}
+  shinyPrefabs:
+  - {fileID: 4982613521882794214, guid: 5546c8be21590194b970e0450727ae69, type: 3}
+  - {fileID: 4026747689770146215, guid: 7e9be71924c8b5448a5a9136f7f183e1, type: 3}
+  - {fileID: 8262754569691398252, guid: af76a402506912e468013d833a23d537, type: 3}
+  shinyCloudIndexes: 02000000040000000600000008000000
   spawnX: -10
   spawnY: 0
   spacing: 0.5
@@ -132,7 +137,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc4cd8c1ee4a7804daee061375975817, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  missCount: 0
+  printScoreDebugOnEnd: 1
   cloudSpawner: {fileID: 5918390109482588665}
 --- !u!114 &6270429745746248132
 MonoBehaviour:
@@ -323,9 +328,10 @@ GameObject:
   m_Component:
   - component: {fileID: 6184811628469641401}
   - component: {fileID: 7424251553050608703}
+  - component: {fileID: 5667331795085952654}
   m_Layer: 0
   m_Name: Bowl
-  m_TagString: Untagged
+  m_TagString: Bowl
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -397,3 +403,48 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!61 &5667331795085952654
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5831122139478334896}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: -0.08633053, y: -0.47481775}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 7.22, y: 4.28}
+    newSize: {x: 1, y: 1}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 7.8674784, y: 2.4670596}
+  m_EdgeRadius: 0
