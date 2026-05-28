@@ -27,13 +27,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5331688873647539970}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.46274, y: -0.21920492, z: 0.014321706}
-  m_LocalScale: {x: 1.6246732, y: -3.5013, z: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0.99999714, w: 0.0023886687}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.6874563, y: -0.81840545, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7664064253689198629}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -179.726}
 --- !u!212 &1595330149037328256
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -75,7 +75,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8cbd9cdec76d00d42a69d70f607862c3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -136,7 +136,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 5.32, y: 6.06}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -192,6 +192,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d386db87373826a48ae06ec5c4ca120c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  printScoreDebugOnEnd: 1
   successCount: 0
 --- !u!1 &7254788973823480484
 GameObject:
@@ -239,6 +240,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   foodPrefab: {fileID: 3627772306848672429, guid: a933f0a3ceba8524f8a6df4f6560a007, type: 3}
   foodCount: 5
+  foodSprites:
+  - {fileID: 21300000, guid: ae2a3509e013e2c418c01e3f98a06940, type: 3}
+  - {fileID: 21300000, guid: 18de46732c24c1a4ba78d3bc7a97da9b, type: 3}
+  - {fileID: 21300000, guid: b332f98f80d987a4dbafea635bb516d4, type: 3}
+  - {fileID: 21300000, guid: 30ff84e273ee16944b691f30b5064bde, type: 3}
+  - {fileID: 21300000, guid: c9017a1423c605642baa891502a9a296, type: 3}
+  - {fileID: 21300000, guid: 74f0cfd7a17def747bb9edd8d431a0ad, type: 3}
+  - {fileID: 21300000, guid: 63bef34f70df0514583ec84a547b9eef, type: 3}
   spawnRangeX: 7
   spawnRangeY: 4
   avoidRadius: 3
