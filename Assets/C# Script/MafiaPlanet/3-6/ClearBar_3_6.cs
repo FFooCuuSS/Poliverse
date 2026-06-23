@@ -10,7 +10,7 @@ public class ClearBar_3_6 : MonoBehaviour
     public GameObject PhoneObj;
 
     private Minigame_3_6 minigame_3_6;
-    private Recorder recorder;
+    private Recorder_3_6 recorder;
     private Phone_3_6 phone_3_6;
 
     [SerializeField] private float upSpeed;
@@ -22,7 +22,7 @@ public class ClearBar_3_6 : MonoBehaviour
     void Start()
     {
         minigame_3_6 = Stage_3_6.GetComponent<Minigame_3_6>();
-        recorder = RecorderObj.GetComponent<Recorder>();
+        recorder = RecorderObj.GetComponent<Recorder_3_6>();
         phone_3_6 = PhoneObj.GetComponent<Phone_3_6>();
 
         ClearSlider = GetComponent<Slider>();
@@ -42,12 +42,9 @@ public class ClearBar_3_6 : MonoBehaviour
         if (ClearSlider.value >= 1f)
         {
             ClearSlider.value = 1f;  // 혹시 넘칠 경우 고정
-            minigame_3_6.Succeed();
             isCleared = true;
             return;
         }
-
-        if (!recorder.BoolCheck()) return;
 
         if (phone_3_6.BoolCheck())
         {

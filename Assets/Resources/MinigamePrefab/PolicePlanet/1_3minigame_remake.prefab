@@ -812,6 +812,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45e39f8c32f448c489cd781f6e653bbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useRhythmJudgementScore: 0
+  manualTotalNodeCount: 7
+  printScoreDebugOnEnd: 1
   player: {fileID: 379004386101876771}
   backDistance: 0.4
   backDuration: 0.4

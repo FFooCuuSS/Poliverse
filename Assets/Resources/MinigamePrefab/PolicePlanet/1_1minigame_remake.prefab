@@ -138,6 +138,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dcce73cda07fc446b46f4b01a1171b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useRhythmJudgementScore: 0
+  manualTotalNodeCount: 12
+  printScoreDebugOnEnd: 1
+  debugLog: 0
   enemies:
   - {fileID: 7872839650986582300}
   - {fileID: 5479064927981975193}

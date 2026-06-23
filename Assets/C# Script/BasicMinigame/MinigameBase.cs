@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public abstract class MiniGameBase : MonoBehaviour
@@ -21,11 +20,9 @@ public abstract class MiniGameBase : MonoBehaviour
     public float GetTimerDuration => TimerDuration;
     public string GetMinigameExplain => MinigameExplain;
 
-
     public virtual float perfectWindowOverride => 0.1f;
     public virtual float goodWindowOverride => 0.3f;
     public virtual float hitWindowOverride => 1f;
-
 
     // 여기서 판정 타입을 표준화 (외부 클래스 RhythmManager에 의존 X)
     public enum JudgementResult { Perfect, Good, Miss }
@@ -33,8 +30,8 @@ public abstract class MiniGameBase : MonoBehaviour
     // 리듬 매니저 계약(인터페이스)
     public interface IRhythmManager
     {
-        event Action<string> OnEventTriggered;          // 차트 타이밍 신호
-        event Action<JudgementResult> OnPlayerJudged;   // 판정 결과 브로드캐스트
+        event Action<string> OnEventTriggered;           // 차트 타이밍 신호
+        event Action<JudgementResult> OnPlayerJudged;    // 판정 결과 브로드캐스트
 
         // 미니게임이 "입력했음"만 알리면, 매니저가 판정한다
         void ReceivePlayerInput(string action = null);
@@ -43,10 +40,26 @@ public abstract class MiniGameBase : MonoBehaviour
 
     protected IRhythmManager rhythmManager;
 
+    [Header("Score Settings")]
+    [Tooltip("true면 RhythmManager의 Input/Tap/Hold/Swipe 판정을 점수로 사용한다. false면 개별 미니게임이 ReportManualSuccess/Fail로 직접 보고한다.")]
+    [SerializeField] private bool useRhythmJudgementScore = true;
 
-    [Header("Score")]
+    [Tooltip("Use Rhythm Judgement Score가 false일 때 사용할 총 점수 대상 수. -1이면 실제 보고된 수를 총량으로 사용한다.")]
+    [SerializeField] private int manualTotalNodeCount = -1;
+
     [SerializeField] private bool printScoreDebugOnEnd = true;
-    // 미니게임당 점수판 집계용 (미니게임 하나 끝난 후 uimanager가 읽어갈 것임)
+
+    // 점수 집계 방식
+    // true : RhythmManager의 Input/Tap/Hold/Swipe 판정을 점수로 사용
+    // false : 개별 미니게임이 ReportManualSuccess/Fail로 직접 보고
+    protected virtual bool UseRhythmJudgementScore => useRhythmJudgementScore;
+
+    protected virtual int ManualTotalNodeCount => manualTotalNodeCount;
+
+    // true면 처리되지 않은 노드는 최종 Miss로 보정
+    protected virtual bool AutoFillRemainingAsMiss => true;
+
+    // 미니게임당 점수판 집계용
     public struct ScoreResult
     {
         public int totalNode;
@@ -62,16 +75,16 @@ public abstract class MiniGameBase : MonoBehaviour
             this.miss = miss;
         }
     }
+
     private int totalNodeCount;
     private int perfectCount;
     private int goodCount;
-    private int missCount;
+    private int scoreMissCount;
 
     private int manualSuccessCount;
     private int manualFailCount;
 
     private bool scoreFinalized = false;
-
 
     protected virtual void Awake()
     {
@@ -91,9 +104,25 @@ public abstract class MiniGameBase : MonoBehaviour
         IsInputLocked = false;
 
         ResetScoreSession();
+        InitializeScoreTotalNodeCount();
+    }
 
-        if (rhythmManager != null)
-            totalNodeCount = rhythmManager.GetTotalNodeCount();
+    protected virtual void InitializeScoreTotalNodeCount()
+    {
+        if (UseRhythmJudgementScore)
+        {
+            if (rhythmManager != null)
+                totalNodeCount = rhythmManager.GetTotalNodeCount();
+            else
+                totalNodeCount = 0;
+
+            return;
+        }
+
+        if (ManualTotalNodeCount >= 0)
+            totalNodeCount = ManualTotalNodeCount;
+        else
+            totalNodeCount = 0;
     }
 
     public virtual void ResetGame()
@@ -110,7 +139,7 @@ public abstract class MiniGameBase : MonoBehaviour
         totalNodeCount = 0;
         perfectCount = 0;
         goodCount = 0;
-        missCount = 0;
+        scoreMissCount = 0;
 
         manualSuccessCount = 0;
         manualFailCount = 0;
@@ -146,20 +175,16 @@ public abstract class MiniGameBase : MonoBehaviour
     public virtual void OnRhythmEvent(string action)
     {
         Debug.Log($"{gameObject.name} 리듬메세지: {action}");
-        
-        // 이건 나중에 개별 미니게임에서 override하는 형태로
+
         switch (action)
         {
             case "Tap":
-                //ShowTapPrompt();
                 break;
 
             case "Hold":
-                //ShowHoldPrompt();
                 break;
 
             case "Swipe":
-                //ShowSwipePrompt();
                 break;
         }
     }
@@ -167,57 +192,127 @@ public abstract class MiniGameBase : MonoBehaviour
     // RhythmManager → 미니게임 (Perfect/Good/Miss)
     public virtual void OnJudgement(JudgementResult judgement)
     {
-        AddJudgementCount(judgement);
-        Debug.Log($"{judgement}");
+        // Manual 모드에서는 RhythmManager 판정을 점수로 쓰지 않는다.
+        // 따라서 여기서 Miss가 와도 Base 점수에는 절대 반영되지 않는다.
+        if (!UseRhythmJudgementScore) return;
+
+        bool counted = AddJudgementCount(judgement);
+
+        if (counted)
+            Debug.Log($"mb counted: {judgement}");
+        else
+            Debug.Log($"mb ignored: {judgement}");
     }
-    protected virtual void AddJudgementCount(JudgementResult judgement)
+
+    protected virtual bool AddJudgementCount(JudgementResult judgement)
     {
-        if (scoreFinalized) return;
+        if (scoreFinalized) return false;
+
+        // 이번 수정의 핵심:
+        // Miss는 여기서 절대 직접 집계하지 않는다.
+        // 최종 Miss는 FinalizeScoreSession()에서
+        // totalNodeCount - perfectCount - goodCount로 계산한다.
+        if (judgement == JudgementResult.Miss)
+            return false;
+
+        // 총 노드 수가 정해져 있다면 Perfect + Good도 총 노드 수를 넘지 못하게 막는다.
+        // 광클로 Good/Perfect가 과하게 들어오는 상황에 대한 최소 방어.
+        int currentHitCount = perfectCount + goodCount;
+
+        if (totalNodeCount > 0 && currentHitCount >= totalNodeCount)
+            return false;
 
         switch (judgement)
         {
             case JudgementResult.Perfect:
                 perfectCount++;
-                break;
+                return true;
 
             case JudgementResult.Good:
                 goodCount++;
-                break;
-
-            case JudgementResult.Miss:
-                missCount++;
-                break;
+                return true;
         }
+
+        return false;
     }
+
     public virtual ScoreResult FinalizeScoreSession()
     {
         if (!scoreFinalized)
         {
             scoreFinalized = true;
 
-            perfectCount += manualSuccessCount;
-            missCount += manualFailCount;
-
-            int judgedTotal = perfectCount + goodCount + missCount;
-
-            if (totalNodeCount <= 0)
-                totalNodeCount = judgedTotal;
+            if (UseRhythmJudgementScore)
+            {
+                FinalizeRhythmScore();
+            }
+            else
+            {
+                FinalizeManualScore();
+            }
 
             if (printScoreDebugOnEnd)
             {
+                int judgedTotal = perfectCount + goodCount + scoreMissCount;
+
                 Debug.Log(
                     $"[MiniGame Score] {gameObject.name}\n" +
+                    $"- Use Rhythm  : {UseRhythmJudgementScore}\n" +
+                    $"- ManualTotal : {ManualTotalNodeCount}\n" +
                     $"- Total Nodes : {totalNodeCount}\n" +
                     $"- Perfect     : {perfectCount}\n" +
                     $"- Good        : {goodCount}\n" +
-                    $"- Miss        : {missCount}\n" +
+                    $"- Miss        : {scoreMissCount}\n" +
                     $"- JudgedTotal : {judgedTotal}\n" +
                     $"- Manual S/F  : {manualSuccessCount}/{manualFailCount}"
                 );
             }
         }
 
-        return new ScoreResult(totalNodeCount, perfectCount, goodCount, missCount);
+        return new ScoreResult(totalNodeCount, perfectCount, goodCount, scoreMissCount);
+    }
+
+    private void FinalizeRhythmScore()
+    {
+        int hitTotal = perfectCount + goodCount;
+
+        // Rhythm 모드에서 totalNodeCount가 없다면 Miss를 계산할 기준이 없다.
+        // 이 경우에는 실제 성공 판정 수를 총량으로 삼는다.
+        if (totalNodeCount <= 0)
+            totalNodeCount = hitTotal;
+
+        // Miss는 직접 집계하지 않고 최종 계산한다.
+        if (AutoFillRemainingAsMiss)
+            scoreMissCount = Mathf.Max(0, totalNodeCount - hitTotal);
+        else
+            scoreMissCount = 0;
+    }
+
+    private void FinalizeManualScore()
+    {
+        // Manual 모드에서는 ReportManualSuccess/Fail만 점수에 반영한다.
+        // RhythmManager에서 Miss가 와도 OnJudgement에서 return되므로 여기까지 영향을 주지 않는다.
+
+        perfectCount = manualSuccessCount;
+        goodCount = 0;
+
+        int manualReportedTotal = manualSuccessCount + manualFailCount;
+
+        // ManualTotalNodeCount가 지정되지 않았다면 실제 보고된 수를 총량으로 삼는다.
+        if (totalNodeCount <= 0)
+            totalNodeCount = manualReportedTotal;
+
+        if (AutoFillRemainingAsMiss)
+        {
+            // 총량 기준으로 성공하지 못한 나머지를 Miss 처리.
+            // manualFailCount + 미보고 항목까지 포함된다.
+            scoreMissCount = Mathf.Max(0, totalNodeCount - perfectCount - goodCount);
+        }
+        else
+        {
+            // 자동 보정이 꺼져 있다면 명시적으로 보고된 실패만 Miss 처리.
+            scoreMissCount = manualFailCount;
+        }
     }
 
     // 미니게임 내부 오브젝트 → 미니게임(Base)
@@ -228,17 +323,55 @@ public abstract class MiniGameBase : MonoBehaviour
         rhythmManager?.ReceivePlayerInput(action);
     }
 
-    // input 판정 안쓰는 미니게임들 점수 처리
+    // input 판정 안 쓰는 미니게임들 점수 처리
     public virtual void ReportManualSuccess()
     {
         if (scoreFinalized) return;
+
+        if (UseRhythmJudgementScore)
+        {
+            Debug.LogWarning($"[MiniGameBase] ReportManualSuccess ignored because UseRhythmJudgementScore is true: {gameObject.name}");
+            return;
+        }
+
+        int reportedTotal = manualSuccessCount + manualFailCount;
+
+        if (totalNodeCount > 0 && reportedTotal >= totalNodeCount)
+        {
+            Debug.LogWarning($"[MiniGameBase] Extra manual success ignored: {gameObject.name}");
+            return;
+        }
+
         manualSuccessCount++;
     }
 
     public virtual void ReportManualFail()
     {
         if (scoreFinalized) return;
+
+        if (UseRhythmJudgementScore)
+        {
+            Debug.LogWarning($"[MiniGameBase] ReportManualFail ignored because UseRhythmJudgementScore is true: {gameObject.name}");
+            return;
+        }
+
+        int reportedTotal = manualSuccessCount + manualFailCount;
+
+        if (totalNodeCount > 0 && reportedTotal >= totalNodeCount)
+        {
+            Debug.LogWarning($"[MiniGameBase] Extra manual fail ignored: {gameObject.name}");
+            return;
+        }
+
         manualFailCount++;
+    }
+
+    // 수동 미니게임에서 총 대상 수가 런타임에 정해지는 경우 사용
+    // 예: 실제 생성된 오브젝트 수를 센 뒤 StartGame 이후에 세팅
+    protected virtual void SetRuntimeTotalNodeCount(int count)
+    {
+        if (scoreFinalized) return;
+        totalNodeCount = Mathf.Max(0, count);
     }
 
     public virtual void Success()

@@ -87,6 +87,7 @@ public class Manager_1_8 : MonoBehaviour
 
         capturedCount++;
         alivePrisoners.Remove(prisoner);
+        minigame.ReportManualSuccess();
     }
 
     public void NotifyEscaped(Prisoner_1_8 prisoner)

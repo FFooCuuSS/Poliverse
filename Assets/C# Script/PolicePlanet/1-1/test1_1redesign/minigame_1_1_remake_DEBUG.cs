@@ -8,6 +8,13 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
     protected override float TimerDuration => 15f;
     protected override string MinigameExplain => "분류해라!";
 
+    // 1-1은 CSV의 Input을 쓰지만,
+    // RhythmManager의 Perfect/Good/Miss 판정 점수는 사용하지 않는다.
+    protected override bool UseRhythmJudgementScore => false;
+
+    // 총 대상 수는 고정 12가 아니라 실제 Show 성공 개수로 Finalize 때 세팅한다.
+    protected override int ManualTotalNodeCount => -1;
+
     private IRhythmManager rhythmManager;
 
     [Header("Debug")]
@@ -31,6 +38,7 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
     private const int ENEMY_COUNT = 4;
     private const int TOTAL_ROUND = 3;
+    private const int EXPECTED_TARGET_COUNT = ENEMY_COUNT * TOTAL_ROUND;
 
     private int round;
     private int showIndex;
@@ -38,9 +46,11 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
     private bool canClick;
     private bool ended;
+    private bool roundsCompleted;
 
-    private int successCount;
-    private int missCount;
+    private int shownTargetCount;
+    private int localSuccessCount;
+    private int localAutoFailCount;
 
     private int[] shuffledPosIndex;
     private bool[] resolvedThisRound;
@@ -64,6 +74,10 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
             Scope.SetActive(false);
 
         cam = Camera.main;
+
+        // 기존 흐름 유지.
+        // UIManager가 StartGame을 따로 호출하는 구조라면 중복 초기화될 수 있지만,
+        // 이 코드는 기존 1-1 동작을 최대한 유지하기 위해 그대로 둔다.
         StartGame();
     }
 
@@ -72,20 +86,25 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
         base.StartGame();
 
         ended = false;
+        roundsCompleted = false;
         canClick = false;
 
         round = 0;
         showIndex = 0;
         inputIndex = 0;
 
-        successCount = 0;
-        missCount = 0;
+        shownTargetCount = 0;
+        localSuccessCount = 0;
+        localAutoFailCount = 0;
 
         resolvedThisRound = new bool[ENEMY_COUNT];
         autoOffJobs = new Coroutine[ENEMY_COUNT];
 
         lastRhythmAction = null;
         pendingInputs.Clear();
+
+        if (Scope != null)
+            Scope.SetActive(false);
 
         PrepareShowPositions();
         ResetRoundObjects();
@@ -105,17 +124,25 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
             rhythmManager.OnEventTriggered += OnRhythmEvent;
             Log("[1-1] RhythmManager bound");
         }
-
-        // manager가 null이어도 에러 안 띄움.
-        // 리듬매니저 분리/전환 중에는 정상적으로 null일 수 있음.
     }
 
     public override void OnRhythmEvent(string action)
     {
         if (ended || string.IsNullOrEmpty(action)) return;
 
-        base.OnRhythmEvent(action);
         action = action.Trim();
+
+        // End는 라운드 완료 이후에도 받아야 한다.
+        if (action == "End")
+        {
+            Log("[1-1] End event received");
+            return;
+        }
+
+        if (roundsCompleted)
+            return;
+
+        base.OnRhythmEvent(action);
 
         if (lastRhythmAction == "Show" && action == "Input")
         {
@@ -139,6 +166,7 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
     void Update()
     {
         if (ended) return;
+        if (roundsCompleted) return;
         if (!Input.GetMouseButtonDown(0)) return;
         if (cam == null) return;
 
@@ -152,9 +180,8 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
         if (col == null)
         {
-            if (canClick)
-                missCount++;
-
+            // 빈 곳 클릭은 대상 하나를 놓친 게 아니라 오입력이므로
+            // ReportManualFail()은 호출하지 않는다.
             return;
         }
 
@@ -162,15 +189,13 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
         if (clicked == null)
         {
-            if (canClick)
-                missCount++;
-
+            // 적이 아닌 것 클릭도 오입력.
             return;
         }
 
         if (!canClick || pendingInputs.Count == 0)
         {
-            missCount++;
+            // 입력 창 밖 클릭도 오입력.
             return;
         }
 
@@ -179,13 +204,13 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
         if (!IsValidEnemyIndex(expected))
         {
             pendingInputs.Dequeue();
-            missCount++;
             return;
         }
 
         if (clicked != enemies[expected])
         {
-            missCount++;
+            // 틀린 적 클릭도 오입력.
+            // 실제 대상은 아직 살아있으므로 AutoOff에서 실패 처리된다.
             return;
         }
 
@@ -214,8 +239,13 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
 
         EnemySetActiveTrueThenShow(e);
 
+        // 실제로 Show에 성공한 대상만 총점 후보로 센다.
+        shownTargetCount++;
+
         StopAutoOff(showIndex);
         autoOffJobs[showIndex] = StartCoroutine(AutoOffRoutine(showIndex));
+
+        Log($"[1-1] SHOW idx={showIndex}, shownTargetCount={shownTargetCount}");
 
         showIndex++;
     }
@@ -245,6 +275,8 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
             StopCoroutine(inputWindowJob);
 
         inputWindowJob = StartCoroutine(InputWindowRoutine());
+
+        Log($"[1-1] INPUT expected={pendingInputs.Peek()} inputIndex={inputIndex} showIndex={showIndex}");
     }
 
     IEnumerator InputWindowRoutine()
@@ -263,9 +295,13 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
         if (resolvedThisRound[idx]) yield break;
 
         resolvedThisRound[idx] = true;
-        missCount++;
+
+        localAutoFailCount++;
+        ReportManualFail();
 
         yield return EnemyHideThenSetActiveFalse(enemies[idx]);
+
+        Log($"[1-1] AUTO FAIL idx={idx}, localAutoFailCount={localAutoFailCount}");
 
         if (idx == inputIndex)
         {
@@ -277,18 +313,24 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
     void ResolveSuccess(int idx)
     {
         if (!IsValidEnemyIndex(idx)) return;
+        if (resolvedThisRound[idx]) return;
+
         StartCoroutine(ResolveSuccessRoutine(idx));
     }
 
     IEnumerator ResolveSuccessRoutine(int idx)
     {
         resolvedThisRound[idx] = true;
-        successCount++;
+
+        localSuccessCount++;
+        ReportManualSuccess();
 
         StopAutoOff(idx);
         CloseInputWindow();
 
         yield return EnemySuccessHideThenSetActiveFalse(enemies[idx]);
+
+        Log($"[1-1] SUCCESS idx={idx}, localSuccessCount={localSuccessCount}");
 
         inputIndex++;
         TryEndRound();
@@ -338,22 +380,31 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
     {
         round++;
 
-        if (round >= TOTAL_ROUND)
-        {
-            Log($"[1-1] FINAL success={successCount}, miss={missCount}");
-
-            if (successCount >= 7)
-                Succeed();
-            else
-                Failure();
-
-            return;
-        }
-
         canClick = false;
         showIndex = 0;
         inputIndex = 0;
         pendingInputs.Clear();
+
+        if (inputWindowJob != null)
+        {
+            StopCoroutine(inputWindowJob);
+            inputWindowJob = null;
+        }
+
+        if (round >= TOTAL_ROUND)
+        {
+            roundsCompleted = true;
+
+            if (Scope != null)
+                Scope.SetActive(false);
+
+            Log(
+                $"[1-1] ROUNDS COMPLETED " +
+                $"shown={shownTargetCount}, success={localSuccessCount}, autoFail={localAutoFailCount}"
+            );
+
+            return;
+        }
 
         PrepareShowPositions();
         ResetRoundObjects();
@@ -405,6 +456,30 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
             int r = Random.Range(i, ENEMY_COUNT);
             (shuffledPosIndex[i], shuffledPosIndex[r]) = (shuffledPosIndex[r], shuffledPosIndex[i]);
         }
+    }
+
+    public override ScoreResult FinalizeScoreSession()
+    {
+        int processedCount = localSuccessCount + localAutoFailCount;
+        int runtimeTotal = Mathf.Max(shownTargetCount, processedCount);
+
+        SetRuntimeTotalNodeCount(runtimeTotal);
+
+        if (runtimeTotal != EXPECTED_TARGET_COUNT)
+        {
+            Debug.LogWarning(
+                $"[1-1] Expected {EXPECTED_TARGET_COUNT} targets, but runtime total is {runtimeTotal}. " +
+                $"shown={shownTargetCount}, processed={processedCount}"
+            );
+        }
+
+        return base.FinalizeScoreSession();
+    }
+
+    public override void OnJudgement(JudgementResult judgement)
+    {
+        // 1-1은 RhythmManager의 Perfect/Good/Miss 판정 점수를 사용하지 않는다.
+        // CSV Input은 클릭 가능 창을 여는 트리거로만 사용한다.
     }
 
     public void Succeed()

@@ -107,9 +107,12 @@ public class Minigame_1_2 : MiniGameBase
 
         OnPlayerInput("Input");
     }
-
+    /*
     public override void OnJudgement(JudgementResult judgement)
     {
+        base.OnJudgement(judgement);
+
         Debug.Log($"Judge: {judgement}");
     }
+    */
 }

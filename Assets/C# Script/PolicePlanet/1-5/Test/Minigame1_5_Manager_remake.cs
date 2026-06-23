@@ -65,6 +65,7 @@ public class Minigame1_5_Manager_remake : MiniGameBase
 
     public override void StartGame()
     {
+        base.StartGame();
         if (mainCam == null) mainCam = Camera.main;
 
         CacheTargets();
@@ -310,6 +311,8 @@ public class Minigame1_5_Manager_remake : MiniGameBase
                 totalSuccessCount++;
                 roundSuccessCounts[currentRoundIndex]++;
 
+                ReportManualSuccess();
+
                 if (case1Prisoners != null && i < case1Prisoners.Length && case1Prisoners[i] != null)
                 {
                     case1Prisoners[i].PlayHit();
@@ -344,6 +347,8 @@ public class Minigame1_5_Manager_remake : MiniGameBase
                 currentRoundHitIndices.Add(i);
                 totalSuccessCount++;
                 roundSuccessCounts[currentRoundIndex]++;
+
+                ReportManualSuccess();
 
                 if (case2Prisoners != null && i < case2Prisoners.Length && case2Prisoners[i] != null)
                     case2Prisoners[i].PlayHit();

@@ -403,4 +403,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9daa829b24c367e4dac9643873b46336, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useRhythmJudgementScore: 0
+  manualTotalNodeCount: 7
+  printScoreDebugOnEnd: 1
   manager: {fileID: 7306850845612836780}

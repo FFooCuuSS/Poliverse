@@ -10,7 +10,7 @@ public class TimeTester : MonoBehaviour
 
         if (timer >= 0.5f)
         {
-            Debug.Log(counter+"초 지남"+Time.time);
+            //Debug.Log(counter+"초 지남"+Time.time);
             timer = 0f; // 초기화
             counter+=0.5f;
         }

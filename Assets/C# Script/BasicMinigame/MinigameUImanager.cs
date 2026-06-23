@@ -806,8 +806,8 @@ public class MinigameUIManager : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
-        if(currentMinigame != null)
-{
+        if (currentMinigame != null)
+        {
             CollectMinigameScore(currentMinigame);
 
             DOTween.Kill(currentMinigame.transform);
@@ -825,7 +825,7 @@ public class MinigameUIManager : MonoBehaviour
         isEndingMinigame = false;
         StartCoroutine(WaitAndLoadNext());
         audioSource.Play();
-    }    
+    }
 
     private IEnumerator WaitAndLoadNext()
     {
