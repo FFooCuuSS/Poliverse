@@ -97,6 +97,7 @@ public class PlayerReachChecker : MonoBehaviour
     private void OnFail()
     {
         if (isRespawning) return;
+        minigame_1_3.ReportManualFail();
 
         // 실패 스프라이트로 교체
         if (PlayerFail != null) sr.sprite = PlayerFail;

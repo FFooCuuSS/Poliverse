@@ -137,7 +137,8 @@ public class Minigame_1_9 : MiniGameBase
     public override void OnJudgement(JudgementResult judgement)
     {
         if (ended) return;
-
+        
+        base.OnJudgement(judgement);
         awaitingJudge = false;
         inputOpen = false;
 

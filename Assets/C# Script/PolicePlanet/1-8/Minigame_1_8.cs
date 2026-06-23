@@ -14,6 +14,7 @@ public class Minigame_1_8 : MiniGameBase
 
     public override void StartGame()
     {
+        base.StartGame();
         if (manager != null)
             manager.ResetRoundState();
     }
@@ -31,6 +32,6 @@ public class Minigame_1_8 : MiniGameBase
     // 이 게임은 리듬 판정 사용 안 함
     public override void OnJudgement(JudgementResult judgement)
     {
-        // intentionally empty
+        //
     }
 }

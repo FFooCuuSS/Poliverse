@@ -132,9 +132,10 @@ public class Minigame_1_4 : MiniGameBase
     public override void OnJudgement(JudgementResult judgement)
     {
         if (ended || roundEnding) return;
+
+        base.OnJudgement(judgement);
         if (!awaitingJudge && judgement != JudgementResult.Miss) return;
 
-        Debug.Log(judgement);
         awaitingJudge = false;
         inputOpen = false;
         LockAllAccessories();
