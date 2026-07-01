@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab0f6c19a579a2347b509d568f62b9a0, type: 3}
   m_Name: Jelly3
   m_EditorClassIdentifier: 
-  moveSpeed: 3
-  bounceForce: 5
-  xStep: 3
+  moveSpeed: 5
+  bounceForce: 8
+  xStep: 12.5
   waveAmount: 0
   waveSpeed: 0
   sr: {fileID: 21300000, guid: 662709eda81abe64381e96a400c28931, type: 3}
