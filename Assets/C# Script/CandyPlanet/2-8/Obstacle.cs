@@ -4,31 +4,34 @@ using UnityEngine;
 
 public class Obstacle : MonoBehaviour
 {
-    private Rigidbody2D rb;
-    private PlayerRotate playerRotate;
-    private float direction;
+    [SerializeField] private float fallSpeed = 10f;
+    [SerializeField] private float destroyY = -10f; // 화면 아래로 벗어나면 정리
 
-    public void Init(PlayerRotate player, float dir)
+    private Collider2D col;
+
+    private void Awake()
     {
-        playerRotate = player;
-        direction = dir;
+        col = GetComponent<Collider2D>();
+        col.isTrigger = true; // 물리 충돌 대신 트리거로만 반응
     }
 
-    void Awake()
+    private void Update()
     {
-        rb = GetComponent<Rigidbody2D>();
-        rb.gravityScale = 0f; // 처음엔 안 떨어짐
+        // 순수 연출용 낙하. 실제 판정은 Minigame_2_8이 리듬 박자("Input")에 맞춰 처리함
+        transform.Translate(Vector3.down * fallSpeed * Time.deltaTime, Space.World);
+
+        if (transform.position.y < destroyY)
+        {
+            Destroy(gameObject);
+        }
     }
 
-    public void Drop()
-    {
-        rb.gravityScale = 1f; // 이 순간부터 떨어짐
-    }
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Floor")) // 발판 콜라이더
         {
-            playerRotate.AddImpactAngle(direction * 15f);
+            // 게임 로직(각도 변화)은 여기서 처리하지 않음. 연출 정리만.
+            Destroy(gameObject);
         }
     }
 }

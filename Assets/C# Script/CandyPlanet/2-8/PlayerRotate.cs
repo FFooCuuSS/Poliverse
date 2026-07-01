@@ -12,6 +12,8 @@ public class PlayerRotate : MonoBehaviour
     private Minigame_2_8 minigame_2_8;
     public GameObject stage_2_8;
 
+    public float CurrentAngle => targetAngle;
+
     private void Start()
     {
         minigame_2_8 = stage_2_8.GetComponent<Minigame_2_8>();
@@ -30,23 +32,18 @@ public class PlayerRotate : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             float centerX = Screen.width / 2f;
+            bool isLeftClick = Input.mousePosition.x < centerX;
 
-            if (Input.mousePosition.x < centerX) // 왼쪽 클릭
-            {
-                // 현재 오른쪽(-20)이면 중앙(0)으로, 중앙(0)이면 왼쪽(20)으로
-                targetAngle += angle;
-                minigame_2_8.OnPlayerInput("Input");
-            }
-            else // 오른쪽 클릭
-            {
-                // 현재 왼쪽(20)이면 중앙(0)으로, 중앙(0)이면 오른쪽(-20)으로
-                targetAngle -= angle;
-                minigame_2_8.OnPlayerInput("Input");
-            }
-
-            // 각도가 20, 0, -20 범위를 벗어나지 않도록 고정
-            targetAngle = Mathf.Clamp(targetAngle, -maxAngle, maxAngle);
+            // 게이트(입력 가능 여부/중복 방지)와 실제 회전 적용은 Minigame_2_8이 전담
+            minigame_2_8.SubmitPlayerInput(isLeftClick);
         }
+    }
+
+    // Minigame_2_8이 게이트를 통과한 클릭에 대해서만 호출한다
+    public void ApplyClickRotation(float direction)
+    {
+        targetAngle += direction * angle;
+        targetAngle = Mathf.Clamp(targetAngle, -maxAngle, maxAngle);
     }
 
     private void ApplyRotation()
@@ -68,9 +65,10 @@ public class PlayerRotate : MonoBehaviour
         }
     }
 
-    // 장애물이 떨어져서 강제로 각도를 변화시켜야 할 때 호출
+    // 장애물이 떨어져서 강제로 각도를 변화시켜야 할 때 호출 (Show 시점 예고용)
     public void AddImpactAngle(float amount)
     {
         targetAngle += amount;
+        targetAngle = Mathf.Clamp(targetAngle, -maxAngle, maxAngle);
     }
 }
