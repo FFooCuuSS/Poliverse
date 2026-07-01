@@ -133,7 +133,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c1ff88959fd55040a52d567de10c17a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveStep: 1.5
-  destroyX: 12
+  moveStep: 3
+  destroyX: -12
+  moveDuration: 0.25
+  moveEase: 9
+  isShiny: 0
   isGrabbed: 0
   debrisPrefab: {fileID: 5325850515164277207, guid: 41a0f6d0076e45943976ff8c8198fae5, type: 3}
+  debrisCount: 5

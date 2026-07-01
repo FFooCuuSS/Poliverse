@@ -1,37 +1,61 @@
 ﻿using UnityEngine;
+using DG.Tweening;
 
 public class Cloud : MonoBehaviour
 {
-    public float moveStep = 1.5f; // 비트당 이동 거리
-    public float destroyX = 12f; // 좌표 넘으면 삭제
+    [Header("이동 설정")]
+    public float moveStep = 1.5f;       // Show 이벤트 1회당 이동 거리
+    public float destroyX = -12f;       // 이 x좌표보다 왼쪽으로 가면 삭제 (좌측 이동이므로 음수)
 
-    private Transform followTarget;
+    [Header("이동 연출 (쿠션감)")]
+    public float moveDuration = 0.25f;  // 한 번 이동에 걸리는 시간
+    public Ease moveEase = Ease.OutCubic;
+
+    [Header("상태")]
+    public bool isShiny = false;        // CloudSpawner가 생성 시 세팅
     public bool isGrabbed = false;
 
+    [Header("파편 연출")]
     public GameObject debrisPrefab;
     public int debrisCount = 5;
 
-    void OnEnable()
+    private Transform followTarget;
+    private Tween moveTween;
+    private CloudSpawner spawner;
+
+    /// <summary>
+    /// CloudSpawner가 생성 직후 호출. BeatManager 대신 Spawner의 이동 신호를 구독한다.
+    /// </summary>
+    public void Init(CloudSpawner owner)
     {
-        Debug.Log("Cloud Enable");
-        BeatManager.Instance.OnBeat += Move;
+        spawner = owner;
+        spawner.OnMoveTick += Move;
     }
 
     void OnDisable()
     {
-        BeatManager.Instance.OnBeat -= Move;
+        if (spawner != null)
+            spawner.OnMoveTick -= Move;
+
+        moveTween?.Kill();
     }
 
     void Move()
     {
-        Debug.Log("Move 실행됨");
         if (isGrabbed) return;
-        transform.position += Vector3.right * moveStep;
 
-        if (transform.position.x > destroyX)
-        {
-            Destroy(gameObject);
-        }
+        Vector3 targetPos = transform.position + Vector3.left * moveStep;
+
+        moveTween?.Kill();
+        moveTween = transform.DOMove(targetPos, moveDuration)
+            .SetEase(moveEase)
+            .OnComplete(() =>
+            {
+                if (transform.position.x < destroyX)
+                {
+                    Destroy(gameObject);
+                }
+            });
     }
 
     void Update()
@@ -48,10 +72,13 @@ public class Cloud : MonoBehaviour
     {
         isGrabbed = true;
         followTarget = hand;
+        moveTween?.Kill(); // 이동 트윈과 손 추적이 같은 프레임에 충돌하지 않도록 정리
     }
 
     public void ReleaseAndBreak()
     {
+        moveTween?.Kill();
+
         for (int i = 0; i < debrisCount; i++)
         {
             GameObject debris = Instantiate(debrisPrefab, transform.position, Quaternion.identity);
