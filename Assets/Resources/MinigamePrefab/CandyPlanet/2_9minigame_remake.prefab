@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 2747463205350046484}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -12.1, y: -0.14, z: 0}
+  m_LocalPosition: {x: 9.61, y: -0.14, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -52,10 +52,11 @@ MonoBehaviour:
   - {fileID: 4982613521882794214, guid: 5546c8be21590194b970e0450727ae69, type: 3}
   - {fileID: 4026747689770146215, guid: 7e9be71924c8b5448a5a9136f7f183e1, type: 3}
   - {fileID: 8262754569691398252, guid: af76a402506912e468013d833a23d537, type: 3}
-  shinyCloudIndexes: 02000000040000000600000008000000
-  spawnX: -10
+  shinyCloudIndexes: 01000000020000000400000006000000
+  spawnX: 12
   spawnY: 0
-  spacing: 0.5
+  extraMargin: 0.3
+  spawnEveryNShows: 1
   parent: {fileID: 8704076299418110011}
 --- !u!1 &3101263683324761352
 GameObject:
@@ -98,7 +99,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3650064631830905929}
   - component: {fileID: 5353158161593180157}
-  - component: {fileID: 6270429745746248132}
   m_Layer: 0
   m_Name: 2_9minigame_remake
   m_TagString: Untagged
@@ -137,23 +137,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc4cd8c1ee4a7804daee061375975817, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useRhythmJudgementScore: 1
+  manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
   cloudSpawner: {fileID: 5918390109482588665}
---- !u!114 &6270429745746248132
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3628888742414449684}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3317fdebeda7c6644a53b1901c7129cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spawner: {fileID: 5918390109482588665}
-  bpm: 120
-  beatPattern: 01000000010000000000000001000000
 --- !u!1 &5617661219270682290
 GameObject:
   m_ObjectHideFlags: 0
@@ -291,6 +278,7 @@ MonoBehaviour:
   downY: -2
   upY: 4
   speed: 15
+  minigame: {fileID: 5353158161593180157}
 --- !u!50 &1772397429521966270
 Rigidbody2D:
   serializedVersion: 4
