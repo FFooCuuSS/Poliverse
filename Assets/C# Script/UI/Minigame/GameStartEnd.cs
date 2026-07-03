@@ -34,6 +34,10 @@ public class GameStartEnd : MonoBehaviour
     [SerializeField] private float fadeDuration = 1f;
     [SerializeField] private string menuSceneName = "LobbyScene";
 
+    [Header("Debug")]
+    [SerializeField] private bool debugMode = false;
+    [SerializeField] private GameObject debugBackgroundPanel;
+
     private bool isMovingScene = false;
     private bool finalSequenceStarted = false;
 
@@ -68,6 +72,9 @@ public class GameStartEnd : MonoBehaviour
             fadePanel.color = c;
             fadePanel.gameObject.SetActive(true);
         }
+
+        if (debugBackgroundPanel != null)
+            debugBackgroundPanel.SetActive(false);
 
         StartCoroutine(StartCountdownRoutine());
     }
@@ -114,12 +121,19 @@ public class GameStartEnd : MonoBehaviour
 
         countdownText.text = "";
         countdownText.gameObject.SetActive(false);
+
+        if (debugMode && debugBackgroundPanel != null)
+            debugBackgroundPanel.SetActive(true);
     }
 
     public void ShowFinalPanel()
     {
         if (finalSequenceStarted) return;
         finalSequenceStarted = true;
+
+        if (debugBackgroundPanel != null)
+            debugBackgroundPanel.SetActive(false);
+
         StartCoroutine(FinalSequence());
     }
 

@@ -3,13 +3,13 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using UnityEngine.EventSystems;
 using System.Collections;
 
 public class CameraScrollController : MonoBehaviour
 {
     public GameObject planetMove;
     public GameObject planetListObj;
+
     private UpDownMove upDownMove;
     private PlanetList planetList;
 
@@ -30,14 +30,21 @@ public class CameraScrollController : MonoBehaviour
     public GameObject fadeTarget;
     [SerializeField] private TextMeshProUGUI planetText;
 
+    [Header("씬 이름")]
+    [SerializeField] private string cutSceneName = "CutScene";
+    [SerializeField] private string minigameLoadSceneName = "MinigameLoad";
+
+    [Header("디버그")]
+    [SerializeField] private bool forceCutScene = false;
+
     private Image fadeImage;
-    private CanvasGroup planetTextCanvasGroup;
 
     private Vector3 targetPosition;
     private int currentPanelIndex = 0;
     private bool isAutoMoving = false;
+    private bool isSelecting = false;
 
-    void Start()
+    private void Start()
     {
         upDownMove = planetMove.GetComponent<UpDownMove>();
         fadeImage = fadeTarget.GetComponent<Image>();
@@ -54,27 +61,32 @@ public class CameraScrollController : MonoBehaviour
             targetPosition = transform.position;
     }
 
-    void Update()
+    private void Update()
     {
-        transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * smoothSpeed);
+        transform.position = Vector3.Lerp(
+            transform.position,
+            targetPosition,
+            Time.deltaTime * smoothSpeed
+        );
     }
 
     public void MoveToPanel(int index)
     {
-        if (index >= 0 && index < panels.Length)
-        {
-            currentPanelIndex = index;
-            Vector3 panelPos = panels[index].position;
-            targetPosition = new Vector3(transform.position.x, panelPos.y, transform.position.z);
+        if (index < 0 || index >= panels.Length) return;
 
-            if (index == 1 && !isAutoMoving)
-                StartCoroutine(AutoMoveToNextPanelAfterDelay());
-        }
+        currentPanelIndex = index;
+
+        Vector3 panelPos = panels[index].position;
+        targetPosition = new Vector3(transform.position.x, panelPos.y, transform.position.z);
+
+        if (index == 1 && !isAutoMoving)
+            StartCoroutine(AutoMoveToNextPanelAfterDelay());
     }
 
     private IEnumerator AutoMoveToNextPanelAfterDelay()
     {
         isAutoMoving = true;
+
         yield return new WaitForSeconds(autoMoveDelay);
 
         if (currentPanelIndex == 1 && panels.Length > 2)
@@ -83,31 +95,9 @@ public class CameraScrollController : MonoBehaviour
 
     public void planetButtonClick()
     {
+        if (isSelecting) return;
+
         selectedPlanetIndex = planetList.CallingCurrentIndex();
-
-        if (planetText != null)
-        {
-            planetText.DOKill();
-
-            Color c = planetText.color;
-            planetText.color = c;
-        }
-        /*
-        GameObject clickedButton = EventSystem.current.currentSelectedGameObject;
-        if (clickedButton != null)
-        {
-            Transform child = clickedButton.transform.Find("planetResource");
-            if (child != null)
-            {
-                RectTransform rect = child.GetComponent<RectTransform>();
-                if (rect != null)
-                {
-                    rect.DOAnchorPos(rect.anchoredPosition + new Vector2(0, -350f), 1f)
-                        .SetEase(Ease.InOutQuad);
-                }
-            }
-        }
-        */
         StartCoroutine(PlanetSelectionSequence());
     }
 
@@ -115,31 +105,70 @@ public class CameraScrollController : MonoBehaviour
     {
         if (index < 0 || index >= panels.Length) return;
 
-        Vector3 targetPos = new Vector3(transform.position.x, panels[index].position.y, transform.position.z);
+        Vector3 targetPos = new Vector3(
+            transform.position.x,
+            panels[index].position.y,
+            transform.position.z
+        );
+
         transform.DOMove(targetPos, 1f).SetEase(Ease.InOutQuad);
         targetPosition = targetPos;
     }
 
     private IEnumerator PlanetSelectionSequence()
     {
+        isSelecting = true;
+
         if (planetText != null)
         {
             planetText.DOKill();
-
-            Color c = planetText.color;
-            planetText.color = c;
-
             planetText.DOFade(0f, 0.15f);
         }
 
         yield return new WaitForSeconds(1.5f);
 
         fadeTarget.SetActive(true);
-        fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, 0f);
+
+        Color fadeColor = fadeImage.color;
+        fadeColor.a = 0f;
+        fadeImage.color = fadeColor;
+
         fadeImage.DOFade(1f, 1f);
 
         yield return new WaitForSeconds(1f);
 
-        SceneManager.LoadScene("MinigameLoad");
+        string nextScene = GetNextSceneName(selectedPlanetIndex);
+        SceneManager.LoadScene(nextScene);
+    }
+
+    private string GetNextSceneName(int planetIndex)
+    {
+        if (forceCutScene)
+            return cutSceneName;
+
+        if (planetIndex == 0 && IsFirstVisit(planetIndex))
+        {
+            SetVisited(planetIndex);
+            return cutSceneName;
+        }
+
+        return minigameLoadSceneName;
+    }
+
+    private bool IsFirstVisit(int planetIndex)
+    {
+        int visited = PlayerPrefs.GetInt(GetPlanetVisitKey(planetIndex), 0);
+        return visited == 0;
+    }
+
+    private void SetVisited(int planetIndex)
+    {
+        PlayerPrefs.SetInt(GetPlanetVisitKey(planetIndex), 1);
+        PlayerPrefs.Save();
+    }
+
+    private string GetPlanetVisitKey(int planetIndex)
+    {
+        return $"Planet_{planetIndex}_Visited";
     }
 }

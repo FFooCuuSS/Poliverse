@@ -446,10 +446,15 @@ public class MinigameUIManager : MonoBehaviour
         timerDuration = currentMinigame.GetTimerDuration;
         StartTimer(timerDuration);
 
+        // 먼저 미니게임 초기화
+        currentMinigame.StartGame();
+
+        // 초기화가 한 프레임 반영되게 함
+        yield return null;
+
+        // 그 다음 노드 실행
         if (rhythmManager != null)
             rhythmManager.StartSong();
-
-        currentMinigame.StartGame();
     }
 
     private IEnumerator WaitUntilBGMTime(float t)
@@ -934,4 +939,41 @@ public class MinigameUIManager : MonoBehaviour
         yield return resetSeq.WaitForCompletion();
     }
     */
+    public void DebugSkipToNextMinigame()
+    {
+        if (isSwitching) return;
+        if (isGameOver) return;
+
+        StartCoroutine(DebugSkipToNextMinigameRoutine());
+    }
+
+    private IEnumerator DebugSkipToNextMinigameRoutine()
+    {
+        if (timelineCoroutine != null)
+        {
+            StopCoroutine(timelineCoroutine);
+            timelineCoroutine = null;
+        }
+
+        yield return EndCurrentMinigame_ShowBlack();
+
+        if (minigameQueue.Count <= 0)
+        {
+            yield return FadeBlack(false);
+
+            if (finalObject != null)
+                finalObject.SetActive(true);
+
+            if (gameStartEnd != null)
+                gameStartEnd.ShowFinalPanel();
+
+            FadeBGM(finalBgmTargetVolume, finalBgmFadeTime);
+            yield break;
+        }
+
+        string nextPath = minigameQueue.Dequeue();
+
+        yield return PrepareNextMinigame(nextPath);
+        yield return StartPreparedMinigame();
+    }
 }

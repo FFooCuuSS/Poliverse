@@ -9,26 +9,25 @@ public class Minigame_3_3_Remake : MiniGameBase
     [SerializeField] private Manager_3_3 manager;
 
     private bool ended;
-    private bool inputOpen = false;
+    private bool inputOpen;
 
-    private void Start()
-    {
-        StartGame();
-    }
 
     public override void StartGame()
     {
+        base.StartGame();
+
         ended = false;
+        inputOpen = false;
 
         manager?.OnMinigameStart(this);
-
-        inputOpen = true;
-        manager?.StartNextRound();
     }
 
     public override void OnRhythmEvent(string action)
     {
         if (ended) return;
+        if (string.IsNullOrEmpty(action)) return;
+
+        action = action.Trim();
 
         switch (action)
         {
@@ -41,12 +40,14 @@ public class Minigame_3_3_Remake : MiniGameBase
             case "Move":
                 Debug.Log("[3-3] 입력 종료");
                 inputOpen = false;
+                manager?.CloseInput();
                 break;
         }
     }
 
     private void Update()
     {
+        if (ended) return;
         if (!inputOpen) return;
 
         if (Input.GetMouseButtonDown(0))
@@ -56,11 +57,19 @@ public class Minigame_3_3_Remake : MiniGameBase
         }
     }
 
+    public void ForceCloseInput()
+    {
+        inputOpen = false;
+    }
+
     public void FinishGame(int successCount)
     {
         if (ended) return;
 
         ended = true;
+        inputOpen = false;
+
         Debug.Log($"[3-3] 종료 / 성공 횟수: {successCount}");
+        Success();
     }
 }

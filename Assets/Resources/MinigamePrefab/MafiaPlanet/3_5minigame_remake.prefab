@@ -235,6 +235,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c44e69056c58fd43bdafed39b75e93d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useRhythmJudgementScore: 1
+  manualTotalNodeCount: -1
+  printScoreDebugOnEnd: 1
   scopeMover: {fileID: 5005005604567533292}
   cameraFollow: {fileID: 4956534895191004109}
 --- !u!1 &1009106037854274116
@@ -534,7 +537,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1883256934224837684}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b1bfea1308146b040907e0ce9c314d8d, type: 3}
   m_Name: 
