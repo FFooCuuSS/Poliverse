@@ -4,38 +4,100 @@ using UnityEngine;
 
 public class IceCream2_5 : MonoBehaviour
 {
-    public float fallSpeed = 10f; // 떨어지는 속도
-    private bool isStopped = false;
-    public GameObject stage_2_5;
-    private Minigame_2_5 minigame_2_5;
+    private enum State
+    {
+        Fly,
+        Drop,
+        Stored
+    }
+
+    private State state = State.Fly;
+
+    private Vector3 flyTarget;
+    private Vector3 storeTarget;
+
+    public float moveSpeed = 5f;
+    public float fallSpeed = 5f;
+
+    private bool landed = false;
+
+    private Rigidbody2D rb;
 
     void Awake()
     {
-        
-        minigame_2_5 = FindAnyObjectByType<Minigame_2_5>();
-
+        rb = GetComponent<Rigidbody2D>();
     }
+
+    public void StartStoreMove()
+    {
+        state = State.Stored;
+
+        if (rb != null)
+        {
+            rb.bodyType = RigidbodyType2D.Kinematic;
+            rb.velocity = Vector2.zero;
+        }
+    }
+
+    public void SetFlyTarget(Vector3 pos)
+    {
+        flyTarget = pos;
+        state = State.Fly;
+    }
+
+    public void SetStoreTarget(Vector3 pos)
+    {
+        storeTarget = new Vector3(pos.x, transform.position.y, transform.position.z);
+    }
+
+    public void Drop()
+    {
+        state = State.Drop;
+    }
+
     void Update()
     {
-        if (isStopped)
+        switch (state)
         {
+            case State.Fly:
+                MoveTo(flyTarget);
+                break;
 
-            
+            case State.Drop:
+                transform.position += Vector3.down * fallSpeed * Time.deltaTime;
+                break;
+
+            case State.Stored:
+                MoveTo(storeTarget);
+                break;
         }
     }
 
-    // 바구니에 닿으면 멈춤
+    private void MoveTo(Vector3 target)
+    {
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            target,
+            moveSpeed * Time.deltaTime
+        );
+
+        if (Vector3.Distance(transform.position, target) < 0.01f)
+        {
+            if (state == State.Stored)
+            {
+                enabled = false; // 여기서만 종료
+            }
+        }
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Basket"))
-        {
-            isStopped = true;
-            
-        }
-        if(other.CompareTag("Floor"))
-        {
-            minigame_2_5.Failure();
-            
-        }
+        if (!other.CompareTag("Floor")) return;
+        if (landed) return;
+
+        landed = true;
+
+        FindAnyObjectByType<IceCreamFloor>()
+            .OnIceCreamLanded(transform);
     }
 }

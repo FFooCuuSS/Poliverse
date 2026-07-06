@@ -27,6 +27,7 @@ TagManager:
   - Macaron
   - Bowl
   - Jelly
+  - IceCream
   layers:
   - Default
   - TransparentFX
