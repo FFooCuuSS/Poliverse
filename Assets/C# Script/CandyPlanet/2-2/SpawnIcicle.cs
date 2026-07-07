@@ -46,25 +46,27 @@ public class SpawnIcicle : MonoBehaviour
 
     private void HandleIcicleFalling()
     {
-        if (waiting || index >= spawnDelays.Length)
-            return;
+        // 이미 모든 고드름을 다 생성했으면 종료
+        if (index >= spawnDelays.Length) return;
 
         SpawnNext();
     }
+
     private void SpawnNext()
     {
-        waiting = true;
-
+        // 생성 위치와 고드름 생성
         Vector3 pos = new Vector3(currentX, transform.position.y, transform.position.z);
         GameObject icicle = Instantiate(iciclePrefab, pos, Quaternion.identity);
 
+        // 고드름 스크립트 가져오기
+        Icicle icicleScript = icicle.GetComponent<Icicle>();
+
+        // 다음 생성 준비
         float delay = spawnDelays[index];
-        icicle.GetComponent<Icicle>().StartIcicle(delay);
+        icicleScript.StartIcicle(delay);
 
         currentX += step;
-        index++;
-
-        waiting = false;
+        index++; // 다음 고드름을 위해 인덱스 증가
     }
 
 
