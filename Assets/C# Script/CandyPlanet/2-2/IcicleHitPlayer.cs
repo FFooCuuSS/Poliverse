@@ -7,16 +7,28 @@ public class IcicleHitPlayer : MonoBehaviour
 {
     private MiniGame2_2 minigame_2_2;
     public GameObject stage_2_2;
+    public PlayerMoveByClick playerMove;
 
     private void Start()
     {
         minigame_2_2 = stage_2_2.GetComponent<MiniGame2_2>();
     }
-    private void OnCollisionEnter2D(Collision2D coll)
+    private void OnTriggerEnter2D(Collider2D coll) 
     {
-        if (coll.gameObject.tag == "Icicle")
+        // 태그가 Icicle인 것과 충돌했는지 확인
+        if (coll.CompareTag("Icicle"))
         {
+            Debug.Log("충돌 감지 성공!");
+
             minigame_2_2.missCount++;
+            minigame_2_2.CheckGameResult();
+
+            // 플레이어 본인의 이동 스크립트 호출
+            var playerMove = GetComponent<PlayerMoveByClick>();
+            if (playerMove != null)
+            {
+                playerMove.ForceMove();
+            }
         }
     }
 

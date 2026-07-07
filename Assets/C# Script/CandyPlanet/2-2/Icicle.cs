@@ -6,6 +6,13 @@ public class Icicle : MonoBehaviour
 {
     public static event Action OnMoveAllowed;
     public static event Action OnMoveBlocked;
+    public static event Action<Icicle> OnIcicleDestroyed;
+
+    private int beatCount = 0; // 추가: 박자 카운트
+    private bool isFalling = false;
+
+    private float beatTimer = 0f;
+    [SerializeField] private float roundTripTime = 0.5f;
 
     [Header("Sprite")]
     [SerializeField] private Sprite fallingSprite;
@@ -25,40 +32,40 @@ public class Icicle : MonoBehaviour
         rb.isKinematic = true; //떨어지기 전까지 고정
     }
 
+    // 외부에서 박자(beat) 정보를 받아 낙하 시점 결정
     public void StartIcicle(float delay)
     {
-        OnMoveBlocked?.Invoke();   //생성 즉시 이동 금지
-        StartCoroutine(FallRoutine(delay));
+        OnMoveBlocked?.Invoke();
+        beatCount = 0;
+        beatTimer = 0f;
+        isFalling = false;
+    }
+    void Update()
+    {
+        if (isFalling) return;
+
+        beatTimer += Time.deltaTime;
+        if (beatTimer >= roundTripTime)
+        {
+            beatTimer = 0f;
+            beatCount++;
+            Debug.Log($"고드름 박자: {beatCount}");
+
+            // 1박자: 생성됨(이미 됨), 2박자: 낙하 시작
+            if (beatCount >= 2)
+            {
+                StartCoroutine(DropRoutine());
+            }
+        }
     }
 
-    private IEnumerator FallRoutine(float delay)
+    private IEnumerator DropRoutine()
     {
-        Vector3 startPos = transform.position;
-        Vector3 warningPos = startPos + Vector3.down * warningMoveDistance;
-
-        float timer = 0f;
-        bool moveUnlocked = false;
-
-        while (timer < delay)
-        {
-            timer += Time.deltaTime;
-            float t = timer / delay;
-
-            transform.position = Vector3.Lerp(startPos, warningPos, t);
-
-            //낙하 1초 전 이동 허용
-            if (!moveUnlocked && timer >= delay - 1f)
-            {
-                moveUnlocked = true;
-                OnMoveAllowed?.Invoke();
-            }
-
-            yield return null;
-        }
-
+        isFalling = true;
         sr.sprite = fallingSprite;
         rb.isKinematic = false;
-        OnIcicleFalling?.Invoke();
+        OnIcicleFalling?.Invoke(); // SpawnIcicle에게 다음 고드름 생성 신호 전달
+        yield break;
     }
-
+    
 }

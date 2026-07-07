@@ -13,12 +13,16 @@ public class MiniGame2_2 : MiniGameBase
 
     private bool ended;
     public int missCount = 0;
-    private int totalCount =5;
 
+    private void Start()
+    {
+        StartGame();
+    }
     public override void StartGame()
     {
-
-
+        base.StartGame();
+        ended = false;
+        missCount = 0;
         // 추가 초기화
         // 예: instructionText.text = MinigameExplain;
     }
@@ -39,7 +43,7 @@ public class MiniGame2_2 : MiniGameBase
         if (ended) return;
         Debug.Log($"{gameObject.name} 리듬메세지: {action}");
         action = action.Trim();
-        if (action == "Tap")
+        if (action == "Input")
         {
         }
         
@@ -54,17 +58,20 @@ public class MiniGame2_2 : MiniGameBase
 
     public override void OnJudgement(JudgementResult judgement)
     {
-        if (IsInputLocked || ended) return;
-
+        if (ended) return;
         base.OnJudgement(judgement);
 
         if (judgement == JudgementResult.Miss)
         {
-            //srChange.ChangeSpriteTemporarily();
             missCount++;
-            Debug.Log($"현재 실수 횟수: {missCount}");
+            CheckGameResult();
         }
     }
+
+
+    // 외부에서 호출 가능하도록 실패/성공 로직 캡슐화
+    public void ForceMiss() => OnJudgement(JudgementResult.Miss);
+
     public void CheckGameResult()
     {
         if (IsInputLocked || ended) return;
