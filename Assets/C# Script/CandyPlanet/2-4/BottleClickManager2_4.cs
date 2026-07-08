@@ -1,3 +1,4 @@
+/*
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -100,3 +101,4 @@ public class BottleClickManager2_4 : MonoBehaviour
         GameManager2_4.Instance.CheckWin();
     }
 }
+*/

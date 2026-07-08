@@ -4,80 +4,62 @@ using UnityEngine;
 
 public class MacaroonSpawn : MonoBehaviour
 {
-    [Header("Prefab & Sprites")]
     public GameObject macaronPrefab;
     public Sprite[] macaronSprites;
 
-    [Header("Line Spawn Settings")]
     public float startX = -3f;
     public float startY = 2f;
-    public float spacing = 2.5f; // 마카롱 사이 간격
+    public float spacing = 2.5f;
 
-    [Header("Options")]
-    [SerializeField] private bool useRandomSprites = false; //리소스 받으면 true변경
+    [SerializeField] public float centerOffsetX = -2f;
 
-    void Start()
+    public void SpawnMacarons()
     {
-        if (macaronSprites == null || macaronSprites.Length == 0)
-        {
-            Debug.LogWarning("Macaron sprites not assigned!");
-            return;
-        }
-
         int macaronCount = macaronSprites.Length;
 
-        // 0 ~ n-1 인덱스 리스트 생성
-        List<int> indices = new List<int>();
-        for (int i = 0; i < macaronCount; i++)
-            indices.Add(i);
-
-        for (int i = 0; i < indices.Count; i++)
-        {
-            int rand = Random.Range(i, indices.Count);
-
-            int temp = indices[i];
-            indices[i] = indices[rand];
-            indices[rand] = temp;
-        }
+        SpriteRenderer prefabSR = macaronPrefab.GetComponent<SpriteRenderer>();
+        Vector2 targetSize = prefabSR.bounds.size;
 
         float totalWidth = (macaronCount - 1) * spacing;
-        float offsetX = -totalWidth / 2f;
+
+        // 기존 중앙 기준 + 왼쪽 이동
+        float startPosX = -totalWidth / 2f + centerOffsetX;
+
 
         for (int i = 0; i < macaronCount; i++)
         {
             Vector2 pos = new Vector2(
-                startX + offsetX + (i * spacing),
+                startPosX + i * spacing,
                 startY
             );
 
-            GameObject obj = Instantiate(macaronPrefab, pos, Quaternion.identity, this.transform);
+
+            GameObject obj = Instantiate(
+                macaronPrefab,
+                pos,
+                Quaternion.identity,
+                transform
+            );
+
 
             Macaron macaron = obj.GetComponent<Macaron>();
             macaron.index = i;
 
-            //이미지 비율 유지하며 크기 조정
+
             SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
-            if (sr != null)
-            {
-                // 기준이 될 프리팹 원래 크기
-                SpriteRenderer prefabSR = macaronPrefab.GetComponent<SpriteRenderer>();
-                Vector2 targetSize = prefabSR.bounds.size;
 
-                // 스프라이트 교체
-                int randomIndex = Random.Range(0, macaronSprites.Length);
-                sr.sprite = macaronSprites[indices[i]];
+            sr.sprite = macaronSprites[i];
 
-                // 새 스프라이트 실제 크기
-                Vector2 spriteSize = sr.sprite.bounds.size;
 
-                // 비율 계산
-                float scaleX = targetSize.x / spriteSize.x;
-                float scaleY = targetSize.y / spriteSize.y;
+            Vector2 spriteSize = sr.sprite.bounds.size;
 
-                float finalScale = Mathf.Min(scaleX, scaleY);// 비율 유지
+            float scaleX = targetSize.x / spriteSize.x;
+            float scaleY = targetSize.y / spriteSize.y;
 
-                obj.transform.localScale = new Vector3(finalScale, finalScale, 1f);
-            }
+            float finalScale = Mathf.Min(scaleX, scaleY);
+
+            obj.transform.localScale =
+                new Vector3(finalScale, finalScale, 1f);
         }
     }
 }

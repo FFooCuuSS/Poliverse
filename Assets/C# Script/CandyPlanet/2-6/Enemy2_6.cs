@@ -25,13 +25,19 @@ public class Enemy2_6 : MonoBehaviour
 
     void Update()
     {
-        if (target != null)
-        {
-            transform.position = Vector3.MoveTowards(
+        if (target == null) return;
+
+        transform.position =
+            Vector3.MoveTowards(
                 transform.position,
                 target.position,
-                speed * Time.deltaTime
-            );
+                speed * Time.deltaTime);
+
+        if (Vector3.Distance(transform.position, target.position) < 0.1f)
+        {
+            _minigame2_6.OnObstaclePassed();
+
+            Destroy(gameObject);
         }
     }
 
@@ -40,16 +46,17 @@ public class Enemy2_6 : MonoBehaviour
         _minigame2_6 = minigame;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D other)
     {
         if (isHit) return;
-        if (!collision.CompareTag("Player")) return;
+
+        if (!other.CompareTag("Player"))
+            return;
 
         isHit = true;
 
-        if (_minigame2_6 != null)
-            _minigame2_6.OnPlayerHit();
+        _minigame2_6.OnPlayerHit();
 
-        //Destroy(gameObject);
+        Destroy(gameObject);
     }
 }

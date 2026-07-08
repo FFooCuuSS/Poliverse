@@ -1,50 +1,70 @@
 using UnityEngine;
+using System.Collections;
 
 public class Bawmquhen2_6 : MonoBehaviour
 {
-    public float moveSpeed = 10f;
-    public float returnSpeed = 5f;
-    public float maxX = 300f;
+    [SerializeField] private float laneOffset = 3f;
+    [SerializeField] private float moveSpeed = 15f;
+    [SerializeField] private float stayTime = 0.15f;
 
-    private bool isDragging = false;
-    private float targetX = 0f;
+    private Vector3 centerPos;
+    private bool isMoving;
+
+    void Start()
+    {
+        centerPos = transform.position;
+    }
 
     void Update()
     {
-        HandleInput();
-        Move();
-    }
+        if (isMoving)
+            return;
 
-    void HandleInput()
-    {
         if (Input.GetMouseButtonDown(0))
         {
-            isDragging = true;
-        }
-
-        if (Input.GetMouseButton(0) && isDragging)
-        {
-            float mouseX = Input.mousePosition.x;
-            float normalized = (mouseX / Screen.width - 0.5f) * 2f;
-
-            targetX = normalized * maxX;
-        }
-
-        if (Input.GetMouseButtonUp(0))
-        {
-            isDragging = false;
-            targetX = 0f;
+            if (Input.mousePosition.x < Screen.width * 0.5f)
+            {
+                StartCoroutine(MoveAndReturn(-laneOffset));
+            }
+            else
+            {
+                StartCoroutine(MoveAndReturn(laneOffset));
+            }
         }
     }
 
-    void Move()
+    IEnumerator MoveAndReturn(float offset)
     {
-        Vector3 pos = transform.position;
+        isMoving = true;
 
-        float speed = isDragging ? moveSpeed : returnSpeed;
+        Vector3 target = centerPos + Vector3.right * offset;
 
-        pos.x = Mathf.MoveTowards(pos.x, targetX, speed * Time.deltaTime);
+        // 이동
+        while (Vector3.Distance(transform.position, target) > 0.01f)
+        {
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                target,
+                moveSpeed * Time.deltaTime);
 
-        transform.position = pos;
+            yield return null;
+        }
+
+        // 잠깐 유지
+        yield return new WaitForSeconds(stayTime);
+
+        // 가운데 복귀
+        while (Vector3.Distance(transform.position, centerPos) > 0.01f)
+        {
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                centerPos,
+                moveSpeed * Time.deltaTime);
+
+            yield return null;
+        }
+
+        transform.position = centerPos;
+        isMoving = false;
     }
 }

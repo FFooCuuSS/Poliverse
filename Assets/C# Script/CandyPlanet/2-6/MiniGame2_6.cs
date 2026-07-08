@@ -7,18 +7,14 @@ public class MiniGame2_6 : MiniGameBase
     protected override float TimerDuration => 5f;
     protected override string MinigameExplain => "좌우로 피해라!";
 
-    public override float perfectWindowOverride => 0.1f;
-    public override float goodWindowOverride => 0.3f;
-    public override float hitWindowOverride => 0.5f;
+    //public override float perfectWindowOverride => 0.1f;
+    //public override float goodWindowOverride => 0.3f;
+    //public override float hitWindowOverride => 0.5f;
+
+    protected override bool UseRhythmJudgementScore => false;
+    protected override int ManualTotalNodeCount => 5;
 
     private bool ended;
-    private bool inputOpen;          // Input 구간인지
-    private bool awaitingJudge;      // 입력 후 판정 대기중(중복 입력 방지용)
-
-    private const int MaxNodes = 5;
-
-    private List<bool> nodeResults; // 각 노드 성공 여부 저장
-    private int currentNode = 0;
 
     public EnemySpawner2_6 spawner;
 
@@ -28,8 +24,6 @@ public class MiniGame2_6 : MiniGameBase
     {
         base.StartGame();
 
-        nodeResults = new List<bool>();
-        currentNode = 0;
         ended = false;
     }
 
@@ -45,7 +39,6 @@ public class MiniGame2_6 : MiniGameBase
         switch (action)
         {
             case "Show":
-                Debug.Log("Show");
                 spawner.SpawnObstacle();
                 break;
         }
@@ -56,13 +49,15 @@ public class MiniGame2_6 : MiniGameBase
     {
         if (ended) return;
 
-        hitCount++;
+        ReportManualFail();
 
-        Debug.Log($"충돌 횟수: {hitCount}");
+        Debug.Log("장애물 충돌!");
+    }
 
-        if (hitCount >= 3)
-        {
-            ended = true;
-        }
+    public void OnObstaclePassed()
+    {
+        if (ended) return;
+
+        ReportManualSuccess();
     }
 }

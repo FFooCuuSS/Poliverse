@@ -7,6 +7,10 @@ using Random = UnityEngine.Random;
 
 public class EnemySpawner2_6 : MonoBehaviour
 {
+    [Header("Obstacle Sprites")]
+    [SerializeField] private float scaleMultiplier = 0.5f;
+    [SerializeField] private Sprite[] obstacleSprites;
+
     [Header("Prefab to Spawn")]
     public GameObject prefab;
 
@@ -23,14 +27,24 @@ public class EnemySpawner2_6 : MonoBehaviour
         float width = (rightX - leftX) / 3f;
         float obstacleWidth = width * (2f / 3f);
 
-        int emptyLane = Random.Range(0, 3);
+        List<int> lanes = new List<int> { 0, 1, 2 };
 
-        for (int lane = 0; lane < 3; lane++)
+        List<int> spriteIndexes = new List<int>();
+        for (int i = 0; i < obstacleSprites.Length; i++)
+            spriteIndexes.Add(i);
+
+        for (int i = 0; i < 2; i++)
         {
-            if (lane == emptyLane) continue;
+            int laneRandom = Random.Range(0, lanes.Count);
+            int lane = lanes[laneRandom];
+            lanes.RemoveAt(laneRandom);
+
+            int spriteRandom = Random.Range(0, spriteIndexes.Count);
+            int spriteIndex = spriteIndexes[spriteRandom];
+            spriteIndexes.RemoveAt(spriteRandom);
 
             float startX = leftX + lane * width;
-            float spawnX = startX + (width / 2f);
+            float spawnX = startX + width * 0.5f;
 
             Vector3 spawnPos = new Vector3(spawnX, spawnY, 0f);
 
@@ -41,11 +55,12 @@ public class EnemySpawner2_6 : MonoBehaviour
 
             SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
 
-            float spriteWidth = sr.bounds.size.x;
-            float extraWidth = 1.2f;
-            float scale = (obstacleWidth / spriteWidth) * extraWidth;
+            sr.sprite = obstacleSprites[spriteIndex];
 
-            obj.transform.localScale = new Vector3(scale, 0.7f, 1f);
+            float spriteWidth = sr.sprite.bounds.size.x;
+            float scale = (obstacleWidth / spriteWidth) * scaleMultiplier;
+
+            obj.transform.localScale = Vector3.one * scale;
         }
     }
 }
