@@ -1,3 +1,4 @@
+/*
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -112,3 +113,4 @@ public class GameManager2_4 : MonoBehaviour
         miniGame2_4.Success();
     }
 }
+*/

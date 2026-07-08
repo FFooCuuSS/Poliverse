@@ -392,6 +392,7 @@ MonoBehaviour:
   stackSpacing: 0.3
   moveDistance: 2.5
   moveSpeed: 8
+  stackStartOffsetY: -0.3
 --- !u!50 &7255636327692408411
 Rigidbody2D:
   serializedVersion: 4
@@ -467,6 +468,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d053a9147346fa6468ea4e7332f922c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useRhythmJudgementScore: 0
+  manualTotalNodeCount: -1
+  printScoreDebugOnEnd: 1
+  spawner: {fileID: 9094759847956891438}
 --- !u!1 &3399296170260846781
 GameObject:
   m_ObjectHideFlags: 0
@@ -493,7 +498,7 @@ Transform:
   m_GameObject: {fileID: 3399296170260846781}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.26215127, y: 0.99, z: 0.054687075}
+  m_LocalPosition: {x: -3.53, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -521,4 +526,4 @@ MonoBehaviour:
   startX: -3
   startY: -1.3
   spacing: 2
-  useRandomSprites: 1
+  centerOffsetX: -3

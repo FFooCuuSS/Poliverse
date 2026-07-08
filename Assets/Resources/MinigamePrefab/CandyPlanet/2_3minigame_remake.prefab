@@ -313,9 +313,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   swingAngle: 60
-  swingSpeed: 4
-  startAngle: 4.71
-  minigame: {fileID: 9039606845292696258}
+  swingDuration: 1
 --- !u!1 &1785535162915662824
 GameObject:
   m_ObjectHideFlags: 0
@@ -970,5 +968,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe33fdf17938f8c4ca2c577746a08512, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxInputCount: 3
-  movingIcon: {fileID: 7300788290715918493}
+  useRhythmJudgementScore: 1
+  manualTotalNodeCount: -1
+  printScoreDebugOnEnd: 1
+  hammer: {fileID: 9173598818886886741}
