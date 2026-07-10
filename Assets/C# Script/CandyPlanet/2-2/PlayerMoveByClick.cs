@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Properties;
 using UnityEngine;
 using static MiniGameBase;
 
@@ -21,14 +22,17 @@ public class PlayerMoveByClick : MonoBehaviour
 
     void OnEnable()
     {
-        Icicle.OnMoveBlocked += () => { canMove = false; };
-        Icicle.OnMoveAllowed += () => { canMove = true; hasMovedThisCycle = false; };
+        Icicle.OnMoveBlocked += HandleMoveBlocked;
+        Icicle.OnMoveAllowed += HandleMoveAllowed;
     }
     void OnDisable()
     {
-        Icicle.OnMoveBlocked -= () => { canMove = false; };
-        Icicle.OnMoveAllowed -= () => { canMove = true; hasMovedThisCycle = false; };
+        Icicle.OnMoveBlocked -= HandleMoveBlocked;
+        Icicle.OnMoveAllowed -= HandleMoveAllowed;
     }
+    private void HandleMoveBlocked() => canMove = false;
+    private void HandleMoveAllowed() { canMove = true; hasMovedThisCycle = false; }
+
     void Update()
     {
         // 클릭 감지 및 이동 가능 여부 확인
@@ -66,5 +70,6 @@ public class PlayerMoveByClick : MonoBehaviour
         isMoving = true;
         canMove = false;
         hasMovedThisCycle = true; // 이동 로직을 수행하도록 설정
+        Icicle.RaiseMoveAllowed();
     }
 }

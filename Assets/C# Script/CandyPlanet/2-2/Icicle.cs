@@ -8,10 +8,9 @@ public class Icicle : MonoBehaviour
     public static event Action OnMoveBlocked;
     public static event Action<Icicle> OnIcicleDestroyed;
 
-    private int beatCount = 0; // 추가: 박자 카운트
+    private int beatCount = 0; // 박자 카운트
     private bool isFalling = false;
 
-    private float beatTimer = 0f;
     [SerializeField] private float roundTripTime = 0.5f;
 
     [Header("Sprite")]
@@ -25,11 +24,26 @@ public class Icicle : MonoBehaviour
 
     public static event Action OnIcicleFalling;
 
+    private RhythmManagerTest rhythmTest;
+    private double spawnSongTime;
+    private bool hasCapturedStartTime = false; // 실제 곡 시작 이후 기준 시간을 잡았는지 여부
+
     void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
         rb.isKinematic = true; //떨어지기 전까지 고정
+        rhythmTest = FindObjectOfType<RhythmManagerTest>();
+    }
+
+    public static void RaiseMoveAllowed()
+    {
+        OnMoveAllowed?.Invoke();
+    }
+
+    public static void RaiseMoveBlocked()
+    {
+        OnMoveBlocked?.Invoke();
     }
 
     // 외부에서 박자(beat) 정보를 받아 낙하 시점 결정
@@ -37,22 +51,36 @@ public class Icicle : MonoBehaviour
     {
         OnMoveBlocked?.Invoke();
         beatCount = 0;
-        beatTimer = 0f;
         isFalling = false;
+        hasCapturedStartTime = false; // 스폰 시점에는 아직 기준 시간을 확정하지 않음
     }
+
     void Update()
     {
-        if (isFalling) return;
+        if (isFalling || rhythmTest == null || !rhythmTest.IsRunning) return;
 
-        beatTimer += Time.deltaTime;
-        if (beatTimer >= roundTripTime)
+        // 곡이 실제로 Running 상태가 된 이후 첫 프레임에서 기준 시간(spawnSongTime) 캡처
+        if (!hasCapturedStartTime)
         {
-            beatTimer = 0f;
-            beatCount++;
-            Debug.Log($"고드름 박자: {beatCount}");
+            spawnSongTime = rhythmTest.SongTimePublic;
+            hasCapturedStartTime = true;
+            return; // 이번 프레임은 기준만 잡고, 카운트는 다음 프레임부터 진행
+        }
 
-            // 1박자: 생성됨(이미 됨), 2박자: 낙하 시작
-            if (beatCount >= 2)
+        double elapsed = rhythmTest.SongTimePublic - spawnSongTime;
+        int currentBeat = Mathf.FloorToInt((float)(elapsed / roundTripTime));
+
+        if (currentBeat > beatCount)
+        {
+            beatCount = currentBeat;
+            Debug.Log($"고드름 박자: {beatCount}");
+            if(beatCount == 2)
+            {
+                RaiseMoveAllowed();
+            }
+
+            // beat 1~3: 꿈틀거림, beat 4: 낙하
+            if (beatCount >= 4)
             {
                 StartCoroutine(DropRoutine());
             }
@@ -67,5 +95,4 @@ public class Icicle : MonoBehaviour
         OnIcicleFalling?.Invoke(); // SpawnIcicle에게 다음 고드름 생성 신호 전달
         yield break;
     }
-    
 }
