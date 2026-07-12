@@ -5,7 +5,7 @@ using UnityEngine;
 public class Bottle2_4 : MonoBehaviour
 {
     private Vector3 target;
-    public float moveSpeed = 5f;
+    [SerializeField] public float moveSpeed = 5f;
     private bool isFilled = false;
 
     public void SetTarget(Vector3 pos)
@@ -27,11 +27,15 @@ public class Bottle2_4 : MonoBehaviour
         }
     }
 
-    public void FillBottle()
+    public void FillBottle(GameObject liquidObject)
     {
-        if (isFilled) return;
+        if (isFilled || liquidObject == null) return;
         isFilled = true;
 
-        Debug.Log("보틀에 음료가 채워졌습니다!");
+        Debug.Log("음료 따르기!");
+
+        liquidObject.transform.SetParent(this.transform);
+
+        liquidObject.transform.DOLocalMove(Vector3.zero, 0.1f).SetEase(Ease.OutQuad);
     }
 }
