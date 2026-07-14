@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 639678927378424895}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.6602485, z: 0.051870387}
+  m_LocalPosition: {x: 0, y: 0, z: 0.051870387}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -73,7 +73,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -9095717837082945937, guid: 207ee8102dd4143d288186ef0be518ee, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 42638842ef23ae947ba157d8f5d48f0e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -186,7 +186,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minigame3_4: {fileID: 3140207031555331764}
-  cardPrefab: {fileID: 5054586211692714608, guid: a3834cbea125f5d45af149077bb53958, type: 3}
+  cardPrefab: {fileID: 8526903590057933716, guid: b95929f00bdd79a4284b4ce7992b9d22, type: 3}
   cardPosition:
   - {fileID: 1940128934615994446}
   - {fileID: 1940128934615994446}
@@ -221,7 +221,7 @@ Transform:
   m_GameObject: {fileID: 2532920688869223799}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.7102487, z: 0.051870387}
+  m_LocalPosition: {x: 0, y: 0, z: 0.051870387}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -268,7 +268,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 54fc07ed45a26e441a9a7c46780b5869, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -550,6 +550,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81dc5cfc84255e84fa5c12951bf42ae8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useRhythmJudgementScore: 1
+  manualTotalNodeCount: -1
+  printScoreDebugOnEnd: 1
   handTransform: {fileID: 1744755312623485662}
   handMover: {fileID: 1355846984851091619}
   handStopX: 6

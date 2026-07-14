@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager_3_11 : MonoBehaviour
@@ -10,6 +12,7 @@ public class GameManager_3_11 : MonoBehaviour
     [SerializeField] private int targetScore = 1;
     [SerializeField] private int bombPenalty = 1;
 
+    [SerializeField] private GameObject bombEffect;
     // 현재 점수
     private int currentScore = 0;
 
@@ -148,7 +151,19 @@ public class GameManager_3_11 : MonoBehaviour
         // 물체를 처리한 뒤 제거한다.
         hitObject.ProcessObject();
     }
+    public void PlayBombEffect()
+    {
+        StartCoroutine(BombEffectCoroutine());
+    }
 
+    private IEnumerator BombEffectCoroutine()
+    {
+        bombEffect.SetActive(true);
+
+        yield return new WaitForSeconds(1f);
+
+        bombEffect.SetActive(false);
+    }
     /// <summary>
     /// Target 적중 시 점수를 증가시킨다.
     /// </summary>
@@ -169,6 +184,7 @@ public class GameManager_3_11 : MonoBehaviour
     /// </summary>
     private void AddBombPenalty()
     {
+        PlayBombEffect();
         currentScore -= bombPenalty;
 
         Debug.Log(
