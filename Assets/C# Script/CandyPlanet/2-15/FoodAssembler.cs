@@ -14,6 +14,9 @@ public class FoodAssembler : MonoBehaviour
             GameObject slice = Instantiate(slicePrefab, parent); // ✅ 부모 지정
             slice.transform.localPosition = Vector3.zero; // 중심 맞추기
             slice.transform.localRotation = Quaternion.identity;
+
+            SpriteRenderer sr = slice.GetComponent<SpriteRenderer>();
+            if (sr != null) sr.sortingOrder = 10; // 플레이어보다 큰 값으로
         }
     }
 }

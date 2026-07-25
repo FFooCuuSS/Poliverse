@@ -14,10 +14,7 @@ public class MiniGame2_2 : MiniGameBase
     private bool ended;
     public int missCount = 0;
 
-    private void Start()
-    {
-        StartGame();
-    }
+  
     public override void StartGame()
     {
         base.StartGame();
