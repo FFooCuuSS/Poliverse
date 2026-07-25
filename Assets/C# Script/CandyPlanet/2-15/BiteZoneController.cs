@@ -22,10 +22,12 @@ public class BiteZoneController : MonoBehaviour
 
             List<Collider2D> results = new List<Collider2D>();
             int count = capsuleCollider.OverlapCollider(filter, results);
+            Debug.Log($"겹친 콜라이더 수: {count}");
 
             for (int i = 0; i < count; i++)
             {
                 Collider2D col = results[i];
+                Debug.Log($"겹친 오브젝트: {col.name}, Tag: {col.tag}");
 
                 if (col.CompareTag(sliceTag))
                 {

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
@@ -7,17 +7,18 @@ public class FoodSliceGeneratorWindow : EditorWindow
 {
     Texture2D sourceTexture;
     int sliceCount = 8;
-    int exportSize = 512; // ������ �ؽ�ó ũ�� (���簢)
+    int exportSize = 512; // 생성할 텍스처 크기 (정사각)
     string exportFolder = "Assets/Resources/MinigamePrefab/CandyPlanet/TempPrefab/EJU/GeneratedSlices";
     string prefabFolder = "Assets/Resources/MinigamePrefab/CandyPlanet/TempPrefab/EJU/GeneratedSlices/Prefabs";
-    float colliderRadius = 0.5f; // Sprite units (�Ҵ� �� Scale ��� ����)
-    int arcSubdivision = 8; // ȣ�� �ٻ��� �� ����
+    float colliderRadius = 0.5f; // Sprite units (할당 후 Scale 사용 가능)
+    int arcSubdivision = 8; // 호를 근사할 점 개수
+    string sliceTag = "FoodPiece"; // ✅ 생성된 조각에 자동으로 지정할 Tag
 
     [MenuItem("Window/Slice Food Creator")]
     static void OpenWindow()
     {
         FoodSliceGeneratorWindow w = GetWindow<FoodSliceGeneratorWindow>("Slice Food Creator");
-        w.minSize = new Vector2(420, 220);
+        w.minSize = new Vector2(420, 240);
     }
 
     void OnGUI()
@@ -27,6 +28,7 @@ public class FoodSliceGeneratorWindow : EditorWindow
         sliceCount = EditorGUILayout.IntField("Slice Count", Mathf.Max(1, sliceCount));
         exportSize = EditorGUILayout.IntField("Export Size(px)", Mathf.Max(32, exportSize));
         arcSubdivision = EditorGUILayout.IntSlider("Arc Subdivision (collider)", arcSubdivision, 3, 32);
+        sliceTag = EditorGUILayout.TagField("Slice Tag", sliceTag); // ✅ Tag 드롭다운으로 선택
 
         GUILayout.Space(8);
         GUILayout.Label("Output Folders", EditorStyles.boldLabel);
@@ -170,6 +172,12 @@ public class FoodSliceGeneratorWindow : EditorWindow
             GameObject go = new GameObject($"{baseName}_slice_{i}");
             go.transform.position = Vector3.zero;
 
+            // ✅ Tag 자동 지정 (Tag Manager에 등록되어 있어야 함)
+            if (!string.IsNullOrEmpty(sliceTag))
+            {
+                go.tag = sliceTag;
+            }
+
             SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = sprite;
 
@@ -197,10 +205,6 @@ public class FoodSliceGeneratorWindow : EditorWindow
             // Close back to center omitted because polygon points list should be non-duplicating
             poly.points = pts.ToArray();
 
-            // Add Slice marker component
-            var sliceScript = go.AddComponent<SliceMarker>();
-            sliceScript.sliceIndex = i;
-
             // Save as prefab
             string prefabPath = $"{prefabFolder}/{go.name}.prefab";
             var prefab = PrefabUtility.SaveAsPrefabAsset(go, prefabPath);
@@ -220,20 +224,6 @@ public class FoodSliceGeneratorWindow : EditorWindow
     }
 }
 
-// Simple marker script for runtime behavior; can be moved to normal assets folder (not Editor).
-public class SliceMarker : MonoBehaviour
-{
-    public int sliceIndex = 0;
-
-    // Example runtime behavior: hide when bite zone enters
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("PlayerBiteZone"))
-        {
-            var sr = GetComponent<SpriteRenderer>();
-            if (sr != null) sr.enabled = false;
-            var col = GetComponent<Collider2D>();
-            if (col != null) col.enabled = false;
-        }
-    }
-}
+// SliceMarker 제거됨: BiteZoneController가 삭제/판정 로직을 전담하고 있어 불필요.
+// (이 파일이 Editor 폴더에 있어 에디터 전용 어셈블리로 컴파일되므로,
+//  런타임 MonoBehaviour를 여기 정의해서 프리팹에 붙이면 저장 시 에러가 발생함)
