@@ -28,6 +28,8 @@ TagManager:
   - Bowl
   - Jelly
   - IceCream
+  - Target
+  - Bomb
   layers:
   - Default
   - TransparentFX

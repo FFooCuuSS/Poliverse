@@ -19,6 +19,8 @@ public class MiniGame2_4 : MiniGameBase
     [SerializeField] private BottleSpawner2_4 spawner;
     [SerializeField] private Kettle2_4 kettle;
 
+    [SerializeField] private GameObject liquidPrefab;
+
     private Bottle2_4 currentBottle;
 
     public override void StartGame()
@@ -42,7 +44,7 @@ public class MiniGame2_4 : MiniGameBase
         switch (action)
         {
             case "Show":
-                spawner.SpawnBottle();
+                currentBottle = spawner.SpawnBottle();
                 break;
             case "Input":
                 inputOpen = true;
@@ -70,7 +72,9 @@ public class MiniGame2_4 : MiniGameBase
         {
             case JudgementResult.Perfect:
             case JudgementResult.Good:
-                currentBottle.FillBottle();
+                GameObject liquid = Instantiate(liquidPrefab, kettle.PourPoint.position, Quaternion.identity);
+
+                currentBottle.FillBottle(liquid);
                 break;
 
             case JudgementResult.Miss:

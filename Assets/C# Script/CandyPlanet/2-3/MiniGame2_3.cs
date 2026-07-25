@@ -11,10 +11,9 @@ public class Minigame_2_3 : MiniGameBase
     protected override float TimerDuration => 5f;
     protected override string MinigameExplain => "가동시켜라!";
 
-    [SerializeField]
-    private PendulamHammer2_3 hammer;
-
-    private int inputCount = 0;
+    [SerializeField] private PendulamHammer2_3 hammer;
+    [SerializeField] private Player2_3 player;
+    private bool isHammerAtRight = false;
 
     private bool inputOpen = false;
 
@@ -26,10 +25,15 @@ public class Minigame_2_3 : MiniGameBase
     {
         base.StartGame();
 
-        inputCount = 0;
-
         inputOpen = false;
         IsInputTiming = false;
+
+        isHammerAtRight = false;
+
+        if (player != null)
+        {
+            player.UpdateDirectionByHammerPosition(isHammerAtRight);
+        }
     }
 
     public override void OnRhythmEvent(string action)
@@ -47,7 +51,14 @@ public class Minigame_2_3 : MiniGameBase
         switch (action)
         {
             case "Show":
+                if (player != null)
+                {
+                    player.UpdateDirectionByHammerPosition(isHammerAtRight);
+                }
+
                 hammer.Swing();
+
+                isHammerAtRight = !isHammerAtRight;
                 break;
             case "Input":
                 inputOpen = true;
@@ -77,6 +88,10 @@ public class Minigame_2_3 : MiniGameBase
                 break;
             case JudgementResult.Miss:
                 Debug.Log("실패");
+                if (player != null)
+                {
+                    player.SetJudgementResult(false);
+                }
                 break;
         }
     }

@@ -10,7 +10,7 @@ public class BottleSpawner2_4 : MonoBehaviour
 
     [SerializeField] private Transform bottleParent;
 
-    public void SpawnBottle()
+    public Bottle2_4 SpawnBottle()
     {
         Vector3 spawnPos = new Vector3(
             rightSpawn.position.x,
@@ -31,6 +31,7 @@ public class BottleSpawner2_4 : MonoBehaviour
         {
             Debug.LogError("Bottle 프리팹에 Bottle2_4 컴포넌트가 없습니다.");
             Destroy(obj);
+            return null;
         }
 
         Vector3 targetPos = new Vector3(
@@ -40,5 +41,7 @@ public class BottleSpawner2_4 : MonoBehaviour
         );
 
         bottle.SetTarget(targetPos);
+
+        return bottle;
     }
 }
