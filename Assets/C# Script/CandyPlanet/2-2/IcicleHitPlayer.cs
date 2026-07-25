@@ -28,6 +28,7 @@ public class IcicleHitPlayer : MonoBehaviour
             if (playerMove != null)
             {
                 playerMove.ForceMove();
+                minigame_2_2.missCount++;
             }
         }
     }

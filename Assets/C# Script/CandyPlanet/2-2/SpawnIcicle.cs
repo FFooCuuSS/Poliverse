@@ -92,10 +92,6 @@ public class SpawnIcicle : MonoBehaviour
     }
 
 
-
-
-
-
     private IEnumerator SpawnLoop()
     {
         float currentX = startX;
