@@ -3,143 +3,174 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class EnemyVision_3_12 : MonoBehaviour
 {
-    [Header("참조")]
-    [SerializeField] private Transform eye;           
+    [Header("Reference")]
+    [Tooltip("적의 방향을 담당하는 루트. 비워두면 부모 사용")]
+    [SerializeField] private Transform eye;
 
     [Header("FOV")]
     [SerializeField] private float viewAngleDeg = 60f;
     [SerializeField] private float viewDistance = 6f;
     [SerializeField, Range(12, 180)] private int rays = 60;
 
-    [Header("감지/차단")]
-    [SerializeField] private LayerMask visionMask;          
-    [SerializeField] private string wallTag = "Wall";
-    [SerializeField] private string playerTag = "Player";
+    [Header("Raycast")]
+    [Tooltip("Wall과 Player 레이어만 포함")]
+    [SerializeField] private LayerMask visionMask;
 
-    [Header("렌더 옵션")]
-    [SerializeField] private Color fovColor = new(1f, 0f, 0f, 0.35f);
+    [Header("Rendering")]
+    [SerializeField]
+    private Color fovColor =
+        new Color(1f, 0f, 0f, 0.35f);
+
     [SerializeField] private string sortingLayerName = "Default";
     [SerializeField] private int sortingOrder = 200;
-    [SerializeField] private float facingOffsetDeg = 90f;    
 
-    private MeshFilter mf;
-    private MeshRenderer mr;
     private Mesh mesh;
-    private Quaternion _offset;
+    private MeshRenderer meshRenderer;
+    private Material runtimeMaterial;
 
-    void Awake()
+    private void Awake()
     {
-        mf = GetComponent<MeshFilter>();
-        mr = GetComponent<MeshRenderer>();
-        mesh = mf.sharedMesh ?? (mf.sharedMesh = new Mesh { name = "EnemyVisionMesh" });
+        MeshFilter meshFilter = GetComponent<MeshFilter>();
+        meshRenderer = GetComponent<MeshRenderer>();
 
-        if (mr.sharedMaterial == null)
-            mr.sharedMaterial = new Material(Shader.Find("Sprites/Default")); // 또는 URP/Unlit
+        mesh = new Mesh
+        {
+            name = "EnemyVisionMesh"
+        };
 
-        // 색/투명도/정렬
-        if (mr.sharedMaterial.HasProperty("_Color")) mr.sharedMaterial.color = fovColor;
-        else if (mr.sharedMaterial.HasProperty("_BaseColor")) mr.sharedMaterial.SetColor("_BaseColor", fovColor);
-        mr.sharedMaterial.renderQueue = 3000;
-        mr.sortingLayerName = sortingLayerName;
-        mr.sortingOrder = sortingOrder;
+        meshFilter.sharedMesh = mesh;
 
-        if (eye == null) eye = transform.parent != null ? transform.parent : transform;
-        if (transform.parent != eye) transform.SetParent(eye, false);
-        transform.localPosition = Vector3.zero;
+        if (meshRenderer.sharedMaterial == null)
+        {
+            Shader shader = Shader.Find("Sprites/Default");
+            meshRenderer.sharedMaterial = new Material(shader);
+        }
 
-        _offset = Quaternion.Euler(0f, 0f, facingOffsetDeg); // 시작 1회 오프셋
-        transform.localRotation = _offset;
+        runtimeMaterial = meshRenderer.material;
 
-        // 자기 자신에 레이 안 맞게(권장)
+        if (runtimeMaterial.HasProperty("_Color"))
+            runtimeMaterial.color = fovColor;
+        else if (runtimeMaterial.HasProperty("_BaseColor"))
+            runtimeMaterial.SetColor("_BaseColor", fovColor);
+
+        runtimeMaterial.renderQueue = 3000;
+
+        meshRenderer.sortingLayerName = sortingLayerName;
+        meshRenderer.sortingOrder = sortingOrder;
+
+        if (eye == null)
+            eye = transform.parent != null ? transform.parent : transform;
+
         gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
     }
 
-    void LateUpdate()
+    private void LateUpdate()
     {
-        // 부모(eye) 회전에 자동 종속. 메쉬만 갱신
         UpdateSightMesh();
     }
 
-    public bool CanSeePlayer(Collider2D player)
+    public bool CanSeePlayer(Collider2D playerCollider)
     {
-        if (player == null) return false;
-        Transform playerRoot = player.transform.root;
+        if (playerCollider == null || eye == null)
+            return false;
 
-        Bounds pb = player.bounds;
-        Vector2 c = pb.center;
+        Vector2 origin = eye.position;
+        Vector2 target = playerCollider.bounds.center;
+        Vector2 toPlayer = target - origin;
 
-        return HasLOS(c, playerRoot);
+        float distance = toPlayer.magnitude;
+
+        if (distance <= 0.001f)
+            return true;
+
+        if (distance > viewDistance)
+            return false;
+
+        Vector2 direction = toPlayer / distance;
+        Vector2 forward = eye.up;
+
+        float halfAngle = viewAngleDeg * 0.5f;
+
+        if (Vector2.Angle(forward, direction) > halfAngle)
+            return false;
+
+        RaycastHit2D hit = Physics2D.Raycast(
+            origin,
+            direction,
+            distance,
+            visionMask
+        );
+
+        Debug.DrawRay(origin, direction * distance, Color.red);
+
+        if (!hit)
+            return false;
+
+        Transform hitTransform = hit.collider.transform;
+        Transform playerRoot = playerCollider.transform.root;
+
+        return hitTransform == playerRoot ||
+               hitTransform.IsChildOf(playerRoot);
     }
 
-    bool HasLOS(Vector2 target, Transform playerRoot)
+    private void UpdateSightMesh()
     {
-        Vector2 origin = transform.position;
-        Vector2 dir = target - origin;
-        float dist = dir.magnitude;
-        if (dist > viewDistance) return false;
+        if (eye == null)
+            return;
 
-        dir /= dist;
+        int vertexCount = rays + 2;
+        Vector3[] vertices = new Vector3[vertexCount];
+        int[] triangles = new int[rays * 3];
 
-        // 시야각(전방 = transform.right)
-        float half = viewAngleDeg * 0.5f;
-        if (Vector2.Angle((Vector2)transform.right, dir) > half) return false;
+        Vector3 worldOrigin = eye.position;
+        vertices[0] = transform.InverseTransformPoint(worldOrigin);
 
-        // 첫 히트로 판정: Wall + Player만 후보
-        RaycastHit2D hit = Physics2D.Raycast(origin, dir, dist, visionMask);
-        Debug.DrawRay(origin, dir * Mathf.Min(dist, viewDistance), Color.red);
-
-        if (!hit) return false;
-
-        // 벽이 먼저면 차단
-        if (hit.collider.CompareTag(wallTag)) return false;
-
-        // 플레이어(혹은 그 자식 콜라이더)면 감지
-        if (hit.collider.CompareTag(playerTag)) return true;
-        Transform ht = hit.collider.transform;
-        return ht == playerRoot || ht.IsChildOf(playerRoot);
-    }
-
-    void UpdateSightMesh()
-    {
-        int vCount = rays + 2; // origin + 각도별 점
-        if (mesh.vertexCount != vCount)
-        {
-            mesh.Clear();
-            mesh.vertices = new Vector3[vCount];
-            mesh.triangles = new int[rays * 3];
-        }
-
-        var verts = mesh.vertices;
-        var tris = mesh.triangles;
-
-        verts[0] = Vector3.zero; // 로컬 원점
-
-        float half = viewAngleDeg * 0.5f;
-        Vector3 origin = transform.position;
+        float halfAngle = viewAngleDeg * 0.5f;
 
         for (int i = 0; i <= rays; i++)
         {
-            float a = -half + (viewAngleDeg * i) / rays;
-            Vector2 dir = (Vector2)(Quaternion.Euler(0, 0, a) * transform.right);
+            float angle =
+                -halfAngle + viewAngleDeg * i / rays;
 
-            // FOV 시각도 Wall/Player에 막히는 지점까지
-            RaycastHit2D hit = Physics2D.Raycast(origin, dir, viewDistance, visionMask);
-            Vector3 worldPoint = hit ? (Vector3)hit.point
-                                     : origin + (Vector3)(dir * viewDistance);
+            Vector2 direction =
+                Quaternion.Euler(0f, 0f, angle) * eye.up;
 
-            verts[i + 1] = transform.InverseTransformPoint(worldPoint);
+            RaycastHit2D hit = Physics2D.Raycast(
+                worldOrigin,
+                direction,
+                viewDistance,
+                visionMask
+            );
 
-            if (i < rays)
-            {
-                int t = i * 3;
-                tris[t + 0] = 0;
-                tris[t + 1] = i + 1;
-                tris[t + 2] = i + 2;
-            }
+            Vector3 worldPoint = hit
+                ? hit.point
+                : worldOrigin + (Vector3)(direction * viewDistance);
+
+            vertices[i + 1] =
+                transform.InverseTransformPoint(worldPoint);
+
+            if (i >= rays)
+                continue;
+
+            int triangleIndex = i * 3;
+
+            triangles[triangleIndex] = 0;
+            triangles[triangleIndex + 1] = i + 1;
+            triangles[triangleIndex + 2] = i + 2;
         }
 
-        mesh.vertices = verts;
-        mesh.triangles = tris;
+        mesh.Clear();
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
         mesh.RecalculateBounds();
+    }
+
+    private void OnDestroy()
+    {
+        if (mesh != null)
+            Destroy(mesh);
+
+        if (runtimeMaterial != null)
+            Destroy(runtimeMaterial);
     }
 }

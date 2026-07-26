@@ -684,7 +684,7 @@ MonoBehaviour:
   inactiveScale: 0.8
   activeAlpha: 1
   inactiveAlpha: 0.3
-  nextSceneName: MinigameLoad
+  nextSceneName: LobbyScene
 --- !u!1 &365364220
 GameObject:
   m_ObjectHideFlags: 0

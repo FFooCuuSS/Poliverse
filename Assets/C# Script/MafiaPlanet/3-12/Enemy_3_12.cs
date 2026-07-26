@@ -1,76 +1,183 @@
+using System;
 using UnityEngine;
+using DG.Tweening;
 
 public class Enemy_3_12 : MonoBehaviour
 {
-    [SerializeField] private GameObject stage_3_12;
-    [SerializeField] private Collider2D playerCollider;
-
-    [Header("AI 행동 세팅")]
-    [SerializeField] private int enemyType;      // 0: 순찰, 1: 고정
-    [SerializeField] private Vector2[] patrolPoints;
-    [SerializeField] private float moveSpeed = 2f;
-    [SerializeField] private float actionInterval = 2f;
-    [SerializeField] private float[] lookAngles;
-
-    [Header("시야 컴포넌트")]
-    [SerializeField] private EnemyVision_3_12 vision; // 자식에 붙은 컴포넌트
-
-    private Minigame_3_12 minigame_3_12;
-
-    private int currentPointIndex = 0;
-    private int currentLookIndex = 0;
-    private float timer = 2f;
-    private bool isMoving = true;
-    private bool alreadyTriggered = false;
-
-    void Start()
+    public enum Facing
     {
-        minigame_3_12 = stage_3_12.GetComponent<Minigame_3_12>();
-
-        if (enemyType == 0 && patrolPoints.Length == 1)
-        {
-            Vector2 startPos = transform.position;
-            Vector2 patrol = patrolPoints[0];
-            patrolPoints = new Vector2[] { startPos, patrol };
-        }
-
-        if (vision == null) vision = GetComponentInChildren<EnemyVision_3_12>(true);
+        Up,
+        Right,
+        Down,
+        Left
     }
 
-    void Update()
+    [Serializable]
+    public struct BeatAction
     {
-        
-        if (!alreadyTriggered && vision != null && playerCollider != null && vision.CanSeePlayer(playerCollider))
-        {
-            var bdd = playerCollider.GetComponentInParent<BlockingDirectionalDrag_3_12>();
-            if (bdd != null) bdd.Revealed();
+        [Tooltip("이 박자에 이동할 셀 수. 고정 적은 (0, 0)")]
+        public Vector2Int moveDelta;
 
-            minigame_3_12.Fail();
-            isMoving = false;
-            alreadyTriggered = true;
+        [Tooltip("이동 후 바라볼 방향")]
+        public Facing facing;
+    }
+
+    [Header("References")]
+    [SerializeField] private EnemyVision_3_12 vision;
+
+    [Tooltip("SpriteRenderer 등을 담은 자식 오브젝트")]
+    [SerializeField] private Transform moveVisual;
+
+    [Header("Initial State")]
+    [SerializeField] private Facing initialFacing = Facing.Down;
+
+    [Header("Beat Pattern")]
+    [SerializeField] private BeatAction[] beatPattern;
+    [SerializeField] private bool loopPattern = true;
+
+    [Header("Animation")]
+    [SerializeField] private float moveTweenDuration = 0.18f;
+    [SerializeField] private Ease moveEase = Ease.OutQuad;
+
+    private GridBoard_3_12 board;
+
+    private Vector3 initialWorldPosition;
+    private Vector3 baseVisualLocalPosition;
+    private Quaternion baseVisualLocalRotation;
+
+    private Vector3Int currentCell;
+    private int patternIndex;
+
+    public Vector3Int CurrentCell => currentCell;
+
+    private void Awake()
+    {
+        initialWorldPosition = transform.position;
+
+        if (vision == null)
+            vision = GetComponentInChildren<EnemyVision_3_12>(true);
+
+        if (moveVisual != null)
+        {
+            baseVisualLocalPosition = moveVisual.localPosition;
+            baseVisualLocalRotation = moveVisual.localRotation;
         }
-        
-        if (!isMoving) return;
+    }
 
-        timer += Time.deltaTime;
+    public void Initialize(GridBoard_3_12 targetBoard)
+    {
+        board = targetBoard;
+        patternIndex = 0;
 
-        if (timer >= actionInterval)
+        currentCell = board.WorldToCell(initialWorldPosition);
+        board.SnapToCell(transform, currentCell);
+
+        transform.rotation = Quaternion.Euler(
+            0f,
+            0f,
+            GetFacingAngle(initialFacing)
+        );
+
+        if (moveVisual != null)
         {
-            timer = 0f;
+            moveVisual.DOKill();
+            moveVisual.localPosition = baseVisualLocalPosition;
+            moveVisual.localRotation = baseVisualLocalRotation;
+        }
+    }
 
-            // 회전
-            currentLookIndex = 1 - currentLookIndex;
-            float angle = lookAngles[currentLookIndex];
-            transform.rotation = Quaternion.Euler(0f, 0f, angle);
+    /// <summary>
+    /// Move 박자마다 한 번 호출한다.
+    /// </summary>
+    public void ResolveBeatAction()
+    {
+        if (board == null || beatPattern == null || beatPattern.Length == 0)
+            return;
 
-            if (enemyType == 0)
-                currentPointIndex = 1 - currentPointIndex;
+        if (patternIndex >= beatPattern.Length)
+        {
+            if (!loopPattern)
+                return;
+
+            patternIndex = 0;
         }
 
-        if (enemyType == 0)
+        BeatAction action = beatPattern[patternIndex];
+        patternIndex++;
+
+        Vector3Int targetCell = currentCell;
+        targetCell.x += action.moveDelta.x;
+        targetCell.y += action.moveDelta.y;
+
+        bool hasMovement = action.moveDelta != Vector2Int.zero;
+
+        if (hasMovement && !board.CanEnter(targetCell))
+            targetCell = currentCell;
+
+        ApplyPose(targetCell, action.facing);
+    }
+
+    private void ApplyPose(Vector3Int targetCell, Facing facing)
+    {
+        Vector3 oldVisualWorldPosition =
+            moveVisual != null ? moveVisual.position : transform.position;
+
+        Quaternion oldVisualWorldRotation =
+            moveVisual != null ? moveVisual.rotation : transform.rotation;
+
+        currentCell = targetCell;
+
+        board.SnapToCell(transform, currentCell);
+        transform.rotation = Quaternion.Euler(
+            0f,
+            0f,
+            GetFacingAngle(facing)
+        );
+
+        if (moveVisual == null)
+            return;
+
+        moveVisual.DOKill();
+
+        // 판정용 루트와 시야는 즉시 새 위치/방향으로 바뀐다.
+        // 그래픽만 이전 자세에서 새 자세로 Tween된다.
+        moveVisual.position = oldVisualWorldPosition;
+        moveVisual.rotation = oldVisualWorldRotation;
+
+        moveVisual
+            .DOLocalMove(baseVisualLocalPosition, moveTweenDuration)
+            .SetEase(moveEase);
+
+        moveVisual
+            .DOLocalRotateQuaternion(baseVisualLocalRotation, moveTweenDuration)
+            .SetEase(Ease.OutQuad);
+    }
+
+    public bool CanSeePlayer(Collider2D playerCollider)
+    {
+        return vision != null &&
+               playerCollider != null &&
+               vision.CanSeePlayer(playerCollider);
+    }
+
+    private static float GetFacingAngle(Facing facing)
+    {
+        switch (facing)
         {
-            Vector3 target = patrolPoints[currentPointIndex];
-            transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
+            case Facing.Up:
+                return 0f;
+
+            case Facing.Right:
+                return -90f;
+
+            case Facing.Down:
+                return 180f;
+
+            case Facing.Left:
+                return 90f;
+
+            default:
+                return 0f;
         }
     }
 }
