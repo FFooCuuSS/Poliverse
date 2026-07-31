@@ -203,15 +203,18 @@ MonoBehaviour:
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
   ringLaneOrder: 00000000010000000200000003000000
-  laneAnchors: []
+  laneAnchors:
+  - {fileID: 5042254338312638237}
+  - {fileID: 7208904041581114227}
+  - {fileID: 8799253746611815666}
+  - {fileID: 955543739476780473}
   ringPrefab: {fileID: 1256727370179898676, guid: af4f77bc6bb81504a937fb14b7038038, type: 3}
   spawnRow: {fileID: 41352011754530217}
   bowlRow: {fileID: 987061613412379101}
   fallDuration: 0.4
   plate: {fileID: 514545284285944489}
   cameraTransform: {fileID: 0}
-  topViewAnchor: {fileID: 393346623884009567}
-  bottomViewAnchor: {fileID: 7699352339812747458}
+  cameraDownOffset: {x: 0, y: -10.33, z: 0}
   cameraMoveDuration: 1.9
   missCount: 0
 --- !u!1 &1501053912206184038
