@@ -1,24 +1,26 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class FoodPiecesTracker : MonoBehaviour
 {
-    public int totalPieces; // 시작할 때 조각 개수
+    public int totalPieces; // 전체 조각 개수
+    public List<GameObject> allSlices = new List<GameObject>(); // 전체 조각
+    public List<GameObject> targetSlices = new List<GameObject>(); // FoodAssembler가 수동 설정으로 채워줌 (먹어야 하는 조각)
 
-    private int eatenPieces = 0;
+    private int eatenTargetCount = 0;
 
-    // 한 조각이 먹혔을 때 호출
-    public void PieceEaten()
+    // BiteZoneController가 특정 조각을 클릭했을 때 호출.
+    // 타겟이 아니면 무시하고 false 반환 -> 파괴되지 않음.
+    public bool PieceEaten(GameObject piece)
     {
-        eatenPieces++;
-        Debug.Log($"조각 먹힘: {eatenPieces}/{totalPieces}");
+        if (piece == null) return false;
+        if (!targetSlices.Contains(piece)) return false; // 타겟이 아니면 먹을 수 없음
 
-        if (eatenPieces >= totalPieces)
-        {
-            Debug.Log("모든 조각 먹음! 다음 음식 스폰!");
-            // 다음 음식 스폰 호출 (FoodManager 같은 곳)
-            FoodManager.Instance.SpawnNextFood();
-            Destroy(gameObject);
+        targetSlices.Remove(piece);
+        eatenTargetCount++;
+        Destroy(piece);
 
-        }
+        Debug.Log($"타겟 조각 먹음: {eatenTargetCount}개 완료, 남은 타겟 {targetSlices.Count}개");
+        return true;
     }
 }

@@ -63,14 +63,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   slices:
-  - {fileID: 1567668729120771780, guid: ec4f77e8bbc7cbc4191d899801018461, type: 3}
-  - {fileID: 7708643761183255891, guid: 6f58c1f2684b7ac4194f93f1b69c193b, type: 3}
-  - {fileID: 6142242296853105876, guid: 89c79bf4c0a169c4aa1c78560d9f4883, type: 3}
-  - {fileID: 1633328214084187547, guid: b98c39d77059a7149b584f62521c7a2f, type: 3}
-  - {fileID: 4731284771517261173, guid: add2af2de7c9a8b44a8b7b7d960660b3, type: 3}
-  - {fileID: 4990927956990514295, guid: 8e2b060ec443e8047a1e739c272fa8e1, type: 3}
-  - {fileID: 8362993768123013875, guid: d4118eb39ff78a44ea58c5a7d4744479, type: 3}
-  - {fileID: 3309122631080172257, guid: 9e89db4952a7dcd49ba4cc354b2ced72, type: 3}
+  - slicePrefab: {fileID: 1567668729120771780, guid: ec4f77e8bbc7cbc4191d899801018461, type: 3}
+    isTarget: 1
+  - slicePrefab: {fileID: 7708643761183255891, guid: 6f58c1f2684b7ac4194f93f1b69c193b, type: 3}
+    isTarget: 0
+  - slicePrefab: {fileID: 6142242296853105876, guid: 89c79bf4c0a169c4aa1c78560d9f4883, type: 3}
+    isTarget: 0
+  - slicePrefab: {fileID: 1633328214084187547, guid: b98c39d77059a7149b584f62521c7a2f, type: 3}
+    isTarget: 0
+  - slicePrefab: {fileID: 4731284771517261173, guid: add2af2de7c9a8b44a8b7b7d960660b3, type: 3}
+    isTarget: 1
+  - slicePrefab: {fileID: 4990927956990514295, guid: 8e2b060ec443e8047a1e739c272fa8e1, type: 3}
+    isTarget: 0
+  - slicePrefab: {fileID: 8362993768123013875, guid: d4118eb39ff78a44ea58c5a7d4744479, type: 3}
+    isTarget: 1
+  - slicePrefab: {fileID: 3309122631080172257, guid: 9e89db4952a7dcd49ba4cc354b2ced72, type: 3}
+    isTarget: 1
+  targetHighlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!114 &6564999700720051499
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -84,3 +93,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   totalPieces: 0
+  allSlices: []
+  targetSlices: []
