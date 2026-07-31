@@ -1,25 +1,41 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Minigame_2_15 : MiniGameBase
 {
-    // ÆÇÁ¤ ¹üÀ§ ¿À¹ö¶óÀÌµå
+    public static Minigame_2_15 Instance;
+
+    // íŒì • ë²”ìœ„ ì˜¤ë²„ë¼ì´ë“œ
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.5f;
     public override float hitWindowOverride => 1f;
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "ÇÇÇØ¶ó!";
+    protected override string MinigameExplain => "í”¼í•´ë¼!";
 
     private bool ended;
     public int missCount = 0;
+
+    // ë§ˆì§€ë§‰ íŒì • ê²°ê³¼ (BiteZoneControllerê°€ í´ë¦­ ì§í›„ ì´ ê°’ì„ í™•ì¸í•´ì„œ íƒ€ì´ë° ì •í™•ë„ë¥¼ íŒë‹¨í•¨)
+    public JudgementResult LastJudgement { get; private set; }
+
+    // StartGame() í˜¸ì¶œ ì‹œì ì„ 0ì´ˆë¡œ ìž¡ëŠ” íƒ€ì´ë¨¸ (CSV íƒ€ì´ë° ê°’ ë½‘ì„ ë•Œ ì°¸ê³ ìš©)
+    private float gameStartTime;
+    public float ElapsedTime => Time.time - gameStartTime;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        Instance = this;
+    }
 
     public override void StartGame()
     {
         base.StartGame();
         ended = false;
         missCount = 0;
-        // Ãß°¡ ÃÊ±âÈ­
+        gameStartTime = Time.time;
+        // ì¶”ê°€ ì´ˆê¸°í™”
     }
 
     public void Succeed()
@@ -35,7 +51,7 @@ public class Minigame_2_15 : MiniGameBase
     public override void OnRhythmEvent(string action)
     {
         if (ended) return;
-        Debug.Log($"{gameObject.name} ¸®µë¸Þ¼¼Áö: {action}");
+        Debug.Log($"{gameObject.name} ë¦¬ë“¬ë©”ì„¸ì§€: {action}");
         action = action.Trim();
         if (action == "Input")
         {
@@ -43,7 +59,7 @@ public class Minigame_2_15 : MiniGameBase
     }
     public override void OnPlayerInput(string action = null)
     {
-        // ÀÔ·Â Àá±Ý »óÅÂ¸é ¹«½Ã
+        // ìž…ë ¥ ìž ê¸ˆ ìƒíƒœë©´ ë¬´ì‹œ
         if (IsInputLocked) return;
         base.OnPlayerInput(action);
     }
@@ -51,6 +67,8 @@ public class Minigame_2_15 : MiniGameBase
     {
         if (ended) return;
         base.OnJudgement(judgement);
+
+        LastJudgement = judgement;
 
         if (judgement == JudgementResult.Miss)
         {
@@ -62,10 +80,10 @@ public class Minigame_2_15 : MiniGameBase
     {
         if (IsInputLocked || ended) return;
         ended = true;
-        // ¸ðµÎ Miss 3¹ø ÀÌ»ó ½ÇÆÐ
+        // ëª¨ë‘ Miss 3ë²ˆ ì´ìƒ ì‹¤íŒ¨
         if (missCount >= 3)
         {
-            Debug.Log("½ÇÆÐ");
+            Debug.Log("ì‹¤íŒ¨");
             Failure();
         }
     }
