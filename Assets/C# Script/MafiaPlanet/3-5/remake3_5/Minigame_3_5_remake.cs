@@ -6,7 +6,7 @@ using UnityEngine;
 public class Minigame_3_5_remake : MiniGameBase
 {
     public ScopeMover scopeMover;
-    public CameraFollow3_5 cameraFollow;
+   // public CameraFollow3_5 cameraFollow;
     bool moveStarted = false;
 
     private void Start()
@@ -40,7 +40,7 @@ public class Minigame_3_5_remake : MiniGameBase
         }
         if(timechecker>=3f)
         {
-            cameraFollow.ResetCamera();
+            //cameraFollow.ResetCamera();
         }
     }
     

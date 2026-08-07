@@ -5,7 +5,10 @@ using UnityEngine;
 public class Instantiater3_5 : MonoBehaviour
 {
     [Header("생성할 프리팹")]
-    public GameObject prefab;
+    public GameObject enemy1;
+    public GameObject enemy2;
+    public GameObject closedDoor;
+    public GameObject openedDoor;
 
     [Header("각 줄별 스폰 위치")]
     public Transform[] line0Points;
@@ -104,7 +107,8 @@ public class Instantiater3_5 : MonoBehaviour
         for (int i = 0; i < selectedPoints.Count; i++)
         {
             Transform spawnPoint = selectedPoints[i];
-            Instantiate(prefab, spawnPoint.position, Quaternion.identity, parent);
+            Instantiate(enemy1, spawnPoint.position, Quaternion.identity, parent);
+            Instantiate(openedDoor, spawnPoint.position, Quaternion.identity, parent);
         }
     }
 
