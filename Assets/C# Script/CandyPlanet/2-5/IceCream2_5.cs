@@ -85,7 +85,7 @@ public class IceCream2_5 : MonoBehaviour
         {
             if (state == State.Stored)
             {
-                enabled = false; // 여기서만 종료
+                enabled = false;
             }
         }
     }

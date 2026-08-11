@@ -5,7 +5,7 @@ using UnityEngine;
 public class IceCreamFloor : MonoBehaviour
 {
     public Transform startPoint;
-    public float offsetX = 1.2f;
+    public float offsetX = 2f;
 
     private int index = 0;
 
