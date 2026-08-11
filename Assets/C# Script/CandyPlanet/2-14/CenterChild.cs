@@ -22,10 +22,10 @@ public class CenterChild : MonoBehaviour
 
         foreach (GameObject food in foods)
         {
-            Vector3 dir = transform.position - food.transform.position; // 플레이어 중심 방향
+            Vector3 dir = transform.position - food.transform.position;
             float dist = dir.magnitude;
 
-            if (dist < attractionRadius) // 끌어당김 범위 내
+            if (dist < attractionRadius)
             {
                 food.transform.position += dir.normalized * attractionForce * Time.deltaTime;
             }
@@ -36,15 +36,9 @@ public class CenterChild : MonoBehaviour
     {
         if (!col.CompareTag("Food")) return;
 
-        Debug.Log("음식이 가운데 닿음 → 실패 처리");
+        Debug.Log("음식이 가운데 도착 → 실패 보고");
 
-        if (miniGame != null)
-        {
-            // 실패 카운트 추가 등 처리 가능
-            // 예: miniGame.FailCount++;
-
-            // 필요 시 실패 이벤트 호출 등
-        }
+        miniGame?.ReportManualFail();
 
         Destroy(col.gameObject);
     }

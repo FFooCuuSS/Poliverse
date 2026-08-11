@@ -34,28 +34,15 @@ public class Shield_2_14 : MonoBehaviour
     {
         if (!col.CompareTag("Food")) return;
 
-        if (miniGame == null) return;
+        var foodMove = col.GetComponent<FoodMove_2_14>();
 
-        if (miniGame.IsInputOpen)
+        if (foodMove != null)
         {
-            Debug.Log("막기 성공! 음식 삭제");
-
-            // 음식 이동 멈추기
-            var foodMove = col.GetComponent<FoodMove_2_14>();
-            if (foodMove != null)
-            {
-                foodMove.StopMovement();
-            }
-
-            // 음식 즉시 삭제
-            Destroy(col.gameObject);
-
-            miniGame.successCount++;
-        }
-        else
-        {
-            Debug.Log("타이밍 아님");
+            foodMove.StopMovement();
         }
 
+        miniGame?.ReportManualSuccess();
+
+        Destroy(col.gameObject);
     }
 }

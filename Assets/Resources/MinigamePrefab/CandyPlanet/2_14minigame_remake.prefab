@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0.99999714, w: 0.0023886687}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.6874563, y: -0.81840545, z: 1}
+  m_LocalScale: {x: 0.7, y: -0.7, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7664064253689198629}
@@ -192,8 +192,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d386db87373826a48ae06ec5c4ca120c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useRhythmJudgementScore: 1
+  manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
-  successCount: 0
 --- !u!1 &7254788973823480484
 GameObject:
   m_ObjectHideFlags: 0
@@ -239,7 +240,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   foodPrefab: {fileID: 3627772306848672429, guid: a933f0a3ceba8524f8a6df4f6560a007, type: 3}
-  foodCount: 5
   foodSprites:
   - {fileID: 21300000, guid: ae2a3509e013e2c418c01e3f98a06940, type: 3}
   - {fileID: 21300000, guid: 18de46732c24c1a4ba78d3bc7a97da9b, type: 3}
@@ -248,9 +248,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: c9017a1423c605642baa891502a9a296, type: 3}
   - {fileID: 21300000, guid: 74f0cfd7a17def747bb9edd8d431a0ad, type: 3}
   - {fileID: 21300000, guid: 63bef34f70df0514583ec84a547b9eef, type: 3}
-  spawnRangeX: 7
-  spawnRangeY: 4
-  avoidRadius: 3
   player: {fileID: 6170430941325830966}
   shieldRadius: 2
 --- !u!1 &7623708924193381935
@@ -352,7 +349,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 6170430941325830966}
-  radius: 3.5
+  radius: 3
 --- !u!61 &2148295014963362531
 BoxCollider2D:
   m_ObjectHideFlags: 0
