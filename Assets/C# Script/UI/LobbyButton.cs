@@ -38,6 +38,20 @@ public class LobbyButton : MonoBehaviour
         SceneManager.LoadScene("MinigameLoad");
     }
 
+    public void tutorialButtonClick()
+    {
+        //robbyCanvas.SetActive(false);
+        // loadingCanvas.SetActive(false);
+        //settingsCanvas.SetActive(false);
+
+        Invoke("tutorialLoading", 1f);
+    }
+
+    void tutorialLoading()
+    {
+        SceneManager.LoadScene("PracticeMinigame");
+    }
+
     //public void settingsButtonClick()
     //{
     //    robbyCanvas.SetActive(false);
