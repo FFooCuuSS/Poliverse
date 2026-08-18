@@ -1,46 +1,61 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
 /// <summary>
-/// CSV Å¸ÀÓ¶óÀÎ (8ÃÊ °íÁ¤):
-///   0~2s : "Show"  x4   -> ÃÊÄÚ¸µ 4°³¸¦ ringLaneOrder ¼ø¼­´ë·Î ½ºÆù (Á¤Áö »óÅÂ·Î Ç¥½Ã)
-///   2s   : "CameraDown" -> Ä«¸Ş¶ó°¡ ¾Æ·¡·Î ÀÌµ¿, ¿Ï·áµÇ¸é Á¢½Ã ÀÔ·Â È°¼ºÈ­
-///   4~6s : "Input" x4   -> ½ºÆùµÈ ¼ø¼­ ±×´ë·Î ´ÙÀ½ ÃÊÄÚ¸µÀÌ ±×¸©À¸·Î ³«ÇÏ ½ÃÀÛ.
-///                          RhythmManager°¡ ÀÌ Input ÀÌº¥Æ® ±âÁØÀ¸·Î Å¸ÀÌ¹Ö(Perfect/Good/Miss)À» ÆÇÁ¤.
-///                          ´Ü, ½ÇÁ¦ "¹Ş¾Ò´Ù"´Â ½ÅÈ£(OnPlayerInput)´Â Á¢½Ã°¡ ÇØ´ç ·¹ÀÎ¿¡ ÀÖÀ» ¶§
-///                          Æ®¸®°Å Ãæµ¹ÀÌ ¹ß»ıÇØ¾ß¸¸ º¸³¿ -> ·¹ÀÎÀÌ Æ²¸®¸é ÀÚµ¿À¸·Î Å¸ÀÌ¹Ö À©µµ¿ì°¡
-///                          ´İÇô Miss Ã³¸®µÊ (RhythmManager ÂÊ ·ÎÁ÷).
-///   6s   : "CameraUp"   -> Ä«¸Ş¶ó ¿øÀ§Ä¡, Á¢½Ã ÀÔ·Â ºñÈ°¼ºÈ­
-/// CSV¿¡´Â ½Ã°£°ú ¾×¼Ç ¹®ÀÚ¿­¸¸ ÀÖÀ¸¸é µÇ°í, ·¹ÀÎ Á¤º¸´Â CSV¿¡ ³ÖÁö ¾Ê°í
-/// ringLaneOrder ¹è¿­(ÀÎ½ºÆåÅÍ)·Î ¹Ì´Ï°ÔÀÓ ¾È¿¡¼­ °ü¸®ÇÕ´Ï´Ù.
+/// CSV íƒ€ì„ë¼ì¸ (6ì´ˆ ê³ ì •):
+///   0~2s : "Show" x4     -> ì´ˆì½”ë§ 4ê°œë¥¼ ringLaneOrder ìˆœì„œëŒ€ë¡œ ìŠ¤í°. ìŠ¤í°ë˜ìë§ˆì ì¼ì • ì†ë„ë¡œ
+///                           ê³„ì† ë‚™í•˜í•˜ë‹¤ê°€ í™”ë©´ ë°– íŠ¸ë¦¬ê±°(ChocoRingOffscreenCleanup)ì— ë‹¿ìœ¼ë©´ ìë™ ì‚­ì œë¨.
+///                           (ì •ì§€ í‘œì‹œê°€ ì•„ë‹ˆë¼ "ë¹ ë¥´ê²Œ í˜ëŸ¬ ë‚˜ê°€ëŠ”" í”„ë¦¬ë·° ì—°ì¶œ)
+///   2s   : "CameraDown"  -> ì¹´ë©”ë¼ê°€ ì•„ë˜ë¡œ ì´ë™, ì™„ë£Œë˜ë©´ ì ‘ì‹œ ì…ë ¥ í™œì„±í™”
+///   ~4~6s: "Cue" x4      -> ringLaneOrder ìˆœì„œ ê·¸ëŒ€ë¡œ ìƒˆ ì´ˆì½”ë§ì„ catchSpawnRowì—ì„œ ìŠ¤í°í•´ ê·¸ë¦‡ìœ¼ë¡œ ë‚™í•˜ì‹œí‚´.
+///                           ë°˜ë“œì‹œ ëŒ€ì‘í•˜ëŠ” "Input" ì´ë²¤íŠ¸ ì‹œê°ë³´ë‹¤ catchFallDurationë§Œí¼ "ë¨¼ì €" ì™€ì•¼ í•¨.
+///                           (ì˜ˆ: Inputì´ 4.5ì´ˆë©´ CueëŠ” 4.5 - catchFallDuration ì´ˆì— ìœ„ì¹˜)
+///                           ì´ë ‡ê²Œ í•´ì•¼ ë‚™í•˜ê°€ ëë‚˜ ê·¸ë¦‡ì— ë„ì°©í•˜ëŠ” ì‹œì  == RhythmManagerê°€ ì‹¤ì œë¡œ
+///                           íŒì •í•˜ëŠ” Input ì‹œê°ì´ ë˜ì–´ ì‹œê°ì  ë‚™í•˜ì™€ íƒ€ì´ë° íŒì •ì´ ì •í™•íˆ ì¼ì¹˜í•¨.
+///   4~6s : "Input" x4    -> Minigame_2_12ëŠ” ì´ ì´ë²¤íŠ¸ì— ë³„ë„ ë°˜ì‘í•˜ì§€ ì•ŠìŒ (ìŠ¤í°ì€ ìœ„ Cueê°€ ë‹´ë‹¹).
+///                           RhythmManagerê°€ ì´ ì‹œê°ì„ ê¸°ì¤€ìœ¼ë¡œ ì‹¤ì œ í”Œë ˆì´ì–´ ì…ë ¥ íƒ€ì´ë°(Perfect/Good/Miss)ì„
+///                           íŒì •í•˜ê³ , ì…ë ¥ì´ ì—†ìœ¼ë©´ ìë™ Miss ì²˜ë¦¬í•¨.
+///                           ì‹¤ì œ "ë°›ì•˜ë‹¤"ëŠ” ì‹ í˜¸(OnPlayerInput)ëŠ” ì ‘ì‹œê°€ í•´ë‹¹ ë ˆì¸ì— ìˆì„ ë•Œ
+///                           íŠ¸ë¦¬ê±° ì¶©ëŒì´ ë°œìƒí•´ì•¼ë§Œ ë³´ëƒ„ -> ë ˆì¸ì´ í‹€ë¦¬ë©´ íŒì • ìœˆë„ìš°ê°€ ë‹«í˜€ ìë™ Miss.
+///   (CSVì— "CameraUp"ì„ ì•ˆ ë„£ì–´ë„ ë¨ - ë§ˆì§€ë§‰ ìºì¹˜ê°€ ëë‚˜ë©´ ì½”ë“œê°€ ìë™ìœ¼ë¡œ ì¹´ë©”ë¼ë¥¼ ì›ìœ„ì¹˜ë¡œ ë˜ëŒë¦° ë’¤ ê²°ê³¼ë¥¼ íŒì •í•¨)
+/// CSVì—ëŠ” ì‹œê°„ê³¼ ì•¡ì…˜ ë¬¸ìì—´ë§Œ ìˆìœ¼ë©´ ë˜ê³ , ë ˆì¸ ì •ë³´ëŠ” CSVì— ë„£ì§€ ì•Šê³ 
+/// ringLaneOrder ë°°ì—´(ì¸ìŠ¤í™í„°)ë¡œ ë¯¸ë‹ˆê²Œì„ ì•ˆì—ì„œ ê´€ë¦¬í•©ë‹ˆë‹¤.
+/// laneAnchorsëŠ” PlateController(Bowl)ì— ìˆëŠ” ê±¸ plate.LaneAnchorsë¡œ ê·¸ëŒ€ë¡œ ì°¸ì¡°í•©ë‹ˆë‹¤.
 /// </summary>
 public class Minigame_2_12 : MiniGameBase
 {
-    // ÆÇÁ¤ ¹üÀ§ ¿À¹ö¶óÀÌµå
+    // íŒì • ë²”ìœ„ ì˜¤ë²„ë¼ì´ë“œ
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.5f;
     public override float hitWindowOverride => 1f;
-    protected override float TimerDuration => 8f;
-    protected override string MinigameExplain => "¶³¾îÁö´Â ¼ø¼­¸¦ ±â¾ïÇÏ°í Á¢½Ã·Î ¹ŞÀ¸¼¼¿ä!";
+    protected override float TimerDuration => 6f;
+    protected override string MinigameExplain => "ë–¨ì–´ì§€ëŠ” ìˆœì„œë¥¼ ê¸°ì–µí•˜ê³  ì ‘ì‹œë¡œ ë°›ìœ¼ì„¸ìš”!";
 
-    [Header("·¹ÀÎ / ÃÊÄÚ¸µ")]
-    [Tooltip("ÃÊÄÚ¸µÀÌ Ç¥½Ã/³«ÇÏµÇ´Â ¼ø¼­. °¢ °ªÀº laneAnchorsÀÇ ÀÎµ¦½º (0 ~ laneCount-1)")]
+    [Header("ë ˆì¸ / ì´ˆì½”ë§ ê³µí†µ")]
+    [Tooltip("ì´ˆì½”ë§ì´ í‘œì‹œ/ë‚™í•˜ë˜ëŠ” ìˆœì„œ. ê° ê°’ì€ PlateController.LaneAnchorsì˜ ì¸ë±ìŠ¤ (0 ~ laneCount-1)")]
     [SerializeField] private int[] ringLaneOrder = new int[4];
-    [SerializeField] private Transform[] laneAnchors;
     [SerializeField] private GameObject ringPrefab;
-    [SerializeField] private Transform spawnRow;   // Show ´Ü°è¿¡¼­ Á¤Áö Ç¥½ÃµÇ´Â À§Ä¡ (È­¸é »ó´Ü)
-    [SerializeField] private Transform bowlRow;    // ³«ÇÏ µµÂø ÁöÁ¡ (±×¸© À§Ä¡)
-    [SerializeField] private float fallDuration = 0.4f; // Input ÀÌº¥Æ® ÀÌÈÄ ½ÇÁ¦ ³«ÇÏ ¾Ö´Ï¸ŞÀÌ¼Ç ½Ã°£
 
-    [Header("Á¢½Ã")]
+    [Header("í”„ë¦¬ë·° ë‚™í•˜ (Show, 0~2ì´ˆ)")]
+    [SerializeField] private Transform spawnRow; // Show ë‹¨ê³„ ìŠ¤í° ìœ„ì¹˜ (í™”ë©´ ìƒë‹¨)
+    [Tooltip("Show ë‹¨ê³„ì—ì„œ í™”ë©´ ë°–ìœ¼ë¡œ í˜ëŸ¬ë‚˜ê°€ëŠ” ì†ë„ (ì´ˆë‹¹ ì´ë™ ê±°ë¦¬)")]
+    [SerializeField] private float previewFallSpeed = 8f;
+
+    [Header("ìºì¹˜ ë‚™í•˜ (Input, 4~6ì´ˆ)")]
+    [SerializeField] private Transform catchSpawnRow; // ì¹´ë©”ë¼ ì´ë™ ì™„ë£Œ í›„ ê¸°ì¤€, ìºì¹˜ìš© ë§ì´ ìƒˆë¡œ ìŠ¤í°ë˜ëŠ” ìƒë‹¨ ìœ„ì¹˜
+    [SerializeField] private Transform bowlRow;        // ë‚™í•˜ ë„ì°© ì§€ì  (ê·¸ë¦‡ ìœ„ì¹˜)
+    [Tooltip("Input ì´ë²¤íŠ¸ ì´í›„ ì‹¤ì œ ìºì¹˜ ë‚™í•˜ ì• ë‹ˆë©”ì´ì…˜ ì‹œê°„ - Show ë‹¨ê³„ì™€ ë¬´ê´€í•˜ê²Œ ììœ ë¡­ê²Œ íŠœë‹")]
+    [SerializeField] private float catchFallDuration = 0.8f;
+
+    [Header("ì ‘ì‹œ")]
     [SerializeField] private PlateController plate;
 
-    [Header("Ä«¸Ş¶ó ¿¬Ãâ")]
+    [Header("ì¹´ë©”ë¼ ì—°ì¶œ")]
     [SerializeField] private Transform cameraTransform;
-    [Tooltip("¾Æ·¡·Î ÀÌµ¿ÇÒ ¶§ÀÇ »ó´ë ¿ÀÇÁ¼Â (originalCameraPosition ±âÁØ)")]
-    [SerializeField] private Vector3 cameraDownOffset = new Vector3(0f, -5f, 0f);
+    [Tooltip("ì•„ë˜ë¡œ ì´ë™í•  ë•Œì˜ ìƒëŒ€ ì˜¤í”„ì…‹ (originalCameraPosition ê¸°ì¤€)")]
+    [SerializeField] private Vector3 cameraDownOffset = new Vector3(0f, -15f, 0f);
     [SerializeField] private float cameraMoveDuration = 2f;
 
     private Vector3 originalCameraPosition;
@@ -48,22 +63,17 @@ public class Minigame_2_12 : MiniGameBase
     public static Minigame_2_12 Instance { get; private set; }
 
     private bool ended;
+    private bool resultPending; // ë§ˆì§€ë§‰ ìºì¹˜ ì™„ë£Œ í›„ ì¹´ë©”ë¼ì—… ì• ë‹ˆë©”ì´ì…˜ì´ ì§„í–‰ ì¤‘ì¸ì§€ (ì¤‘ë³µ íŠ¸ë¦¬ê±° ë°©ì§€)
     public int missCount = 0;
 
-    private readonly List<GameObject> spawnedRings = new List<GameObject>();
-    private int shownCount;  // Show ÀÌº¥Æ® Ã³¸® È½¼ö
-    private int dropCount;   // Input ÀÌº¥Æ® Ã³¸® È½¼ö
-    private int fallsInProgress; // ¾ÆÁ÷ ³«ÇÏ ¾Ö´Ï¸ŞÀÌ¼ÇÀÌ ³¡³ªÁö ¾ÊÀº ¸µ °³¼ö
+    private int shownCount;  // Show ì´ë²¤íŠ¸ ì²˜ë¦¬ íšŸìˆ˜
+    private int dropCount;   // Input ì´ë²¤íŠ¸ ì²˜ë¦¬ íšŸìˆ˜
+    private int fallsInProgress; // ì•„ì§ ìºì¹˜ ë‚™í•˜ ì• ë‹ˆë©”ì´ì…˜ì´ ëë‚˜ì§€ ì•Šì€ ë§ ê°œìˆ˜
 
     protected override void Awake()
     {
         base.Awake();
         Instance = this;
-
-        // Áø´Ü¿ë: ¾À¿¡ ¸Å´ÏÀú/¹Ì´Ï°ÔÀÓÀÌ Áßº¹µÇ¾î ÀÖ´ÂÁö È®ÀÎ (¿øÀÎ ÆÄ¾Ç ÈÄ Á¦°ÅÇØµµ µË´Ï´Ù)
-        var managers = FindObjectsOfType<RhythmManagerTest>();
-        var minigames = FindObjectsOfType<Minigame_2_12>();
-        Debug.Log($"[Minigame_2_12][Áø´Ü] RhythmManagerTest °³¼ö={managers.Length}, Minigame_2_12 °³¼ö={minigames.Length}");
     }
 
     protected override void OnDestroy()
@@ -76,16 +86,17 @@ public class Minigame_2_12 : MiniGameBase
     {
         base.StartGame();
         ended = false;
+        resultPending = false;
         missCount = 0;
         shownCount = 0;
         dropCount = 0;
         fallsInProgress = 0;
 
-        foreach (var ring in spawnedRings)
-            if (ring != null) Destroy(ring);
-        spawnedRings.Clear();
+        // ì´ì „ í”Œë ˆì´ì—ì„œ ë‚¨ì•„ìˆì„ ìˆ˜ ìˆëŠ” ì´ˆì½”ë§(í”„ë¦¬ë·°/ìºì¹˜ ëª¨ë‘) ì •ë¦¬
+        foreach (var marker in FindObjectsOfType<ChocoRingMarker>())
+            if (marker != null) Destroy(marker.gameObject);
 
-        cameraTransform.DOKill(); // È¤½Ã ³²¾ÆÀÖ´Â ÀÌÀü Æ®À© Á¤¸®
+        cameraTransform.DOKill(); // í˜¹ì‹œ ë‚¨ì•„ìˆëŠ” ì´ì „ íŠ¸ìœˆ ì •ë¦¬
         originalCameraPosition = cameraTransform.position;
         plate.SetInputEnabled(false);
     }
@@ -107,13 +118,17 @@ public class Minigame_2_12 : MiniGameBase
     public override void OnRhythmEvent(string action)
     {
         if (ended) return;
-        Debug.Log($"{gameObject.name} ¸®µë¸Ş¼¼Áö: {action} (frame={Time.frameCount})");
+        Debug.Log($"{gameObject.name} ë¦¬ë“¬ë©”ì„¸ì§€: {action} (frame={Time.frameCount})");
         action = action.Trim();
 
         switch (action)
         {
             case "Show":
-                SpawnNextRing();
+                SpawnPreviewRing();
+                break;
+
+            case "Cue":
+                DropCatchRing();
                 break;
 
             case "CameraDown":
@@ -121,7 +136,8 @@ public class Minigame_2_12 : MiniGameBase
                 break;
 
             case "Input":
-                DropNextRing();
+                // Minigame_2_12ëŠ” ë°˜ì‘ ì•ˆ í•¨ - RhythmManagerê°€ ìì²´ì ìœ¼ë¡œ ì´ ì‹œê° ê¸°ì¤€ íŒì •/ìë™ë¯¸ìŠ¤ ì²˜ë¦¬.
+                // (ìŠ¤í°ì€ ì´ë³´ë‹¤ ë¨¼ì € ì˜¨ "Cue" ì´ë²¤íŠ¸ê°€ ì´ë¯¸ ë‹´ë‹¹)
                 break;
 
             case "CameraUp":
@@ -130,34 +146,53 @@ public class Minigame_2_12 : MiniGameBase
         }
     }
 
-    private void SpawnNextRing()
+    private Transform GetLaneAnchor(int lane)
+    {
+        Transform[] laneAnchors = plate.LaneAnchors;
+
+        if (laneAnchors == null || lane < 0 || lane >= laneAnchors.Length)
+        {
+            Debug.LogError($"[Minigame_2_12] laneAnchors ë²”ìœ„ ì´ˆê³¼: lane={lane}, " +
+                           $"laneAnchors.Length={(laneAnchors == null ? 0 : laneAnchors.Length)}. " +
+                           $"PlateController(Bowl)ì˜ Lane Anchors ë°°ì—´ í¬ê¸°/í• ë‹¹ì„ í™•ì¸í•˜ì„¸ìš”.");
+            return null;
+        }
+
+        return laneAnchors[lane];
+    }
+
+    /// <summary>Show ì´ë²¤íŠ¸: ìˆœì„œëŒ€ë¡œ ë‹¤ìŒ í”„ë¦¬ë·° ë§ì„ ìŠ¤í°, ìŠ¤í° ì¦‰ì‹œ ì¼ì • ì†ë„ë¡œ ê³„ì† ë‚™í•˜ì‹œí‚´</summary>
+    private void SpawnPreviewRing()
     {
         if (shownCount >= ringLaneOrder.Length)
         {
-            Debug.LogWarning("[Minigame_2_12] ringLaneOrder ±æÀÌº¸´Ù Show ÀÌº¥Æ®°¡ ´õ ¸¹ÀÌ µé¾î¿È");
+            Debug.LogWarning("[Minigame_2_12] ringLaneOrder ê¸¸ì´ë³´ë‹¤ Show ì´ë²¤íŠ¸ê°€ ë” ë§ì´ ë“¤ì–´ì˜´");
             return;
         }
 
         int lane = ringLaneOrder[shownCount];
+        Transform anchor = GetLaneAnchor(lane);
+        if (anchor == null) { shownCount++; return; }
 
-        if (laneAnchors == null || lane < 0 || lane >= laneAnchors.Length)
-        {
-            Debug.LogError($"[Minigame_2_12] laneAnchors ¹üÀ§ ÃÊ°ú: lane={lane}, laneAnchors.Length={(laneAnchors == null ? 0 : laneAnchors.Length)}. " +
-                           $"ÀÎ½ºÆåÅÍ¿¡¼­ laneAnchors ¹è¿­ Å©±â/ÇÒ´çÀ» È®ÀÎÇÏ¼¼¿ä.");
-            shownCount++; // Ä«¿îÆ®´Â ÁøÇà½ÃÄÑ¼­ ÀÌÈÄ Show/Input ÀÎµ¦½º°¡ ¾È ¹Ğ¸®°Ô ÇÔ
-            return;
-        }
-
-        Transform anchor = laneAnchors[lane];
         Vector3 pos = new Vector3(anchor.position.x, spawnRow.position.y, 0f);
 
-        GameObject ring = Instantiate(ringPrefab, pos, Quaternion.identity);
+        // anchorì™€ ê°™ì€ ë¶€ëª¨(Canvas ë“±) ì•„ë˜ì— ìƒì„± - UI RectTransformì´ì–´ë„ ì¢Œí‘œê³„ê°€ ê¹¨ì§€ì§€ ì•Šë„ë¡
+        GameObject ring = Instantiate(ringPrefab, pos, Quaternion.identity, anchor.parent);
+
         var marker = ring.AddComponent<ChocoRingMarker>();
         marker.lane = lane;
         marker.orderIndex = shownCount;
 
-        spawnedRings.Add(ring);
-        Debug.Log($"[Minigame_2_12][Áø´Ü] ½ºÆùµÊ - shownCount={shownCount}, lane={lane}, anchor.position.x={anchor.position.x}, ring.position={ring.transform.position}");
+        // íŠ¸ë¦¬ê±° ê°ì§€ë¥¼ ìœ„í•´ Kinematic Rigidbody2D í•„ìš” (ì—†ìœ¼ë©´ ì¶”ê°€)
+        var rb = ring.GetComponent<Rigidbody2D>();
+        if (rb == null) rb = ring.AddComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.gravityScale = 0f;
+
+        var faller = ring.AddComponent<ChocoRingFaller>();
+        faller.speed = previewFallSpeed;
+
+        Debug.Log($"[Minigame_2_12][ì§„ë‹¨] í”„ë¦¬ë·° ìŠ¤í° - shownCount={shownCount}, lane={lane}, pos={ring.transform.position}");
         shownCount++;
     }
 
@@ -170,15 +205,16 @@ public class Minigame_2_12 : MiniGameBase
             .OnComplete(() => plate.SetInputEnabled(true));
     }
 
-    private void MoveCameraUp()
+    private void MoveCameraUp(System.Action onComplete = null)
     {
         plate.SetInputEnabled(false);
         cameraTransform.DOKill();
         cameraTransform.DOMove(originalCameraPosition, cameraMoveDuration)
-            .SetEase(Ease.InOutSine);
+            .SetEase(Ease.InOutSine)
+            .OnComplete(() => onComplete?.Invoke());
     }
 
-    /// <summary>Ä«¸Ş¶ó°¡ È®½ÇÈ÷ ¿ø·¡ À§Ä¡·Î µ¹¾Æ¿Í ÀÖµµ·Ï º¸Àå (¼º°ø/½ÇÆĞ/Áß´Ü ½Ã ¾ÈÀüÀåÄ¡)</summary>
+    /// <summary>ì¹´ë©”ë¼ê°€ í™•ì‹¤íˆ ì›ë˜ ìœ„ì¹˜ë¡œ ëŒì•„ì™€ ìˆë„ë¡ ë³´ì¥ (ì„±ê³µ/ì‹¤íŒ¨/ì¤‘ë‹¨ ì‹œ ì•ˆì „ì¥ì¹˜)</summary>
     private void RestoreCamera()
     {
         if (cameraTransform == null) return;
@@ -186,39 +222,51 @@ public class Minigame_2_12 : MiniGameBase
         cameraTransform.position = originalCameraPosition;
     }
 
-    /// <summary>Input ÀÌº¥Æ® ¹ß»ı ½Ã, ½ºÆùµÈ ¼ø¼­´ë·Î ´ÙÀ½ ¸µÀ» ±×¸©À» ÇâÇØ ³«ÇÏ½ÃÅ´</summary>
-    private void DropNextRing()
+    /// <summary>
+    /// Cue ì´ë²¤íŠ¸(ìºì¹˜ ìŠ¤í° í): ringLaneOrder ìˆœì„œ ê·¸ëŒ€ë¡œ "ìƒˆë¡œìš´" ìºì¹˜ìš© ë§ì„ catchSpawnRowì—ì„œ ìŠ¤í°í•´ì„œ
+    /// bowlRowê¹Œì§€ catchFallDuration ë™ì•ˆ ë‚™í•˜ì‹œí‚´. Show ë‹¨ê³„ í”„ë¦¬ë·°ì™€ëŠ” ì™„ì „íˆ ë‹¤ë¥¸ ì˜¤ë¸Œì íŠ¸/ì‹œê°„ì´ê³ ,
+    /// ëŒ€ì‘í•˜ëŠ” Input ì´ë²¤íŠ¸ë³´ë‹¤ catchFallDurationë§Œí¼ ë¨¼ì € í˜¸ì¶œë˜ë„ë¡ CSVì—ì„œ íƒ€ì´ë°ì„ ë§ì¶°ì•¼ í•¨.
+    /// </summary>
+    private void DropCatchRing()
     {
-        if (dropCount >= spawnedRings.Count)
+        if (dropCount >= ringLaneOrder.Length)
         {
-            Debug.LogWarning("[Minigame_2_12] ³²Àº ÃÊÄÚ¸µÀÌ ¾ø´Âµ¥ Input ÀÌº¥Æ®°¡ ´õ µé¾î¿È");
+            Debug.LogWarning("[Minigame_2_12] ringLaneOrder ê¸¸ì´ë³´ë‹¤ Cue ì´ë²¤íŠ¸ê°€ ë” ë§ì´ ë“¤ì–´ì˜´");
             return;
         }
 
-        GameObject ring = spawnedRings[dropCount];
-        dropCount++;
+        int lane = ringLaneOrder[dropCount];
+        Transform anchor = GetLaneAnchor(lane);
+        if (anchor == null) { dropCount++; return; }
 
-        if (ring == null) return; // ÀÌ¹Ì ´Ù¸¥ ÀÌÀ¯·Î ÆÄ±«µÈ °æ¿ì ¹æ¾î
-
-        var marker = ring.GetComponent<ChocoRingMarker>();
-        Transform anchor = laneAnchors[marker.lane];
+        Vector3 startPos = new Vector3(anchor.position.x, catchSpawnRow.position.y, 0f);
         Vector3 targetPos = new Vector3(anchor.position.x, bowlRow.position.y, 0f);
 
-        fallsInProgress++;
+        Debug.Log($"[Minigame_2_12][ì§„ë‹¨] Cue ë‚™í•˜ - catchSpawnRow.y={catchSpawnRow.position.y}, bowlRow.y={bowlRow.position.y} " +
+                  $"({(catchSpawnRow.position.y > bowlRow.position.y ? "ì •ìƒ: ì•„ë˜ë¡œ ë‚™í•˜í•¨" : "âš  catchSpawnRowê°€ bowlRowë³´ë‹¤ ë‚®ìŒ -> ìœ„ë¡œ ì´ë™í•˜ê²Œ ë¨")})");
 
-        ring.transform.DOMove(targetPos, fallDuration).SetEase(Ease.InQuad).OnComplete(() =>
+        GameObject ring = Instantiate(ringPrefab, startPos, Quaternion.identity, anchor.parent);
+        var marker = ring.AddComponent<ChocoRingMarker>();
+        marker.lane = lane;
+        marker.orderIndex = dropCount;
+        // ChocoRingFallerëŠ” ë¶™ì´ì§€ ì•ŠìŒ -> í™”ë©´ë°– íŠ¸ë¦¬ê±°ëŠ” ì´ ë§ì„ í”„ë¦¬ë·°ë¡œ ì·¨ê¸‰í•˜ì§€ ì•Šê³  ë¬´ì‹œí•¨
+
+        fallsInProgress++;
+        dropCount++;
+
+        ring.transform.DOMove(targetPos, catchFallDuration).SetEase(Ease.InQuad).OnComplete(() =>
         {
-            // ¿©±â µµ´ŞÇß´Ù´Â °Ç HandleCatchAttempt¿¡¼­ Ä³Ä¡µÇÁö ¾Ê¾Ò´Ù´Â ¶æ
-            // (Ä³Ä¡µÇ¸é ±× Áï½Ã DestroyµÇ¾î ÀÌ Äİ¹éÀÌ ½ÇÇàµÇÁö ¾ÊÀ½)
+            // ì—¬ê¸° ë„ë‹¬í–ˆë‹¤ëŠ” ê±´ HandleCatchAttemptì—ì„œ ìºì¹˜ë˜ì§€ ì•Šì•˜ë‹¤ëŠ” ëœ»
+            // (ìºì¹˜ë˜ë©´ ê·¸ ì¦‰ì‹œ Destroyë˜ì–´ ì´ ì½œë°±ì´ ì‹¤í–‰ë˜ì§€ ì•ŠìŒ)
             if (ring != null) Destroy(ring);
             OnFallFinished();
         });
     }
 
     /// <summary>
-    /// Á¢½Ã(PlateCatchTrigger)¿¡¼­ È£Ãâ.
-    /// ·¹ÀÎÀÌ ÀÏÄ¡ÇÒ ¶§¸¸ ½ÇÁ¦ ÀÔ·ÂÀ¸·Î ÀÎÁ¤ÇØ¼­ RhythmManager¿¡°Ô ÆÇÁ¤À» ³Ñ±ä´Ù.
-    /// ·¹ÀÎÀÌ ´Ù¸£¸é ¹«½ÃÇÏ°í ±×´ë·Î ³«ÇÏ¸¦ °è¼Ó ÁøÇà½ÃÄÑ, °á±¹ Input ÆÇÁ¤ À©µµ¿ì°¡ ´İÈ÷¸ç ÀÚµ¿ Miss Ã³¸®µÇ°Ô ÇÑ´Ù.
+    /// ì ‘ì‹œ(PlateCatchTrigger)ì—ì„œ í˜¸ì¶œ.
+    /// ë ˆì¸ì´ ì¼ì¹˜í•  ë•Œë§Œ ì‹¤ì œ ì…ë ¥ìœ¼ë¡œ ì¸ì •í•´ì„œ RhythmManagerì—ê²Œ íŒì •ì„ ë„˜ê¸´ë‹¤.
+    /// ë ˆì¸ì´ ë‹¤ë¥´ë©´ ë¬´ì‹œí•˜ê³  ê·¸ëŒ€ë¡œ ë‚™í•˜ë¥¼ ê³„ì† ì§„í–‰ì‹œì¼œ, ê²°êµ­ Input íŒì • ìœˆë„ìš°ê°€ ë‹«íˆë©° ìë™ Miss ì²˜ë¦¬ë˜ê²Œ í•œë‹¤.
     /// </summary>
     public void HandleCatchAttempt(GameObject ring, ChocoRingMarker marker)
     {
@@ -226,7 +274,7 @@ public class Minigame_2_12 : MiniGameBase
         if (marker.lane != plate.CurrentLane) return;
 
         marker.caught = true;
-        OnPlayerInput(); // MiniGameBase -> RhythmManager Ç¥ÁØ Èå¸§ (Å¸ÀÌ¹Ö ±âÁØ Perfect/Good/Miss´Â RhythmManager°¡ ÆÇÁ¤)
+        OnPlayerInput(); // MiniGameBase -> RhythmManager í‘œì¤€ íë¦„ (íƒ€ì´ë° ê¸°ì¤€ Perfect/Good/MissëŠ” RhythmManagerê°€ íŒì •)
         Destroy(ring);
         OnFallFinished();
     }
@@ -234,15 +282,17 @@ public class Minigame_2_12 : MiniGameBase
     private void OnFallFinished()
     {
         fallsInProgress--;
-        if (fallsInProgress <= 0 && dropCount >= ringLaneOrder.Length)
+        if (fallsInProgress <= 0 && dropCount >= ringLaneOrder.Length && !resultPending)
         {
-            CheckGameResult();
+            resultPending = true;
+            Debug.Log("[Minigame_2_12] ë§ˆì§€ë§‰ ìºì¹˜ ì™„ë£Œ - ì¹´ë©”ë¼ ë³µê·€ ì—°ì¶œ í›„ ê²°ê³¼ íŒì •");
+            MoveCameraUp(CheckGameResult);
         }
     }
 
     public override void OnPlayerInput(string action = null)
     {
-        // ÀÔ·Â Àá±İ »óÅÂ¸é ¹«½Ã
+        // ì…ë ¥ ì ê¸ˆ ìƒíƒœë©´ ë¬´ì‹œ
         if (IsInputLocked) return;
         base.OnPlayerInput(action);
     }
@@ -258,6 +308,17 @@ public class Minigame_2_12 : MiniGameBase
         }
     }
 
+    /// <summary>
+    /// ì™¸ë¶€ ì‹œìŠ¤í…œ(ì „ì²´ ë¯¸ë‹ˆê²Œì„ ì§„í–‰ ê´€ë¦¬ì)ì´ ì´ ë¯¸ë‹ˆê²Œì„ì„ ê°•ì œë¡œ ë„˜ê¸¸ ë•Œ í˜¸ì¶œ.
+    /// CSVì˜ ë‚¨ì€ ë¼ìš´ë“œì™€ ë¬´ê´€í•˜ê²Œ, ì§€ê¸ˆê¹Œì§€ ìŒ“ì¸ ê²°ê³¼ë¡œ ì¦‰ì‹œ ë§ˆë¬´ë¦¬ ì²˜ë¦¬í•œë‹¤.
+    /// </summary>
+    public void ForceComplete()
+    {
+        if (ended) return;
+        Debug.Log("[Minigame_2_12] ì™¸ë¶€ ì‹œìŠ¤í…œì— ì˜í•´ ê°•ì œ ì¢…ë£Œë¨");
+        CheckGameResult();
+    }
+
     public void CheckGameResult()
     {
         if (IsInputLocked || ended) return;
@@ -265,18 +326,18 @@ public class Minigame_2_12 : MiniGameBase
 
         if (missCount >= 3)
         {
-            Debug.Log("½ÇÆĞ");
+            Debug.Log("ì‹¤íŒ¨");
             Failure();
         }
         else
         {
-            Debug.Log("¼º°ø");
+            Debug.Log("ì„±ê³µ");
             Succeed();
         }
     }
 }
 
-/// <summary>½ºÆùµÈ ÃÊÄÚ¸µ ¿ÀºêÁ§Æ®¿¡ ºÙ´Â ¸ŞÅ¸µ¥ÀÌÅÍ (·¹ÀÎ, ¼ø¼­, Ä³Ä¡ ¿©ºÎ)</summary>
+/// <summary>ìŠ¤í°ëœ ì´ˆì½”ë§ ì˜¤ë¸Œì íŠ¸ì— ë¶™ëŠ” ë©”íƒ€ë°ì´í„° (ë ˆì¸, ìˆœì„œ, ìºì¹˜ ì—¬ë¶€)</summary>
 public class ChocoRingMarker : MonoBehaviour
 {
     public int lane;
