@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6287357518189027756}
   - component: {fileID: 8694933331670033763}
+  - component: {fileID: 189800850821651240}
   m_Layer: 0
   m_Name: policeRemake
   m_TagString: Untagged
@@ -85,6 +86,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &189800850821651240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8298872960722800079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e53076822936ae6489232100115ac89d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactionType: 2
 --- !u!1 &9009649655538298412
 GameObject:
   m_ObjectHideFlags: 0
@@ -96,6 +110,7 @@ GameObject:
   - component: {fileID: 5317675535848605598}
   - component: {fileID: 8727842674980823658}
   - component: {fileID: 1275487370800542430}
+  - component: {fileID: 8253320869072562893}
   m_Layer: 0
   m_Name: 1_10_prisoner4_hrad
   m_TagString: Untagged
@@ -191,3 +206,18 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
+--- !u!114 &8253320869072562893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9009649655538298412}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e53076822936ae6489232100115ac89d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactionType: 2

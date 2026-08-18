@@ -1,64 +1,68 @@
-using TMPro;
-using DG.Tweening;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using System.Collections;
+using DG.Tweening;
+using TMPro;
+using UnityEngine;
 
 public class CameraScrollController : MonoBehaviour
 {
-    public GameObject planetMove;
-    public GameObject planetListObj;
+    [Header("References")]
+    [SerializeField]
+    private GameObject planetListObj;
 
-    private UpDownMove upDownMove;
     private PlanetList planetList;
 
     [Header("패널 위치들")]
-    public Transform[] panels;
+    [SerializeField]
+    private Transform[] panels;
 
-    [Header("카메라 이동 속도")]
-    public float smoothSpeed = 5f;
+    [Header("카메라 이동")]
+    [SerializeField]
+    private float smoothSpeed = 5f;
 
-    [Header("Panel 2에서 자동 이동까지 대기 시간")]
-    public float autoMoveDelay = 3f;
+    [Header("Panel 2 자동 이동")]
+    [SerializeField]
+    private float autoMoveDelay = 3f;
 
-    [Header("선택된 플래닛 오브젝트")]
-    public GameObject selectedPlanet;
+    [Header("선택된 행성")]
     public static int selectedPlanetIndex;
 
-    [Header("페이드 타겟")]
-    public GameObject fadeTarget;
-    [SerializeField] private TextMeshProUGUI planetText;
+    [Header("UI")]
+    [SerializeField]
+    private TextMeshProUGUI planetText;
 
-    [Header("씬 이름")]
-    [SerializeField] private string cutSceneName = "CutScene";
-    [SerializeField] private string minigameLoadSceneName = "MinigameLoad";
+    [Header("Scene")]
+    [SerializeField]
+    private string minigameLoadSceneName =
+        "MinigameLoad";
 
-    [Header("디버그")]
-    [SerializeField] private bool forceCutScene = false;
-
-    private Image fadeImage;
+    [Tooltip("행성 선택 후 로딩창을 띄울 때까지의 연출 시간")]
+    [SerializeField]
+    private float selectionDelay = 1.5f;
 
     private Vector3 targetPosition;
-    private int currentPanelIndex = 0;
-    private bool isAutoMoving = false;
-    private bool isSelecting = false;
+
+    private int currentPanelIndex;
+
+    private bool isAutoMoving;
+    private bool isSelecting;
 
     private void Start()
     {
-        upDownMove = planetMove.GetComponent<UpDownMove>();
-        fadeImage = fadeTarget.GetComponent<Image>();
-        planetList = planetListObj.GetComponent<PlanetList>();
+        if (planetListObj != null)
+        {
+            planetList =
+                planetListObj.GetComponent<PlanetList>();
+        }
 
         if (planetText != null)
         {
-            Color c = planetText.color;
-            c.a = 1f;
-            planetText.color = c;
+            Color color = planetText.color;
+            color.a = 1f;
+            planetText.color = color;
         }
 
-        if (panels.Length > 0)
-            targetPosition = transform.position;
+        targetPosition =
+            transform.position;
     }
 
     private void Update()
@@ -72,103 +76,141 @@ public class CameraScrollController : MonoBehaviour
 
     public void MoveToPanel(int index)
     {
-        if (index < 0 || index >= panels.Length) return;
+        if (index < 0 ||
+            index >= panels.Length)
+        {
+            return;
+        }
 
         currentPanelIndex = index;
 
-        Vector3 panelPos = panels[index].position;
-        targetPosition = new Vector3(transform.position.x, panelPos.y, transform.position.z);
+        Vector3 panelPosition =
+            panels[index].position;
 
-        if (index == 1 && !isAutoMoving)
-            StartCoroutine(AutoMoveToNextPanelAfterDelay());
+        targetPosition =
+            new Vector3(
+                transform.position.x,
+                panelPosition.y,
+                transform.position.z
+            );
+
+        if (index == 1 &&
+            !isAutoMoving)
+        {
+            StartCoroutine(
+                AutoMoveToNextPanelAfterDelay()
+            );
+        }
     }
 
-    private IEnumerator AutoMoveToNextPanelAfterDelay()
+    private IEnumerator
+        AutoMoveToNextPanelAfterDelay()
     {
         isAutoMoving = true;
 
-        yield return new WaitForSeconds(autoMoveDelay);
+        yield return new WaitForSeconds(
+            autoMoveDelay
+        );
 
-        if (currentPanelIndex == 1 && panels.Length > 2)
+        if (currentPanelIndex == 1 &&
+            panels.Length > 2)
+        {
             MoveToPanel(2);
+        }
     }
 
+    /// <summary>
+    /// 행성 선택 버튼의 OnClick에 연결한다.
+    /// </summary>
     public void planetButtonClick()
     {
-        if (isSelecting) return;
+        if (isSelecting)
+            return;
 
-        selectedPlanetIndex = planetList.CallingCurrentIndex();
-        StartCoroutine(PlanetSelectionSequence());
+        if (planetList == null)
+        {
+            Debug.LogError(
+                "[CameraScrollController] " +
+                "PlanetList가 없습니다."
+            );
+
+            return;
+        }
+
+        selectedPlanetIndex =
+            planetList.CallingCurrentIndex();
+
+        StartCoroutine(
+            PlanetSelectionSequence()
+        );
     }
 
     public void MovingCamera(int index)
     {
-        if (index < 0 || index >= panels.Length) return;
+        if (index < 0 ||
+            index >= panels.Length)
+        {
+            return;
+        }
 
-        Vector3 targetPos = new Vector3(
-            transform.position.x,
-            panels[index].position.y,
-            transform.position.z
-        );
+        Vector3 target =
+            new Vector3(
+                transform.position.x,
+                panels[index].position.y,
+                transform.position.z
+            );
 
-        transform.DOMove(targetPos, 1f).SetEase(Ease.InOutQuad);
-        targetPosition = targetPos;
+        transform
+            .DOMove(target, 1f)
+            .SetEase(Ease.InOutQuad);
+
+        targetPosition = target;
     }
 
-    private IEnumerator PlanetSelectionSequence()
+    private IEnumerator
+        PlanetSelectionSequence()
     {
         isSelecting = true;
 
         if (planetText != null)
         {
             planetText.DOKill();
-            planetText.DOFade(0f, 0.15f);
+
+            planetText
+                .DOFade(0f, 0.15f)
+                .SetEase(Ease.Linear);
         }
 
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(
+            Mathf.Max(0f, selectionDelay)
+        );
 
-        fadeTarget.SetActive(true);
-
-        Color fadeColor = fadeImage.color;
-        fadeColor.a = 0f;
-        fadeImage.color = fadeColor;
-
-        fadeImage.DOFade(1f, 1f);
-
-        yield return new WaitForSeconds(1f);
-
-        string nextScene = GetNextSceneName(selectedPlanetIndex);
-        SceneManager.LoadScene(nextScene);
-    }
-
-    private string GetNextSceneName(int planetIndex)
-    {
-        if (forceCutScene)
-            return cutSceneName;
-
-        if (planetIndex == 0 && IsFirstVisit(planetIndex))
+        if (GameRoot.Instance == null ||
+            GameRoot.Instance.SceneFlow == null)
         {
-            SetVisited(planetIndex);
-            return cutSceneName;
+            Debug.LogError(
+                "[CameraScrollController] " +
+                "GameRoot 또는 SceneFlowManager가 없습니다. " +
+                "BootStrapScene부터 실행했는지 확인하세요."
+            );
+
+            isSelecting = false;
+
+            if (planetText != null)
+            {
+                planetText
+                    .DOFade(1f, 0.15f)
+                    .SetEase(Ease.Linear);
+            }
+
+            yield break;
         }
 
-        return minigameLoadSceneName;
-    }
-
-    private bool IsFirstVisit(int planetIndex)
-    {
-        int visited = PlayerPrefs.GetInt(GetPlanetVisitKey(planetIndex), 0);
-        return visited == 0;
-    }
-
-    private void SetVisited(int planetIndex)
-    {
-        PlayerPrefs.SetInt(GetPlanetVisitKey(planetIndex), 1);
-        PlayerPrefs.Save();
-    }
-
-    private string GetPlanetVisitKey(int planetIndex)
-    {
-        return $"Planet_{planetIndex}_Visited";
+        // 전역 로딩창 표시
+        // → 최소 로딩 시간 대기
+        // → MinigameLoad 씬 활성화
+        GameRoot.Instance.SceneFlow.LoadScene(
+            minigameLoadSceneName
+        );
     }
 }

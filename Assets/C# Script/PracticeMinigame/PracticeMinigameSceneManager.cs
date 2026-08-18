@@ -1,6 +1,23 @@
 using System.Collections;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+public enum PracticePhase
+{
+    None,
+    Title,
+    Practice,
+    Transition,
+    Finished
+}
+
+public enum PracticePlayMode
+{
+    Demo,
+    Player
+}
 
 public class PracticeMinigameSceneManager : MonoBehaviour
 {
@@ -9,7 +26,7 @@ public class PracticeMinigameSceneManager : MonoBehaviour
     private RhythmManager rhythmManager;
 
     [Tooltip(
-        "로딩 및 마디 대기 중 입력을 막는 패널"
+        "로딩 및 시범 중 플레이어 입력을 막는 패널"
     )]
     [SerializeField]
     private GameObject blockInputPanel;
@@ -35,21 +52,6 @@ public class PracticeMinigameSceneManager : MonoBehaviour
     [SerializeField]
     private TextAsset chartCsv;
 
-    [Header("Repeat Timing")]
-    [Tooltip(
-        "한 마디의 길이(초). " +
-        "예: 마디 경계가 0, 8, 16초라면 8"
-    )]
-    [SerializeField, Min(0.01f)]
-    private float measureDuration = 8f;
-
-    [Tooltip(
-        "프레임 오차로 마디 경계를 조금 넘었을 때 " +
-        "즉시 반복할 허용 범위"
-    )]
-    [SerializeField, Range(0f, 0.25f)]
-    private float measureBoundaryTolerance = 0.05f;
-
     [Header("Exit")]
     [Tooltip(
         "Session에 돌아갈 씬이 없을 경우 사용할 씬"
@@ -58,6 +60,46 @@ public class PracticeMinigameSceneManager : MonoBehaviour
     private string fallbackExitSceneName =
         "LobbyScene";
 
+    [Header("Practice UI")]
+    [SerializeField]
+    private GameObject titlePanel;
+
+    [SerializeField]
+    private TMP_Text titleText;
+
+    [SerializeField]
+    private GameObject practicePanel;
+
+    [SerializeField]
+    private PracticeGuideTextController
+        guideTextController;
+
+    [SerializeField]
+    private PracticePanelToggle
+        practicePanelToggle;
+
+    [SerializeField]
+    private GameObject modeButton;
+
+    [SerializeField]
+    private TMP_Text modeButtonText;
+
+    [SerializeField]
+    private GameObject nextButton;
+
+    [Header("Transition")]
+    [SerializeField]
+    private GameObject transitionPanel;
+
+    [SerializeField, Min(0f)]
+    private float titleFadeDuration = 0.35f;
+
+    [SerializeField, Min(0f)]
+    private float transitionFadeDuration = 0.4f;
+
+    private CanvasGroup titleCanvasGroup;
+    private CanvasGroup transitionCanvasGroup;
+
     private MiniGameBase currentMinigame;
     private GameObject currentMinigameObject;
 
@@ -65,7 +107,25 @@ public class PracticeMinigameSceneManager : MonoBehaviour
     private bool isPracticing;
 
     private int selectedPlanet;
-    private int selectedMinigame;
+    private int selectedTrack;
+
+    private List<int> trackMinigames =
+        new List<int>();
+
+    private int currentTrackIndex;
+
+    private int CurrentMinigameId =>
+        trackMinigames[currentTrackIndex];
+
+    private PracticePhase currentPhase =
+        PracticePhase.None;
+
+    private PracticePlayMode playMode =
+        PracticePlayMode.Demo;
+
+    private bool titleConfirmed;
+    private bool modeChangeRequested;
+    private bool nextRequested;
 
     private Vector3 initialCameraPosition;
     private Quaternion initialCameraRotation;
@@ -96,82 +156,145 @@ public class PracticeMinigameSceneManager : MonoBehaviour
 
         if (blockInputPanel != null)
             blockInputPanel.SetActive(true);
+
+        if (titlePanel != null)
+            titlePanel.SetActive(false);
+
+        if (practicePanel != null)
+            practicePanel.SetActive(false);
+
+        if (modeButton != null)
+            modeButton.SetActive(false);
+
+        if (nextButton != null)
+            nextButton.SetActive(false);
+
+        if (titlePanel != null)
+        {
+            titleCanvasGroup =
+                titlePanel.GetComponent<CanvasGroup>();
+
+            if (titleCanvasGroup == null)
+            {
+                Debug.LogError(
+                    "[Practice] TitlePanel에 CanvasGroup이 없습니다."
+                );
+            }
+        }
+
+        if (transitionPanel != null)
+        {
+            transitionCanvasGroup =
+                transitionPanel.GetComponent<CanvasGroup>();
+
+            if (transitionCanvasGroup == null)
+            {
+                Debug.LogError(
+                    "[Practice] TransitionPanel에 CanvasGroup이 없습니다."
+                );
+            }
+        }
+
+        if (titleCanvasGroup != null)
+        {
+            titleCanvasGroup.alpha = 1f;
+        }
+
+        if (transitionCanvasGroup != null)
+        {
+            transitionCanvasGroup.alpha = 0f;
+        }
+
+        if (transitionPanel != null)
+        {
+            transitionPanel.SetActive(false);
+        }
     }
 
     private void Start()
     {
-        if (GameRoot.Instance == null)
-        {
-            Debug.LogError(
-                "[Practice] GameRoot가 없습니다. " +
-                "BootStrapScene부터 실행해야 합니다."
-            );
+        // 기본 테스트값.
+        // 로비에서 정상적으로 훈련 트랙을 전달받았다면
+        // 아래에서 해당 값으로 덮어쓴다.
+        selectedPlanet = 1;
+        selectedTrack = 1;
 
-            ReturnToExitScene();
-            return;
+        bool hasPracticeSelection = false;
+
+        if (GameRoot.Instance != null &&
+            GameRoot.Instance.Session != null &&
+            GameRoot.Instance.Session.Data != null)
+        {
+            GameSessionData session =
+                GameRoot.Instance.Session.Data;
+
+            if (session.gameMode == GameMode.Practice &&
+                session.selectedPlanetId > 0 &&
+                session.selectedPracticeTrackId > 0)
+            {
+                selectedPlanet =
+                    session.selectedPlanetId;
+
+                selectedTrack =
+                    session.selectedPracticeTrackId;
+
+                hasPracticeSelection = true;
+            }
         }
 
-        GameSessionManager sessionManager =
-            GameRoot.Instance.Session;
-
-        if (sessionManager == null ||
-            sessionManager.Data == null)
+        if (!hasPracticeSelection)
         {
-            Debug.LogError(
-                "[Practice] GameSessionManager가 " +
-                "준비되지 않았습니다."
+            Debug.LogWarning(
+                "[Practice] 전달된 훈련 트랙이 없습니다. " +
+                "테스트용 1_1 훈련을 실행합니다."
             );
-
-            ReturnToExitScene();
-            return;
         }
-
-        GameSessionData session =
-            sessionManager.Data;
-
-        if (session.gameMode != GameMode.Practice)
-        {
-            Debug.LogError(
-                "[Practice] 연습 모드 선택 정보가 없습니다."
-            );
-
-            ReturnToExitScene();
-            return;
-        }
-
-        selectedPlanet =
-            session.selectedPlanetId;
-
-        selectedMinigame =
-            session.selectedMinigameId;
-
-        int maxMinigameCount =
-            selectedPlanet == 1 ? 10 : 15;
 
         if (selectedPlanet < 1 ||
-            selectedPlanet > 4 ||
-            selectedMinigame < 1 ||
-            selectedMinigame > maxMinigameCount)
+            selectedPlanet > 4)
         {
             Debug.LogError(
-                $"[Practice] 잘못된 선택값: " +
-                $"{selectedPlanet}-{selectedMinigame}"
+                $"[Practice] 잘못된 행성 번호: " +
+                $"{selectedPlanet}"
             );
 
             ReturnToExitScene();
             return;
         }
 
-        if (measureDuration <= 0f)
+        int maxTrackCount =
+            selectedPlanet == 1 ? 4 : 5;
+
+        if (selectedTrack < 1 ||
+            selectedTrack > maxTrackCount)
         {
             Debug.LogError(
-                "[Practice] Measure Duration은 " +
-                "0보다 커야 합니다."
+                $"[Practice] 잘못된 훈련 트랙: " +
+                $"{selectedPlanet}_{selectedTrack}"
             );
 
             ReturnToExitScene();
             return;
         }
+
+        trackMinigames =
+            PracticeTrackCatalog.GetMinigames(
+                selectedPlanet,
+                selectedTrack
+            );
+
+        if (trackMinigames.Count == 0)
+        {
+            Debug.LogError(
+                "[Practice] 훈련 트랙에 " +
+                "미니게임이 없습니다."
+            );
+
+            ReturnToExitScene();
+            return;
+        }
+
+        currentTrackIndex = 0;
 
         if (rhythmManager == null)
         {
@@ -194,14 +317,14 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             return;
         }
 
-        // 로비에서 재생 중이던 전역 BGM을 정지한다.
-        if (GameRoot.Instance.Audio != null)
+        // PracticeScene을 직접 실행하는 테스트 상황에서는
+        // GameRoot가 없을 수도 있으므로 null 검사.
+        if (GameRoot.Instance != null &&
+            GameRoot.Instance.Audio != null)
         {
             GameRoot.Instance.Audio.StopBgm();
         }
 
-        // 연습 씬의 RhythmManager가
-        // 연습용 음악을 직접 재생하게 한다.
         rhythmManager.SetTimelineMusic(
             practiceMusic,
             false
@@ -223,58 +346,166 @@ public class PracticeMinigameSceneManager : MonoBehaviour
 
     private IEnumerator PracticeLoop()
     {
-        while (isPracticing)
+        for (currentTrackIndex = 0;
+             currentTrackIndex <
+             trackMinigames.Count;
+             currentTrackIndex++)
         {
-            if (blockInputPanel != null)
-                blockInputPanel.SetActive(true);
+            if (!isPracticing)
+                yield break;
 
-            yield return CreateAndStartMinigame();
+            yield return CreateMinigame();
 
             if (!isPracticing ||
-                currentMinigame == null ||
-                currentMinigameObject == null)
+                currentMinigame == null)
             {
-                practiceCoroutine = null;
                 yield break;
             }
 
-            // CSV의 마지막 노드가 실행될 때까지 기다린다.
-            yield return new WaitUntil(() =>
-                !isPracticing ||
-                rhythmManager == null ||
-                rhythmManager.HasDispatchedAllEvents
-            );
+            yield return ShowTitlePhase();
 
             if (!isPracticing)
-            {
-                practiceCoroutine = null;
                 yield break;
-            }
 
-            if (blockInputPanel != null)
-                blockInputPanel.SetActive(true);
+            playMode =
+                PracticePlayMode.Demo;
 
-            // 마지막 노드 이후 다음 마디 경계까지 기다린다.
             yield return
-                WaitUntilNextMeasureBoundary();
+                PracticeCurrentMinigame();
 
             if (!isPracticing)
-            {
-                practiceCoroutine = null;
                 yield break;
-            }
+
+            currentPhase =
+                PracticePhase.Transition;
+
+            /*
+             * 현재 게임 화면을 검게 덮은 뒤
+             * 프리팹을 교체한다.
+             */
+            yield return
+                FadeTransitionTo(1f);
 
             DestroyCurrentMinigame();
             ResetCamera();
 
-            // Destroy가 반영되는 프레임을 기다린다.
             yield return null;
+
+            /*
+             * 다음 for 반복에서
+             * CreateMinigame()
+             * ShowTitlePhase()
+             *
+             * 순으로 실행된다.
+             *
+             * ShowTitlePhase에서
+             * FadeTransitionTo(0)가 실행된다.
+             */
         }
+
+        currentPhase =
+            PracticePhase.Finished;
 
         practiceCoroutine = null;
     }
 
-    private IEnumerator CreateAndStartMinigame()
+    private IEnumerator PracticeCurrentMinigame()
+    {
+        currentPhase =
+            PracticePhase.Practice;
+
+        nextRequested = false;
+
+        if (practicePanel != null)
+            practicePanel.SetActive(true);
+        if (guideTextController != null && currentMinigame != null)
+        {
+            guideTextController.Initialize(
+                currentMinigame.GetMinigameExplains
+            );
+        }
+
+        if (practicePanelToggle != null)
+        {
+            practicePanelToggle.OpenImmediate();
+        }
+        while (isPracticing &&
+               !nextRequested)
+        {
+            modeChangeRequested = false;
+
+            UpdatePracticeUI();
+
+            bool isDemo =
+                playMode ==
+                PracticePlayMode.Demo;
+
+            // 시범에서는 실제 플레이어 입력을 막는다.
+            if (blockInputPanel != null)
+            {
+                blockInputPanel.SetActive(
+                    isDemo
+                );
+            }
+
+            currentMinigame.StartGame();
+
+            yield return null;
+
+            rhythmManager.StartSong();
+
+            if (isDemo)
+            {
+                // 다음 단계에서 여기에
+                // PracticeDemoManager를 실행한다.
+                //
+                // PracticeDemoManager가
+                // Demo CSV를 읽고 실제 미니게임에
+                // 가상 입력을 보낼 예정이다.
+            }
+
+            yield return new WaitUntil(
+                () =>
+                    !isPracticing ||
+                    nextRequested ||
+                    modeChangeRequested ||
+                    rhythmManager.HasDispatchedAllEvents
+            );
+
+            if (!isPracticing ||
+                nextRequested)
+            {
+                break;
+            }
+
+            // 한 번 재생이 끝났거나
+            // Demo <-> Player 모드를 바꿨으면
+            // 미니게임을 처음 상태로 다시 만든다.
+            DestroyCurrentMinigame();
+            ResetCamera();
+
+            yield return null;
+
+            yield return CreateMinigame();
+
+            if (!isPracticing ||
+                currentMinigame == null)
+            {
+                yield break;
+            }
+        }
+
+        if (practicePanel != null)
+            practicePanel.SetActive(false);
+
+        if (modeButton != null)
+            modeButton.SetActive(false);
+
+        if (nextButton != null)
+            nextButton.SetActive(false);
+    }
+
+    private IEnumerator CreateMinigame()
     {
         if (rhythmManager == null)
         {
@@ -297,7 +528,9 @@ public class PracticeMinigameSceneManager : MonoBehaviour
         }
 
         string planetFolderName =
-            GetPlanetFolderName(selectedPlanet);
+            GetPlanetFolderName(
+                selectedPlanet
+            );
 
         if (string.IsNullOrEmpty(
                 planetFolderName))
@@ -311,9 +544,12 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             yield break;
         }
 
+        int minigameNumber =
+            CurrentMinigameId;
+
         string resourcePath =
             $"MinigamePrefab/{planetFolderName}/" +
-            $"{selectedPlanet}_{selectedMinigame}" +
+            $"{selectedPlanet}_{minigameNumber}" +
             "minigame_remake";
 
         GameObject prefab =
@@ -334,7 +570,6 @@ public class PracticeMinigameSceneManager : MonoBehaviour
 
         ResetCamera();
 
-        // 프리팹에 저장된 원래 Transform으로 생성한다.
         currentMinigameObject =
             Instantiate(prefab);
 
@@ -357,14 +592,11 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             yield break;
         }
 
-        // 예: 3번 행성의 12번 미니게임이면 "3-12"
         string minigameId =
-            $"{selectedPlanet}-{selectedMinigame}";
+            $"{selectedPlanet}-{minigameNumber}";
 
         rhythmManager.ClearCurrent();
 
-        // 전체 CSV 하나와 선택한 미니게임 ID를 전달한다.
-        // RhythmManager가 3-12_time, 3-12_type 행을 찾는다.
         var configureTask =
             rhythmManager.ConfigureForMinigameAsync(
                 currentMinigame,
@@ -384,8 +616,8 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             );
 
             DestroyCurrentMinigame();
-            isPracticing = false;
 
+            isPracticing = false;
             yield break;
         }
 
@@ -397,85 +629,320 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             );
 
             DestroyCurrentMinigame();
-            isPracticing = false;
 
+            isPracticing = false;
             yield break;
         }
 
-        currentMinigame.StartGame();
+        Debug.Log(
+            $"[Practice] 미니게임 준비 완료\n" +
+            $"ID: {minigameId}\n" +
+            $"Prefab: {resourcePath}"
+        );
 
         yield return null;
+    }
 
-        if (!isPracticing ||
-            currentMinigame == null)
+    private IEnumerator ShowTitlePhase()
+    {
+        currentPhase =
+            PracticePhase.Title;
+
+        titleConfirmed = false;
+
+        if (blockInputPanel != null)
+        {
+            blockInputPanel.SetActive(true);
+        }
+
+        if (practicePanel != null)
+        {
+            practicePanel.SetActive(false);
+        }
+
+        if (modeButton != null)
+        {
+            modeButton.SetActive(false);
+        }
+
+        if (nextButton != null)
+        {
+            nextButton.SetActive(false);
+        }
+
+        if (titlePanel != null)
+        {
+            titlePanel.SetActive(true);
+        }
+
+        if (titleCanvasGroup != null)
+        {
+            titleCanvasGroup.alpha = 1f;
+        }
+
+        if (titleText != null &&
+            currentMinigame != null)
+        {
+            titleText.gameObject.SetActive(true);
+
+            titleText.alpha = 1f;
+
+            titleText.text =
+                $"{selectedPlanet}-" +
+                $"{CurrentMinigameId} " +
+                $"{currentMinigame.GetMinigameTitle}";
+        }
+        
+        if (transitionPanel != null &&
+            transitionPanel.activeSelf)
+        {
+            yield return
+                FadeTransitionTo(0f);
+        }
+        
+        while (isPracticing &&
+       !titleConfirmed)
+        {
+            bool clicked =
+                Input.GetMouseButtonDown(0);
+
+            bool touched =
+                Input.touchCount > 0 &&
+                Input.GetTouch(0).phase ==
+                TouchPhase.Began;
+
+            if (clicked || touched)
+            {
+                titleConfirmed = true;
+                break;
+            }
+
+            yield return null;
+        }
+
+        if (!isPracticing)
+            yield break;
+
+        yield return FadeTitleOut();
+
+        if (titlePanel != null)
+        {
+            titlePanel.SetActive(false);
+        }
+
+        if (titleCanvasGroup != null)
+        {
+            // 다음 미니게임을 위해 복구.
+            titleCanvasGroup.alpha = 1f;
+        }
+    }
+    private IEnumerator FadeTitleOut()
+    {
+        if (titleCanvasGroup == null)
+            yield break;
+
+        if (titleFadeDuration <= 0f)
+        {
+            titleCanvasGroup.alpha = 0f;
+            yield break;
+        }
+
+        float startAlpha =
+            titleCanvasGroup.alpha;
+
+        float elapsed = 0f;
+
+        while (elapsed <
+               titleFadeDuration)
+        {
+            elapsed +=
+                Time.unscaledDeltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    elapsed /
+                    titleFadeDuration
+                );
+
+            titleCanvasGroup.alpha =
+                Mathf.Lerp(
+                    startAlpha,
+                    0f,
+                    t
+                );
+
+            yield return null;
+        }
+
+        titleCanvasGroup.alpha = 0f;
+    }
+    private IEnumerator FadeTransitionTo(
+    float targetAlpha)
+    {
+        if (transitionPanel == null ||
+            transitionCanvasGroup == null)
         {
             yield break;
         }
 
-        if (blockInputPanel != null)
-            blockInputPanel.SetActive(false);
+        transitionPanel.SetActive(true);
 
-        rhythmManager.StartSong();
+        if (transitionFadeDuration <= 0f)
+        {
+            transitionCanvasGroup.alpha =
+                targetAlpha;
 
-        Debug.Log(
-            $"[Practice] 반복 시작\n" +
-            $"ID: {minigameId}\n" +
-            $"Prefab: {resourcePath}\n" +
-            $"Measure: {measureDuration:F3}초"
+            if (targetAlpha <= 0f)
+            {
+                transitionPanel.SetActive(false);
+            }
+
+            yield break;
+        }
+
+        float startAlpha =
+            transitionCanvasGroup.alpha;
+
+        float elapsed = 0f;
+
+        while (elapsed <
+               transitionFadeDuration)
+        {
+            elapsed +=
+                Time.unscaledDeltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    elapsed /
+                    transitionFadeDuration
+                );
+
+            transitionCanvasGroup.alpha =
+                Mathf.Lerp(
+                    startAlpha,
+                    targetAlpha,
+                    t
+                );
+
+            yield return null;
+        }
+
+        transitionCanvasGroup.alpha =
+            targetAlpha;
+
+        if (targetAlpha <= 0f)
+        {
+            transitionPanel.SetActive(false);
+        }
+    }
+    private void UpdatePracticeUI()
+    {
+        if (practicePanel != null)
+        {
+            practicePanel.SetActive(true);
+        }
+
+        if (modeButton != null)
+        {
+            modeButton.SetActive(true);
+        }
+
+        if (nextButton != null)
+        {
+            nextButton.SetActive(true);
+        }
+
+        if (modeButtonText == null)
+            return;
+
+        if (playMode ==
+            PracticePlayMode.Demo)
+        {
+            modeButtonText.text =
+                "직접 해보기";
+        }
+        else
+        {
+            modeButtonText.text =
+                "시범 다시 보기";
+        }
+    }
+
+    public void ConfirmTitle()
+    {
+        if (currentPhase !=
+            PracticePhase.Title)
+        {
+            return;
+        }
+
+        titleConfirmed = true;
+    }
+
+    public void TogglePracticeMode()
+    {
+        if (currentPhase !=
+            PracticePhase.Practice)
+        {
+            return;
+        }
+
+        if (playMode ==
+            PracticePlayMode.Demo)
+        {
+            playMode =
+                PracticePlayMode.Player;
+        }
+        else
+        {
+            playMode =
+                PracticePlayMode.Demo;
+        }
+
+        modeChangeRequested = true;
+    }
+
+    public void NextMinigame()
+    {
+        if (currentPhase !=
+            PracticePhase.Practice)
+        {
+            return;
+        }
+
+        if (GameRoot.Instance == null ||
+            GameRoot.Instance.Confirm == null)
+        {
+            Debug.LogError(
+                "[Practice] ConfirmManager가 없습니다."
+            );
+
+            return;
+        }
+
+        bool isLastMinigame =
+            currentTrackIndex >=
+            trackMinigames.Count - 1;
+
+        if (isLastMinigame)
+        {
+            GameRoot.Instance.Confirm.Show(
+                "훈련을 종료하시겠습니까?",
+                onYes: ExitPractice
+            );
+
+            return;
+        }
+
+        GameRoot.Instance.Confirm.Show(
+            "다음 미니게임으로 넘어가시겠습니까?",
+            onYes: ConfirmNextMinigame
         );
     }
 
-    private IEnumerator
-        WaitUntilNextMeasureBoundary()
+    private void ConfirmNextMinigame()
     {
-        if (rhythmManager == null)
-            yield break;
-
-        double currentSongTime =
-            rhythmManager.SongTime;
-
-        double measure =
-            measureDuration;
-
-        double remainder =
-            currentSongTime % measure;
-
-        double waitDuration =
-            measure - remainder;
-
-        bool nearPreviousBoundary =
-            remainder <=
-            measureBoundaryTolerance;
-
-        bool nearNextBoundary =
-            waitDuration <=
-            measureBoundaryTolerance;
-
-        if (nearPreviousBoundary ||
-            nearNextBoundary)
-        {
-            waitDuration = 0.0;
-        }
-
-        double targetSongTime =
-            currentSongTime + waitDuration;
-
-        Debug.Log(
-            $"[Practice] 마지막 노드: " +
-            $"{currentSongTime:F3}초\n" +
-            $"다음 마디 경계: " +
-            $"{targetSongTime:F3}초\n" +
-            $"대기시간: {waitDuration:F3}초"
-        );
-
-        while (isPracticing &&
-               rhythmManager != null &&
-               rhythmManager.IsRunning &&
-               rhythmManager.SongTime <
-               targetSongTime)
-        {
-            yield return null;
-        }
+        nextRequested = true;
     }
 
     private string GetPlanetFolderName(
@@ -524,9 +991,6 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             initialCameraRotation;
     }
 
-    /// <summary>
-    /// 나가기 버튼 OnClick에 연결한다.
-    /// </summary>
     public void ExitPractice()
     {
         isPracticing = false;
@@ -565,7 +1029,8 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             GameRoot.Instance.Session.Clear();
         }
 
-        if (string.IsNullOrWhiteSpace(exitScene))
+        if (string.IsNullOrWhiteSpace(
+                exitScene))
         {
             Debug.LogWarning(
                 "[Practice] 나갈 씬 이름이 없습니다."
@@ -584,7 +1049,25 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             return;
         }
 
-        SceneManager.LoadScene(exitScene);
+        SceneManager.LoadScene(
+            exitScene
+        );
+    }
+    public void UnlockGuideText(
+    int guideIndex)
+    {
+        if (currentPhase !=
+            PracticePhase.Practice)
+        {
+            return;
+        }
+
+        if (guideTextController == null)
+            return;
+
+        guideTextController.UnlockGuide(
+            guideIndex
+        );
     }
 
     private void OnDestroy()

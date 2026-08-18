@@ -8,7 +8,8 @@ public class Minigame_1_2 : MiniGameBase
     public override float hitWindowOverride => 1f;
 
     protected override float TimerDuration => 15f;
-    protected override string MinigameExplain => "체포해라!";
+    protected override string MinigameTitle =>  "수갑 채우기";
+    protected override string MinigameExplain => "왼쪽에서 수갑이 채워져 타이밍을 알려줍니다";
 
     [Header("Sequence Controller")]
     [SerializeField] private HandcuffSequenceController sequence;

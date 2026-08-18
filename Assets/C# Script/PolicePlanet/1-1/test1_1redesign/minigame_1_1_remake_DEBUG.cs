@@ -6,7 +6,9 @@ using static MiniGameBase;
 public class minigame_1_1_remake_DEBUG : MiniGameBase
 {
     protected override float TimerDuration => 15f;
-    protected override string MinigameExplain => "분류해라!";
+    protected override string MinigameTitle => "범인 찾기";
+
+    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
 
     // 1-1은 CSV의 Input을 쓰지만,
     // RhythmManager의 Perfect/Good/Miss 판정 점수는 사용하지 않는다.

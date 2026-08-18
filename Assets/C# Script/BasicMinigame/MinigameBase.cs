@@ -12,13 +12,55 @@ public abstract class MiniGameBase : MonoBehaviour
     public bool IsInputLocked { get; protected set; } = false;
 
     protected virtual float TimerDuration => 10f;
+    protected virtual string MinigameTitle => "기본 미니게임";
     protected virtual string MinigameExplain => "기본 미니게임 설명";
+
+    protected virtual string[] AdditionalMinigameExplains =>
+        System.Array.Empty<string>();
 
     protected AudioSource sfxSource;
     private readonly Dictionary<string, AudioClip> sfxCache = new Dictionary<string, AudioClip>();
 
     public float GetTimerDuration => TimerDuration;
+    public string GetMinigameTitle => MinigameTitle;
     public string GetMinigameExplain => MinigameExplain;
+    public IReadOnlyList<string> GetMinigameExplains
+    {
+        get
+        {
+            List<string> explains =
+                new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(
+                    MinigameExplain))
+            {
+                explains.Add(
+                    MinigameExplain
+                );
+            }
+
+            if (AdditionalMinigameExplains != null)
+            {
+                for (int i = 0;
+                     i < AdditionalMinigameExplains.Length;
+                     i++)
+                {
+                    string explain =
+                        AdditionalMinigameExplains[i];
+
+                    if (!string.IsNullOrWhiteSpace(
+                            explain))
+                    {
+                        explains.Add(
+                            explain
+                        );
+                    }
+                }
+            }
+
+            return explains;
+        }
+    }
 
     public virtual float perfectWindowOverride => 0.1f;
     public virtual float goodWindowOverride => 0.3f;

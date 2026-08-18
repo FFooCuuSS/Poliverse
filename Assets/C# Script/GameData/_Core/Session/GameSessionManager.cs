@@ -11,18 +11,18 @@ public class GameSessionManager : MonoBehaviour
         Data = new GameSessionData();
     }
 
-    public void SelectPractice(
+    public void SelectPracticeTrack(
         int planetId,
-        int minigameId,
+        int trackId,
         string returnSceneName)
     {
         EnsureInitialized();
 
-        if (planetId <= 0 || minigameId <= 0)
+        if (planetId <= 0 || trackId <= 0)
         {
             Debug.LogError(
-                $"[Session] 잘못된 연습 선택값: " +
-                $"{planetId}-{minigameId}"
+                $"[Session] 잘못된 연습 트랙 선택값: " +
+                $"{planetId}_{trackId}"
             );
 
             return;
@@ -30,7 +30,8 @@ public class GameSessionManager : MonoBehaviour
 
         Data.gameMode = GameMode.Practice;
         Data.selectedPlanetId = planetId;
-        Data.selectedMinigameId = minigameId;
+        Data.selectedMinigameId = -1;
+        Data.selectedPracticeTrackId = trackId;
         Data.returnSceneName = returnSceneName ?? "";
 
         Data.currentScore = 0;
@@ -56,6 +57,7 @@ public class GameSessionManager : MonoBehaviour
         Data.gameMode = GameMode.PlanetRun;
         Data.selectedPlanetId = planetId;
         Data.selectedMinigameId = -1;
+        Data.selectedPracticeTrackId = -1;
         Data.returnSceneName = returnSceneName ?? "";
 
         Data.currentScore = 0;
@@ -69,6 +71,7 @@ public class GameSessionManager : MonoBehaviour
         Data.gameMode = GameMode.Story;
         Data.selectedPlanetId = -1;
         Data.selectedMinigameId = -1;
+        Data.selectedPracticeTrackId = -1;
         Data.returnSceneName = returnSceneName ?? "";
 
         Data.currentScore = 0;

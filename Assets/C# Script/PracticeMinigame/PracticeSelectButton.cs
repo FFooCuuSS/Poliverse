@@ -8,7 +8,7 @@ public class PracticeSelectButton : MonoBehaviour
     private int planetId = 1;
 
     [SerializeField, Min(1)]
-    private int minigameId = 1;
+    private int trackId = 1;
 
     [Header("Scene")]
     [SerializeField]
@@ -28,8 +28,7 @@ public class PracticeSelectButton : MonoBehaviour
         if (GameRoot.Instance.Session == null)
         {
             Debug.LogError(
-                "[PracticeSelect] " +
-                "GameSessionManager가 없습니다."
+                "[PracticeSelect] GameSessionManager가 없습니다."
             );
 
             return;
@@ -38,9 +37,9 @@ public class PracticeSelectButton : MonoBehaviour
         string returnSceneName =
             SceneManager.GetActiveScene().name;
 
-        GameRoot.Instance.Session.SelectPractice(
+        GameRoot.Instance.Session.SelectPracticeTrack(
             planetId,
-            minigameId,
+            trackId,
             returnSceneName
         );
 

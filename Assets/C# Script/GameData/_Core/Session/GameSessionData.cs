@@ -16,6 +16,7 @@ public class GameSessionData
     // 씬 전환 동안만 유지되는 선택값
     public int selectedPlanetId = -1;
     public int selectedMinigameId = -1;
+    public int selectedPracticeTrackId = -1;
 
     // 해당 모드에서 나갈 때 돌아갈 씬
     public string returnSceneName = "";

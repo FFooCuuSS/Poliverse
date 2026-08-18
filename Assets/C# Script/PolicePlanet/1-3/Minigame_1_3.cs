@@ -4,7 +4,10 @@ using DG.Tweening;
 public class Minigame_1_3 : MiniGameBase
 {
     protected override float TimerDuration => 18f;
-    protected override string MinigameExplain => "조심해라!";
+
+    protected override string MinigameTitle => "낭떠러지 피하기";
+
+    protected override string MinigameExplain => "상하 스와이프를 통해 낭떠러지를 피하세요";
 
     // 1-3은 RhythmManager의 Perfect/Good/Miss 판정을 점수로 쓰지 않음.
     // 실패 횟수는 직접 ReportManualFail로 올리고,

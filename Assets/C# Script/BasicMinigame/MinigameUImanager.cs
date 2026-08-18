@@ -60,6 +60,22 @@ public class MinigameUIManager : MonoBehaviour
     [Header("Score Debug")]
     [SerializeField] private bool printTotalScoreDebug = true;
 
+    private int plannedMinigameCount;
+
+    private bool fullRunFinalized;
+
+    private readonly HashSet<int>
+        collectedMinigameInstanceIds =
+            new HashSet<int>();
+
+    private GameSaveManager saveManager;
+
+    public PlanetRunResult FinalRunResult
+    {
+        get;
+        private set;
+    }
+
     private int totalNodeSum;
     private int totalPerfectSum;
     private int totalGoodSum;
@@ -109,9 +125,14 @@ public class MinigameUIManager : MonoBehaviour
     //[SerializeField] private AudioClip failureBGM;
     public AudioSource audioSource;
 
-    void Awake()
+    private void Awake()
     {
-        selectedPlanet = CameraScrollController.selectedPlanetIndex + 1;
+        selectedPlanet =
+            CameraScrollController
+                .selectedPlanetIndex + 1;
+
+        saveManager =
+            FindObjectOfType<GameSaveManager>();
     }
 
     void Start()
@@ -146,6 +167,9 @@ public class MinigameUIManager : MonoBehaviour
             case 4: SetMinigameQueue("MusicPlanet", 15); break;
             default: return;
         }
+        plannedMinigameCount = minigameQueue.Count;
+
+        ResetFullRunScore();    
 
         ValidateTimeline();
         timelineCoroutine = StartCoroutine(TimelineRoutine());
@@ -352,11 +376,7 @@ public class MinigameUIManager : MonoBehaviour
 
             yield return FadeBlack(false);
 
-            if (finalObject != null)
-                finalObject.SetActive(true);
-
-            if (gameStartEnd != null)
-                gameStartEnd.ShowFinalPanel();
+            CompleteFullRun();
 
             FadeBGM(finalBgmTargetVolume, finalBgmFadeTime);
         }
@@ -367,11 +387,7 @@ public class MinigameUIManager : MonoBehaviour
 
             yield return FadeBlack(false);
 
-            if (finalObject != null)
-                finalObject.SetActive(true);
-
-            if (gameStartEnd != null)
-                gameStartEnd.ShowFinalPanel();
+            CompleteFullRun();
 
             FadeBGM(finalBgmTargetVolume, finalBgmFadeTime);
         }
@@ -506,26 +522,114 @@ public class MinigameUIManager : MonoBehaviour
     }
 
     // 점수 책정 디버그
-    private void CollectMinigameScore(MiniGameBase minigame)
+    private void CollectMinigameScore(
+    MiniGameBase minigame)
     {
-        if (minigame == null) return;
+        if (minigame == null)
+            return;
 
-        MiniGameBase.ScoreResult result = minigame.FinalizeScoreSession();
+        int instanceId =
+            minigame.GetInstanceID();
+
+        if (!collectedMinigameInstanceIds.Add(
+                instanceId))
+        {
+            Debug.LogWarning(
+                $"[Score] 이미 수집한 미니게임 점수 무시: " +
+                $"{minigame.gameObject.name}"
+            );
+
+            return;
+        }
+
+        MiniGameBase.ScoreResult result =
+            minigame.FinalizeScoreSession();
 
         totalNodeSum += result.totalNode;
         totalPerfectSum += result.perfect;
         totalGoodSum += result.good;
         totalMissSum += result.miss;
+
         endedMinigameCount++;
 
         if (printTotalScoreDebug)
         {
             Debug.Log(
-                $"UI[Total Score After Minigame {endedMinigameCount}]\n" +
-                $"- Total Nodes : {totalNodeSum}\n" +
-                $"- Perfect     : {totalPerfectSum}\n" +
-                $"- Good        : {totalGoodSum}\n" +
-                $"- Miss        : {totalMissSum}"
+                $"[Planet Score After Minigame " +
+                $"{endedMinigameCount}]\n" +
+                $"- Total Nodes: {totalNodeSum}\n" +
+                $"- Perfect: {totalPerfectSum}\n" +
+                $"- Good: {totalGoodSum}\n" +
+                $"- Miss: {totalMissSum}"
+            );
+        }
+    }
+    private void CompleteFullRun()
+    {
+        if (fullRunFinalized)
+            return;
+
+        fullRunFinalized = true;
+
+        bool isCleared =
+            plannedMinigameCount > 0 &&
+            endedMinigameCount >=
+            plannedMinigameCount;
+
+        FinalRunResult =
+            PlanetScoreCalculator.Calculate(
+                selectedPlanet,
+                endedMinigameCount,
+                totalNodeSum,
+                totalPerfectSum,
+                totalGoodSum,
+                totalMissSum,
+                isCleared
+            );
+
+        Debug.Log(
+            $"[Planet Full Run Result]\n" +
+            $"- Planet: {FinalRunResult.planetId}\n" +
+            $"- Minigames: " +
+            $"{FinalRunResult.completedMinigameCount}/" +
+            $"{plannedMinigameCount}\n" +
+            $"- Nodes: {FinalRunResult.totalNode}\n" +
+            $"- Perfect: {FinalRunResult.perfect}\n" +
+            $"- Good: {FinalRunResult.good}\n" +
+            $"- Miss: {FinalRunResult.miss}\n" +
+            $"- Score: {FinalRunResult.score}\n" +
+            $"- Evaluation: " +
+            $"{FinalRunResult.evaluation}\n" +
+            $"- Cleared: {FinalRunResult.isCleared}"
+        );
+
+        if (saveManager == null)
+        {
+            saveManager =
+                FindObjectOfType<GameSaveManager>();
+        }
+
+        if (saveManager != null)
+        {
+            saveManager.RecordFullRunResult(
+                FinalRunResult
+            );
+        }
+        else
+        {
+            Debug.LogError(
+                "[MinigameUIManager] " +
+                "GameSaveManager를 찾을 수 없습니다."
+            );
+        }
+
+        if (finalObject != null)
+            finalObject.SetActive(true);
+
+        if (gameStartEnd != null)
+        {
+            gameStartEnd.ShowFinalPanel(
+                FinalRunResult
             );
         }
     }
@@ -666,7 +770,20 @@ public class MinigameUIManager : MonoBehaviour
 
         return $"{a}-{b}";
     }
+    private void ResetFullRunScore()
+    {
+        totalNodeSum = 0;
+        totalPerfectSum = 0;
+        totalGoodSum = 0;
+        totalMissSum = 0;
 
+        endedMinigameCount = 0;
+        fullRunFinalized = false;
+
+        FinalRunResult = null;
+
+        collectedMinigameInstanceIds.Clear();
+    }
 
     // 가이드 텍스트
     public void ShowGuide(string text, float duration)
@@ -961,11 +1078,7 @@ public class MinigameUIManager : MonoBehaviour
         {
             yield return FadeBlack(false);
 
-            if (finalObject != null)
-                finalObject.SetActive(true);
-
-            if (gameStartEnd != null)
-                gameStartEnd.ShowFinalPanel();
+            CompleteFullRun();
 
             FadeBGM(finalBgmTargetVolume, finalBgmFadeTime);
             yield break;

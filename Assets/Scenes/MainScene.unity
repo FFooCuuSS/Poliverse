@@ -2309,7 +2309,7 @@ MonoBehaviour:
   blinkingText: {fileID: 784485110}
   blinkCycleDuration: 2
   minimumTextAlpha: 0.15
-  lobbySceneName: CutScene
+  lobbySceneName: PracticeMinigame
   loadingStartDelay: 0.3
 --- !u!1 &1939351155
 GameObject:
