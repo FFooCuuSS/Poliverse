@@ -12,7 +12,7 @@ public class FoodSliceGeneratorWindow : EditorWindow
     string prefabFolder = "Assets/Resources/MinigamePrefab/CandyPlanet/TempPrefab/EJU/GeneratedSlices/Prefabs";
     float colliderRadius = 0.5f; // Sprite units (할당 후 Scale 사용 가능)
     int arcSubdivision = 8; // 호를 근사할 점 개수
-    string sliceTag = "FoodPiece"; // ✅ 생성된 조각에 자동으로 지정할 Tag
+    string sliceTag = "FoodPiece"; // 생성된 조각에 자동으로 지정할 Tag
 
     [MenuItem("Window/Slice Food Creator")]
     static void OpenWindow()
