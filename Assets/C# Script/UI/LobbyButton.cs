@@ -10,6 +10,9 @@ public class LobbyButton : MonoBehaviour
     [SerializeField] private Button planetSelect;
     [SerializeField] private Button leftPlanet;
     [SerializeField] private Button rightPlanet;
+
+    [SerializeField] private GameObject practiceCanvas;
+
     //[SerializeField] private Button settings;
 
     //[SerializeField] private GameObject robbyCanvas;
@@ -40,17 +43,14 @@ public class LobbyButton : MonoBehaviour
 
     public void tutorialButtonClick()
     {
-        //robbyCanvas.SetActive(false);
-        // loadingCanvas.SetActive(false);
-        //settingsCanvas.SetActive(false);
-
-        Invoke("tutorialLoading", 1f);
+        practiceCanvas.SetActive(true);
     }
 
-    void tutorialLoading()
+    public void exitButtonClick()
     {
-        SceneManager.LoadScene("PracticeMinigame");
+        practiceCanvas.SetActive(false);
     }
+
 
     //public void settingsButtonClick()
     //{
