@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "651529722196",
+    "project_id": "copspace-2190b",
+    "storage_bucket": "copspace-2190b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:651529722196:android:f16955f599d634802f50c1",
+        "android_client_info": {
+          "package_name": "com.hong.copspace"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "651529722196-08sifc30mg0isvvkpgqnvtn29mgk1l1d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hong.copspace",
+            "certificate_hash": "f2767e7e6fd7e9fcfe494cd37a027c126d83618c"
+          }
+        },
+        {
+          "client_id": "651529722196-2pn2mi0u1faudg9qef7tnmpaf1q2lqc8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsUFmWUj6eeqo8B1Y6u9JrEV7kAANk6Sg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "651529722196-2pn2mi0u1faudg9qef7tnmpaf1q2lqc8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

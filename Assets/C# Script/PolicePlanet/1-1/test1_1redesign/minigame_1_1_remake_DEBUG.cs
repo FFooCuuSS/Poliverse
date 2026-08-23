@@ -548,4 +548,83 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
     {
         return enemies != null && idx >= 0 && idx < enemies.Length && idx < ENEMY_COUNT;
     }
+
+    public override void ExecutePracticeAction(
+    int actionIndex,
+    string actionType)
+    {
+        if (ended ||
+            roundsCompleted)
+        {
+            return;
+        }
+
+        /*
+         * 1-1에서 플레이어 행동은
+         * CSV의 Input 시점에만 발생한다.
+         */
+        if (!string.Equals(
+                actionType,
+                "Input",
+                System.StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        /*
+         * OnRhythmEvent("Input")에서
+         * HandleInput()이 먼저 실행되어
+         * pendingInputs에 현재 정답이 들어간다.
+         */
+        if (!canClick ||
+            pendingInputs.Count == 0)
+        {
+            Log(
+                $"[1-1 Demo] 실행할 대상 없음 " +
+                $"actionIndex={actionIndex}"
+            );
+
+            return;
+        }
+
+        int expected =
+            pendingInputs.Peek();
+
+        if (!IsValidEnemyIndex(expected))
+        {
+            pendingInputs.Dequeue();
+            return;
+        }
+
+        enemy_1_1_test target =
+            enemies[expected];
+
+        if (target == null)
+            return;
+
+        /*
+         * 실제 플레이어가 클릭하면
+         * targetScope가 클릭 위치로 움직이므로
+         * 예시보기에서도 같은 시각적 반응을 준다.
+         */
+        if (targetScope != null)
+        {
+            targetScope.position =
+                target.transform.position;
+        }
+
+        /*
+         * 실제 클릭 성공과 동일하게
+         * 현재 정답 입력을 소비한다.
+         */
+        pendingInputs.Dequeue();
+
+        ResolveSuccess(expected);
+
+        Log(
+            $"[1-1 Demo] 자동 입력 성공 " +
+            $"actionIndex={actionIndex}, " +
+            $"enemy={expected}"
+        );
+    }
 }

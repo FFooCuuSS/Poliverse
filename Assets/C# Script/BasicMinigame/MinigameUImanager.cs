@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
 
@@ -36,9 +37,13 @@ public class MinigameUIManager : MonoBehaviour
     private bool isGameOver = false;
 
     // ===== NEW MODE: Timeline =====
-    [Header("NEW MODE - Timeline (seconds since scene start)")]
-    [SerializeField] private List<float> startTimes = new List<float>(); // 예: 0, 7.1, 21.8 ...
+    [Header("NEW MODE - Timeline CSV")]
+    [SerializeField] private TextAsset stageTimelineCsv;
     [SerializeField] private float preEndGap = 0.5f;
+
+    // CSV에서 현재 행성(stage) 행을 읽어 채운다.
+    // 마지막 값은 미니게임 시작 시간이 아니라 전체 스테이지 종료 시간이다.
+    private readonly List<float> startTimes = new List<float>();
 
     [Header("NEW MODE - Black Panel")]
     [SerializeField] private Image blackPanelImage;
@@ -127,12 +132,60 @@ public class MinigameUIManager : MonoBehaviour
 
     private void Awake()
     {
-        selectedPlanet =
-            CameraScrollController
-                .selectedPlanetIndex + 1;
+        selectedPlanet = GetSelectedPlanetFromSession();
 
         saveManager =
             FindObjectOfType<GameSaveManager>();
+    }
+
+    private int GetSelectedPlanetFromSession()
+    {
+        if (GameRoot.Instance == null)
+        {
+            Debug.LogError(
+                "[MinigameUIManager] GameRoot.Instance가 없습니다. " +
+                "BootStrapScene부터 실행했는지 확인하세요."
+            );
+
+            return 1;
+        }
+
+        GameSessionManager session =
+            GameRoot.Instance.Session;
+
+        if (session == null)
+        {
+            Debug.LogError(
+                "[MinigameUIManager] GameSessionManager가 없습니다."
+            );
+
+            return 1;
+        }
+
+        if (!session.IsInitialized)
+        {
+            Debug.LogError(
+                "[MinigameUIManager] GameSessionManager가 " +
+                "초기화되지 않았습니다."
+            );
+
+            return 1;
+        }
+
+        int planetId =
+            session.Data.selectedPlanetId;
+
+        if (planetId < 1 || planetId > 4)
+        {
+            Debug.LogError(
+                $"[MinigameUIManager] 잘못된 selectedPlanetId: " +
+                $"{planetId}"
+            );
+
+            return 1;
+        }
+
+        return planetId;
     }
 
     void Start()
@@ -156,7 +209,6 @@ public class MinigameUIManager : MonoBehaviour
         //PlayBounceAnimation(enemyRenderer.transform);
         StartCoroutine(HideFadeAwayObjectsAfterDelay(10f));
 
-        PlayStageBGM();
         InitBlackPanel();
 
         switch (selectedPlanet)
@@ -169,9 +221,14 @@ public class MinigameUIManager : MonoBehaviour
         }
         plannedMinigameCount = minigameQueue.Count;
 
-        ResetFullRunScore();    
+        ResetFullRunScore();
+
+        if (!LoadTimelineFromCsv())
+            return;
 
         ValidateTimeline();
+
+        PlayStageBGM();
         timelineCoroutine = StartCoroutine(TimelineRoutine());
 
         if (gameOverPanelImage != null)
@@ -282,6 +339,106 @@ public class MinigameUIManager : MonoBehaviour
 
         if (!show) blackPanelImage.gameObject.SetActive(false);
     }
+    private bool LoadTimelineFromCsv()
+    {
+        startTimes.Clear();
+
+        if (stageTimelineCsv == null)
+        {
+            Debug.LogError(
+                "[Timeline] stageTimelineCsv가 할당되지 않았습니다."
+            );
+            return false;
+        }
+
+        string targetStage =
+            $"{selectedPlanet}stage";
+
+        string[] lines =
+            stageTimelineCsv.text.Split(
+                new[] { "\r\n", "\n", "\r" },
+                System.StringSplitOptions.RemoveEmptyEntries
+            );
+
+        foreach (string rawLine in lines)
+        {
+            string line = rawLine.Trim();
+
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
+
+            char delimiter =
+                line.Contains("\t") ? '\t' : ',';
+
+            string[] cells =
+                line.Split(delimiter);
+
+            if (cells.Length < 2)
+                continue;
+
+            string rowName =
+                cells[0]
+                    .Trim()
+                    .Trim('\uFEFF', '"')
+                    .Replace(" ", "")
+                    .ToLowerInvariant();
+
+            if (rowName != targetStage)
+                continue;
+
+            for (int i = 1; i < cells.Length; i++)
+            {
+                string valueText =
+                    cells[i]
+                        .Trim()
+                        .Trim('"');
+
+                if (string.IsNullOrWhiteSpace(valueText))
+                    continue;
+
+                if (float.TryParse(
+                    valueText,
+                    NumberStyles.Float,
+                    CultureInfo.InvariantCulture,
+                    out float value))
+                {
+                    startTimes.Add(value);
+                }
+                else
+                {
+                    Debug.LogWarning(
+                        $"[Timeline] 숫자로 읽을 수 없는 값 무시: " +
+                        $"{valueText}"
+                    );
+                }
+            }
+
+            break;
+        }
+
+        int expectedCount =
+            plannedMinigameCount + 1;
+
+        if (startTimes.Count != expectedCount)
+        {
+            Debug.LogError(
+                $"[Timeline] {targetStage}에서 읽은 시간 개수: " +
+                $"{startTimes.Count}, 필요 개수: {expectedCount} " +
+                $"(미니게임 {plannedMinigameCount}개 + 종료시간 1개)"
+            );
+
+            return false;
+        }
+
+        Debug.Log(
+            $"[Timeline] {targetStage} 로드 완료: " +
+            $"{plannedMinigameCount}개 미니게임, " +
+            $"종료 {startTimes[plannedMinigameCount]:0.###}초"
+        );
+
+        return true;
+    }
+
     private float GetTimelineStartTime(int index)
     {
         if (startTimes == null || index < 0 || index >= startTimes.Count)
@@ -297,8 +454,6 @@ public class MinigameUIManager : MonoBehaviour
 
     private void ValidateTimeline()
     {
-        if (startTimes == null) startTimes = new List<float>();
-
         // startTimes가 오름차순이 아니면 경고
         for (int i = 1; i < startTimes.Count; i++)
         {
@@ -311,15 +466,13 @@ public class MinigameUIManager : MonoBehaviour
 
         int gameCount = minigameQueue.Count;
 
-        // startTimes는 미니게임 개수와 같거나,
-        // 마지막 엔딩 타이밍 포함해서 gameCount + 1까지 허용
-        if (startTimes.Count < gameCount)
+        // CSV 형식은 "미니게임 시작시간 N개 + 스테이지 종료시간 1개"
+        if (startTimes.Count != gameCount + 1)
         {
-            Debug.LogError($"[Timeline] startTimes({startTimes.Count}) < minigameQueue({gameCount}). Not enough start times.");
-        }
-        else if (startTimes.Count > gameCount + 1)
-        {
-            Debug.LogWarning($"[Timeline] startTimes({startTimes.Count}) > minigameQueue({gameCount}) + final event(1). Extra times will be ignored.");
+            Debug.LogError(
+                $"[Timeline] startTimes({startTimes.Count}) != " +
+                $"minigameQueue({gameCount}) + 종료시간(1)."
+            );
         }
     }
 
@@ -334,10 +487,13 @@ public class MinigameUIManager : MonoBehaviour
         bgmActuallyStarted = true;
         gameplayStartDspTime = bgmStartDspTime;
 
-        // 미니게임 개수보다 startTimes가 적으면 진행 불가
-        if (startTimes.Count < gameCount)
+        // 미니게임 시작시간 + 마지막 종료시간까지 있어야 진행
+        if (startTimes.Count != gameCount + 1)
         {
-            Debug.LogError($"[Timeline] startTimes({startTimes.Count}) < gameCount({gameCount}).");
+            Debug.LogError(
+                $"[Timeline] startTimes({startTimes.Count}) != " +
+                $"gameCount({gameCount}) + 1."
+            );
             yield break;
         }
 

@@ -616,14 +616,16 @@ public class RhythmManager :
             }
         }
 
+        // 현재 hitWindow 안에 판정 가능한 노드가 없다면
+        // 이번 입력은 어떤 노드에도 귀속시키지 않고 무시한다.
+        // Miss는 실제 노드가 판정되었거나
+        // 노드의 판정 시간이 만료되었을 때만 발생한다.
+        if (nearest == null)
+            return;
+
         MiniGameBase.JudgementResult judgement;
 
-        if (nearest == null)
-        {
-            judgement =
-                MiniGameBase.JudgementResult.Miss;
-        }
-        else if (bestDelta <= perfectWindow)
+        if (bestDelta <= perfectWindow)
         {
             judgement =
                 MiniGameBase.JudgementResult.Perfect;
@@ -639,8 +641,8 @@ public class RhythmManager :
                 MiniGameBase.JudgementResult.Miss;
         }
 
-        if (nearest != null)
-            nearest.consumed = true;
+        // 선택된 노드는 결과와 관계없이 한 번만 처리한다.
+        nearest.consumed = true;
 
         OnPlayerJudged?.Invoke(judgement);
     }
@@ -662,12 +664,17 @@ public class RhythmManager :
             if (!IsJudgeType(rhythmEvent.type))
                 continue;
 
+            // events는 시간순으로 정렬되어 있으므로,
+            // 아직 만료되지 않은 첫 판정 노드를 만나면
+            // 그 뒤의 노드들도 아직 만료되지 않았다.
             if (now <=
                 rhythmEvent.time + hitWindow)
             {
                 break;
             }
 
+            // 입력 없이 hitWindow가 지난 노드는
+            // 정확히 한 번 자동 Miss 처리한다.
             rhythmEvent.consumed = true;
             events[i] = rhythmEvent;
 

@@ -62,6 +62,27 @@ public abstract class MiniGameBase : MonoBehaviour
         }
     }
 
+    public enum PracticeTimingMode
+    {
+        RhythmChart,
+        Custom
+    }
+
+    [Header("Practice Guide")]
+    [SerializeField]
+    private PracticeTimingMode practiceTimingMode =
+        PracticeTimingMode.RhythmChart;
+
+    public PracticeTimingMode GetPracticeTimingMode =>
+        practiceTimingMode;
+
+    // 연습 예시보기에서 플레이어 대신 실제 미니게임 행동을 실행하는 공통 진입점.
+    public virtual void ExecutePracticeAction(
+        int actionIndex,
+        string actionType)
+    {
+    }
+
     public virtual float perfectWindowOverride => 0.1f;
     public virtual float goodWindowOverride => 0.3f;
     public virtual float hitWindowOverride => 1f;

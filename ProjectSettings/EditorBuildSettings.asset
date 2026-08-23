@@ -9,24 +9,25 @@ EditorBuildSettings:
     path: Assets/Scenes/BootStrapScene.unity
     guid: 66e5298d0bc96304badbd2b5c1342aea
   - enabled: 1
+    path: Assets/Scenes/MainScene.unity
+    guid: 1d0a54c257d0aae4eac5659cabd27c18
+  - enabled: 1
+    path: Assets/Scenes/CutScene.unity
+    guid: a1697ad6c04b3374fa60cb4ab0992b9b
+  - enabled: 1
     path: Assets/Scenes/LobbyScene.unity
     guid: c0d7d235d9f51b043aafd1e0a51a6f94
   - enabled: 1
     path: Assets/Scenes/PracticeMinigame.unity
     guid: b6a9b6fc59fcacf4888244c63ec50978
   - enabled: 1
-    path: Assets/Scenes/CutScene.unity
-    guid: a1697ad6c04b3374fa60cb4ab0992b9b
-  - enabled: 1
     path: Assets/Scenes/MinigameLoad.unity
     guid: c12687692575fd947940a22259afc381
   - enabled: 0
     path: Assets/Scenes/StageEnd.unity
     guid: 01664a79cd4f80c4f8ccaf1710669342
-  - enabled: 1
-    path: Assets/Scenes/MainScene.unity
-    guid: 1d0a54c257d0aae4eac5659cabd27c18
   m_configObjects:
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 625beb70c70ea984993ba0feb1cc473a, type: 2}
+    com.unity.adaptiveperformance.samsung.android.provider_settings: {fileID: 11400000, guid: ca67ff03b42a1fd47af171e4ae7896cf, type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 59d7ab21642657240b87afec04891bbb, type: 2}
     com.unity.addressableassets: {fileID: 11400000, guid: 0e10e407fc6c66a4ea675b8c7f7fda15, type: 2}

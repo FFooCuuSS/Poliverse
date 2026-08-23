@@ -24,6 +24,8 @@ public class PracticeMinigameSceneManager : MonoBehaviour
     [Header("References")]
     [SerializeField]
     private RhythmManager rhythmManager;
+    [SerializeField]
+    private PracticeDemoManager practiceDemoManager;
 
     [Tooltip(
         "로딩 및 시범 중 플레이어 입력을 막는 패널"
@@ -51,6 +53,13 @@ public class PracticeMinigameSceneManager : MonoBehaviour
     )]
     [SerializeField]
     private TextAsset chartCsv;
+
+    [Header("Practice Guide")]
+    [Tooltip(
+        "Custom 시범 행동과 설명 해금 타이밍이 들어 있는 연습용 CSV"
+    )]
+    [SerializeField]
+    private TextAsset practiceGuideCsv;
 
     [Header("Exit")]
     [Tooltip(
@@ -417,8 +426,12 @@ public class PracticeMinigameSceneManager : MonoBehaviour
         nextRequested = false;
 
         if (practicePanel != null)
+        {
             practicePanel.SetActive(true);
-        if (guideTextController != null && currentMinigame != null)
+        }
+
+        if (guideTextController != null &&
+            currentMinigame != null)
         {
             guideTextController.Initialize(
                 currentMinigame.GetMinigameExplains
@@ -429,6 +442,7 @@ public class PracticeMinigameSceneManager : MonoBehaviour
         {
             practicePanelToggle.OpenImmediate();
         }
+
         while (isPracticing &&
                !nextRequested)
         {
@@ -440,7 +454,9 @@ public class PracticeMinigameSceneManager : MonoBehaviour
                 playMode ==
                 PracticePlayMode.Demo;
 
-            // 시범에서는 실제 플레이어 입력을 막는다.
+            /*
+             * 예시보기에서는 실제 플레이어 터치를 막는다.
+             */
             if (blockInputPanel != null)
             {
                 blockInputPanel.SetActive(
@@ -448,21 +464,47 @@ public class PracticeMinigameSceneManager : MonoBehaviour
                 );
             }
 
+            /*
+             * 현재 미니게임 초기화.
+             */
             currentMinigame.StartGame();
 
             yield return null;
 
-            rhythmManager.StartSong();
-
+            /*
+             * 예시보기일 때만
+             * RhythmManager의 입력 이벤트를 받아
+             * 자동 행동을 실행한다.
+             */
             if (isDemo)
             {
-                // 다음 단계에서 여기에
-                // PracticeDemoManager를 실행한다.
-                //
-                // PracticeDemoManager가
-                // Demo CSV를 읽고 실제 미니게임에
-                // 가상 입력을 보낼 예정이다.
+                if (practiceDemoManager != null)
+                {
+                    string minigameId =
+                        $"{selectedPlanet}-{CurrentMinigameId}";
+
+                    practiceDemoManager.Begin(
+                        currentMinigame,
+                        rhythmManager,
+                        practiceGuideCsv,
+                        minigameId,
+                        UnlockGuideText
+                    );
+                }
             }
+            else
+            {
+                if (practiceDemoManager != null)
+                {
+                    practiceDemoManager.Stop();
+                }
+            }
+
+            /*
+             * DemoManager를 먼저 연결한 뒤
+             * 타임라인을 시작한다.
+             */
+            rhythmManager.StartSong();
 
             yield return new WaitUntil(
                 () =>
@@ -472,15 +514,26 @@ public class PracticeMinigameSceneManager : MonoBehaviour
                     rhythmManager.HasDispatchedAllEvents
             );
 
+            /*
+             * 이번 재생이 끝났으므로
+             * 이벤트 구독을 반드시 해제한다.
+             */
+            if (practiceDemoManager != null)
+            {
+                practiceDemoManager.Stop();
+            }
+
             if (!isPracticing ||
                 nextRequested)
             {
                 break;
             }
 
-            // 한 번 재생이 끝났거나
-            // Demo <-> Player 모드를 바꿨으면
-            // 미니게임을 처음 상태로 다시 만든다.
+            /*
+             * 한 번 재생이 끝났거나
+             * Demo <-> Player 모드를 바꿨으면
+             * 미니게임을 처음 상태로 다시 만든다.
+             */
             DestroyCurrentMinigame();
             ResetCamera();
 
@@ -495,14 +548,25 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             }
         }
 
+        if (practiceDemoManager != null)
+        {
+            practiceDemoManager.Stop();
+        }
+
         if (practicePanel != null)
+        {
             practicePanel.SetActive(false);
+        }
 
         if (modeButton != null)
+        {
             modeButton.SetActive(false);
+        }
 
         if (nextButton != null)
+        {
             nextButton.SetActive(false);
+        }
     }
 
     private IEnumerator CreateMinigame()
@@ -692,14 +756,14 @@ public class PracticeMinigameSceneManager : MonoBehaviour
                 $"{CurrentMinigameId} " +
                 $"{currentMinigame.GetMinigameTitle}";
         }
-        
+
         if (transitionPanel != null &&
             transitionPanel.activeSelf)
         {
             yield return
                 FadeTransitionTo(0f);
         }
-        
+
         while (isPracticing &&
        !titleConfirmed)
         {
@@ -904,6 +968,8 @@ public class PracticeMinigameSceneManager : MonoBehaviour
 
     public void NextMinigame()
     {
+        Debug.Log("[Practice] NEXT 클릭");
+
         if (currentPhase !=
             PracticePhase.Practice)
         {
@@ -969,11 +1035,20 @@ public class PracticeMinigameSceneManager : MonoBehaviour
 
     private void DestroyCurrentMinigame()
     {
+        if (practiceDemoManager != null)
+        {
+            practiceDemoManager.Stop();
+        }
+
         if (rhythmManager != null)
+        {
             rhythmManager.ClearCurrent();
+        }
 
         if (currentMinigameObject != null)
+        {
             Destroy(currentMinigameObject);
+        }
 
         currentMinigame = null;
         currentMinigameObject = null;

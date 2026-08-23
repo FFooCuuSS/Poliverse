@@ -12,7 +12,20 @@
           "package_name": "com.hong.copspace"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "651529722196-08sifc30mg0isvvkpgqnvtn29mgk1l1d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hong.copspace",
+            "certificate_hash": "f2767e7e6fd7e9fcfe494cd37a027c126d83618c"
+          }
+        },
+        {
+          "client_id": "651529722196-2pn2mi0u1faudg9qef7tnmpaf1q2lqc8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBsUFmWUj6eeqo8B1Y6u9JrEV7kAANk6Sg"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "651529722196-2pn2mi0u1faudg9qef7tnmpaf1q2lqc8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

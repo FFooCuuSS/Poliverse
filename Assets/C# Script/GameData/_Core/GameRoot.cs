@@ -243,7 +243,7 @@ public class GameRoot : MonoBehaviour
             yield break;
         }
 
-        // 1. 동기 시스템 초기화
+        // 1. 기본 로컬 시스템
         try
         {
             sessionManager.Initialize();
@@ -253,8 +253,6 @@ public class GameRoot : MonoBehaviour
             accountManager
                 .InitializeLocalOnly();
 
-            // Save가 Account 상태 변화를
-            // 받을 수 있도록 먼저 연결.
             saveManager
                 .SetAccountManager(
                     accountManager
@@ -271,52 +269,96 @@ public class GameRoot : MonoBehaviour
             yield break;
         }
 
-        // 2. Firebase 초기화
-        Task<bool> authTask =
+        // 2. Firebase SDK 초기화
+        Task<bool> firebaseTask =
             accountManager
                 .InitializeFirebaseAsync();
 
-        while (!authTask.IsCompleted)
+        while (!firebaseTask.IsCompleted)
             yield return null;
 
-        if (authTask.IsFaulted)
+        bool firebaseAvailable =
+            false;
+
+        if (firebaseTask.IsFaulted)
         {
             Debug.LogError(
                 $"[GameRoot] Firebase 초기화 예외\n" +
-                $"{authTask.Exception}"
+                $"{firebaseTask.Exception}"
             );
+        }
+        else if (firebaseTask.IsCanceled)
+        {
+            Debug.LogWarning(
+                "[GameRoot] Firebase 초기화 취소."
+            );
+        }
+        else
+        {
+            firebaseAvailable =
+                firebaseTask.Result;
+        }
 
-            Debug.LogWarning(
-                "[GameRoot] Local 모드로 계속합니다."
-            );
-        }
-        else if (authTask.IsCanceled)
+        // 3. Firebase 계정 확보
+        //
+        // 기존 로그인 세션:
+        // 그대로 사용
+        //
+        // 로그인 세션 없음:
+        // Firebase Anonymous Guest 생성
+        if (firebaseAvailable)
         {
-            Debug.LogWarning(
-                "[GameRoot] Firebase 초기화 취소. " +
-                "Local 모드로 계속합니다."
-            );
-        }
-        else if (authTask.Result)
-        {
-            Debug.Log(
-                "[GameRoot] Firebase Account 초기화 완료"
-            );
+            Task<bool> signInTask =
+                accountManager
+                    .EnsureSignedInAsync();
+
+            while (!signInTask.IsCompleted)
+                yield return null;
+
+            if (signInTask.IsFaulted)
+            {
+                Debug.LogError(
+                    $"[GameRoot] Firebase 계정 확보 실패\n" +
+                    $"{signInTask.Exception}"
+                );
+            }
+            else if (signInTask.IsCanceled)
+            {
+                Debug.LogWarning(
+                    "[GameRoot] Firebase 계정 확보 취소."
+                );
+            }
+            else if (signInTask.Result)
+            {
+                Debug.Log(
+                    $"[GameRoot] Firebase 계정 준비 완료 | " +
+                    $"UID: {accountManager.Data.uid} | " +
+                    $"Guest: " +
+                    $"{accountManager.Data.isAnonymous}"
+                );
+            }
+            else
+            {
+                Debug.LogWarning(
+                    "[GameRoot] Firebase 계정을 만들 수 없습니다. " +
+                    "Local 저장으로 계속합니다."
+                );
+            }
         }
         else
         {
             Debug.LogWarning(
                 "[GameRoot] Firebase 사용 불가. " +
-                "Local 모드로 계속합니다."
+                "Local 저장으로 계속합니다."
             );
         }
 
-        // 3. Save 초기화
+        // 4. Save 초기화
         //
-        // 로그인 상태면:
+        // Firebase UID 있음:
         // Local + Firestore
         //
-        // 비로그인 상태면:
+        // Firebase UID 없음:
         // Local Only
         Task saveInitializeTask =
             saveManager
@@ -346,7 +388,7 @@ public class GameRoot : MonoBehaviour
             yield break;
         }
 
-        // 4. 나머지 시스템
+        // 5. 후속 시스템
         try
         {
             sceneFlowManager.Initialize();

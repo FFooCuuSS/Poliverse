@@ -15,11 +15,26 @@ public class GameSceneFlowManager : MonoBehaviour
     [SerializeField, Min(0f)]
     private float minimumLoadingDuration = 3f;
 
+    [SerializeField]
+    private PracticeDemoManager practiceDemoManager;
     public bool IsLoading { get; private set; }
 
     private void Awake()
     {
         FindLoadingOverlay();
+
+        if (practiceDemoManager == null)
+        {
+            practiceDemoManager =
+                GetComponent<PracticeDemoManager>();
+        }
+
+        if (practiceDemoManager == null)
+        {
+            practiceDemoManager =
+                gameObject.AddComponent<
+                    PracticeDemoManager>();
+        }
     }
 
     public void Initialize()
