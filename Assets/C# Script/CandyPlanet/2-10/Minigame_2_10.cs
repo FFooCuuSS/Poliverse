@@ -19,10 +19,6 @@ public class Minigame_2_10 : MiniGameBase
     [SerializeField] private TemperatureController temperatureController;
     [SerializeField] private ScoopDrag scoopDrag;
 
-    private void Start()
-    {
-        StartGame();
-    }
 
     public override void StartGame()
     {
