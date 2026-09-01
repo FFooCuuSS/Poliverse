@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <projectSettings>
-<<<<<<< Updated upstream
   <projectSetting name="com.google.external-dependency-managerAnalyticsEnabled" value="False" />
   <projectSetting name="com.google.firebaseAnalyticsCookie" value="b54a51464a2549bda48dc4a3ac9c3399" />
-=======
-  <projectSetting name="com.google.external-dependency-managerAnalyticsCookie" value="da0c4acc127a45fb98146ef560153ae6" />
-  <projectSetting name="com.google.external-dependency-managerAnalyticsEnabled" value="True" />
-  <projectSetting name="com.google.firebaseAnalyticsCookie" value="a25d46882fda49e28fc6c90a190856a0" />
->>>>>>> Stashed changes
   <projectSetting name="com.google.firebaseAnalyticsEnabled" value="True" />
   <projectSetting name="GooglePlayServices.AutoResolverEnabled" value="False" />
   <projectSetting name="GooglePlayServices.PromptBeforeAutoResolution" value="False" />
