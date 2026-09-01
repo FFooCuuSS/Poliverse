@@ -5,12 +5,14 @@ using UnityEngine;
 
 public class Minigame_3_5_remake : MiniGameBase
 {
+    public GameObject scope;
     public ScopeMover scopeMover;
    // public CameraFollow3_5 cameraFollow;
     bool moveStarted = false;
 
     private void Start()
     {
+        scope.SetActive(false);
         StartGame();
         moveStarted = true;
     }
@@ -34,7 +36,7 @@ public class Minigame_3_5_remake : MiniGameBase
         }
         if(timechecker>=3.5f&&moveStarted)
         {
-
+            scope.SetActive(true);
             scopeMover.StartMove();
             moveStarted = false; 
         }
