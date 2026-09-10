@@ -1,94 +1,133 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 2-13 Á©¸® ºí·Ï Ã¶°Å ¹Ì´Ï°ÔÀÓ
+/// 2-13 ì ¤ë¦¬ ë¸”ë¡ ì² ê±° ë¯¸ë‹ˆê²Œì„
 ///
-/// ¸®µë Èå¸§ (2¹Ú 1¼¼Æ®):
-///  1¹Ú) CSV type = "Show"  -> ÅºÈ¯ ¼ÒÈ¯ + ³«ÇÏ (RigidBody ¹Ì»ç¿ë, Transform º¸°£)
-///  1¹Ú) CSV type = "Input" -> ÇÃ·¹ÀÌ¾î°¡ È­¸éÀ» ÅÍÄ¡ÇØ¾ß ÇÏ´Â Å¸ÀÌ¹Ö.
-///                             Á¤È®ÇÑ ÆÇÁ¤(Perfect/Good/Miss)Àº RhythmManager°¡ ¼öÇàÇÏ°í,
-///                             ±× °á°ú°¡ OnJudgement()·Î Àü´ŞµÈ´Ù.
+/// ë¦¬ë“¬ íë¦„ (2ë°• 1ì„¸íŠ¸):
+///  1ë°•) CSV type = "Show"  -> íƒ„í™˜ ì†Œí™˜ + ë‚™í•˜ (RigidBody ë¯¸ì‚¬ìš©, Transform ë³´ê°„)
+///  1ë°•) CSV type = "Input" -> í”Œë ˆì´ì–´ê°€ í™”ë©´ì„ í„°ì¹˜í•´ì•¼ í•˜ëŠ” íƒ€ì´ë°.
+///                             ì •í™•í•œ íŒì •(Perfect/Good/Miss)ì€ RhythmManagerê°€ ìˆ˜í–‰í•˜ê³ ,
+///                             ê·¸ ê²°ê³¼ê°€ OnJudgement()ë¡œ ì „ë‹¬ëœë‹¤.
 ///
-/// ÆÇÁ¤ °á°ú¿¡ µû¶ó:
-///  - Perfect / Good -> Åõ¼®±â ¹ß»ç ¸ğ¼Ç + ÅºÈ¯ÀÌ ³¯¾Æ°¡¼­ ÇöÀç Å¸°Ù Á©¸® ºí·Ï¿¡ ¸íÁß (µ¥¹ÌÁö)
-///  - Miss           -> ÅºÈ¯ÀÌ ±×´ë·Î »ç¶óÁü (¶Ç´Â ½ÇÆĞ ¸ğ¼Ç)
+/// íŒì • ê²°ê³¼ì— ë”°ë¼:
+///  - Perfect / Good -> íˆ¬ì„ê¸° ë°œì‚¬ ëª¨ì…˜ + íƒ„í™˜ì´ í˜„ì¬ íƒ€ê²Ÿ ë¸”ë¡ìœ¼ë¡œ ë‚ ì•„ê° (ëª…ì¤‘ ì²˜ë¦¬)
+///  - Miss           -> íˆ¬ì„ê¸° ë°œì‚¬ ëª¨ì…˜ ì—†ì´, íƒ„í™˜ì´ ê·¸ ìë¦¬ì—ì„œ ì•„ë˜ë¡œ ë–¨ì–´ì§€ë‹¤ê°€ ì‚¬ë¼ì§
 ///
-/// Á¡¼ö Áı°è´Â MiniGameBaseÀÇ UseRhythmJudgementScore(±âº» true) °æ·Î¸¦ ±×´ë·Î »ç¿ëÇÏ¹Ç·Î
-/// ÀÌ ½ºÅ©¸³Æ®¿¡¼­ º°µµ·Î Á¡¼ö¸¦ °è»êÇÏÁö ¾Ê´Â´Ù.
+/// Enemyê°€ ìˆëŠ” ê³ ì • ì ¤ë¦¬ ë¸”ë¡ë“¤ì„ targetBlocks ë¦¬ìŠ¤íŠ¸ë¡œ ìˆœì„œëŒ€ë¡œ ë“±ë¡í•´ë‘ê³ ,
+/// ê·¸ì¤‘ currentTargetIndexë²ˆì§¸ ë¸”ë¡ ìœ„ì¹˜ë¥¼ ë°œì‚¬ ëª©í‘œë¡œ ì‚¬ìš©í•œë‹¤.
+/// í•œ ë¸”ë¡ë‹¹ ëª…ì¤‘ 2íšŒ(Perfect/Good)ë¡œ Enemy ìŠ¤í”„ë¼ì´íŠ¸ê°€ Stage1 -> Stage2 -> Stage3ë¡œ ë°”ë€Œê³ ,
+/// Stage3ì— ë„ë‹¬í•˜ë©´ ë‹¤ìŒ ë¸”ë¡ìœ¼ë¡œ ë„˜ì–´ê°„ë‹¤. ëª¨ë“  ë¸”ë¡ì„ ì²˜ë¦¬í•˜ë©´ Success() í˜¸ì¶œ.
+///
+/// ì ìˆ˜ ì§‘ê³„ëŠ” MiniGameBaseì˜ UseRhythmJudgementScore(ê¸°ë³¸ true) ê²½ë¡œë¥¼ ê·¸ëŒ€ë¡œ ì‚¬ìš©í•˜ë¯€ë¡œ
+/// ì´ ìŠ¤í¬ë¦½íŠ¸ì—ì„œ ë³„ë„ë¡œ ì ìˆ˜ë¥¼ ê³„ì‚°í•˜ì§€ ì•ŠëŠ”ë‹¤.
 /// </summary>
+[Serializable]
+public class JellyEnemyTarget
+{
+    [Tooltip("ì´ Enemyê°€ ìˆëŠ” ì ¤ë¦¬ ë¸”ë¡ì˜ ìœ„ì¹˜ (íƒ„í™˜ ë°œì‚¬ ëª©í‘œ ì§€ì )")]
+    public Transform point;
+
+    [Tooltip("ì´ ë¸”ë¡ ìœ„ Enemyì˜ SpriteRenderer (ìŠ¤í”„ë¼ì´íŠ¸ êµì²´ ëŒ€ìƒ)")]
+    public SpriteRenderer enemyRenderer;
+}
 
 public class Minigame_2_13 : MiniGameBase
 {
-    // ÆÇÁ¤ À©µµ¿ì ¿À¹ö¶óÀÌµå
-    public override float perfectWindowOverride => 0.15f;
-    public override float goodWindowOverride => 0.5f;
-    public override float hitWindowOverride => 1f;
-    protected override string MinigameExplain => "Á©¸®ºôµù ºÎ¼ö±â!";
+    // íŒì • ìœˆë„ìš° ì˜¤ë²„ë¼ì´ë“œ
+    // hitWindowë¥¼ goodWindowì— ê°€ê¹ê²Œ ì¢í˜€ì„œ, íŒì • í•˜ë‚˜ê°€ ë‹¤ìŒ ì‚¬ì´í´ ì´ë²¤íŠ¸ê¹Œì§€
+    // ì˜ëª» ì†Œëª¨ì‹œí‚¤ëŠ” ì—¬ì§€ë¥¼ ìµœì†Œí™”í•œë‹¤. (Show/Input ê°„ê²©, ì¦‰ 1ë°• ê¸¸ì´ì˜ ì ˆë°˜ë³´ë‹¤
+    // ë°˜ë“œì‹œ ì‘ê²Œ ìœ ì§€í•  ê²ƒ â€” ê²¹ì¹˜ë©´ ë‹¤ì‹œ ê°™ì€ ë¬¸ì œê°€ ì¬ë°œí•¨)
+    public override float perfectWindowOverride => 0.1f;
+    public override float goodWindowOverride => 0.25f;
+    public override float hitWindowOverride => 0.35f;
+    protected override string MinigameExplain => "ì ¤ë¦¬ë¹Œë”© ë¶€ìˆ˜ê¸°!";
 
     [Header("Jelly Block Demolition - Positions")]
-    [Tooltip("ÅºÈ¯ÀÌ Ã³À½ ¼ÒÈ¯µÇ´Â À§Ä¡ (ÁÂÃø »ó´Ü)")]
+    [Tooltip("íƒ„í™˜ì´ ì²˜ìŒ ì†Œí™˜ë˜ëŠ” ìœ„ì¹˜ (ì¢Œì¸¡ ìƒë‹¨)")]
     [SerializeField] private Transform spawnPoint;
 
-    [Tooltip("ÅºÈ¯ÀÌ ³«ÇÏÇØ¼­ µµÂøÇÏ´Â À§Ä¡ (Åõ¼®±â À§Ä¡)")]
+    [Tooltip("íƒ„í™˜ì´ ë‚™í•˜í•´ì„œ ë„ì°©í•˜ëŠ” ìœ„ì¹˜ (íˆ¬ì„ê¸° ìœ„ì¹˜)")]
     [SerializeField] private Transform catapultPoint;
 
-    [Tooltip("Åõ¼®±â¿¡¼­ ¹ß»çµÈ ÅºÈ¯ÀÌ ³¯¾Æ°¡´Â ¸ñÇ¥ ÁöÁ¡ (Á©¸® ºôµù ÂÊ °íÁ¤ Æ÷ÀÎÆ®)")]
-    [SerializeField] private Transform targetPoint;
+    [Header("Jelly Block Demolition - Enemy Targets (ê³ ì • ë¸”ë¡)")]
+    [Tooltip("Enemyê°€ ìˆëŠ” ì ¤ë¦¬ ë¸”ë¡ë“¤. ê³ ì •ëœ ìˆœì„œëŒ€ë¡œ ë“±ë¡í•˜ë©°, í•˜ë‚˜ê°€ í´ë¦¬ì–´ë˜ë©´ ë‹¤ìŒ ë¸”ë¡ì´ íƒ€ê²Ÿì´ ëœë‹¤.")]
+    [SerializeField] private List<JellyEnemyTarget> targetBlocks = new List<JellyEnemyTarget>();
+
+    [Header("Enemy Sprite Stages (ê³µìš©)")]
+    [Tooltip("í”¼ê²© ì „ ê¸°ë³¸ Enemy ìŠ¤í”„ë¼ì´íŠ¸. ë¹„ì›Œë‘ë©´ ì”¬ì— ì›ë˜ ì„¤ì •ëœ ìŠ¤í”„ë¼ì´íŠ¸ë¥¼ ê·¸ëŒ€ë¡œ ì‚¬ìš©.")]
+    [SerializeField] private Sprite enemySpriteStage1;
+
+    [Tooltip("1íšŒ ëª…ì¤‘(Perfect/Good) í›„ í‘œì‹œí•  ìŠ¤í”„ë¼ì´íŠ¸")]
+    [SerializeField] private Sprite enemySpriteStage2;
+
+    [Tooltip("2íšŒ ëª…ì¤‘ í›„ í‘œì‹œí•  ìŠ¤í”„ë¼ì´íŠ¸. ì´ ìƒíƒœê°€ ë˜ë©´ ë‹¤ìŒ íƒ€ê²Ÿ ë¸”ë¡ìœ¼ë¡œ ë„˜ì–´ê°„ë‹¤.")]
+    [SerializeField] private Sprite enemySpriteStage3;
 
     [Header("Jelly Block Demolition - Prefab & Timing")]
     [SerializeField] private GameObject projectilePrefab;
 
-    [Tooltip("¼ÒÈ¯ ÈÄ Åõ¼®±â À§Ä¡±îÁö ³«ÇÏÇÏ´Â µ¥ °É¸®´Â ½Ã°£(ÃÊ). 1¹Ú ±æÀÌ¿¡ ¸ÂÃç Á¶Á¤.")]
+    [Tooltip("ì†Œí™˜ í›„ íˆ¬ì„ê¸° ìœ„ì¹˜ê¹Œì§€ ë‚™í•˜í•˜ëŠ” ë° ê±¸ë¦¬ëŠ” ì‹œê°„(ì´ˆ). 1ë°• ê¸¸ì´ì— ë§ì¶° ì¡°ì •.")]
     [SerializeField] private float fallDuration = 0.5f;
 
-    [Tooltip("Åõ¼®±â¿¡¼­ ¸ñÇ¥ ÁöÁ¡±îÁö ³¯¾Æ°¡´Â µ¥ °É¸®´Â ½Ã°£(ÃÊ). 1¹Ú ±æÀÌ¿¡ ¸ÂÃç Á¶Á¤.")]
+    [Tooltip("íˆ¬ì„ê¸°ì—ì„œ ëª©í‘œ ì§€ì ê¹Œì§€ ë‚ ì•„ê°€ëŠ” ë° ê±¸ë¦¬ëŠ” ì‹œê°„(ì´ˆ). 1ë°• ê¸¸ì´ì— ë§ì¶° ì¡°ì •.")]
     [SerializeField] private float flyDuration = 0.3f;
 
-    [Header("Catapult Procedural Motion (¾Ö´Ï¸ŞÀÌ¼Ç Å¬¸³ ¾øÀÌ ÄÚµå·Î ±¸Çö)")]
+    [Header("Catapult Procedural Motion (ì• ë‹ˆë©”ì´ì…˜ í´ë¦½ ì—†ì´ ì½”ë“œë¡œ êµ¬í˜„)")]
     [Tooltip(
-        "È¸Àü½ÃÅ³ Åõ¼®±â ÆÈ Transform.\n" +
-        "¡Ú Áß¿ä: ÀÌ TransformÀÇ À§Ä¡(ÇÇ¹ş)´Â ¹ŞÄ§´ë¿Í ÆÈÀÌ ¿¬°áµÇ´Â ÁöÁ¡¿¡ ÀÖ¾î¾ß ÇÔ.\n" +
-        "ÆÈ ½ºÇÁ¶óÀÌÆ®´Â ±× ÁöÁ¡¿¡¼­ ¿ÀÇÁ¼ÂµÇ¾î ¹èÄ¡ (¶Ç´Â ½ºÇÁ¶óÀÌÆ® ÀÚÃ¼ PivotÀ» ¿¬°á ÁöÁ¡À¸·Î ¼³Á¤).\n" +
-        "±×·¡¾ß È¸Àü ½Ã ¿¬°á ÁöÁ¡À» ÃàÀ¸·Î ÀÚ¿¬½º·´°Ô ÈÖµÎ¸§.")]
+        "íšŒì „ì‹œí‚¬ íˆ¬ì„ê¸° íŒ” Transform.\n" +
+        "â˜… ì¤‘ìš”: ì´ Transformì˜ ìœ„ì¹˜(í”¼ë²—)ëŠ” ë°›ì¹¨ëŒ€ì™€ íŒ”ì´ ì—°ê²°ë˜ëŠ” ì§€ì ì— ìˆì–´ì•¼ í•¨.\n" +
+        "íŒ” ìŠ¤í”„ë¼ì´íŠ¸ëŠ” ê·¸ ì§€ì ì—ì„œ ì˜¤í”„ì…‹ë˜ì–´ ë°°ì¹˜ (ë˜ëŠ” ìŠ¤í”„ë¼ì´íŠ¸ ìì²´ Pivotì„ ì—°ê²° ì§€ì ìœ¼ë¡œ ì„¤ì •).\n" +
+        "ê·¸ë˜ì•¼ íšŒì „ ì‹œ ì—°ê²° ì§€ì ì„ ì¶•ìœ¼ë¡œ ìì—°ìŠ¤ëŸ½ê²Œ íœ˜ë‘ë¦„.")]
     [SerializeField] private Transform catapultArm;
 
     [Tooltip(
-        "¾À¿¡ ¹èÄ¡ÇØµĞ armÀÇ 'Æò»ó½Ã ±â¿ï¾îÁø ÀÚ¼¼' ±×´ë·Î¸¦ Rest·Î »ç¿ëÇÒÁö ¿©ºÎ.\n" +
-        "true¸é °ÔÀÓ ½ÃÀÛ ½Ã armÀÇ ÇöÀç È¸Àü°ªÀ» ÀÚµ¿À¸·Î Rest °¢µµ·Î ÀúÀåÇÑ´Ù.\n" +
-        "false¸é ¾Æ·¡ catapultRestAngleOverride °ªÀ» Rest·Î »ç¿ëÇÑ´Ù.")]
+        "ì”¬ì— ë°°ì¹˜í•´ë‘” armì˜ 'í‰ìƒì‹œ ê¸°ìš¸ì–´ì§„ ìì„¸' ê·¸ëŒ€ë¡œë¥¼ Restë¡œ ì‚¬ìš©í• ì§€ ì—¬ë¶€.\n" +
+        "trueë©´ ê²Œì„ ì‹œì‘ ì‹œ armì˜ í˜„ì¬ íšŒì „ê°’ì„ ìë™ìœ¼ë¡œ Rest ê°ë„ë¡œ ì €ì¥í•œë‹¤.\n" +
+        "falseë©´ ì•„ë˜ catapultRestAngleOverride ê°’ì„ Restë¡œ ì‚¬ìš©í•œë‹¤.")]
     [SerializeField] private bool useCurrentArmRotationAsRest = true;
 
-    [Tooltip("useCurrentArmRotationAsRest°¡ falseÀÏ ¶§ »ç¿ëÇÒ Rest °¢µµ(Z, degrees)")]
+    [Tooltip("useCurrentArmRotationAsRestê°€ falseì¼ ë•Œ ì‚¬ìš©í•  Rest ê°ë„(Z, degrees)")]
     [SerializeField] private float catapultRestAngleOverride = 0f;
 
-    [Tooltip("Rest °¢µµ¿¡¼­ ¹ŞÄ§´ë ÂÊÀ¸·Î ¾ó¸¶³ª ´õ ´ç°ÜÁúÁö (»ó´ë ¿ÀÇÁ¼Â, degrees). " +
-             "¿¹: -20ÀÌ¸é Restº¸´Ù 20µµ ´õ ´¯´Â(´ç°ÜÁö´Â) ¹æÇâ.")]
+    [Tooltip("Rest ê°ë„ì—ì„œ ë°›ì¹¨ëŒ€ ìª½ìœ¼ë¡œ ì–¼ë§ˆë‚˜ ë” ë‹¹ê²¨ì§ˆì§€ (ìƒëŒ€ ì˜¤í”„ì…‹, degrees). " +
+             "ì˜ˆ: -20ì´ë©´ Restë³´ë‹¤ 20ë„ ë” ëˆ•ëŠ”(ë‹¹ê²¨ì§€ëŠ”) ë°©í–¥.")]
     [SerializeField] private float catapultPullBackOffset = -20f;
 
-    [Tooltip("Rest °¢µµ¿¡¼­ ¾ó¸¶³ª ¾ÕÀ¸·Î Æ¨°Ü³ª°¥Áö (»ó´ë ¿ÀÇÁ¼Â, degrees). " +
-             "¿¹: 70ÀÌ¸é Restº¸´Ù 70µµ ¾ÕÀ¸·Î ÈÖµÎ¸£´Â ¹æÇâ. ºÎÈ£/Å©±â´Â ½ÇÁ¦ ¾ÆÆ® ¹æÇâ¿¡ ¸ÂÃç Á¶Á¤.")]
+    [Tooltip("Rest ê°ë„ì—ì„œ ì–¼ë§ˆë‚˜ ì•ìœ¼ë¡œ íŠ•ê²¨ë‚˜ê°ˆì§€ (ìƒëŒ€ ì˜¤í”„ì…‹, degrees). " +
+             "ì˜ˆ: 70ì´ë©´ Restë³´ë‹¤ 70ë„ ì•ìœ¼ë¡œ íœ˜ë‘ë¥´ëŠ” ë°©í–¥. ë¶€í˜¸/í¬ê¸°ëŠ” ì‹¤ì œ ì•„íŠ¸ ë°©í–¥ì— ë§ì¶° ì¡°ì •.")]
     [SerializeField] private float catapultThrowOffset = 70f;
 
-    [Tooltip("´ç±è µ¿ÀÛ¿¡ °É¸®´Â ½Ã°£(ÃÊ). 0ÀÌ¸é ´ç±è µ¿ÀÛ ¾øÀÌ ¹Ù·Î ´øÁü.")]
+    [Tooltip("ë‹¹ê¹€ ë™ì‘ì— ê±¸ë¦¬ëŠ” ì‹œê°„(ì´ˆ). 0ì´ë©´ ë‹¹ê¹€ ë™ì‘ ì—†ì´ ë°”ë¡œ ë˜ì§.")]
     [SerializeField] private float catapultPullBackDuration = 0.08f;
 
-    [Tooltip("PullBack(or Rest) -> Throw °¢µµ·Î ÈÖµÎ¸£´Â µ¥ °É¸®´Â ½Ã°£(ÃÊ)")]
+    [Tooltip("PullBack(or Rest) -> Throw ê°ë„ë¡œ íœ˜ë‘ë¥´ëŠ” ë° ê±¸ë¦¬ëŠ” ì‹œê°„(ì´ˆ)")]
     [SerializeField] private float catapultSwingDuration = 0.12f;
 
-    [Tooltip("´øÁø ÈÄ Rest °¢µµ·Î º¹±ÍÇÏ´Â µ¥ °É¸®´Â ½Ã°£(ÃÊ)")]
+    [Tooltip("ë˜ì§„ í›„ Rest ê°ë„ë¡œ ë³µê·€í•˜ëŠ” ë° ê±¸ë¦¬ëŠ” ì‹œê°„(ì´ˆ)")]
     [SerializeField] private float catapultReturnDuration = 0.2f;
 
+    [Header("Miss Motion")]
+    [Tooltip("Miss ì‹œ íƒ„í™˜ì´ íˆ¬ì„ê¸° ì•„ë˜ë¡œ ë–¨ì–´ì§€ëŠ” ìƒëŒ€ ê±°ë¦¬ (í˜„ì¬ ìœ„ì¹˜ ê¸°ì¤€ ì•„ë˜ ë°©í–¥ ì˜¤í”„ì…‹)")]
+    [SerializeField] private float missDropDistance = 1.5f;
+
+    [Tooltip("Miss ì‹œ ë‚™í•˜ ëª¨ì…˜ í›„ íƒ„í™˜ì´ ì‚¬ë¼ì§€ê¸°ê¹Œì§€ ê±¸ë¦¬ëŠ” ì‹œê°„(ì´ˆ)")]
+    [SerializeField] private float missDropDuration = 0.3f;
+
     private Coroutine catapultMotionRoutine;
-    private float catapultRestAngle; // ½ÇÁ¦ »ç¿ëµÇ´Â Rest °¢µµ (ÀÚµ¿ Ä¸Ã³ ¶Ç´Â Override)
+    private float catapultRestAngle; // ì‹¤ì œ ì‚¬ìš©ë˜ëŠ” Rest ê°ë„ (ìë™ ìº¡ì²˜ ë˜ëŠ” Override)
 
     private GameObject currentProjectile;
-    private bool isProjectileReadyForInput = false; // Show ÀÌÈÄ ~ Input ÆÇÁ¤ Àü±îÁö true
+    private Coroutine projectileMotionRoutine; // íƒ„í™˜ì˜ ë‚™í•˜/ë°œì‚¬ ì´ë™ì„ ì œì–´í•˜ëŠ” ì½”ë£¨í‹´ (ê²¹ì¹˜ì§€ ì•Šë„ë¡ ê´€ë¦¬)
+    private bool isProjectileReadyForInput = false; // Show ì´í›„ ~ Input íŒì • ì „ê¹Œì§€ true
+
+    private int currentTargetIndex = 0;
+    private int currentHitStage = 0; // 0 = ê¸°ë³¸, 1 = 1íšŒ ëª…ì¤‘(Stage2), 2 = 2íšŒ ëª…ì¤‘(Stage3, ë‹¤ìŒ íƒ€ê²Ÿìœ¼ë¡œ)
 
     protected override float TimerDuration => 15f;
-    protected override string MinigameTitle => "Á©¸® ºí·Ï Ã¶°Å";
+    protected override string MinigameTitle => "ì ¤ë¦¬ ë¸”ë¡ ì² ê±°";
 
     protected override void Awake()
     {
@@ -114,6 +153,9 @@ public class Minigame_2_13 : MiniGameBase
 
         isProjectileReadyForInput = false;
 
+        InitializeTargets();
+        StopProjectileMotion();
+
         if (currentProjectile != null)
         {
             Destroy(currentProjectile);
@@ -127,10 +169,37 @@ public class Minigame_2_13 : MiniGameBase
 
         isProjectileReadyForInput = false;
 
+        InitializeTargets();
+        StopProjectileMotion();
+
         if (currentProjectile != null)
         {
             Destroy(currentProjectile);
             currentProjectile = null;
+        }
+    }
+
+    private void InitializeTargets()
+    {
+        currentTargetIndex = 0;
+        currentHitStage = 0;
+
+        if (targetBlocks == null)
+            return;
+
+        // ëª¨ë“  Enemyë¥¼ ê¸°ë³¸(í”¼ê²© ì „) ìŠ¤í”„ë¼ì´íŠ¸ë¡œ ë˜ëŒë¦°ë‹¤.
+        for (int i = 0; i < targetBlocks.Count; i++)
+        {
+            SetEnemySprite(targetBlocks[i], enemySpriteStage1);
+        }
+    }
+
+    private void StopProjectileMotion()
+    {
+        if (projectileMotionRoutine != null)
+        {
+            StopCoroutine(projectileMotionRoutine);
+            projectileMotionRoutine = null;
         }
     }
 
@@ -139,10 +208,17 @@ public class Minigame_2_13 : MiniGameBase
         if (IsInputLocked || IsSuccess)
             return;
 
+        // íŒì •í•  íƒ„í™˜ì´ ì—†ëŠ” êµ¬ê°„(ì§ì „ íŒì • ì™„ë£Œ ~ ë‹¤ìŒ Show ìŠ¤í° ì „)ì˜ í´ë¦­ì€
+        // ì•„ì˜ˆ RhythmManagerë¡œ ì „ë‹¬í•˜ì§€ ì•ŠëŠ”ë‹¤.
+        // ì´ê±¸ ë§‰ì§€ ì•Šìœ¼ë©´, hitWindowê°€ ë„“ì„ ë•Œ ì´ í´ë¦­ì´ "ë‹¤ìŒ ì‚¬ì´í´"ì˜ Input ì´ë²¤íŠ¸ë¥¼
+        // ë¯¸ë¦¬ ì†Œëª¨ì‹œì¼œë²„ë ¤ì„œ ì§„ì§œ ë‹¤ìŒ íƒ€ì´ë°ì— í´ë¦­í•´ë„ íŒì •ì´ ì”¹íˆëŠ” ë²„ê·¸ê°€ ìƒê¸´ë‹¤.
+        if (currentProjectile == null)
+            return;
+
         if (WasTouchedThisFrame())
         {
-            // ÆÇÁ¤ ÀÚÃ¼´Â RhythmManager°¡ ¼öÇàÇÑ´Ù.
-            // action ÀÌ¸§Àº CSVÀÇ type °ª°ú ´ë¼Ò¹®ÀÚ ¹«°üÇÏ°Ô ¸ÅÄªµÈ´Ù.
+            // íŒì • ìì²´ëŠ” RhythmManagerê°€ ìˆ˜í–‰í•œë‹¤.
+            // action ì´ë¦„ì€ CSVì˜ type ê°’ê³¼ ëŒ€ì†Œë¬¸ì ë¬´ê´€í•˜ê²Œ ë§¤ì¹­ëœë‹¤.
             OnPlayerInput("Input");
         }
     }
@@ -163,7 +239,7 @@ public class Minigame_2_13 : MiniGameBase
         return false;
     }
 
-    // RhythmManager -> MiniGameBase -> ¿©±â : Â÷Æ® Å¸ÀÌ¹Ö ½ÅÈ£ (Show / Input µî)
+    // RhythmManager -> MiniGameBase -> ì—¬ê¸° : ì°¨íŠ¸ íƒ€ì´ë° ì‹ í˜¸ (Show / Input ë“±)
     public override void OnRhythmEvent(string action)
     {
         base.OnRhythmEvent(action);
@@ -178,32 +254,34 @@ public class Minigame_2_13 : MiniGameBase
         }
     }
 
-    // RhythmManager -> MiniGameBase -> ¿©±â : Perfect/Good/Miss ÆÇÁ¤ °á°ú
+    // RhythmManager -> MiniGameBase -> ì—¬ê¸° : Perfect/Good/Miss íŒì • ê²°ê³¼
     public override void OnJudgement(JudgementResult judgement)
     {
-        // Á¡¼ö Áı°è(ÃÑ ³ëµå/Perfect/Good/Miss)´Â º£ÀÌ½º¿¡¼­ ±×´ë·Î Ã³¸®ÇÑ´Ù.
+        // ì ìˆ˜ ì§‘ê³„(ì´ ë…¸ë“œ/Perfect/Good/Miss)ëŠ” ë² ì´ìŠ¤ì—ì„œ ê·¸ëŒ€ë¡œ ì²˜ë¦¬í•œë‹¤.
         base.OnJudgement(judgement);
 
         isProjectileReadyForInput = false;
 
         if (currentProjectile == null)
-            return; // Show ¾øÀÌ µé¾î¿Â ÀÔ·Â µî ¿¹¿Ü »óÈ² ¹æ¾î
+            return; // Show ì—†ì´ ë“¤ì–´ì˜¨ ì…ë ¥ ë“± ì˜ˆì™¸ ìƒí™© ë°©ì–´
 
         switch (judgement)
         {
             case JudgementResult.Perfect:
             case JudgementResult.Good:
-                LaunchProjectile(hitTarget: true);
+                LaunchProjectile();
                 break;
 
             case JudgementResult.Miss:
-                LaunchProjectile(hitTarget: false);
+                DropProjectileOnMiss();
                 break;
         }
     }
 
     private void SpawnAndDropProjectile()
     {
+        StopProjectileMotion();
+
         if (currentProjectile != null)
         {
             Destroy(currentProjectile);
@@ -212,47 +290,53 @@ public class Minigame_2_13 : MiniGameBase
 
         if (projectilePrefab == null || spawnPoint == null || catapultPoint == null)
         {
-            Debug.LogWarning("[JellyBlockDemolitionMinigame] projectilePrefab/spawnPoint/catapultPoint°¡ ¼³Á¤µÇÁö ¾Ê¾Ò½À´Ï´Ù.");
+            Debug.LogWarning("[Minigame_2_13] projectilePrefab/spawnPoint/catapultPointê°€ ì„¤ì •ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.");
             return;
         }
 
         currentProjectile = Instantiate(projectilePrefab, spawnPoint.position, Quaternion.identity);
 
-        StartCoroutine(MoveRoutine(
+        projectileMotionRoutine = StartCoroutine(MoveRoutine(
             currentProjectile,
             spawnPoint.position,
             catapultPoint.position,
             fallDuration,
-            onComplete: null));
+            onComplete: () =>
+            {
+                projectileMotionRoutine = null;
+            }));
     }
 
-    private void LaunchProjectile(bool hitTarget)
+    private void LaunchProjectile()
     {
         if (currentProjectile == null)
             return;
 
         GameObject projectile = currentProjectile;
-        currentProjectile = null; // ´ÙÀ½ Show ¼ÒÈ¯°ú °ãÄ¡Áö ¾Êµµ·Ï Áï½Ã ÂüÁ¶ ÇØÁ¦
+        currentProjectile = null; // ë‹¤ìŒ Show ì†Œí™˜ê³¼ ê²¹ì¹˜ì§€ ì•Šë„ë¡ ì¦‰ì‹œ ì°¸ì¡° í•´ì œ
+
+        // ì•„ì§ ë‚™í•˜ ì¤‘ì´ì—ˆë‹¤ë©´(ì˜ˆ: Input íƒ€ì´ë°ë³´ë‹¤ ì¼ì° í´ë¦­) ë‚™í•˜ ì½”ë£¨í‹´ì„ ë°˜ë“œì‹œ ë©ˆì¶˜ë‹¤.
+        // ê·¸ë ‡ì§€ ì•Šìœ¼ë©´ ë‚™í•˜ ì½”ë£¨í‹´ê³¼ ì•„ë˜ ë°œì‚¬ ì½”ë£¨í‹´ì´ ê°™ì€ ì˜¤ë¸Œì íŠ¸ì˜ positionì„ ë™ì‹œì—
+        // ê±´ë“œë¦¬ë©´ì„œ ìœ„ì¹˜ê°€ íŠ€ëŠ” ë²„ê·¸ê°€ ìƒê¸´ë‹¤.
+        StopProjectileMotion();
 
         PlayCatapultThrowMotion();
 
         Vector3 startPos = projectile.transform.position;
-        Vector3 targetPos = targetPoint != null ? targetPoint.position : transform.position;
+        Vector3 targetPos = GetCurrentTargetPosition();
 
-        StartCoroutine(MoveRoutine(
+        projectileMotionRoutine = StartCoroutine(MoveRoutine(
             projectile,
             startPos,
             targetPos,
             flyDuration,
             onComplete: () =>
             {
-                if (hitTarget)
-                {
-                    // TODO: Á©¸® ºôµù ¸íÁß ¿¬Ãâ(Èçµé¸², ÆÄÆ¼Å¬, »ç¿îµå µî)ÀÌ ÇÊ¿äÇÏ¸é ¿©±â¼­ Ã³¸®
-                    OnProjectileHit();
-                }
+                projectileMotionRoutine = null;
 
-                // ³¯¾Æ°¡´Â ¸ğ¼ÇÀÌ ³¡³­ µÚ ÅºÈ¯ »èÁ¦
+                HandleEnemyHit();
+
+                // ë‚ ì•„ê°€ëŠ” ëª¨ì…˜ì´ ëë‚œ ë’¤ íƒ„í™˜ ì‚­ì œ
                 if (projectile != null)
                 {
                     Destroy(projectile);
@@ -261,9 +345,41 @@ public class Minigame_2_13 : MiniGameBase
     }
 
     /// <summary>
-    /// ¾Ö´Ï¸ŞÀÌ¼Ç Å¬¸³ ¾øÀÌ ÄÚµå·Î ±¸ÇöÇÏ´Â Åõ¼®±â ´øÁö±â ¸ğ¼Ç.
-    /// (¼±ÅÃ) PullBack °¢µµ -> Throw °¢µµ·Î ºü¸£°Ô ÈÖµÎ¸¥ µÚ -> Rest °¢µµ·Î º¹±Í.
-    /// catapultArmÀÌ ÁöÁ¤µÇÁö ¾Ê¾Ò´Ù¸é ¾Æ¹« µ¿ÀÛµµ ÇÏÁö ¾Ê´Â´Ù.
+    /// Miss íŒì • ì‹œ: íˆ¬ì„ê¸° ë°œì‚¬ ëª¨ì…˜ ì—†ì´, íƒ„í™˜ì´ ê·¸ ìë¦¬ì—ì„œ ì•„ë˜ë¡œ ë–¨ì–´ì§€ë‹¤ê°€ ì‚¬ë¼ì§„ë‹¤.
+    /// </summary>
+    private void DropProjectileOnMiss()
+    {
+        if (currentProjectile == null)
+            return;
+
+        GameObject projectile = currentProjectile;
+        currentProjectile = null; // ë‹¤ìŒ Show ì†Œí™˜ê³¼ ê²¹ì¹˜ì§€ ì•Šë„ë¡ ì¦‰ì‹œ ì°¸ì¡° í•´ì œ
+
+        StopProjectileMotion();
+
+        Vector3 startPos = projectile.transform.position;
+        Vector3 dropPos = startPos + (Vector3.down * missDropDistance);
+
+        projectileMotionRoutine = StartCoroutine(MoveRoutine(
+            projectile,
+            startPos,
+            dropPos,
+            missDropDuration,
+            onComplete: () =>
+            {
+                projectileMotionRoutine = null;
+
+                if (projectile != null)
+                {
+                    Destroy(projectile);
+                }
+            }));
+    }
+
+    /// <summary>
+    /// ì• ë‹ˆë©”ì´ì…˜ í´ë¦½ ì—†ì´ ì½”ë“œë¡œ êµ¬í˜„í•˜ëŠ” íˆ¬ì„ê¸° ë˜ì§€ê¸° ëª¨ì…˜.
+    /// (ì„ íƒ) PullBack ê°ë„ -> Throw ê°ë„ë¡œ ë¹ ë¥´ê²Œ íœ˜ë‘ë¥¸ ë’¤ -> Rest ê°ë„ë¡œ ë³µê·€.
+    /// catapultArmì´ ì§€ì •ë˜ì§€ ì•Šì•˜ë‹¤ë©´ ì•„ë¬´ ë™ì‘ë„ í•˜ì§€ ì•ŠëŠ”ë‹¤.
     /// </summary>
     private void PlayCatapultThrowMotion()
     {
@@ -281,7 +397,7 @@ public class Minigame_2_13 : MiniGameBase
         float pullBackAngle = catapultRestAngle + catapultPullBackOffset;
         float throwAngle = catapultRestAngle + catapultThrowOffset;
 
-        // 1) (¼±ÅÃ) ´øÁö±â Á÷Àü ¹ŞÄ§´ë ÂÊÀ¸·Î ´ç±â´Â ÁØºñ µ¿ÀÛ
+        // 1) (ì„ íƒ) ë˜ì§€ê¸° ì§ì „ ë°›ì¹¨ëŒ€ ìª½ìœ¼ë¡œ ë‹¹ê¸°ëŠ” ì¤€ë¹„ ë™ì‘
         if (catapultPullBackDuration > 0f &&
             !Mathf.Approximately(catapultPullBackOffset, 0f))
         {
@@ -295,7 +411,7 @@ public class Minigame_2_13 : MiniGameBase
             SetArmAngle(catapultRestAngle);
         }
 
-        // 2) ´øÁö´Â ¼ø°£: PullBack(or Rest) -> Throw °¢µµ·Î ºü¸£°Ô ÈÖµÎ¸§
+        // 2) ë˜ì§€ëŠ” ìˆœê°„: PullBack(or Rest) -> Throw ê°ë„ë¡œ ë¹ ë¥´ê²Œ íœ˜ë‘ë¦„
         float swingFrom = (catapultPullBackDuration > 0f &&
                             !Mathf.Approximately(catapultPullBackOffset, 0f))
             ? pullBackAngle
@@ -306,7 +422,7 @@ public class Minigame_2_13 : MiniGameBase
             throwAngle,
             catapultSwingDuration);
 
-        // 3) ´øÁø µÚ ´Ù½Ã Rest °¢µµ·Î º¹±Í
+        // 3) ë˜ì§„ ë’¤ ë‹¤ì‹œ Rest ê°ë„ë¡œ ë³µê·€
         yield return RotateArmRoutine(
             throwAngle,
             catapultRestAngle,
@@ -341,7 +457,7 @@ public class Minigame_2_13 : MiniGameBase
             elapsed += Time.deltaTime;
             float ratio = Mathf.Clamp01(elapsed / duration);
 
-            // ÇÊ¿äÇÏ¸é ¿©±â ratio¿¡ easing(ease-out µî)À» Àû¿ëÇØ ¼Õ¸ÀÀ» ´õÇÒ ¼ö ÀÖÀ½
+            // í•„ìš”í•˜ë©´ ì—¬ê¸° ratioì— easing(ease-out ë“±)ì„ ì ìš©í•´ ì†ë§›ì„ ë”í•  ìˆ˜ ìˆìŒ
             float angle = Mathf.LerpAngle(fromAngle, toAngle, ratio);
             SetArmAngle(angle);
 
@@ -351,16 +467,65 @@ public class Minigame_2_13 : MiniGameBase
         SetArmAngle(toAngle);
     }
 
-    /// <summary>
-    /// ÅºÈ¯ÀÌ targetPoint¿¡ ¸íÁßÇßÀ» ¶§ È£ÃâµÊ.
-    /// Á©¸® ºôµù ÂÊ ¿¬Ãâ(¿¹: Á©¸®ºí·Ï Èçµé¸²/ÆÄ±« ¾Ö´Ï¸ŞÀÌ¼Ç)À» ¿¬°áÇÏ°í ½Í´Ù¸é ¿©±â¸¦ overrideÇÏ°Å³ª
-    /// ÀÌº¥Æ®¸¦ Ãß°¡ÇØ¼­ »ç¿ë.
-    /// </summary>
-    protected virtual void OnProjectileHit()
+    private Vector3 GetCurrentTargetPosition()
     {
+        if (targetBlocks != null &&
+            currentTargetIndex < targetBlocks.Count &&
+            targetBlocks[currentTargetIndex] != null &&
+            targetBlocks[currentTargetIndex].point != null)
+        {
+            return targetBlocks[currentTargetIndex].point.position;
+        }
+
+        return transform.position; // íƒ€ê²Ÿì´ ì—†ì„ ë•Œì˜ ì•ˆì „í•œ ê¸°ë³¸ê°’
     }
 
-    // RigidBody¸¦ »ç¿ëÇÏÁö ¾Ê´Â ÁÂÇ¥ º¸°£ ÀÌµ¿ (³«ÇÏ / ¹ß»ç °ø¿ë)
+    /// <summary>
+    /// íƒ„í™˜ì´ í˜„ì¬ íƒ€ê²Ÿ ë¸”ë¡ì— ëª…ì¤‘í–ˆì„ ë•Œ í˜¸ì¶œë¨.
+    /// 1íšŒ ëª…ì¤‘ -> Enemy Stage2, 2íšŒ ëª…ì¤‘ -> Enemy Stage3 + ë‹¤ìŒ íƒ€ê²Ÿìœ¼ë¡œ ì´ë™.
+    /// </summary>
+    private void HandleEnemyHit()
+    {
+        if (targetBlocks == null || currentTargetIndex >= targetBlocks.Count)
+            return;
+
+        JellyEnemyTarget target = targetBlocks[currentTargetIndex];
+        currentHitStage++;
+
+        if (currentHitStage == 1)
+        {
+            SetEnemySprite(target, enemySpriteStage2);
+        }
+        else if (currentHitStage >= 2)
+        {
+            SetEnemySprite(target, enemySpriteStage3);
+            MoveToNextTarget();
+        }
+    }
+
+    private void MoveToNextTarget()
+    {
+        currentTargetIndex++;
+        currentHitStage = 0;
+
+        if (targetBlocks == null || currentTargetIndex >= targetBlocks.Count)
+        {
+            // ëª¨ë“  Enemy ë¸”ë¡ ì²˜ë¦¬ ì™„ë£Œ -> ë¯¸ë‹ˆê²Œì„ ì„±ê³µ
+            Success();
+        }
+
+        // TODO: ë‹¤ìŒ íƒ€ê²Ÿìœ¼ë¡œ ë„˜ì–´ê°ˆ ë•Œ ì¹´ë©”ë¼ ì´ë™/ì•ˆë‚´ ì—°ì¶œì´ í•„ìš”í•˜ë©´ ì—¬ê¸°ì„œ ì²˜ë¦¬
+    }
+
+    private void SetEnemySprite(JellyEnemyTarget target, Sprite sprite)
+    {
+        if (target == null || target.enemyRenderer == null || sprite == null)
+            return;
+
+        target.enemyRenderer.sprite = sprite;
+    }
+
+    // RigidBodyë¥¼ ì‚¬ìš©í•˜ì§€ ì•ŠëŠ” ì¢Œí‘œ ë³´ê°„ ì´ë™ (ë‚™í•˜ / ë°œì‚¬ ê³µìš©)
     private IEnumerator MoveRoutine(
         GameObject target,
         Vector3 from,
@@ -379,7 +544,7 @@ public class Minigame_2_13 : MiniGameBase
             elapsed += Time.deltaTime;
             float ratio = Mathf.Clamp01(elapsed / duration);
 
-            // ÇÊ¿äÇÏ´Ù¸é ¿©±â¼­ ratio¿¡ easing / Æ÷¹°¼± °î¼±À» Àû¿ëÇØ ±ËÀûÀ» ´ÙµëÀ» ¼ö ÀÖÀ½
+            // í•„ìš”í•˜ë‹¤ë©´ ì—¬ê¸°ì„œ ratioì— easing / í¬ë¬¼ì„  ê³¡ì„ ì„ ì ìš©í•´ ê¶¤ì ì„ ë‹¤ë“¬ì„ ìˆ˜ ìˆìŒ
             target.transform.position = Vector3.Lerp(from, to, ratio);
 
             yield return null;
