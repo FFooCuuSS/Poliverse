@@ -1495,7 +1495,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2a0b1352e8a37c49b7e0d7f78c10c25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  guideText: {fileID: 0}
+  guideText: {fileID: 456896879}
   stageText: {fileID: 1071107811}
   timerSlider: {fileID: 497392569}
   blockInputPanel: {fileID: 234986921}
