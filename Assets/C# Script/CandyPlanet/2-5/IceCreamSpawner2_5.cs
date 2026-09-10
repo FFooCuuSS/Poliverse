@@ -5,11 +5,12 @@ using UnityEngine;
 public class IceCreamSpawner2_5 : MonoBehaviour
 {
     [SerializeField] private GameObject iceCreamPrefab;
-
     [SerializeField] private Sprite[] iceCreamSprites;
 
     [SerializeField] private Transform startPoint;
     [SerializeField] private Transform rightSidePoint;
+
+    [SerializeField] private List<IceCreamPipe> pipes;
 
     public IceCream2_5 SpawnIceCream()
     {
@@ -37,6 +38,7 @@ public class IceCreamSpawner2_5 : MonoBehaviour
             return null;
         }
 
+        iceCream.SetPipes(pipes);
         iceCream.SetFlyTarget(rightSidePoint.position);
 
         return iceCream;

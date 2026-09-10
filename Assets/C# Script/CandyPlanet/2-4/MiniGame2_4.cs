@@ -20,6 +20,7 @@ public class MiniGame2_4 : MiniGameBase
     [SerializeField] private Kettle2_4 kettle;
 
     [SerializeField] private GameObject liquidPrefab;
+    [SerializeField] private Sprite[] fillingSprites;
 
     private Bottle2_4 currentBottle;
 
@@ -72,13 +73,50 @@ public class MiniGame2_4 : MiniGameBase
         {
             case JudgementResult.Perfect:
             case JudgementResult.Good:
-                GameObject liquid = Instantiate(liquidPrefab, kettle.PourPoint.position, Quaternion.identity);
 
-                currentBottle.FillBottle(liquid);
+                if (currentBottle == null)
+                {
+                    Debug.LogWarning("현재 채울 보틀이 없습니다.");
+                    return;
+                }
+
+                CreateRandomFilling();
+
                 break;
 
             case JudgementResult.Miss:
+
                 break;
+        }
+    }
+
+    private void CreateRandomFilling()
+    {
+        if (liquidPrefab == null || fillingSprites == null || fillingSprites.Length == 0)
+        {
+            Debug.LogError("Liquid Prefab 또는 Filling Sprite가 비어있습니다.");
+            return;
+        }
+
+        int randomIndex = Random.Range(0, fillingSprites.Length);
+        Sprite selectedSprite = fillingSprites[randomIndex];
+
+        GameObject liquid = Instantiate(
+            liquidPrefab,
+            kettle.PourPoint.position,
+            Quaternion.identity
+        );
+
+        SpriteRenderer liquidRenderer = liquid.GetComponent<SpriteRenderer>();
+
+        if (liquidRenderer != null)
+        {
+            liquidRenderer.sprite = selectedSprite;
+            currentBottle.FillBottle(liquid);
+        }
+        else
+        {
+            Destroy(liquid);
         }
     }
 }
