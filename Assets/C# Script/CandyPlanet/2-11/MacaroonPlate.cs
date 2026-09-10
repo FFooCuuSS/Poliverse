@@ -14,15 +14,20 @@ public class MacaroonPlate : MonoBehaviour
     {
         stackedMacarons.Add(macaron);
 
-        int order = stackedMacarons.Count;
+        int count = stackedMacarons.Count;
 
         macaron.transform.SetParent(transform);
-        macaron.transform.localPosition = new Vector3(0, yOffset * (order - 1), 0);
+
+        macaron.transform.localPosition = new Vector3(0, yOffset * (count - 1), 0);
 
         SpriteRenderer sr = macaron.GetComponent<SpriteRenderer>();
 
-        sr.sortingLayerName = "Macaron";   // 마카롱 레이어
-        sr.sortingOrder = order;           // 쌓인 순서대로 증가
-    }
 
+        if (sr != null)
+        {
+            sr.sortingLayerName = "Macaron";
+
+            sr.sortingOrder = count;
+        }
+    }
 }

@@ -125,7 +125,6 @@ public class Fork_2_11 : MonoBehaviour
             Debug.Log("마카롱 획득");
 
             Macaron mac = target.GetComponent<Macaron>();
-
             mac.isStacked = true;
 
             target.transform.SetParent(transform);
@@ -134,21 +133,21 @@ public class Fork_2_11 : MonoBehaviour
 
             for (int i = 0; i < skeweredMacarons.Count; i++)
             {
-                skeweredMacarons[i].transform.localPosition =
-                    new Vector3(
-                        0,
-                        stackStartOffsetY + i * stackSpacing,
-                        0
-                    );
+                skeweredMacarons[i].transform.localPosition = new Vector3(
+                    0,
+                    stackStartOffsetY + (i * stackSpacing),
+                    0
+                );
+
+                SpriteRenderer sr = skeweredMacarons[i].GetComponent<SpriteRenderer>();
+                if (sr != null)
+                {
+                    sr.sortingLayerName = "Macaron";
+                    sr.sortingOrder = 50 + i;
+                }
             }
 
             minigame.MacaronSuccess();
-        }
-        else
-        {
-            Debug.Log("마카롱 실패");
-
-            minigame.MacaronFail();
         }
 
         // 다시 원래 높이로 올라가기

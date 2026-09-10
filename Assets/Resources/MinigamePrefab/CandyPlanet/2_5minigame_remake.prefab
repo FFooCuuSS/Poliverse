@@ -57,8 +57,8 @@ Transform:
   m_GameObject: {fileID: 3206111034141630215}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 9.200001, y: 6.0885997, z: 0.13481067}
-  m_LocalScale: {x: 2.7943, y: 2.7943, z: 2.7943}
+  m_LocalPosition: {x: 8.86, y: 6.04, z: 0.13481067}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8142889111422902313}
@@ -103,8 +103,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_SortingOrder: 1
+  m_Sprite: {fileID: 21300000, guid: e145be5863a38784d82d653708aa0f05, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -171,6 +171,10 @@ MonoBehaviour:
   - {fileID: 21300000, guid: f96691c9b89017648a052e0a42e5625d, type: 3}
   startPoint: {fileID: 7868899214928842730}
   rightSidePoint: {fileID: 8189897531826538964}
+  pipes:
+  - {fileID: 8166474221271182560}
+  - {fileID: 7852235533697534343}
+  - {fileID: 3934127595987802603}
 --- !u!1 &3769110326636698690
 GameObject:
   m_ObjectHideFlags: 0
@@ -220,6 +224,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f796fa67483dba49887c3275ab68de5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 0
   useRhythmJudgementScore: 1
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
@@ -348,6 +353,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7926111995074222167}
   - component: {fileID: 6670243217771067112}
+  - component: {fileID: 3934127595987802603}
   m_Layer: 0
   m_Name: IceCreamPipe3
   m_TagString: Untagged
@@ -364,8 +370,8 @@ Transform:
   m_GameObject: {fileID: 5462131932956007914}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.61, y: 6.58, z: 0.13481067}
-  m_LocalScale: {x: 5.106197, y: 1.7953146, z: 1}
+  m_LocalPosition: {x: 5.23, y: 6.15, z: 0.13481067}
+  m_LocalScale: {x: 0.5, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8142889111422902313}
@@ -410,8 +416,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_SortingOrder: 1
+  m_Sprite: {fileID: 21300000, guid: 290a4cfe3b0900b4c8382c0d2bbe4511, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -422,6 +428,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &3934127595987802603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5462131932956007914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d643d63a055e504e98dac65c3509028, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  highlightedSprite: {fileID: 21300000, guid: 88c0031588000424abe109997e0bf35b, type: 3}
 --- !u!1 &6117916677204509968
 GameObject:
   m_ObjectHideFlags: 0
@@ -432,6 +451,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7868899214928842730}
   - component: {fileID: 7098539009423381723}
+  - component: {fileID: 8166474221271182560}
   m_Layer: 0
   m_Name: IceCreamPipe1
   m_TagString: Untagged
@@ -448,8 +468,8 @@ Transform:
   m_GameObject: {fileID: 6117916677204509968}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.8968, y: 6.58, z: 0.13481067}
-  m_LocalScale: {x: 5.106197, y: 1.7953146, z: 1}
+  m_LocalPosition: {x: -3.9, y: 6.15, z: 0.13481067}
+  m_LocalScale: {x: 0.6, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8142889111422902313}
@@ -494,8 +514,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_SortingOrder: 1
+  m_Sprite: {fileID: 21300000, guid: 290a4cfe3b0900b4c8382c0d2bbe4511, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -506,6 +526,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &8166474221271182560
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6117916677204509968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d643d63a055e504e98dac65c3509028, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  highlightedSprite: {fileID: 21300000, guid: 88c0031588000424abe109997e0bf35b, type: 3}
 --- !u!1 &7115544719909223899
 GameObject:
   m_ObjectHideFlags: 0
@@ -516,6 +549,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8033721436648250349}
   - component: {fileID: 2165074293370331942}
+  - component: {fileID: 7852235533697534343}
   m_Layer: 0
   m_Name: IceCreamPipe2
   m_TagString: Untagged
@@ -532,8 +566,8 @@ Transform:
   m_GameObject: {fileID: 7115544719909223899}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.01, y: 6.58, z: 0.13481067}
-  m_LocalScale: {x: 5.106197, y: 1.7953146, z: 1}
+  m_LocalPosition: {x: 0.87, y: 6.15, z: 0.13481067}
+  m_LocalScale: {x: 0.6, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8142889111422902313}
@@ -578,8 +612,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_SortingOrder: 1
+  m_Sprite: {fileID: 21300000, guid: 290a4cfe3b0900b4c8382c0d2bbe4511, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -590,6 +624,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &7852235533697534343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7115544719909223899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d643d63a055e504e98dac65c3509028, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  highlightedSprite: {fileID: 21300000, guid: 88c0031588000424abe109997e0bf35b, type: 3}
 --- !u!1 &7359363044399607910
 GameObject:
   m_ObjectHideFlags: 0
