@@ -1529,7 +1529,10 @@ MonoBehaviour:
   preEndGap: 0.5
   blackPanelImage: {fileID: 1586313778}
   blackFadeDuration: 0.05
-  stageBGM: {fileID: 8300000, guid: 41813b86be5c7794b8867b37108cf986, type: 3}
+  stageBGMs:
+  - {fileID: 8300000, guid: 41813b86be5c7794b8867b37108cf986, type: 3}
+  - {fileID: 8300000, guid: b44fedc29c7f42742a3a98e44cc72742, type: 3}
+  - {fileID: 8300000, guid: ada3f992a6d6f9e49b2110c1280c9584, type: 3}
   loopBGM: 1
   finalObject: {fileID: 0}
   finalBgmTargetVolume: 0.5

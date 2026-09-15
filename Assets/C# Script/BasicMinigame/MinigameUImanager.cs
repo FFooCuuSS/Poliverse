@@ -50,7 +50,7 @@ public class MinigameUIManager : MonoBehaviour
     [SerializeField] private float blackFadeDuration = 0.08f;
 
     [Header("NEW MODE - Single BGM")]
-    [SerializeField] private AudioClip stageBGM;
+    [SerializeField] private AudioClip[] stageBGMs;
     [SerializeField] private bool loopBGM = true;
 
     [Header("NEW MODE - Final Event")]
@@ -287,15 +287,19 @@ public class MinigameUIManager : MonoBehaviour
             Debug.LogWarning("[MinigameUIManager] AudioSource is NULL");
             return;
         }
+        int idx = selectedPlanet - 1;
+        AudioClip clip = (stageBGMs != null && idx >= 0 && idx < stageBGMs.Length)
+            ? stageBGMs[idx]
+            : null;
 
-        if (stageBGM == null)
+        if (clip == null)
         {
             Debug.LogWarning("[MinigameUIManager] stageBGM is NULL");
             return;
         }
 
         audioSource.Stop();
-        audioSource.clip = stageBGM;
+        audioSource.clip = clip;
         audioSource.loop = loopBGM;
 
         bgmStartDspTime = AudioSettings.dspTime + BgmStartDelay;
