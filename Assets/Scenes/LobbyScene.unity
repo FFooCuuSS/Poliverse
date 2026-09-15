@@ -2051,6 +2051,7 @@ MonoBehaviour:
   leftPlanet: {fileID: 862331695}
   rightPlanet: {fileID: 578775902}
   practiceCanvas: {fileID: 1003403302}
+  planetList: {fileID: 1033379178}
 --- !u!1 &489401976
 GameObject:
   m_ObjectHideFlags: 0
