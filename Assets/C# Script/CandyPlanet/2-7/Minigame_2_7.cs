@@ -35,10 +35,6 @@ public class Minigame_2_7 : MiniGameBase
     private float lastClickTime = -999f; // 선입력 버퍼용, 가장 최근 클릭 시각
     private bool isFirstTouch = true; // 게임 시작 후 첫 접촉인지 (여유시간 부여용)
 
-    private void Start()
-    {
-        StartGame();
-    }
 
     public override void StartGame()
     {

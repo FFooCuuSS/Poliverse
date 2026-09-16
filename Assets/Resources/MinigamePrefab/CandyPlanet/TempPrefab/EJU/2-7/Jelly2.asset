@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Jelly2
   m_EditorClassIdentifier: 
   moveSpeed: 3
-  bounceForce: 7
+  bounceForce: 8
   xStep: 12.5
   waveAmount: 0
   waveSpeed: 0

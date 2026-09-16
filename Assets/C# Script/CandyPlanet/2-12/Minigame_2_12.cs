@@ -1,27 +1,34 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using DG.Tweening;
 
 /// <summary>
-/// CSV 타임라인 (6초 고정):
-///   0~2s : "Show" x4     -> 초코링 4개를 ringLaneOrder 순서대로 스폰. 스폰되자마자 일정 속도로
-///                           계속 낙하하다가 화면 밖 트리거(ChocoRingOffscreenCleanup)에 닿으면 자동 삭제됨.
-///                           (정지 표시가 아니라 "빠르게 흘러 나가는" 프리뷰 연출)
-///   2s   : "CameraDown"  -> 카메라가 아래로 이동, 완료되면 접시 입력 활성화
-///   ~4~6s: "Cue" x4      -> ringLaneOrder 순서 그대로 새 초코링을 catchSpawnRow에서 스폰해 그릇으로 낙하시킴.
-///                           반드시 대응하는 "Input" 이벤트 시각보다 catchFallDuration만큼 "먼저" 와야 함.
-///                           (예: Input이 4.5초면 Cue는 4.5 - catchFallDuration 초에 위치)
-///                           이렇게 해야 낙하가 끝나 그릇에 도착하는 시점 == RhythmManager가 실제로
-///                           판정하는 Input 시각이 되어 시각적 낙하와 타이밍 판정이 정확히 일치함.
-///   4~6s : "Input" x4    -> Minigame_2_12는 이 이벤트에 별도 반응하지 않음 (스폰은 위 Cue가 담당).
-///                           RhythmManager가 이 시각을 기준으로 실제 플레이어 입력 타이밍(Perfect/Good/Miss)을
-///                           판정하고, 입력이 없으면 자동 Miss 처리함.
-///                           실제 "받았다"는 신호(OnPlayerInput)는 접시가 해당 레인에 있을 때
-///                           트리거 충돌이 발생해야만 보냄 -> 레인이 틀리면 판정 윈도우가 닫혀 자동 Miss.
-///   (CSV에 "CameraUp"을 안 넣어도 됨 - 마지막 캐치가 끝나면 코드가 자동으로 카메라를 원위치로 되돌린 뒤 결과를 판정함)
+/// CSV 타임라인 (세트 단위로 반복 가능):
+///   Show x4      -> 초코링 4개를 해당 세트의 lanes 순서대로 스폰. 스폰되자마자 일정 속도로
+///                   계속 낙하하다가 화면 밖 트리거(ChocoRingOffscreenCleanup)에 닿으면 자동 삭제됨.
+///                   (정지 표시가 아니라 "빠르게 흘러 나가는" 프리뷰 연출)
+///   CameraDown   -> 카메라가 아래로 이동, 완료되면 접시 입력 활성화
+///   Cue x4       -> 해당 세트의 lanes 순서 그대로 새 초코링을 catchSpawnRow에서 스폰해 그릇으로 낙하시킴.
+///                   반드시 대응하는 "Input" 이벤트 시각보다 catchFallDuration만큼 "먼저" 와야 함.
+///                   (예: Input이 4.5초면 Cue는 4.5 - catchFallDuration 초에 위치)
+///                   이렇게 해야 낙하가 끝나 그릇에 도착하는 시점 == RhythmManager가 실제로
+///                   판정하는 Input 시각이 되어 시각적 낙하와 타이밍 판정이 정확히 일치함.
+///   Input x4     -> Minigame_2_12는 이 이벤트에 별도 반응하지 않음 (스폰은 위 Cue가 담당).
+///                   RhythmManager가 이 시각을 기준으로 실제 플레이어 입력 타이밍(Perfect/Good/Miss)을
+///                   판정하고, 입력이 없으면 자동 Miss 처리함.
+///                   실제 "받았다"는 신호(OnPlayerInput)는 접시가 해당 레인에 있을 때
+///                   트리거 충돌이 발생해야만 보냄 -> 레인이 틀리면 판정 윈도우가 닫혀 자동 Miss.
+///   (마지막 세트가 끝난 뒤엔 CSV에 "CameraUp"을 안 넣어도 됨 - 마지막 캐치가 끝나면 코드가
+///    자동으로 카메라를 원위치로 되돌린 뒤 결과를 판정함)
+///
+/// 여러 세트를 이어붙이고 싶으면(예: 0~6초 세트, 7~13초 세트) ringLaneOrderSets 리스트에
+/// 세트를 추가하면 됨. 세트마다 서로 다른 레인 순서를 줄 수 있고, CSV의 Show/Cue/Input
+/// 총 개수는 반드시 모든 세트의 lanes 길이 합과 일치해야 함.
+///
 /// CSV에는 시간과 액션 문자열만 있으면 되고, 레인 정보는 CSV에 넣지 않고
-/// ringLaneOrder 배열(인스펙터)로 미니게임 안에서 관리합니다.
+/// ringLaneOrderSets(인스펙터)로 미니게임 안에서 관리합니다.
 /// laneAnchors는 PlateController(Bowl)에 있는 걸 plate.LaneAnchors로 그대로 참조합니다.
 /// </summary>
 public class Minigame_2_12 : MiniGameBase
@@ -30,20 +37,35 @@ public class Minigame_2_12 : MiniGameBase
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.5f;
     public override float hitWindowOverride => 1f;
-    protected override float TimerDuration => 6f;
+    protected override float TimerDuration => timerDurationOverride;
     protected override string MinigameExplain => "떨어지는 순서를 기억하고 접시로 받으세요!";
 
-    [Header("레인 / 초코링 공통")]
-    [Tooltip("초코링이 표시/낙하되는 순서. 각 값은 PlateController.LaneAnchors의 인덱스 (0 ~ laneCount-1)")]
-    [SerializeField] private int[] ringLaneOrder = new int[4];
+    [System.Serializable]
+    public class RingLaneOrderSet
+    {
+        [Tooltip("이 세트에서 초코링이 표시/낙하되는 레인 순서. 각 값은 PlateController.LaneAnchors의 인덱스 (0 ~ laneCount-1)")]
+        public int[] lanes = new int[4];
+    }
+
+    [Header("레인 / 초코링 공통 (세트별)")]
+    [Tooltip("세트(반복)별 레인 순서. 리스트에 세트를 추가한 만큼 CSV의 Show/Cue/Input도 그만큼 들어와야 함. " +
+             "예: 2세트면 이 리스트에 2개 항목, 각 항목이 4개짜리 lanes 배열")]
+    [SerializeField]
+    private List<RingLaneOrderSet> ringLaneOrderSets =
+        new List<RingLaneOrderSet> { new RingLaneOrderSet() };
+
     [SerializeField] private GameObject ringPrefab;
 
-    [Header("프리뷰 낙하 (Show, 0~2초)")]
+    [Header("타이머")]
+    [Tooltip("CSV 전체 길이 + 마지막 캐치 낙하/카메라 복귀 여유시간. CSV를 늘릴 때마다 같이 맞춰줘야 함")]
+    [SerializeField] private float timerDurationOverride = 15f;
+
+    [Header("프리뷰 낙하 (Show)")]
     [SerializeField] private Transform spawnRow; // Show 단계 스폰 위치 (화면 상단)
     [Tooltip("Show 단계에서 화면 밖으로 흘러나가는 속도 (초당 이동 거리)")]
     [SerializeField] private float previewFallSpeed = 8f;
 
-    [Header("캐치 낙하 (Input, 4~6초)")]
+    [Header("캐치 낙하 (Input)")]
     [SerializeField] private Transform catchSpawnRow; // 카메라 이동 완료 후 기준, 캐치용 링이 새로 스폰되는 상단 위치
     [SerializeField] private Transform bowlRow;        // 낙하 도착 지점 (그릇 위치)
     [Tooltip("Input 이벤트 이후 실제 캐치 낙하 애니메이션 시간 - Show 단계와 무관하게 자유롭게 튜닝")]
@@ -66,14 +88,30 @@ public class Minigame_2_12 : MiniGameBase
     private bool resultPending; // 마지막 캐치 완료 후 카메라업 애니메이션이 진행 중인지 (중복 트리거 방지)
     public int missCount = 0;
 
-    private int shownCount;  // Show 이벤트 처리 횟수
-    private int dropCount;   // Input 이벤트 처리 횟수
+    private int shownCount;  // Show 이벤트 처리 횟수 (전체 세트 누적)
+    private int dropCount;   // Input(Cue) 이벤트 처리 횟수 (전체 세트 누적)
     private int fallsInProgress; // 아직 캐치 낙하 애니메이션이 끝나지 않은 링 개수
+
+    // 모든 세트의 lanes 길이 합 = CSV에 기대되는 Show/Cue 총 개수
+    private int TotalRingCount => ringLaneOrderSets.Sum(s => s.lanes.Length);
 
     protected override void Awake()
     {
         base.Awake();
         Instance = this;
+
+        if (cameraTransform == null)
+        {
+            if (Camera.main != null)
+            {
+                cameraTransform = Camera.main.transform;
+            }
+            else
+            {
+                Debug.LogError($"[Minigame_2_12] cameraTransform이 비어있고 Camera.main도 찾을 수 없습니다. " +
+                               $"씬에 MainCamera 태그가 붙은 카메라가 있는지 확인하세요.");
+            }
+        }
     }
 
     protected override void OnDestroy()
@@ -161,16 +199,38 @@ public class Minigame_2_12 : MiniGameBase
         return laneAnchors[lane];
     }
 
+    /// <summary>
+    /// 전체 누적 인덱스(shownCount/dropCount)를 받아서, 그게 몇 번째 세트의 몇 번째 레인인지 찾아 반환한다.
+    /// 예: ringLaneOrderSets = [ [0,1,2,3], [3,0,2,1] ] 이고 index=4 라면
+    ///     1세트(길이4)를 지나 2세트의 0번째(lane=3)를 반환.
+    /// </summary>
+    private int GetLaneForIndex(int index)
+    {
+        int remaining = index;
+
+        foreach (var set in ringLaneOrderSets)
+        {
+            if (remaining < set.lanes.Length)
+                return set.lanes[remaining];
+
+            remaining -= set.lanes.Length;
+        }
+
+        Debug.LogError($"[Minigame_2_12] 인덱스({index})가 전체 세트 길이({TotalRingCount})를 초과함. " +
+                        $"CSV의 Show/Cue 개수와 ringLaneOrderSets 총 길이가 맞는지 확인하세요.");
+        return 0;
+    }
+
     /// <summary>Show 이벤트: 순서대로 다음 프리뷰 링을 스폰, 스폰 즉시 일정 속도로 계속 낙하시킴</summary>
     private void SpawnPreviewRing()
     {
-        if (shownCount >= ringLaneOrder.Length)
+        if (shownCount >= TotalRingCount)
         {
-            Debug.LogWarning("[Minigame_2_12] ringLaneOrder 길이보다 Show 이벤트가 더 많이 들어옴");
+            Debug.LogWarning($"[Minigame_2_12] 예상된 Show 이벤트 수({TotalRingCount})보다 더 많이 들어옴");
             return;
         }
 
-        int lane = ringLaneOrder[shownCount];
+        int lane = GetLaneForIndex(shownCount);
         Transform anchor = GetLaneAnchor(lane);
         if (anchor == null) { shownCount++; return; }
 
@@ -223,19 +283,19 @@ public class Minigame_2_12 : MiniGameBase
     }
 
     /// <summary>
-    /// Cue 이벤트(캐치 스폰 큐): ringLaneOrder 순서 그대로 "새로운" 캐치용 링을 catchSpawnRow에서 스폰해서
+    /// Cue 이벤트(캐치 스폰 큐): 해당 세트의 lanes 순서 그대로 "새로운" 캐치용 링을 catchSpawnRow에서 스폰해서
     /// bowlRow까지 catchFallDuration 동안 낙하시킴. Show 단계 프리뷰와는 완전히 다른 오브젝트/시간이고,
     /// 대응하는 Input 이벤트보다 catchFallDuration만큼 먼저 호출되도록 CSV에서 타이밍을 맞춰야 함.
     /// </summary>
     private void DropCatchRing()
     {
-        if (dropCount >= ringLaneOrder.Length)
+        if (dropCount >= TotalRingCount)
         {
-            Debug.LogWarning("[Minigame_2_12] ringLaneOrder 길이보다 Cue 이벤트가 더 많이 들어옴");
+            Debug.LogWarning($"[Minigame_2_12] 예상된 Cue 이벤트 수({TotalRingCount})보다 더 많이 들어옴");
             return;
         }
 
-        int lane = ringLaneOrder[dropCount];
+        int lane = GetLaneForIndex(dropCount);
         Transform anchor = GetLaneAnchor(lane);
         if (anchor == null) { dropCount++; return; }
 
@@ -282,7 +342,7 @@ public class Minigame_2_12 : MiniGameBase
     private void OnFallFinished()
     {
         fallsInProgress--;
-        if (fallsInProgress <= 0 && dropCount >= ringLaneOrder.Length && !resultPending)
+        if (fallsInProgress <= 0 && dropCount >= TotalRingCount && !resultPending)
         {
             resultPending = true;
             Debug.Log("[Minigame_2_12] 마지막 캐치 완료 - 카메라 복귀 연출 후 결과 판정");

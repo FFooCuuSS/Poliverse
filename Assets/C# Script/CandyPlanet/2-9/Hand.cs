@@ -2,59 +2,65 @@
 
 public class Hand : MonoBehaviour
 {
-    public float downY = 2f;
-    public float upY = 5f;
-    public float speed = 10f;
+    [Header("Sprite")]
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private Sprite openSprite;
+    [SerializeField] private Sprite grabSprite;
+
+    [Header("Timing")]
+    public float grabDuration = 0.2f; // grab 스프라이트로 유지되는 시간
+
+    [Header("Grab 판정용 콜라이더 (평소 비활성화 상태로 둘 것)")]
+    [SerializeField] private Collider2D grabCollider;
 
     [Tooltip("클릭 시점을 리듬 판정 입력으로 전달할 미니게임")]
     [SerializeField] private MiniGameBase minigame;
 
-    private bool isMoving = false;
-    private bool isDown = false;
+    private bool isGrabbing = false;
+    private float timer = 0f;
 
     private Cloud grabbedCloud;
 
+    private float lastClickTime = -1f;
+    void Awake()
+    {
+        grabCollider.enabled = false; // 시작 시 항상 비활성화 상태 보장
+    }
+
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && !isMoving)
+        if (Input.GetMouseButtonDown(0) && !isGrabbing)
         {
-            isMoving = true;
-            isDown = true;
+            isGrabbing = true;
+            timer = 0f;
 
-            // 클릭 시점 = 판정 입력 시점. RhythmManager가 CSV의 Input 타이밍과 비교해 Perfect/Good/Miss를 매긴다.
+            spriteRenderer.sprite = grabSprite;
+            grabCollider.enabled = true; // 이미 겹쳐있는 구름과 OnTriggerEnter2D 발동
+
+             // --- 클릭 시간 측정 디버그 ---
+            float now = Time.time;
+            float interval = lastClickTime < 0 ? 0f : now - lastClickTime;
+            Debug.Log($"[Hand] 클릭 시각: {now:F3}s / 이전 클릭과 간격: {interval:F3}s");
+            lastClickTime = now;
+            // ---------------------------
+
             if (minigame != null)
             {
                 minigame.OnPlayerInput();
             }
         }
 
-        if (isMoving)
+        if (isGrabbing)
         {
-            Move();
-        }
-    }
+            timer += Time.deltaTime;
 
-    void Move()
-    {
-        float targetY = isDown ? downY : upY;
-
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            new Vector3(transform.position.x, targetY, 0),
-            speed * Time.deltaTime
-        );
-
-        if (Mathf.Abs(transform.position.y - targetY) < 0.01f)
-        {
-            if (isDown)
+            if (timer >= grabDuration)
             {
-                isDown = false; // 다시 올라감
-            }
-            else
-            {
-                isMoving = false;
+                isGrabbing = false;
 
-                // 올라온 후 처리
+                spriteRenderer.sprite = openSprite;
+                grabCollider.enabled = false;
+
                 if (grabbedCloud != null)
                 {
                     grabbedCloud.ReleaseAndBreak();
@@ -66,8 +72,6 @@ public class Hand : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D col)
     {
-        if (!isDown) return;
-
         Cloud cloud = col.GetComponent<Cloud>();
 
         if (cloud != null && grabbedCloud == null)

@@ -201,11 +201,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94f9644ae13c9cd4c871aff074bb6f2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 0
   useRhythmJudgementScore: 1
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
-  ringLaneOrder: 00000000020000000100000003000000
+  ringLaneOrderSets:
+  - lanes: 00000000010000000200000003000000
+  - lanes: 01000000020000000000000003000000
   ringPrefab: {fileID: 1256727370179898676, guid: af4f77bc6bb81504a937fb14b7038038, type: 3}
+  timerDurationOverride: 15.5
   spawnRow: {fileID: 41352011754530217}
   previewFallSpeed: 8
   catchSpawnRow: {fileID: 720503971896569123}

@@ -1,27 +1,31 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Minigame_2_9 : MiniGameBase
 {
-    // ÆÇÁ¤ ¹üÀ§ ¿À¹ö¶óÀÌµå
+    // íŒì • ë²”ìœ„ ì˜¤ë²„ë¼ì´ë“œ
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.5f;
     public override float hitWindowOverride => 1f;
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "½×¾Æ¶ó!";
+    protected override string MinigameExplain => "ìŒ“ì•„ë¼!";
 
     private bool ended;
     private int totalCount = 5;
 
     [SerializeField] private CloudSpawner cloudSpawner;
 
+    private void Start()
+    {
+        StartGame();
+    }
     public override void StartGame()
     {
         base.StartGame();
         ended = false;
-        // Ãß°¡ ÃÊ±âÈ­
-        // ¿¹: instructionText.text = MinigameExplain;
+        // ì¶”ê°€ ì´ˆê¸°í™”
+        // ì˜ˆ: instructionText.text = MinigameExplain;
     }
 
     public void Succeed()
@@ -36,26 +40,30 @@ public class Minigame_2_9 : MiniGameBase
     public override void OnRhythmEvent(string action)
     {
         if (ended) return;
-        Debug.Log($"{gameObject.name} ¸®µë¸Ş¼¼Áö: {action}");
+        Debug.Log($"{gameObject.name} ë¦¬ë“¬ë©”ì„¸ì§€: {action}");
         action = action.Trim();
 
         if (action == "Show")
         {
-            // CSV Â÷Æ®ÀÇ Show Å¸ÀÌ¹Ö = ±¸¸§ ÇÑ Ä­ ÀÌµ¿ + ÇÊ¿ä ½Ã ½Å±Ô ½ºÆù
+            // ì´ë™ë§Œ
             cloudSpawner.OnBeatEvent();
+        }
+
+        if (action == "Spawn")
+        {
+            // ìƒì„±ë§Œ â€” CSVì—ì„œ ì§€ì •í•œ ì‹œì ì— êµ¬ë¦„ ë“±ì¥
+            cloudSpawner.SpawnCloudManual();
         }
 
         if (action == "Input")
         {
-            // ½ÇÁ¦ ÆÇÁ¤Àº Hand.csÀÇ Å¬¸¯ ½ÃÁ¡¿¡¼­ OnPlayerInput()À¸·Î RhythmManager¿¡ Àü´ŞµÇ°í,
-            // °á°ú´Â OnJudgement(JudgementResult)·Î µ¹¾Æ¿Â´Ù.
-            // ¿©±â¼­´Â º°µµ Ã³¸® ¾øÀ½ (ÇÊ¿äÇØÁö¸é ¾È³» ¿¬Ãâ µî Ãß°¡)
+            // ê¸°ì¡´ê³¼ ë™ì¼: íŒì •ì€ Hand.cs â†’ RhythmManager â†’ OnJudgement ê²½ë¡œ
         }
     }
 
     public override void OnPlayerInput(string action = null)
     {
-        // ÀÔ·Â Àá±İ »óÅÂ¸é ¹«½Ã
+        // ì…ë ¥ ì ê¸ˆ ìƒíƒœë©´ ë¬´ì‹œ
         if (IsInputLocked) return;
         base.OnPlayerInput(action);
     }
@@ -69,12 +77,12 @@ public class Minigame_2_9 : MiniGameBase
         switch (judgement)
         {
             case JudgementResult.Miss:
-                // ÇÊ¿ä ½Ã: PlaySFX("Miss");
+                // í•„ìš” ì‹œ: PlaySFX("Miss");
                 break;
 
             case JudgementResult.Good:
             case JudgementResult.Perfect:
-                // ÇÊ¿ä ½Ã: PlaySFX("Hit");
+                // í•„ìš” ì‹œ: PlaySFX("Hit");
                 break;
         }
     }

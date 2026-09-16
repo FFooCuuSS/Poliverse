@@ -22,10 +22,6 @@ public class Minigame_2_8 : MiniGameBase
     [SerializeField] private PlayerRotate playerRotate;
     [SerializeField] private PlayerSr playerSr;
 
-    private void Start()
-    {
-        StartGame();
-    }
 
     public override void StartGame()
     {

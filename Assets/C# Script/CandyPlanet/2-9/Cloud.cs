@@ -79,20 +79,23 @@ public class Cloud : MonoBehaviour
     {
         moveTween?.Kill();
 
-        for (int i = 0; i < debrisCount; i++)
+        if (isShiny)
         {
-            GameObject debris = Instantiate(debrisPrefab, transform.position, Quaternion.identity);
-
-            Rigidbody2D rb = debris.GetComponent<Rigidbody2D>();
-
-            if (rb != null)
+            for (int i = 0; i < debrisCount; i++)
             {
-                Vector2 force = new Vector2(
-                    Random.Range(-2f, 2f),
-                    Random.Range(3f, 6f)
-                );
+                GameObject debris = Instantiate(debrisPrefab, transform.position, Quaternion.identity);
 
-                rb.AddForce(force, ForceMode2D.Impulse);
+                Rigidbody2D rb = debris.GetComponent<Rigidbody2D>();
+
+                if (rb != null)
+                {
+                    Vector2 force = new Vector2(
+                        Random.Range(-2f, 2f),
+                        Random.Range(3f, 6f)
+                    );
+
+                    rb.AddForce(force, ForceMode2D.Impulse);
+                }
             }
         }
 
