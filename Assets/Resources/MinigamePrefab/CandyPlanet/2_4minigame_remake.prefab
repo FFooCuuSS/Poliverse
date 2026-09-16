@@ -354,15 +354,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4958121964396578434}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4.9972258, y: 3.3549976, z: 0.060267232}
-  m_LocalScale: {x: 2.0163, y: 3.8311, z: 1}
+  m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
+  m_LocalPosition: {x: 4.9972258, y: 3.02, z: 0.060267232}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3780448164789792164}
   - {fileID: 1499332499948847687}
   m_Father: {fileID: 598140013952876763}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
 --- !u!212 &5445067287866082239
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -403,8 +403,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_SortingOrder: 1
+  m_Sprite: {fileID: 21300000, guid: 35d01f0e431cae140823e9cf5b136081, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -473,9 +473,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62d2c5c2f844f884b8e7495508c2b82a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bottlePrefab: {fileID: 3047415205189193602, guid: cc5ea43dae0516d47981da944cbe4d66, type: 3}
+  bottlePrefabs:
+  - {fileID: 8460721339309029093, guid: 3cc4a6e94cb5c2d46b660a12d8bba07d, type: 3}
+  - {fileID: 3070975687863215388, guid: b25e27343934642428ba718a5f9c0e3b, type: 3}
+  - {fileID: 8891203404300190512, guid: 8e38db6aa51cdb442ba1ddff93b74380, type: 3}
   rightSpawn: {fileID: 3468933968228403628}
   leftEnd: {fileID: 4927221902757983294}
+  spawnYOffset: 1
   bottleParent: {fileID: 598140013952876763}
 --- !u!1 &7375670716672844579
 GameObject:
@@ -528,12 +532,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfa94272cdc89dc4dbc7291d1f3f7d90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 0
   useRhythmJudgementScore: 1
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
   spawner: {fileID: 9070551462213751118}
   kettle: {fileID: 6585031478722335147}
   liquidPrefab: {fileID: 8244382315107285797, guid: d89f99fe9d8c1844893bb7dd02774c2d, type: 3}
+  fillingSprites:
+  - {fileID: 21300000, guid: 9804d6ce0ca2d0340a28c2a9c9495093, type: 3}
+  - {fileID: 21300000, guid: 9a86236fda2addc4ba457e76bf1600df, type: 3}
+  - {fileID: 21300000, guid: 28656921f95519f4ba5112de4ac9f7ce, type: 3}
 --- !u!1 &8585847917017601325
 GameObject:
   m_ObjectHideFlags: 0
