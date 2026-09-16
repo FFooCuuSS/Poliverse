@@ -6,7 +6,7 @@ public class MoveHandRemake : MonoBehaviour
 {
     public GameObject hand;
 
-    Vector3 startPos = new Vector3(-6.0f, 4.5f, 0f);
+    Vector3 startPos = new Vector3(-6.0f, 2.0f, 0f);
     Vector3 startSet = new Vector3(-6.0f, 2.0f, 0f);
 
     float duration = 0.5f; // 이동에 걸리는 시간(0.5초)

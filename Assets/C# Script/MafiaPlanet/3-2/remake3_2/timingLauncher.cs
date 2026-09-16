@@ -12,6 +12,7 @@ public class timingLauncher : MonoBehaviour
     public Sprite originSprite;
 
     private float timer = 0f;
+    public int counter = 0;
 
     // suitcase는 씬에 있는 오브젝트가 아니라 프리팹으로 넣는 용도
     public GameObject suitcase;
@@ -26,12 +27,17 @@ public class timingLauncher : MonoBehaviour
 
     void Start()
     {
+        counter=0;
         TestScene.SetActive(true);
         PlayScene.SetActive(false);
     }
 
     void Update()
     {
+        if(counter>=5)
+        {
+            return;
+        }
         if (isTestScene)
         {
             timer += Time.deltaTime;
@@ -113,6 +119,7 @@ public class timingLauncher : MonoBehaviour
 
         // 생성 후 1초 뒤 파괴
         StartCoroutine(DestroyAfterOneSecond(currentSuitcase));
+        counter++;
     }
 
     IEnumerator MoveRoutine(GameObject targetSuitcase)

@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class BushSpawner3_8 : MonoBehaviour
 {
+    public Minigame3_8remake minigame;
     public GameObject bushPrefab;
     public EnemyWatch3_8 enemyWatch;
+    public int bushCount = 0;
 
     public Vector3 spawnPosition = new Vector3(10f, 0f, 0f);
 
@@ -15,6 +17,7 @@ public class BushSpawner3_8 : MonoBehaviour
 
     void Start()
     {
+        bushCount = 0;
         StartCoroutine(SpawnRoutine());
     }
 
@@ -23,6 +26,12 @@ public class BushSpawner3_8 : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             StopAllBushes();
+        }
+        if(bushCount>=5)
+        {
+            minigame.finished = true;
+            return;
+
         }
 
         Cleanup();
@@ -33,13 +42,23 @@ public class BushSpawner3_8 : MonoBehaviour
         while (true)
         {
             SpawnBush();
-
+            if (bushCount >= 5)
+            {
+                break;
+            }
             yield return new WaitForSeconds(spawnInterval);
+            
         }
+        
     }
 
     void SpawnBush()
     {
+        bushCount++;
+        if (bushCount >= 5)
+        {
+            return;
+        }
         enemyWatch.PlayWatchRoutine();
         GameObject obj = Instantiate(bushPrefab, spawnPosition, Quaternion.identity,transform);
 
@@ -49,6 +68,7 @@ public class BushSpawner3_8 : MonoBehaviour
         {
             bushes.Add(mover);
         }
+       
     }
 
     void StopAllBushes()

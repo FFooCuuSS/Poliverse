@@ -11,7 +11,7 @@ public class Minigame3_8remake : MiniGameBase
     public override float hitWindowOverride => 0.5f;
 
 
-    private bool finished = false;
+    public bool finished = false;
 
     private void Start()
     {
