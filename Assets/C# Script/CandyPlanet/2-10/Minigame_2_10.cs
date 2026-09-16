@@ -9,10 +9,16 @@ public class Minigame_2_10 : MiniGameBase
     public override float goodWindowOverride => 0.5f;
     public override float hitWindowOverride => 1f;
     // 라운드(패턴) 1개당 6초(시스템 3초 + 플레이어 3초). 등록된 라운드 수만큼 곱해서 전체 길이를 알려준다.
-    protected override float TimerDuration =>
-        6f * Mathf.Max(1, temperatureController != null && temperatureController.Pattern != null
-            ? temperatureController.Pattern.PatternCount
-            : 1);
+    protected override float TimerDuration
+    {
+        get
+        {
+            var pattern = temperatureController != null ? temperatureController.Pattern : null;
+            float roundLength = pattern != null ? pattern.PlayerPhaseOffset * 2f : 8f;
+            int patternCount = pattern != null ? Mathf.Max(1, pattern.PatternCount) : 1;
+            return roundLength * patternCount;
+        }
+    }
     protected override string MinigameExplain => "초콜릿 젓기!";
 
     [Header("참조")]
@@ -49,7 +55,6 @@ public class Minigame_2_10 : MiniGameBase
             temperatureController.OnAllPatternsFinished -= HandleAllPatternsFinished;
             temperatureController.OnAllPatternsFinished += HandleAllPatternsFinished;
 
-            temperatureController.BeginPattern();
         }
 
         if (scoopDrag != null)
@@ -99,8 +104,9 @@ public class Minigame_2_10 : MiniGameBase
     {
         Debug.Log($"{gameObject.name} 리듬메세지: {action}");
         action = action.Trim();
-        if (action == "Show")
+        if (action == "PatternStart")
         {
+            temperatureController?.BeginPattern();
         }
         if (action == "Drop")
         {

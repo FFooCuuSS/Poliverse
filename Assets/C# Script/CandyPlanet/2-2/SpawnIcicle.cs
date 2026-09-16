@@ -54,9 +54,9 @@ public class SpawnIcicle : MonoBehaviour
 
     private void SpawnNext()
     {
-        // 생성 위치와 고드름 생성
+        // 생성 위치와 고드름 생성 (minigame2_2 오브젝트의 자식으로)
         Vector3 pos = new Vector3(currentX, transform.position.y, transform.position.z);
-        GameObject icicle = Instantiate(iciclePrefab, pos, Quaternion.identity);
+        GameObject icicle = Instantiate(iciclePrefab, pos, Quaternion.identity, minigame2_2.transform);
 
         // 고드름 스크립트 가져오기
         Icicle icicleScript = icicle.GetComponent<Icicle>();
@@ -66,7 +66,7 @@ public class SpawnIcicle : MonoBehaviour
         icicleScript.StartIcicle(delay);
 
         currentX += step;
-        index++; // 다음 고드름을 위해 인덱스 증가
+        index++;
     }
 
 

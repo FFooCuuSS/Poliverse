@@ -32,8 +32,8 @@ public class HeatPattern : MonoBehaviour
     [SerializeField] private List<HeatPatternEntry> patterns = new List<HeatPatternEntry> { new HeatPatternEntry() };
 
     [Header("플레이어 응답 구간")]
-    [Tooltip("시스템 구간 길이(=플레이어 구간이 시작되는 시각, 초). 모든 라운드 공통. 기본 3초 (전체 6초 패턴 기준)")]
-    [SerializeField] private float playerPhaseOffset = 3f;
+    [Tooltip("시스템 구간 길이(=플레이어 구간이 시작되는 시각, 초). 모든 라운드 공통. ")]
+    [SerializeField] private float playerPhaseOffset = 4f;
 
     /// <summary>등록된 라운드(패턴) 개수.</summary>
     public int PatternCount => patterns != null ? patterns.Count : 0;

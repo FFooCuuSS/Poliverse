@@ -132,7 +132,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   heatPattern: {fileID: 6321188603382064593}
   gauge: {fileID: 6596068778299621131}
-  moveAmount: 1.3
+  moveAmount: 0.8
   duration: 0.2
   perfectWindow: 0.15
   goodWindow: 0.5
@@ -186,10 +186,15 @@ MonoBehaviour:
     - 1
     - 2
     - 3
+    - 4
   - dropTimes:
     - 1
     - 3
-  playerPhaseOffset: 3
+    - 4
+  - dropTimes:
+    - 1
+    - 4
+  playerPhaseOffset: 4
 --- !u!1 &4307070605085662324
 GameObject:
   m_ObjectHideFlags: 0
@@ -435,6 +440,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2401478526117828883}
   - component: {fileID: 6947483293021810591}
+  - component: {fileID: 3969180583639218278}
   m_Layer: 0
   m_Name: Triangle
   m_TagString: Untagged
@@ -509,6 +515,29 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &3969180583639218278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6596068778299621131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.5
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &6966618363795602875
 GameObject:
   m_ObjectHideFlags: 0
@@ -726,6 +755,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c7f94713cca8334aad7d6e47bfcb2da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 0
   useRhythmJudgementScore: 1
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
