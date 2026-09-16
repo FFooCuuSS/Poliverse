@@ -255,7 +255,7 @@ MonoBehaviour:
   chartFile: {fileID: 4900000, guid: d69b17f77d95b8b48b88f46175f2c750, type: 3}
   addressablesKey: 
   idA: 2
-  idB: 14
+  idB: 4
   perfectWindow: 0.03
   goodWindow: 0.07
   hitWindow: 1

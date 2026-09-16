@@ -17,12 +17,13 @@ public class Kettle2_4 : MonoBehaviour
         if (isPouring) return;
         isPouring = true;
 
+        Vector3 originalRotation = kettleTransform.eulerAngles;
+
         Sequence seq = DOTween.Sequence();
 
-        seq.Append(kettleTransform.DORotate(new Vector3(0, 0, -40), 0.15f).SetEase(Ease.OutQuad));
+        seq.Append(kettleTransform.DORotate(new Vector3(originalRotation.x, originalRotation.y, 40f), 0.15f).SetEase(Ease.OutQuad)); seq.AppendInterval(0.2f);
         seq.AppendInterval(0.2f);
-        seq.Append(kettleTransform.DORotate(Vector3.zero, 0.15f).SetEase(Ease.InQuad));
-
+        seq.Append( kettleTransform.DORotate( originalRotation, 0.15f ).SetEase(Ease.InQuad) );
         seq.OnComplete(() => isPouring = false);
     }
 }
