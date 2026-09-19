@@ -48,6 +48,10 @@ public class TrainingManager : MonoBehaviour
     [Header("Training Buttons")]
     [SerializeField] private Button[] trainingButtons;
 
+    [Header("Training Button Images")]
+    [SerializeField] private Sprite normalButtonSprite;
+    [SerializeField] private Sprite selectedButtonSprite;
+
 
     private void Start()
     {
@@ -76,8 +80,9 @@ public class TrainingManager : MonoBehaviour
             currentPlanetIndex,
             0
         );
-    }
 
+        UpdateTrainingButtonImages(0);
+    }
 
     private void SetupTrainingButtons()
     {
@@ -101,6 +106,29 @@ public class TrainingManager : MonoBehaviour
             currentPlanetIndex,
             trainingIndex
         );
+
+        UpdateTrainingButtonImages(trainingIndex);
+    }
+
+    private void UpdateTrainingButtonImages(int selectedIndex)
+    {
+        for (int i = 0; i < trainingButtons.Length; i++)
+        {
+            Image buttonImage =
+                trainingButtons[i].GetComponent<Image>();
+
+            if (buttonImage == null)
+                continue;
+
+            if (i == selectedIndex)
+            {
+                buttonImage.sprite = selectedButtonSprite;
+            }
+            else
+            {
+                buttonImage.sprite = normalButtonSprite;
+            }
+        }
     }
 
 
