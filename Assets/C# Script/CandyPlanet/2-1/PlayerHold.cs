@@ -12,6 +12,7 @@ public class PlayerHold : MonoBehaviour
     private bool isMoving;
 
     private Minigame_2_1 minigame_2_1;
+    private RhythmManager rhythmManager;
 
     private void Awake()
     {
@@ -37,8 +38,16 @@ public class PlayerHold : MonoBehaviour
     {
         isMoving = true;
 
+        if (rhythmManager == null)
+            rhythmManager = FindObjectOfType<RhythmManager>();
+
+        double songTime = rhythmManager != null
+            ? AudioSettings.dspTime - rhythmManager.DspStartTime
+            : -1;
+        Debug.Log($"[PlayerHold] 클릭 시작 SongTime: {songTime:F3}s (CSV와 동일한 시간 기준, RhythmManager found: {rhythmManager != null})");
+
         if (minigame_2_1 != null)
-            minigame_2_1.OnPlayerInput("Hold");
+            minigame_2_1.OnPlayerInput("Input");
 
         transform.DOKill();
 

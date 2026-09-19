@@ -23,7 +23,7 @@ public class FinishTrigger : MonoBehaviour
     {
         if(icicles.index <= icicles.spawnDelays.Length)
         {
-            minigame2_2.Succeed();
+           // minigame2_2.Succeed();
         }
         
     }

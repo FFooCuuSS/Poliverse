@@ -40,6 +40,8 @@ public class Player2_3 : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
+            Debug.Log($"[Player2_3] 클릭 감지, IsInputOpen={(minigame != null ? minigame.IsInputOpen.ToString() : "minigame null")}");
+
             if (minigame != null && minigame.IsInputOpen)
             {
                 minigame.OnPlayerInput();

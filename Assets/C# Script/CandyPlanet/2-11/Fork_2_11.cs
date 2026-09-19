@@ -22,6 +22,7 @@ public class Fork_2_11 : MonoBehaviour
     private bool isMoving = false;
 
     private MacaroonPlate plate;
+    private MacaroonSpawn spawner;
 
     private int macaronLayer;
 
@@ -41,7 +42,7 @@ public class Fork_2_11 : MonoBehaviour
         startPos = transform.position;
 
         plate = FindObjectOfType<MacaroonPlate>();
-
+        spawner = FindObjectOfType<MacaroonSpawn>();
         minigame = FindObjectOfType<Minigame_2_11>();
 
         macaronLayer = LayerMask.GetMask("Macaron");
@@ -50,7 +51,7 @@ public class Fork_2_11 : MonoBehaviour
     void Update()
     {
         if (isDropping || isMoving) return;
-
+        if (minigame != null && minigame.IsEnded) return;
         transform.position += Vector3.right * moveSpeedX * Time.deltaTime;
 
         if (transform.position.x >= rightX && !isDropping)
@@ -178,38 +179,37 @@ public class Fork_2_11 : MonoBehaviour
     {
         isDropping = true;
 
-        Vector3 platePos = new Vector3(
-            plate.transform.position.x,
-            transform.position.y,
-            0
-        );
+        Vector3 platePos = new Vector3(plate.transform.position.x, transform.position.y, 0);
 
         while (Vector3.Distance(transform.position, platePos) > 0.05f)
         {
-            transform.position = Vector3.Lerp(
-                transform.position,
-                platePos,
-                Time.deltaTime * moveSpeed
-            );
-
+            transform.position = Vector3.Lerp(transform.position, platePos, Time.deltaTime * moveSpeed);
             yield return null;
         }
 
-        // 아래에 있는 마카롱부터 떨어뜨리기
         while (skeweredMacarons.Count > 0)
         {
-            // 현재 맨 아래 마카롱
             GameObject macaron = skeweredMacarons[0];
-
             skeweredMacarons.RemoveAt(0);
-
             macaron.transform.SetParent(null);
 
             Macaron m = macaron.GetComponent<Macaron>();
-
             plate.AddMacaron(m);
 
             yield return new WaitForSeconds(0.2f);
         }
+
+        // 이번 라운드에서 못 집은 마카롱 정리
+        spawner?.ClearUncollectedMacarons();
+
+        // 접시에 쌓였던 마카롱도 정리 (다음 라운드를 위해 접시 초기화)
+        plate?.ClearPlate();
+
+        // 포크 초기화
+        transform.position = startPos;
+        isDropping = false;
+
+        // 다음 패턴 스폰
+        minigame?.SpawnNextRound();
     }
 }

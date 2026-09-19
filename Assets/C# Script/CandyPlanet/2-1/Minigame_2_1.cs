@@ -1,16 +1,16 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Minigame_2_1 : MiniGameBase
 {
-    // ÆÇÁ¤ ¹üÀ§ ¿À¹ö¶óÀÌµå
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.5f;
     public override float hitWindowOverride => 1f;
 
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "¼û¾î¶ó!";
+    protected override string MinigameExplain => "ï¿½ï¿½ï¿½ï¿½ï¿½!";
 
     private bool ended;
     private int missCount = 0;
@@ -19,7 +19,7 @@ public class Minigame_2_1 : MiniGameBase
     private DropCake dropCake;
     private PlayerSrChange srChange;
 
-    //½ºÄÚ¾î
+    //ï¿½ï¿½ï¿½Ú¾ï¿½
     private int score;
     [SerializeField] private int missAmount;
     [SerializeField] private int goodAmount;
@@ -27,7 +27,7 @@ public class Minigame_2_1 : MiniGameBase
 
     [SerializeField] private float duration;
 
-    private void Start()
+    private void Awake()
     {
         dropCake = GetComponent<DropCake>();
         srChange = GetComponentInChildren<PlayerSrChange>();
@@ -36,8 +36,8 @@ public class Minigame_2_1 : MiniGameBase
     {
         base.StartGame();
         ended = false;
-        // Ãß°¡ ÃÊ±âÈ­
-        // ¿¹: instructionText.text = MinigameExplain;
+        // ï¿½ß°ï¿½ ï¿½Ê±ï¿½È­
+        // ï¿½ï¿½: instructionText.text = MinigameExplain;
     }
 
     public void Succeed()
@@ -54,9 +54,9 @@ public class Minigame_2_1 : MiniGameBase
     public override void OnRhythmEvent(string action)
     {
         if (ended) return;
-        Debug.Log($"{gameObject.name} ¸®µë¸Þ¼¼Áö: {action}");
+        Debug.Log($"{gameObject.name} ï¿½ï¿½ï¿½ï¿½Þ¼ï¿½ï¿½ï¿½: {action}");
         action = action.Trim();
-        if (action == "Hold")
+        if (action == "Input")
         {
             dropCake.MoveDownAndBack(duration);
         }
@@ -68,7 +68,7 @@ public class Minigame_2_1 : MiniGameBase
     }
     public override void OnPlayerInput(string action = null)
     {
-        // ÀÔ·Â Àá±Ý »óÅÂ¸é ¹«½Ã
+        // ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â¸ï¿½ ï¿½ï¿½ï¿½ï¿½
         if (IsInputLocked) return;
         base.OnPlayerInput(action);
     }
@@ -83,24 +83,13 @@ public class Minigame_2_1 : MiniGameBase
         {
             srChange.ChangeSpriteTemporarily();
             missCount++;
-            Debug.Log($"ÇöÀç ½Ç¼ö È½¼ö: {missCount}");
         }
     }
     public void CheckGameResult()
     {
         if (IsInputLocked || ended) return;
         ended = true;
-        // ¸ðµÎ MissÀÎ °æ¿ì ½ÇÆÐ
-        if (missCount >= totalCount)
-        {
-            Debug.Log("½ÇÆÐ");
-            Failure();
-        }
-        else
-        {
-            Debug.Log("¼º°ø");
-            Succeed();
-        }
+        
     }
 
 }

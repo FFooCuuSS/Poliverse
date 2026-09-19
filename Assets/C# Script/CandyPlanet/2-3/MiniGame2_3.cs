@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +9,7 @@ public class Minigame_2_3 : MiniGameBase
     public override float hitWindowOverride => 1f;
 
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "∞°µøΩ√ƒ—∂Û!";
+    protected override string MinigameExplain => "Í∞ÄÎèôÏãúÏºúÎùº!";
 
     [SerializeField] private PendulamHammer2_3 hammer;
     [SerializeField] private Player2_3 player;
@@ -20,6 +20,18 @@ public class Minigame_2_3 : MiniGameBase
     public bool IsInputTiming { get; private set; }
 
     public bool IsInputOpen => inputOpen;
+
+    private RhythmManager rhythmManagerRef;
+
+    private double GetSongTime()
+    {
+        if (rhythmManagerRef == null)
+            rhythmManagerRef = FindObjectOfType<RhythmManager>();
+
+        return rhythmManagerRef != null
+            ? rhythmManagerRef.SongTime
+            : -1;
+    }
 
     public override void StartGame()
     {
@@ -42,7 +54,7 @@ public class Minigame_2_3 : MiniGameBase
             return;
 
 
-        Debug.Log($"{gameObject.name} ∏ÆµÎ∏ﬁºº¡ˆ: {action}");
+        Debug.Log($"{gameObject.name} Î¶¨Îì¨Î©îÏÑ∏ÏßÄ: {action}");
 
 
         action = action.Trim();
@@ -59,15 +71,18 @@ public class Minigame_2_3 : MiniGameBase
                 hammer.Swing();
 
                 isHammerAtRight = !isHammerAtRight;
+                inputOpen = true;
                 break;
             case "Input":
-                inputOpen = true;
+
                 break;
         }
     }
 
     public override void OnPlayerInput(string action = null)
     {
+        Debug.Log($"[Minigame_2_3] ÌÅ¥Î¶≠ ÏàòÏã† @ SongTime {GetSongTime():F3}, inputOpen={inputOpen}");
+
         if (!inputOpen)
             return;
 
@@ -84,10 +99,10 @@ public class Minigame_2_3 : MiniGameBase
         {
             case JudgementResult.Perfect:
             case JudgementResult.Good:
-                Debug.Log("º∫∞¯");
+                Debug.Log("ÏÑ±Í≥µ");
                 break;
             case JudgementResult.Miss:
-                Debug.Log("Ω«∆–");
+                Debug.Log("Ïã§Ìå®");
                 if (player != null)
                 {
                     player.SetJudgementResult(false);
