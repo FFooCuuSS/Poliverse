@@ -108,6 +108,21 @@ public class Minigame_1_2 : MiniGameBase
 
         OnPlayerInput("Input");
     }
+    public override void ExecutePracticeAction(
+    int actionIndex,
+    string actionType)
+    {
+        if (!string.Equals(
+                actionType,
+                "Input",
+                System.StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        TryResolveRound();
+    }
+
     /*
     public override void OnJudgement(JudgementResult judgement)
     {

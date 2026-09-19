@@ -1,16 +1,33 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
+[System.Serializable]
+public class SupStepData
+{
+    [Header("Sup-Step 이미지")]
+    public Sprite image;
+
+    [Header("단계 텍스트")]
+    [TextArea]
+    public string text1;
+
+    [Header("타이틀 텍스트")]
+    [TextArea]
+    public string text2;
+}
 
 [System.Serializable]
 public class PlanetTrainingData
 {
     public string planetName;
 
-    [Header("이 행성의 Sup-Step Sprite")]
-    public Sprite[] supSteps;
+    [Header("이 행성의 Sup-Step")]
+    public SupStepData[] supSteps;
 }
+
 
 public class TrainingManager : MonoBehaviour
 {
@@ -22,6 +39,12 @@ public class TrainingManager : MonoBehaviour
     [Header("Sup-Step Images")]
     [SerializeField] private Image[] supStepImages;
 
+    [Header("Sup-Step Text")]
+    [SerializeField] private TMP_Text[] supStepTexts1;
+
+    [Header("Sup-Step Title Text")]
+    [SerializeField] private TMP_Text[] supStepTexts2;
+
     [Header("Training Buttons")]
     [SerializeField] private Button[] trainingButtons;
 
@@ -30,6 +53,7 @@ public class TrainingManager : MonoBehaviour
     {
         SetupTrainingButtons();
     }
+
 
     private void OnEnable()
     {
@@ -47,11 +71,13 @@ public class TrainingManager : MonoBehaviour
             + currentPlanetIndex
         );
 
+        // 패널이 열리면 항상 Training 1 표시
         ShowTrainingForPlanet(
             currentPlanetIndex,
             0
         );
     }
+
 
     private void SetupTrainingButtons()
     {
@@ -65,6 +91,7 @@ public class TrainingManager : MonoBehaviour
         }
     }
 
+
     private void ShowTraining(int trainingIndex)
     {
         int currentPlanetIndex =
@@ -75,6 +102,7 @@ public class TrainingManager : MonoBehaviour
             trainingIndex
         );
     }
+
 
     private void ShowTrainingForPlanet(
         int planetIndex,
@@ -90,12 +118,17 @@ public class TrainingManager : MonoBehaviour
             return;
         }
 
-        Sprite[] supSteps =
+        SupStepData[] supSteps =
             planets[planetIndex].supSteps;
 
-        ClearSupStepImages();
+        ClearSupStep();
 
+
+        // Training 1 = 0,1,2
+        // Training 2 = 3,4,5
+        // Training 3 = 6,7,8
         int startIndex = trainingIndex * 3;
+
 
         for (int i = 0; i < 3; i++)
         {
@@ -103,21 +136,54 @@ public class TrainingManager : MonoBehaviour
 
             if (supStepIndex < supSteps.Length)
             {
+                // 이미지
                 supStepImages[i].sprite =
-                    supSteps[supStepIndex];
+                    supSteps[supStepIndex].image;
 
                 supStepImages[i].enabled = true;
+
+
+                // 텍스트 1
+                supStepTexts1[i].text =
+                    supSteps[supStepIndex].text1;
+
+                supStepTexts1[i].enabled = true;
+
+
+                // 텍스트 2
+                supStepTexts2[i].text =
+                    supSteps[supStepIndex].text2;
+
+                supStepTexts2[i].enabled = true;
             }
         }
     }
 
-    // Sup-Step 이미지 초기화
-    private void ClearSupStepImages()
+
+    // Sup-Step 이미지 + 텍스트 초기화
+    private void ClearSupStep()
     {
+        // 이미지
         for (int i = 0; i < supStepImages.Length; i++)
         {
             supStepImages[i].sprite = null;
             supStepImages[i].enabled = false;
+        }
+
+
+        // 텍스트 1
+        for (int i = 0; i < supStepTexts1.Length; i++)
+        {
+            supStepTexts1[i].text = "";
+            supStepTexts1[i].enabled = false;
+        }
+
+
+        // 텍스트 2
+        for (int i = 0; i < supStepTexts2.Length; i++)
+        {
+            supStepTexts2[i].text = "";
+            supStepTexts2[i].enabled = false;
         }
     }
 }

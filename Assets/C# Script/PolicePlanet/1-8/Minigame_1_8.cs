@@ -5,7 +5,10 @@ public class Minigame_1_8 : MiniGameBase
     [SerializeField] private Manager_1_8 manager;
 
     protected override float TimerDuration => 10f;
-    protected override string MinigameExplain => "모두 가둬라!";
+
+    protected override string MinigameTitle => "모두 가둬라!";
+
+    protected override string MinigameExplain => "죄수가 감옥 아래로 지나가면 화면을 터치해 가둬주세요.";
 
     private void Start()
     {

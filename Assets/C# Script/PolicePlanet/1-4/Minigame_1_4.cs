@@ -9,7 +9,10 @@ public class Minigame_1_4 : MiniGameBase
     public override float hitWindowOverride => 0.8f;
 
     protected override float TimerDuration => 10f;
-    protected override string MinigameExplain => "리듬에 맞춰 악세서리를 제거하세요.";
+
+    protected override string MinigameTitle => "악세서리 제거하기";
+
+    protected override string MinigameExplain => "죄수의 변장이 순서대로 깜빡이며 타이밍을 알려줍니다.";
 
     [Header("Round Setting")]
     [SerializeField] private int totalRound = 2;
