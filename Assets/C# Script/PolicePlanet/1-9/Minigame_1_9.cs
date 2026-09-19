@@ -25,7 +25,10 @@ public class Minigame_1_9 : MiniGameBase
     [SerializeField] private GameObject lightEffect;
 
     protected override float TimerDuration => 10f;
-    protected override string MinigameExplain => "가동시켜라!";
+
+    protected override string MinigameTitle => "가동시켜라!";
+
+    protected override string MinigameExplain => " 불이 2번씩 켜지며 타이밍을 알려줍니다.";
 
     private bool ended;
     private bool inputOpen;

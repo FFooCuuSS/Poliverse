@@ -139,6 +139,10 @@ public class PracticeMinigameSceneManager : MonoBehaviour
     private Vector3 initialCameraPosition;
     private Quaternion initialCameraRotation;
 
+    [Header("Next / Exit 확인 UI")]
+    [SerializeField] private GameObject nextConfirmPanel;
+    [SerializeField] private TMP_Text nextConfirmText;
+
     private void Awake()
     {
         if (rhythmManager == null)
@@ -217,6 +221,11 @@ public class PracticeMinigameSceneManager : MonoBehaviour
         if (transitionPanel != null)
         {
             transitionPanel.SetActive(false);
+        }
+
+        if (nextConfirmPanel != null)
+        {
+            nextConfirmPanel.SetActive(false);
         }
     }
 
@@ -976,11 +985,20 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             return;
         }
 
-        if (GameRoot.Instance == null ||
-            GameRoot.Instance.Confirm == null)
+        //if (GameRoot.Instance == null ||
+        //    GameRoot.Instance.Confirm == null)
+        //{
+        //    Debug.LogError(
+        //        "[Practice] ConfirmManager가 없습니다."
+        //    );
+
+        //    return;
+        //}
+
+        if (currentPhase != PracticePhase.Practice)
         {
-            Debug.LogError(
-                "[Practice] ConfirmManager가 없습니다."
+            Debug.LogWarning(
+                "[Practice] 현재 Practice 상태가 아닙니다."
             );
 
             return;
@@ -990,20 +1008,79 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             currentTrackIndex >=
             trackMinigames.Count - 1;
 
-        if (isLastMinigame)
+        if (nextConfirmText != null)
         {
-            GameRoot.Instance.Confirm.Show(
-                "훈련을 종료하시겠습니까?",
-                onYes: ExitPractice
-            );
-
-            return;
+            if (isLastMinigame)
+            {
+                nextConfirmText.text =
+                    "훈련을 종료하시겠습니까?";
+            }
+            else
+            {
+                nextConfirmText.text =
+                    "다음 미니게임으로 넘어가시겠습니까?";
+            }
         }
 
-        GameRoot.Instance.Confirm.Show(
-            "다음 미니게임으로 넘어가시겠습니까?",
-            onYes: ConfirmNextMinigame
-        );
+        if (nextConfirmPanel != null)
+        {
+            nextConfirmPanel.SetActive(true);
+
+            Debug.Log("[Practice] 확인 패널을 열었습니다.");
+        }
+        else
+        {
+            Debug.LogError(
+                "[Practice] nextConfirmPanel이 연결되지 않았습니다!"
+            );
+        }
+
+        /*
+            if (isLastMinigame)
+            {
+                GameRoot.Instance.Confirm.Show(
+                    "훈련을 종료하시겠습니까?",
+                    onYes: ExitPractice
+                );
+
+                return;
+            }
+
+            GameRoot.Instance.Confirm.Show(
+                "다음 미니게임으로 넘어가시겠습니까?",
+                onYes: ConfirmNextMinigame
+            );
+            */
+    }
+
+    public void ConfirmNextOrExit()
+    {
+        if (nextConfirmPanel != null)
+        {
+            nextConfirmPanel.SetActive(false);
+        }
+
+        // 마지막 미니게임인지 다시 확인
+        bool isLastMinigame =
+            currentTrackIndex >= trackMinigames.Count - 1;
+
+        if (isLastMinigame)
+        {
+            // 마지막이면 훈련 종료
+            ExitPractice();
+        }
+        else
+        {
+            // 마지막이 아니면 다음 미니게임
+            nextRequested = true;
+        }
+    }
+    public void CancelNextOrExit()
+    {
+        if (nextConfirmPanel != null)
+        {
+            nextConfirmPanel.SetActive(false);
+        }
     }
 
     private void ConfirmNextMinigame()

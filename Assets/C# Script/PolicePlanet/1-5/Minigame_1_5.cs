@@ -8,7 +8,10 @@ public class Minigame_1_5 : MiniGameBase
     private CameraManager1_5 cameraManager1_5;
 
     protected override float TimerDuration => 15f;
-    protected override string MinigameExplain => "숨어있지마라!";
+
+    protected override string MinigameTitle => "숨어있지 마라!";
+
+    protected override string MinigameExplain => "오른쪽에서 줄이 죄수위로 지나갈때 화면을 터치해주세요.";
 
     private void Start()
     {

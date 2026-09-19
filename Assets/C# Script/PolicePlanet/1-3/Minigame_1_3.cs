@@ -161,4 +161,77 @@ public class Minigame_1_3 : MiniGameBase
             lockY = true;
         });
     }
+
+    public override void ExecutePracticeAction(
+    int actionIndex,
+    string actionType)
+    {
+        if (!string.Equals(
+                actionType,
+                "Action",
+                System.StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (player == null)
+            return;
+
+        Debug.Log(
+            $"[1-3 Demo] Action={actionIndex}"
+        );
+
+        switch (actionIndex)
+        {
+            case 0:
+                MovePlayerUp();
+                break;
+
+            case 1:
+                MovePlayerDown();
+                break;
+
+            case 2:
+                MovePlayerUp();
+                break;
+
+            default:
+                Debug.LogWarning(
+                    $"[1-3 Demo] 알 수 없는 Action Index: {actionIndex}"
+                );
+                break;
+        }
+    }
+
+    private void MovePlayerUp()
+    {
+        if (player == null)
+            return;
+
+        player.DOKill();
+
+        Vector3 targetPos = player.position;
+        targetPos.y += 2f;
+
+        player.DOMove(
+            targetPos,
+            0.3f
+        ).SetEase(Ease.OutSine);
+    }
+
+    private void MovePlayerDown()
+    {
+        if (player == null)
+            return;
+
+        player.DOKill();
+
+        Vector3 targetPos = player.position;
+        targetPos.y -= 2f;
+
+        player.DOMove(
+            targetPos,
+            0.3f
+        ).SetEase(Ease.OutSine);
+    }
 }
