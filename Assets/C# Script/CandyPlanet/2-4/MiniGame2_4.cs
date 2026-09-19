@@ -13,8 +13,8 @@ public class MiniGame2_4 : MiniGameBase
     public override float hitWindowOverride => 0.6f;
 
     private bool ended;
-    private bool inputOpen;
-    public bool IsInputOpen => inputOpen;
+    private readonly Queue<Bottle2_4> pendingBottles = new Queue<Bottle2_4>();
+    public bool IsInputOpen => pendingBottles.Count > 0;
 
     [SerializeField] private BottleSpawner2_4 spawner;
     [SerializeField] private Kettle2_4 kettle;
@@ -22,15 +22,20 @@ public class MiniGame2_4 : MiniGameBase
     [SerializeField] private GameObject liquidPrefab;
     [SerializeField] private Sprite[] fillingSprites;
 
-    private Bottle2_4 currentBottle;
+    // MiniGameBase를 건드리지 않고, 어떤 RhythmManager 구현체든 대응
+    private double GetSongTime()
+    {
+        if (rhythmManager is RhythmManager rm) return rm.SongTime;
+        if (rhythmManager is RhythmManagerTest rmt) return rmt.SongTime;
+        return -1;
+    }
 
     public override void StartGame()
     {
         base.StartGame();
 
         ended = false;
-        inputOpen = false;
-        currentBottle = null;
+        pendingBottles.Clear();
     }
 
     public override void OnRhythmEvent(string action)
@@ -45,10 +50,11 @@ public class MiniGame2_4 : MiniGameBase
         switch (action)
         {
             case "Show":
-                currentBottle = spawner.SpawnBottle();
+                var newBottle = spawner.SpawnBottle();
+                pendingBottles.Enqueue(newBottle);
+                Debug.Log($"[MiniGame2_4] Show @ SongTime {GetSongTime():F3} → 병 생성 (id={newBottle?.GetInstanceID()}), 대기 중: {pendingBottles.Count}개");
                 break;
             case "Input":
-                inputOpen = true;
                 break;
         }
     }
@@ -56,9 +62,10 @@ public class MiniGame2_4 : MiniGameBase
     public override void OnPlayerInput(string action = null)
     {
         if (ended) return;
-        if (!inputOpen) return;
 
-        inputOpen = false;
+        Debug.Log($"[MiniGame2_4] 클릭 수신 @ SongTime {GetSongTime():F3}, 대기 중: {pendingBottles.Count}개");
+
+        if (pendingBottles.Count == 0) return;
 
         kettle.Pour();
 
@@ -69,28 +76,39 @@ public class MiniGame2_4 : MiniGameBase
     {
         base.OnJudgement(judgement);
 
+        Debug.Log($"[MiniGame2_4] OnJudgement 호출: {judgement}, 대기 중: {pendingBottles.Count}개");
+
+        // 판정 하나당(클릭이든 타임아웃 자동 Miss든) 큐에서 가장 오래된 병 하나를 처리한다.
+        if (pendingBottles.Count == 0)
+        {
+            Debug.LogWarning("[MiniGame2_4] 판정이 왔는데 대기 중인 병이 없습니다.");
+            return;
+        }
+
+        Bottle2_4 targetBottle = pendingBottles.Dequeue();
+
+        // Bottle2_4가 컨베이어 끝에서 스스로 Destroy될 수 있으므로,
+        // 판정이 오기 전에 이미 파괴된 경우를 방어한다.
+        if (targetBottle == null)
+        {
+            Debug.LogWarning("[MiniGame2_4] 대상 병이 이미 파괴되어 판정을 건너뜁니다.");
+            return;
+        }
+
         switch (judgement)
         {
             case JudgementResult.Perfect:
             case JudgementResult.Good:
-
-                if (currentBottle == null)
-                {
-                    Debug.LogWarning("현재 채울 보틀이 없습니다.");
-                    return;
-                }
-
-                CreateRandomFilling();
-
+                CreateRandomFilling(targetBottle);
                 break;
 
             case JudgementResult.Miss:
-
+                // 이 병은 못 채움 (필요하면 여기서 실패 연출 추가)
                 break;
         }
     }
 
-    private void CreateRandomFilling()
+    private void CreateRandomFilling(Bottle2_4 targetBottle)
     {
         if (liquidPrefab == null || fillingSprites == null || fillingSprites.Length == 0)
         {
@@ -112,7 +130,8 @@ public class MiniGame2_4 : MiniGameBase
         if (liquidRenderer != null)
         {
             liquidRenderer.sprite = selectedSprite;
-            currentBottle.FillBottle(liquid);
+            Debug.Log($"[MiniGame2_4] FillBottle 호출 대상 id={targetBottle.GetInstanceID()}");
+            targetBottle.FillBottle(liquid);
         }
         else
         {

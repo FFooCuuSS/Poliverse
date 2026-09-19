@@ -124,30 +124,12 @@ public class Minigame_2_7 : MiniGameBase
         if (success)
         {
             stone.PlayBounceMotion(); // 실제 접촉 시점에 맞춰 튕기는 연출 
-            ReportManualSuccess();
+            ReportManualSuccess();  
         }
         else
         {
             ReportManualFail();
-            missCount++;
-            Debug.Log($"현재 실수 횟수: {missCount}");
         }
-
-        // 매 판정마다 실패 조건(미스 5회 이상)을 체크
-        CheckGameResult();
-    }
-
-    public void Succeed()
-    {
-        if (ended) return;
-        ended = true;
-        Success();
-    }
-
-    public void Failure()
-    {
-        ended = true;
-        Fail();
     }
 
     public override void OnRhythmEvent(string action)
@@ -167,17 +149,5 @@ public class Minigame_2_7 : MiniGameBase
     public override void OnJudgement(JudgementResult judgement)
     {
         // 매뉴얼 판정(Jelly-Stone 접촉 기반)을 사용하므로 비워둠
-    }
-
-    public void CheckGameResult()
-    {
-        if (IsInputLocked || ended) return;
-
-        // 미스 5번 이상 시 실패 조건 유지
-        if (missCount >= 5)
-        {
-            Debug.Log("실패");
-            Failure();
-        }
     }
 }

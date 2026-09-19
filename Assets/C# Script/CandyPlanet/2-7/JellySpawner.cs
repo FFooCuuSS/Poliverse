@@ -29,7 +29,6 @@ public class JellySpawner : MonoBehaviour
         if (currentIndex >= jellyTypes.Length)
         {
             Debug.Log("Game Success");
-            minigame_2_7.Succeed();
             return;
         }
 

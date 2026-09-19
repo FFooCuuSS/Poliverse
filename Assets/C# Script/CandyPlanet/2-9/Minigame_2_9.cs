@@ -16,10 +16,6 @@ public class Minigame_2_9 : MiniGameBase
 
     [SerializeField] private CloudSpawner cloudSpawner;
 
-    private void Start()
-    {
-        StartGame();
-    }
     public override void StartGame()
     {
         base.StartGame();

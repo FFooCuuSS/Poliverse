@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2301464967783610754
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9190559235386029989}
+  m_Layer: 0
+  m_Name: IceCreamLandingPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9190559235386029989
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2301464967783610754}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 9.14, y: 0.85, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4453379281386092065}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2373919942509622234
 GameObject:
   m_ObjectHideFlags: 0
@@ -175,6 +206,8 @@ MonoBehaviour:
   - {fileID: 8166474221271182560}
   - {fileID: 7852235533697534343}
   - {fileID: 3934127595987802603}
+  conveyorPoint: {fileID: 9190559235386029989}
+  destroyPoint: {fileID: 8165258057374527263}
 --- !u!1 &3769110326636698690
 GameObject:
   m_ObjectHideFlags: 0
@@ -210,6 +243,7 @@ Transform:
   - {fileID: 7277656939521610782}
   - {fileID: 8165258057374527263}
   - {fileID: 8189897531826538964}
+  - {fileID: 9190559235386029989}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4979449793151747609
@@ -648,7 +682,6 @@ GameObject:
   - component: {fileID: 7277656939521610782}
   - component: {fileID: 7939895773401542851}
   - component: {fileID: 7506080352627358256}
-  - component: {fileID: 5328123739885758331}
   m_Layer: 0
   m_Name: Floor
   m_TagString: Floor
@@ -752,10 +785,10 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.59204435, y: 1.4269063}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -766,19 +799,5 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 23.622318, y: 3.8538127}
   m_EdgeRadius: 0
---- !u!114 &5328123739885758331
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7359363044399607910}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e7f7bf6a3adca9408bead47510e689b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startPoint: {fileID: 8165258057374527263}
-  offsetX: 1.2

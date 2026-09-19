@@ -77,7 +77,7 @@ public class MiniGame2_2 : MiniGameBase
         if (missCount >= 3)
         {
             Debug.Log("½ÇÆÐ");
-            Failure();
+           // Failure();
         }
     }
 }
