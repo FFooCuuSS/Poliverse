@@ -12,7 +12,9 @@ public class GameManager_3_11 : MonoBehaviour
     [SerializeField] private int targetScore = 1;
     [SerializeField] private int bombPenalty = 1;
 
+    [SerializeField] private GameObject normalBox;
     [SerializeField] private GameObject bombEffect;
+    [SerializeField] private GameObject successEffect;
     // 현재 점수
     private int currentScore = 0;
 
@@ -27,6 +29,9 @@ public class GameManager_3_11 : MonoBehaviour
 
     private void Start()
     {
+        normalBox.SetActive(true);
+        bombEffect.SetActive(false);
+        successEffect.SetActive(false);
         StartGame();
     }
 
@@ -158,17 +163,35 @@ public class GameManager_3_11 : MonoBehaviour
 
     private IEnumerator BombEffectCoroutine()
     {
+        normalBox.SetActive(false);
         bombEffect.SetActive(true);
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.5f);
 
         bombEffect.SetActive(false);
+        normalBox.SetActive(true);
+    }
+    public void PlaySuccessEffect()
+    {
+        StartCoroutine(SuccessEffectCoroutine());
+    }
+
+    private IEnumerator SuccessEffectCoroutine()
+    {
+        normalBox.SetActive(false);
+        successEffect.SetActive(true);
+
+        yield return new WaitForSeconds(0.5f);
+
+        successEffect.SetActive(false);
+        normalBox.SetActive(true);
     }
     /// <summary>
     /// Target 적중 시 점수를 증가시킨다.
     /// </summary>
     private void AddTargetScore()
     {
+        PlaySuccessEffect();
         currentScore += targetScore;
 
         Debug.Log(

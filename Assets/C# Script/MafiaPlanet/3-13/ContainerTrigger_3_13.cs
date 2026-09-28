@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ContainerTrigger_3_13 : MonoBehaviour
+public class ContainerTrigger_3_13 : MiniGameBase
 {
 
     [Header("Case Manager")]
@@ -33,6 +33,7 @@ public class ContainerTrigger_3_13 : MonoBehaviour
         // 이 컨테이너와 겹친 물체가 없으면 아무 처리도 하지 않는다.
         if (overlapObjects.Count == 0)
         {
+            base.ReportManualFail();
             return;
         }
 
@@ -65,6 +66,7 @@ public class ContainerTrigger_3_13 : MonoBehaviour
             // 현재 Case에 맞는 성공 표시 오브젝트 활성화
             if (caseManager != null)
             {
+                base.ReportManualSuccess();
                 caseManager.ShowSuccessObject(
                     selectedObject.ObjectType
                 );
@@ -85,6 +87,7 @@ public class ContainerTrigger_3_13 : MonoBehaviour
         }
         else
         {
+            base.ReportManualFail();
             // 잘못된 컨테이너에서 클릭한 경우
             selectedObject.ProcessWrongClick();
         }

@@ -15,9 +15,11 @@ public class Minigame_3_10_remake : MiniGameBase
     // 현재 선택된 스폰 인덱스 저장
     private int index1;
     private int index2;
+    private int count;
 
     void Start()
     {
+        count = 0;
         base.StartGame();
         // 시작할 때 랜덤 위치 먼저 세팅
         SetRandomPositions();
@@ -27,6 +29,13 @@ public class Minigame_3_10_remake : MiniGameBase
     {
         if (action == "Show")
         {
+            count++;
+            if(count>=5)
+            {
+                //Debug.Log("[Show] Show 이벤트 들어옴, 5회 이상 발생하여 게임 종료");
+                
+                return;
+            }
             Debug.Log("[Show] Show 이벤트 들어옴");
             ShowObject();
         }

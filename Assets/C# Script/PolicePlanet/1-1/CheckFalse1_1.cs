@@ -19,7 +19,7 @@ public class CheckFalse1_1 : MonoBehaviour
         if(collision.gameObject.CompareTag("Enemy") && !isChecked)
         {
             Debug.Log("¼º°ø");
-            isChecked = true;
+            isChecked = true;   
             minigmae_1_1.Success();
         }
     }
