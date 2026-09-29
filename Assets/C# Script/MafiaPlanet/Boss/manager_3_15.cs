@@ -6,6 +6,7 @@ public class manager_3_15 : MonoBehaviour
 {
     [SerializeField] private GameObject[] gamePrefabs;
     [SerializeField] private GameObject DarkPanel;
+    [SerializeField] private Minigame_3_15 minigame;
 
     [Header("BossSFX")]
     public AudioSource audioSource;
@@ -16,67 +17,78 @@ public class manager_3_15 : MonoBehaviour
     [SerializeField] private float holdTime = 6.5f;
     [SerializeField] private float fadeOutDur = 0.35f;
 
-    // 1번 미니게임
+    [Header("Phase 1")]
+    [SerializeField] private int wandGoal = 10;
     public int wandCount = 0;
 
-    // 내부 상태
-    private enum State { MG1, Transition, MG2 }
-    private State state = State.MG1;
+    private enum State { Idle, MG1, Transition, MG2 }
+    private State state = State.Idle;
 
     private Image darkImg;
     private Coroutine transCo;
     private secondGameCommand sGC;
+    private weaponSpawner_3_15[] spawners = new weaponSpawner_3_15[0];
 
     private void Awake()
     {
-        darkImg = DarkPanel.GetComponent<Image>();
+        darkImg = DarkPanel != null ? DarkPanel.GetComponent<Image>() : null;
         sGC = GetComponent<secondGameCommand>();
+        if (minigame == null) minigame = GetComponentInParent<Minigame_3_15>();
 
-        // 시작 시 패널 투명화
-        if (darkImg != null)
-        {
-            var c = darkImg.color;
-            c.a = 0f;
-            darkImg.color = c;
-        }
+        SetPanelAlpha(0f);
 
         if (gamePrefabs != null && gamePrefabs.Length >= 2)
         {
             gamePrefabs[0]?.SetActive(true);
             gamePrefabs[1]?.SetActive(false);
         }
+
+        if (gamePrefabs != null && gamePrefabs.Length >= 1 && gamePrefabs[0] != null)
+            spawners = gamePrefabs[0].GetComponentsInChildren<weaponSpawner_3_15>(true);
+
+        // StartGame 전에는 스폰 금지
+        SetSpawnersBanned(true);
     }
 
-    private void Update()
+    // Minigame_3_15.StartGame()에서만 호출
+    public void BeginGame()
     {
-        switch (state)
+        if (state != State.Idle) return;
+
+        wandCount = 0;
+        state = State.MG1;
+        SetSpawnersBanned(false);
+    }
+
+    // weapon_3_15 클릭 시 호출
+    public void OnWeaponClicked(bool isMagicWand)
+    {
+        if (state != State.MG1) return;
+
+        if (isMagicWand)
         {
-            case State.MG1:
-                if (wandCount >= 10)
-                {
-                    EnterTransition();
-                }
-                break;
+            wandCount++;
+            minigame?.ReportHit($"페이즈1 마법봉 클릭 ({wandCount}/{wandGoal})");
 
-            case State.Transition:
-                break;
-
-            case State.MG2:
-                sGC.StartPattern();
-                break;
+            if (wandCount >= wandGoal)
+                EnterTransition();
         }
+        else
+        {
+            minigame?.ReportMiss("페이즈1 일반 무기 클릭");
+        }
+    }
+
+    private void SetSpawnersBanned(bool ban)
+    {
+        foreach (var s in spawners)
+            if (s != null) s.banMoving = ban;
     }
 
     private void EnterTransition()
     {
         state = State.Transition;
-
-        for (int i = 0; i < 3; i++)
-        {
-            var tempForBan = gamePrefabs[0].transform.GetChild(i);
-            weaponSpawner_3_15 wS = tempForBan.GetComponent<weaponSpawner_3_15>();
-            wS.banMoving = true;
-        }
+        SetSpawnersBanned(true);
 
         if (transCo != null) StopCoroutine(transCo);
         transCo = StartCoroutine(TransitionRoutine());
@@ -96,25 +108,25 @@ public class manager_3_15 : MonoBehaviour
         if (gamePrefabs != null && gamePrefabs.Length >= 1)
             gamePrefabs[0]?.SetActive(false);
 
-        // 2) 대기 + SFX 실행
+        // 2) 대기 + SFX
         yield return new WaitForSeconds(holdTime);
         BossSFX();
 
-        // 3) 빠른 페이드 아웃
+        // 3) 페이드 아웃
         float startA = darkImg != null ? darkImg.color.a : 1f;
         float t = 0f;
         while (t < fadeOutDur)
         {
             t += Time.deltaTime;
-            float k = t / fadeOutDur;
-            SetPanelAlpha(Mathf.Lerp(startA, 0f, k));
+            SetPanelAlpha(Mathf.Lerp(startA, 0f, t / fadeOutDur));
             yield return null;
         }
         SetPanelAlpha(0f);
 
-        // 4) 상태 전환
+        // 4) 2페이즈 시작 (한 번만)
         state = State.MG2;
         transCo = null;
+        if (sGC != null) sGC.StartPattern();
     }
 
     private void SetPanelAlpha(float alpha)
@@ -132,13 +144,8 @@ public class manager_3_15 : MonoBehaviour
             audioSource.clip = ohYesClip;
             audioSource.Play();
         }
-        
+
         if (gamePrefabs != null && gamePrefabs.Length >= 2)
             gamePrefabs[1]?.SetActive(true);
-    }
-
-    public void OnMagicWandCollected()
-    {
-        Debug.Log(++wandCount);
     }
 }

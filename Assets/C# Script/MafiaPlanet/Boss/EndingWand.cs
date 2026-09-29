@@ -1,3 +1,4 @@
+Ôªøusing System;
 using System.Collections;
 using UnityEngine;
 using DG.Tweening;
@@ -6,12 +7,12 @@ using DG.Tweening;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class EndingWand : MonoBehaviour
 {
+    // trueÎ©¥ ÌîåÎ†àÏù¥Ïñ¥ ÌîºÍ≤© ÌåêÏ†ï OFF (Í±∞Ïö∏ ÏÑ±Í≥µ Ïãú)
     [SerializeField] private bool notifyEnabled = false;
 
     [Header("Beam Shape / Visual")]
     [SerializeField] private float beamMaxLength = 20f;
     [SerializeField] private float beamHalfWidth = 0.075f;
-    [SerializeField] private Color beamColor = new(1f, 1f, 1f, 0.8f);
     [SerializeField] private string sortingLayerName = "Default";
     [SerializeField] private int sortingOrder = 300;
 
@@ -38,14 +39,15 @@ public class EndingWand : MonoBehaviour
     [Header("VFX (optional)")]
     [SerializeField] private GameObject hitEffectPrefab;
 
-    [Header("Appear / Smoothing")]
-    [SerializeField] private float growSpeed = 40f;       
-    [SerializeField] private float shrinkSpeed = 60f;     
-    [SerializeField] private float appearFadeTime = 0.08f;
+    [Header("Grow / Shrink")]
+    [SerializeField] private float growSpeed = 40f;
+    [SerializeField] private float shrinkSpeed = 60f;
     private float currentLength = 0f;
-    private Color _baseColor;
 
-    // internal
+    // Î†àÏù¥Ï†Ä ON/OFF ÏïåÎ¶º ‚Äî Î≥¥Ïä§ Ïä§ÌîÑÎùºÏù¥Ìä∏ ÍµêÏ≤¥Ïö©
+    public event Action<bool> OnLaserStateChanged;
+    private bool laserOn;
+
     private Vector2 lastDir = Vector2.right;
     private Vector2 targetPos;
     private Quaternion targetRot;
@@ -56,7 +58,7 @@ public class EndingWand : MonoBehaviour
     private Mesh mesh;
     private GameObject hitFxInstance;
 
-    void Awake()
+    private void Awake()
     {
         mf = GetComponent<MeshFilter>();
         mr = GetComponent<MeshRenderer>();
@@ -67,17 +69,18 @@ public class EndingWand : MonoBehaviour
         if (mr.sharedMaterial == null)
             mr.sharedMaterial = new Material(Shader.Find("Sprites/Default"));
 
-        if (mr.sharedMaterial.HasProperty("_Color")) _baseColor = mr.sharedMaterial.color;
-        else if (mr.sharedMaterial.HasProperty("_BaseColor")) _baseColor = mr.sharedMaterial.GetColor("_BaseColor");
-        else _baseColor = beamColor;
-
         mr.sortingLayerName = sortingLayerName;
         mr.sortingOrder = sortingOrder;
-        mr.sharedMaterial.renderQueue = 3000;
 
+        // Î∞úÏÇ¨ Ï†ÑÏóî Í∏∏Ïù¥ 0 ‚Üí Ïïà Î≥¥ÏûÑ
         currentLength = 0f;
-        BuildBeamMesh(5f);
-        SetAlpha(1f); // Ω√¿€¿∫ ≈ı∏Ì
+        BuildBeamMesh(0f);
+    }
+
+    private void OnDestroy()
+    {
+        SetLaser(false);
+        if (hitFxInstance != null) Destroy(hitFxInstance);
     }
 
     public void Fire(Vector2 position, Vector2 direction, float lightRemaining, float wandRemaining,
@@ -96,8 +99,7 @@ public class EndingWand : MonoBehaviour
         Vector2 spawnPos = position + (-dir * spawnBackOffset + -left * spawnLeftOffset);
 
         float finalAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        float startAngle = finalAngle + 90f;
-        Quaternion startRot = Quaternion.AngleAxis(startAngle, Vector3.forward);
+        Quaternion startRot = Quaternion.AngleAxis(finalAngle + 90f, Vector3.forward);
         Quaternion finalRot = Quaternion.AngleAxis(finalAngle + angleOffsetDeg, Vector3.forward);
 
         targetRot = finalRot;
@@ -108,7 +110,7 @@ public class EndingWand : MonoBehaviour
                          + (-dir * (curveBend * 0.35f));
 
         introSeq?.Kill(false);
-        introSeq = DOTween.Sequence();
+        introSeq = DOTween.Sequence().SetLink(gameObject);
         introSeq.Join(transform.DOPath(new Vector3[] { control, position }, moveDuration, PathType.CatmullRom)
                               .SetEase(Ease.OutQuad));
         introSeq.Join(transform.DORotateQuaternion(finalRot, rotateDuration).SetEase(Ease.OutQuad));
@@ -122,17 +124,14 @@ public class EndingWand : MonoBehaviour
 
     private IEnumerator FireRoutine()
     {
-        transform.DOMove(targetPos, lifeTime).SetEase(Ease.OutSine);
-        transform.DORotateQuaternion(targetRot, lifeTime).SetEase(Ease.OutSine);
+        transform.DOMove(targetPos, lifeTime).SetEase(Ease.OutSine).SetLink(gameObject);
+        transform.DORotateQuaternion(targetRot, lifeTime).SetEase(Ease.OutSine).SetLink(gameObject);
 
         yield return new WaitForSeconds(moveDuration);
 
-        // æÀ∆ƒ ∆‰¿ÃµÂ¿Œ
-        DOTween.Kill(mr.sharedMaterial);
-        DOTween.To(() => 0f, a => SetAlpha(a), 1f, appearFadeTime);
+        SetLaser(true);
 
         float elapsed = 0f;
-
         while (elapsed < activeTime)
         {
             Vector2 origin = transform.position;
@@ -140,7 +139,6 @@ public class EndingWand : MonoBehaviour
 
             RaycastHit2D[] hits = Physics2D.RaycastAll(origin, fwd, beamMaxLength, ~0);
             float cutLength = beamMaxLength;
-            Vector3 endWorld = origin + fwd * cutLength;
 
             RaycastHit2D? firstValidCut = null;
             for (int i = 0; i < hits.Length; i++)
@@ -155,7 +153,7 @@ public class EndingWand : MonoBehaviour
             if (firstValidCut.HasValue)
             {
                 cutLength = firstValidCut.Value.distance;
-                endWorld = firstValidCut.Value.point;
+                Vector3 endWorld = firstValidCut.Value.point;
 
                 if (hitEffectPrefab != null)
                 {
@@ -170,42 +168,49 @@ public class EndingWand : MonoBehaviour
                     currentLength = cutLength;
                     BuildBeamMesh(currentLength);
                     NotifyPlayersWithin(hits, cutLength);
-                    if (hitFxInstance != null) Destroy(hitFxInstance);
-                    Destroy(gameObject);
+                    Destroy(gameObject); // OnDestroyÏóêÏÑú SetLaser(false) + FX Ï†ïÎ¶¨
                     yield break;
                 }
             }
-            else
+            else if (hitFxInstance != null)
             {
-                if (hitFxInstance != null) { Destroy(hitFxInstance); hitFxInstance = null; }
+                Destroy(hitFxInstance);
+                hitFxInstance = null;
             }
 
             NotifyPlayersWithin(hits, cutLength);
 
             float spd = (cutLength > currentLength) ? growSpeed : shrinkSpeed;
             currentLength = Mathf.MoveTowards(currentLength, cutLength, spd * Time.deltaTime);
-
             BuildBeamMesh(currentLength);
 
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        // ¿⁄ø¨Ω∫∑± ºˆ√‡ ¡æ∑· ø¨√‚
+        // ÏàòÏ∂ï Ï¢ÖÎ£å
         while (currentLength > 0.001f)
         {
             currentLength = Mathf.MoveTowards(currentLength, 0f, shrinkSpeed * Time.deltaTime);
             BuildBeamMesh(currentLength);
             yield return null;
         }
-        SetAlpha(0f);
+        BuildBeamMesh(0f);
+        SetLaser(false);
 
-        if (hitFxInstance != null) Destroy(hitFxInstance);
+        if (hitFxInstance != null) { Destroy(hitFxInstance); hitFxInstance = null; }
     }
 
     public void EnableNotify()
     {
         notifyEnabled = true;
+    }
+
+    private void SetLaser(bool on)
+    {
+        if (laserOn == on) return;
+        laserOn = on;
+        OnLaserStateChanged?.Invoke(on);
     }
 
     private void BuildBeamMesh(float length)
@@ -223,15 +228,6 @@ public class EndingWand : MonoBehaviour
         mesh.vertices = v;
         mesh.triangles = t;
         mesh.RecalculateBounds();
-    }
-
-    private void SetAlpha(float a)
-    {
-        a = Mathf.Clamp01(a);
-        if (mr.sharedMaterial.HasProperty("_Color"))
-            mr.sharedMaterial.color = new Color(_baseColor.r, _baseColor.g, _baseColor.b, a * _baseColor.a);
-        else if (mr.sharedMaterial.HasProperty("_BaseColor"))
-            mr.sharedMaterial.SetColor("_BaseColor", new Color(_baseColor.r, _baseColor.g, _baseColor.b, a * _baseColor.a));
     }
 
     private bool TagPass(GameObject go)
@@ -254,7 +250,6 @@ public class EndingWand : MonoBehaviour
             var go = h.collider.gameObject;
             if (!go.CompareTag(playerTag)) continue;
 
-            // ¿Œ≈Õ∆‰¿ÃΩ∫ øÏº±
             if (go.TryGetComponent(out IEndingWandHittable ih))
             {
                 ih.OnLaserHit(h.point, this);
@@ -263,6 +258,7 @@ public class EndingWand : MonoBehaviour
 
             go.SendMessage(playerHitMethod, h.point, SendMessageOptions.DontRequireReceiver);
 
+            // Miss Î≥¥Í≥† (PlayerDrag Ï™Ω Ïø®Îã§Ïö¥ÏúºÎ°ú Îß§ ÌîÑÎ†àÏûÑ Ï§ëÎ≥µ Î∞©ÏßÄ)
             var pd = go.GetComponent<PlayerDrag>();
             if (pd != null) pd.EndingBlast();
         }
@@ -273,4 +269,3 @@ public interface IEndingWandHittable
 {
     void OnLaserHit(Vector2 hitPoint, EndingWand source);
 }
-
