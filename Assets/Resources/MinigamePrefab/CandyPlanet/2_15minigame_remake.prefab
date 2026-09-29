@@ -209,7 +209,7 @@ MonoBehaviour:
   rhythm: {fileID: 0}
   test: {fileID: 0}
   moveY: 0.18
-  roundTripTime: 0.5
+  roundTripTime: 0.4
   squashX: 0.06
   squashY: 0.1
   scaleDelay: 0.02
@@ -233,7 +233,7 @@ MonoBehaviour:
   test: {fileID: 0}
   frame1: {fileID: 21300000, guid: d81a983ce90db83458c71c4278e7a35a, type: 3}
   frame2: {fileID: 21300000, guid: a20726df83c651a44a86e2678a337215, type: 3}
-  beatInterval: 0.5
+  beatInterval: 0.4
   beatsPerSwap: 1
   playOnEnable: 1
   useUnscaledTime: 0
@@ -425,7 +425,7 @@ MonoBehaviour:
   test: {fileID: 0}
   frame1: {fileID: 21300000, guid: d96c8bed5487a9c4ba8aef2d38d113f8, type: 3}
   frame2: {fileID: 21300000, guid: a6366bb46997b474e92a757fd1c6199d, type: 3}
-  beatInterval: 0.5
+  beatInterval: 0.4
   beatsPerSwap: 1
   playOnEnable: 1
   useUnscaledTime: 0
@@ -446,7 +446,7 @@ MonoBehaviour:
   rhythm: {fileID: 0}
   test: {fileID: 0}
   moveY: 0.18
-  roundTripTime: 0.5
+  roundTripTime: 0.4
   squashX: 0.06
   squashY: 0.1
   scaleDelay: 0.02

@@ -409,7 +409,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32624ebcbfd621544b73e69c8923abf0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stage_2_2: {fileID: 8004529902184986114}
   playerMove: {fileID: 8688912183666981504}
 --- !u!114 &1733083001852665381
 MonoBehaviour:
@@ -426,7 +425,7 @@ MonoBehaviour:
   rhythm: {fileID: 0}
   test: {fileID: 0}
   moveY: 0.18
-  roundTripTime: 0.5
+  roundTripTime: 0.4
   squashX: 0.06
   squashY: 0.1
   scaleDelay: 0.02
