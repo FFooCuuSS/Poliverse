@@ -218,7 +218,7 @@ MonoBehaviour:
   plate: {fileID: 514545284285944489}
   cameraTransform: {fileID: 0}
   cameraDownOffset: {x: 0, y: -10.33, z: 0}
-  cameraMoveDuration: 1.9
+  cameraMoveDuration: 1.5
   missCount: 0
 --- !u!1 &1501053912206184038
 GameObject:

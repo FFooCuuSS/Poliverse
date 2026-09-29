@@ -212,7 +212,7 @@ GameObject:
   - component: {fileID: 7139281466178450517}
   - component: {fileID: 6143927279342711561}
   m_Layer: 0
-  m_Name: 3_2minigame_remake
+  m_Name: 3_2_
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
