@@ -11,17 +11,21 @@ public class PracticeButton : MonoBehaviour
     [SerializeField]
     private PlanetList planetList;
 
-    [Header("훈련 번호")]
-    [SerializeField, Min(1)]
-    private int trackId = 1;
+
+    [Header("Training Manager")]
+    [SerializeField]
+    private TrainingManager trainingManager;
+
 
     [Header("이동할 씬")]
     [SerializeField]
-    private string practiceSceneName = "PracticeMinigameScene";
+    private string practiceSceneName =
+        "PracticeMinigameScene";
 
 
-    public void trainingButtonClick()
+    public void TrainingButtonClick()
     {
+        // PlanetList 확인
         if (planetList == null)
         {
             Debug.LogError(
@@ -32,15 +36,44 @@ public class PracticeButton : MonoBehaviour
         }
 
 
-        // PlanetList의 현재 선택 행성
-        // currentIndex는 0부터 시작하므로 +1
+        // TrainingManager 확인
+        if (trainingManager == null)
+        {
+            Debug.LogError(
+                "[PracticeButton] TrainingManager가 연결되지 않았습니다."
+            );
+
+            return;
+        }
+
+
+        // 현재 선택된 행성
+        //
+        // PlanetList의 index
+        // 0 → 행성 1
+        // 1 → 행성 2
+        // 2 → 행성 3
         int planetId =
             planetList.CallingCurrentIndex() + 1;
+
+
+        // 현재 선택된 훈련
+        // 1 ~ 5
+        int trackId =
+            trainingManager.GetCurrentTrainingId();
 
 
         // 현재 Lobby 씬
         string returnSceneName =
             SceneManager.GetActiveScene().name;
+
+
+        Debug.Log(
+            $"[PracticeButton] 훈련 시작\n" +
+            $"Planet = {planetId}\n" +
+            $"Training = {trackId}\n" +
+            $"Return Scene = {returnSceneName}"
+        );
 
 
         // 선택 정보 저장
@@ -62,13 +95,7 @@ public class PracticeButton : MonoBehaviour
         PlayerPrefs.Save();
 
 
-        Debug.Log(
-            $"[PracticeButton] 선택 완료 - " +
-            $"Planet={planetId}, Track={trackId}"
-        );
-
-
-        // PracticeScene으로 이동
+        // PracticeMinigameScene 이동
         SceneManager.LoadScene(
             practiceSceneName
         );
