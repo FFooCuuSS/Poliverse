@@ -1869,9 +1869,9 @@ RectTransform:
   - {fileID: 1131372485}
   m_Father: {fileID: 926940586}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 775, y: -50}
   m_SizeDelta: {x: 270, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &388069284
@@ -4541,7 +4541,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1344143342}
         m_TargetAssemblyTypeName: PracticeButton, Assembly-CSharp
-        m_MethodName: trainingButtonClick
+        m_MethodName: TrainingButtonClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5677,7 +5677,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1003403303
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7669,7 +7669,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   planetList: {fileID: 1033379178}
-  trackId: 1
+  trainingManager: {fileID: 1719637532}
   practiceSceneName: PracticeMinigame
 --- !u!1 &1346252050
 GameObject:
@@ -7784,7 +7784,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -33, y: 366}
+  m_AnchoredPosition: {x: -204, y: 377.7}
   m_SizeDelta: {x: 794, y: 75}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1349617868
@@ -7834,15 +7834,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -9088,9 +9088,9 @@ RectTransform:
   - {fileID: 331135924}
   m_Father: {fileID: 926940586}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 455, y: -50}
   m_SizeDelta: {x: 270, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1548449914
@@ -9317,9 +9317,9 @@ RectTransform:
   - {fileID: 2137411464}
   m_Father: {fileID: 926940586}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 135, y: -50}
   m_SizeDelta: {x: 270, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1562139717
@@ -10747,6 +10747,7 @@ MonoBehaviour:
   - {fileID: 1711141769}
   normalButtonSprite: {fileID: 21300000, guid: a7aaf1ed3f0005d46bc68efb3e187e05, type: 3}
   selectedButtonSprite: {fileID: 21300000, guid: b958c6d183370fd49846514dc8315de4, type: 3}
+  currentTrainingText: {fileID: 1672045023}
 --- !u!1 &1752593866
 GameObject:
   m_ObjectHideFlags: 0

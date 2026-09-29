@@ -143,6 +143,27 @@ public class PracticeMinigameSceneManager : MonoBehaviour
     [SerializeField] private GameObject nextConfirmPanel;
     [SerializeField] private TMP_Text nextConfirmText;
 
+    [Header("Button Sprite Feedback")]
+
+    [Tooltip("현재 모드 버튼 클릭 Sprite")]
+    [SerializeField] private Sprite modeButtonPressedSprite;
+
+    [Tooltip("다음 버튼 클릭 Sprite")]
+    [SerializeField] private Sprite nextButtonPressedSprite;
+
+    [Tooltip("네 버튼 클릭 Sprite")]
+    [SerializeField] private Sprite yesButtonPressedSprite;
+
+    [Tooltip("아니요 버튼 클릭 Sprite")]
+    [SerializeField] private Sprite noButtonPressedSprite;
+
+    [SerializeField, Min(0f)]
+    private float buttonPressedDuration = 0.12f;
+
+    [Header("Button References")]
+    [SerializeField] private GameObject yesButton;
+    [SerializeField] private GameObject noButton;
+
     private void Awake()
     {
         if (rhythmManager == null)
@@ -231,43 +252,52 @@ public class PracticeMinigameSceneManager : MonoBehaviour
 
     private void Start()
     {
-        // 기본 테스트값.
-        // 로비에서 정상적으로 훈련 트랙을 전달받았다면
-        // 아래에서 해당 값으로 덮어쓴다.
+        // 기본값
         selectedPlanet = 1;
         selectedTrack = 1;
 
         bool hasPracticeSelection = false;
 
-        if (GameRoot.Instance != null &&
-            GameRoot.Instance.Session != null &&
-            GameRoot.Instance.Session.Data != null)
+
+        // 로비에서 PlayerPrefs로 전달받은 정보 읽기
+        if (PlayerPrefs.HasKey("PracticePlanetId") &&
+            PlayerPrefs.HasKey("PracticeTrackId"))
         {
-            GameSessionData session =
-                GameRoot.Instance.Session.Data;
+            selectedPlanet =
+                PlayerPrefs.GetInt(
+                    "PracticePlanetId",
+                    1
+                );
 
-            if (session.gameMode == GameMode.Practice &&
-                session.selectedPlanetId > 0 &&
-                session.selectedPracticeTrackId > 0)
-            {
-                selectedPlanet =
-                    session.selectedPlanetId;
+            selectedTrack =
+                PlayerPrefs.GetInt(
+                    "PracticeTrackId",
+                    1
+                );
 
-                selectedTrack =
-                    session.selectedPracticeTrackId;
-
-                hasPracticeSelection = true;
-            }
+            hasPracticeSelection = true;
         }
 
+
+        // 전달받은 값 확인
         if (!hasPracticeSelection)
         {
             Debug.LogWarning(
                 "[Practice] 전달된 훈련 트랙이 없습니다. " +
-                "테스트용 1_1 훈련을 실행합니다."
+                "테스트용 1-1 훈련을 실행합니다."
+            );
+        }
+        else
+        {
+            Debug.Log(
+                $"[Practice] 훈련 선택 정보 받음 - " +
+                $"Planet={selectedPlanet}, " +
+                $"Track={selectedTrack}"
             );
         }
 
+
+        // 행성 번호 확인
         if (selectedPlanet < 1 ||
             selectedPlanet > 4)
         {
@@ -280,8 +310,14 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             return;
         }
 
+
+        // 행성별 훈련 개수
+
+        // 1번 행성 = 훈련 4개
+        // 나머지 행성 = 훈련 5개
         int maxTrackCount =
             selectedPlanet == 1 ? 4 : 5;
+
 
         if (selectedTrack < 1 ||
             selectedTrack > maxTrackCount)
@@ -295,13 +331,17 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             return;
         }
 
+
+        // 선택한 훈련의 미니게임 목록 가져오기
         trackMinigames =
             PracticeTrackCatalog.GetMinigames(
                 selectedPlanet,
                 selectedTrack
             );
 
-        if (trackMinigames.Count == 0)
+
+        if (trackMinigames == null ||
+            trackMinigames.Count == 0)
         {
             Debug.LogError(
                 "[Practice] 훈련 트랙에 " +
@@ -312,8 +352,25 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             return;
         }
 
+
+        Debug.Log(
+            $"[Practice] 실행할 훈련: " +
+            $"{selectedPlanet}-{selectedTrack}"
+        );
+
+        Debug.Log(
+            $"[Practice] 미니게임 목록: " +
+            string.Join(
+                ", ",
+                trackMinigames
+            )
+        );
+
+
         currentTrackIndex = 0;
 
+
+        // RhythmManager 확인
         if (rhythmManager == null)
         {
             Debug.LogError(
@@ -323,6 +380,7 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             ReturnToExitScene();
             return;
         }
+
 
         if (chartCsv == null)
         {
@@ -335,18 +393,20 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             return;
         }
 
-        // PracticeScene을 직접 실행하는 테스트 상황에서는
-        // GameRoot가 없을 수도 있으므로 null 검사.
+
+        // Audio
         if (GameRoot.Instance != null &&
             GameRoot.Instance.Audio != null)
         {
             GameRoot.Instance.Audio.StopBgm();
         }
 
+
         rhythmManager.SetTimelineMusic(
             practiceMusic,
             false
         );
+
 
         if (practiceMusic == null)
         {
@@ -356,10 +416,14 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             );
         }
 
+
+        // 연습 시작
         isPracticing = true;
 
         practiceCoroutine =
-            StartCoroutine(PracticeLoop());
+            StartCoroutine(
+                PracticeLoop()
+            );
     }
 
     private IEnumerator PracticeLoop()
@@ -1164,20 +1228,22 @@ public class PracticeMinigameSceneManager : MonoBehaviour
         string exitScene =
             fallbackExitSceneName;
 
+        string savedReturnScene =
+            PlayerPrefs.GetString(
+            "PracticeReturnScene",
+            ""
+        );
+
+        if (!string.IsNullOrWhiteSpace(savedReturnScene))
+        {
+            exitScene = savedReturnScene;
+        }
+
+
+        // GameRoot가 있다면 기존 Session도 정리
         if (GameRoot.Instance != null &&
             GameRoot.Instance.Session != null)
         {
-            string sessionReturnScene =
-                GameRoot.Instance.Session.Data
-                    .returnSceneName;
-
-            if (!string.IsNullOrWhiteSpace(
-                    sessionReturnScene))
-            {
-                exitScene =
-                    sessionReturnScene;
-            }
-
             GameRoot.Instance.Session.Clear();
         }
 
@@ -1228,5 +1294,92 @@ public class PracticeMinigameSceneManager : MonoBehaviour
 
         if (rhythmManager != null)
             rhythmManager.ClearCurrent();
+    }
+
+    public void OnModeButtonClick()
+    {
+        ChangeButtonSprite(
+            modeButton,
+            modeButtonPressedSprite
+        );
+
+        TogglePracticeMode();
+    }
+
+    public void OnNextButtonClick()
+    {
+        ChangeButtonSprite(
+            nextButton,
+            nextButtonPressedSprite
+        );
+
+        NextMinigame();
+    }
+
+    public void OnYesButtonClick()
+    {
+        ChangeButtonSprite(
+            yesButton,
+            yesButtonPressedSprite
+        );
+
+        ConfirmNextOrExit();
+    }
+
+    public void OnNoButtonClick()
+    {
+        ChangeButtonSprite(
+            noButton,
+            noButtonPressedSprite
+        );
+
+        CancelNextOrExit();
+    }
+
+    private void ChangeButtonSprite(
+    GameObject buttonObject,
+    Sprite pressedSprite)
+    {
+        if (buttonObject == null)
+            return;
+
+        if (pressedSprite == null)
+            return;
+
+        UnityEngine.UI.Image buttonImage =
+            buttonObject.GetComponent<UnityEngine.UI.Image>();
+
+        if (buttonImage == null)
+            return;
+
+        // 현재 버튼에 설정되어 있는 기본 Sprite 저장
+        Sprite originalSprite =
+            buttonImage.sprite;
+
+        // 클릭 Sprite로 변경
+        buttonImage.sprite =
+            pressedSprite;
+
+        StartCoroutine(
+            RestoreButtonSprite(
+                buttonImage,
+                originalSprite
+            )
+        );
+    }
+
+    private IEnumerator RestoreButtonSprite(
+        UnityEngine.UI.Image buttonImage,
+        Sprite originalSprite)
+    {
+        yield return new WaitForSecondsRealtime(
+            buttonPressedDuration
+        );
+
+        if (buttonImage != null)
+        {
+            buttonImage.sprite =
+                originalSprite;
+        }
     }
 }
