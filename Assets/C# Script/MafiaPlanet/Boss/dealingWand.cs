@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections;
 using UnityEngine;
 using DG.Tweening;
@@ -5,17 +6,21 @@ using DG.Tweening;
 public class dealingWand : MonoBehaviour
 {
     [Header("Hit Settings")]
-    [SerializeField] private Collider2D hitCollider;      
-    [SerializeField] private GameObject hitEffectPrefab;  
-    [SerializeField] private float activeTime = 0.2f;     
-    [SerializeField] private float lifeTime = 2f;         
+    [SerializeField] private Collider2D hitCollider;
+    [SerializeField] private GameObject hitEffectPrefab;
+    [SerializeField] private float activeTime = 0.2f;
+    [SerializeField] private float lifeTime = 2f;
 
     [Header("Intro Tween")]
-    [SerializeField] private float spawnBackOffset = 5f;  
-    [SerializeField] private float spawnLeftOffset = 5f;  
-    [SerializeField] private float moveDuration = 0.18f;  
+    [SerializeField] private float spawnBackOffset = 5f;
+    [SerializeField] private float spawnLeftOffset = 5f;
+    [SerializeField] private float moveDuration = 0.18f;
     [SerializeField] private float rotateDuration = 0.16f;
-    [SerializeField] private float curveBend = 6f;        
+    [SerializeField] private float curveBend = 6f;
+
+    // 레이저(히트 판정) ON/OFF 알림 — 보스 스프라이트 교체용
+    public event Action<bool> OnLaserStateChanged;
+    private bool laserOn;
 
     private Vector2 lastDir = Vector2.right;
     private Vector2 targetPos;
@@ -31,13 +36,19 @@ public class dealingWand : MonoBehaviour
         if (hitCollider != null)
             hitCollider.enabled = false;
 
-        tempEffect = transform.GetChild(0).gameObject; tempEffect.SetActive(false);
+        tempEffect = transform.GetChild(0).gameObject;
+        tempEffect.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        // 레이저 켜진 채로 파괴돼도 카운트가 꼬이지 않게
+        SetLaser(false);
     }
 
     public void Fire(Vector2 position, Vector2 direction, float lightRemaining, float wandRemaining, Vector2 offset = default, float angleOffsetDeg = 0f)
     {
         targetPos = position + offset;
-        targetRot = transform.rotation;
         lifeTime = wandRemaining;
         activeTime = lightRemaining;
 
@@ -50,11 +61,9 @@ public class dealingWand : MonoBehaviour
         Vector2 spawnPos = position + (-dir * spawnBackOffset + -left * spawnLeftOffset);
 
         float finalAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        float startAngle = finalAngle + 90f;
-        Quaternion startRot = Quaternion.AngleAxis(startAngle, Vector3.forward);
+        Quaternion startRot = Quaternion.AngleAxis(finalAngle + 90f, Vector3.forward);
         Quaternion finalRot = Quaternion.AngleAxis(finalAngle, Vector3.forward);
 
-        // Ÿ�ٹ����� ��������
         targetRot = Quaternion.AngleAxis(finalAngle + angleOffsetDeg, Vector3.forward);
 
         transform.SetPositionAndRotation(spawnPos, startRot);
@@ -64,14 +73,10 @@ public class dealingWand : MonoBehaviour
                          + (-dir * (curveBend * 0.35f));
 
         introSeq?.Kill(false);
-        introSeq = DOTween.Sequence();
+        introSeq = DOTween.Sequence().SetLink(gameObject);
 
-        introSeq.Join(transform.DOPath(
-            new Vector3[] { control, position },
-            moveDuration,
-            PathType.CatmullRom)
+        introSeq.Join(transform.DOPath(new Vector3[] { control, position }, moveDuration, PathType.CatmullRom)
             .SetEase(Ease.OutQuad));
-
         introSeq.Join(transform.DORotateQuaternion(finalRot, rotateDuration)
             .SetEase(Ease.OutQuad));
 
@@ -79,21 +84,15 @@ public class dealingWand : MonoBehaviour
         introSeq.AppendInterval(lifeTime);
 
         Vector2 retreatPos = position + (left.normalized * -7f);
-
-        introSeq.Append(transform.DOMove(retreatPos, 0.5f)
-            .SetEase(Ease.InSine));
+        introSeq.Append(transform.DOMove(retreatPos, 0.5f).SetEase(Ease.InSine));
 
         introSeq.OnComplete(() => Destroy(gameObject));
     }
 
-
-
     private IEnumerator FireRoutine()
     {
-        transform.DOMove(targetPos, lifeTime)
-            .SetEase(Ease.OutSine);
-        transform.DORotateQuaternion(targetRot, lifeTime)
-            .SetEase(Ease.OutSine);
+        transform.DOMove(targetPos, lifeTime).SetEase(Ease.OutSine).SetLink(gameObject);
+        transform.DORotateQuaternion(targetRot, lifeTime).SetEase(Ease.OutSine).SetLink(gameObject);
 
         yield return new WaitForSeconds(moveDuration);
 
@@ -102,6 +101,7 @@ public class dealingWand : MonoBehaviour
             hitCollider.enabled = true;
             tempEffect.SetActive(true);
         }
+        SetLaser(true);
 
         if (hitEffectPrefab != null)
             Instantiate(hitEffectPrefab, transform.position, transform.rotation);
@@ -113,6 +113,14 @@ public class dealingWand : MonoBehaviour
             hitCollider.enabled = false;
             tempEffect.SetActive(false);
         }
+        SetLaser(false);
+    }
+
+    private void SetLaser(bool on)
+    {
+        if (laserOn == on) return;
+        laserOn = on;
+        OnLaserStateChanged?.Invoke(on);
     }
 
 #if UNITY_EDITOR
@@ -124,9 +132,9 @@ public class dealingWand : MonoBehaviour
         Vector2 dir = lastDir.sqrMagnitude < 0.0001f ? Vector2.right : lastDir.normalized;
         Vector2 left = new Vector2(-dir.y, dir.x);
 
-        Vector3 targetPos = pos + (Vector3)(dir * spawnBackOffset + left * spawnLeftOffset); // �ܼ� ����
+        Vector3 gizmoPos = pos + (Vector3)(dir * spawnBackOffset + left * spawnLeftOffset);
         Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(targetPos, 0.2f);
+        Gizmos.DrawWireSphere(gizmoPos, 0.2f);
     }
 #endif
 }
