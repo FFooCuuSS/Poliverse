@@ -116,6 +116,7 @@ public class GameSettingsManager : MonoBehaviour
         if (Data == null)
             return;
 
+#if !UNITY_ANDROID && !UNITY_IOS
         Screen.SetResolution(
             Data.resolutionWidth,
             Data.resolutionHeight,
@@ -124,6 +125,10 @@ public class GameSettingsManager : MonoBehaviour
 
         QualitySettings.vSyncCount =
             Data.vSyncCount;
+#else
+    // 모바일은 vSync가 무시되고 targetFrameRate만 적용됨
+    QualitySettings.vSyncCount = 0;
+#endif
 
         Application.targetFrameRate =
             Data.targetFrameRate;
