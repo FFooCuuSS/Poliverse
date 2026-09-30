@@ -3,13 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class MiniGameBase : MonoBehaviour
+public abstract class MiniGameBase : MonoBehaviour, IPracticeDemoInput
 {
     public event Action OnSuccess;
     public event Action OnFail;
 
     public bool IsSuccess { get; protected set; }
     public bool IsInputLocked { get; protected set; } = false;
+    protected bool IsDemoMode { get; private set; }
+    public virtual void SetDemoMode(bool isDemo)
+    {
+        IsDemoMode = isDemo;
+    }
 
     protected virtual float TimerDuration => 10f;
     protected virtual string MinigameTitle => "기본 미니게임";
@@ -65,7 +70,8 @@ public abstract class MiniGameBase : MonoBehaviour
     public enum PracticeTimingMode
     {
         RhythmChart,
-        Custom
+        Custom,
+        Auto
     }
 
     [Header("Practice Guide")]

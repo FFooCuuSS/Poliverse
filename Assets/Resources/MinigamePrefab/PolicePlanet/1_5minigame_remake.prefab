@@ -1886,7 +1886,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ec0c55fb9291d549bbfa8d5de2388c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  practiceTimingMode: 1
+  practiceTimingMode: 2
   useRhythmJudgementScore: 0
   manualTotalNodeCount: 14
   printScoreDebugOnEnd: 1

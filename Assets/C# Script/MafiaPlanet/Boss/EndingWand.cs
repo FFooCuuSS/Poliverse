@@ -13,6 +13,8 @@ public class EndingWand : MonoBehaviour
     [Header("Beam Shape / Visual")]
     [SerializeField] private float beamMaxLength = 20f;
     [SerializeField] private float beamHalfWidth = 0.075f;
+    [Tooltip("빔 색/알파. 머티리얼 에셋은 건드리지 않음 (셰이더는 Sprites/Default 권장)")]
+    [SerializeField] private Color beamColor = new(1f, 1f, 1f, 0.8f);
     [SerializeField] private string sortingLayerName = "Default";
     [SerializeField] private int sortingOrder = 300;
 
@@ -71,6 +73,8 @@ public class EndingWand : MonoBehaviour
 
         mr.sortingLayerName = sortingLayerName;
         mr.sortingOrder = sortingOrder;
+
+        ApplyBeamColor();
 
         // 발사 전엔 길이 0 → 안 보임
         currentLength = 0f;
@@ -158,7 +162,7 @@ public class EndingWand : MonoBehaviour
                 if (hitEffectPrefab != null)
                 {
                     if (hitFxInstance == null)
-                        hitFxInstance = Instantiate(hitEffectPrefab, endWorld, transform.rotation);
+                        hitFxInstance = Instantiate(hitEffectPrefab, endWorld, transform.rotation, transform.parent);
                     else
                         hitFxInstance.transform.SetPositionAndRotation(endWorld, transform.rotation);
                 }
@@ -205,6 +209,22 @@ public class EndingWand : MonoBehaviour
     {
         notifyEnabled = true;
     }
+
+    private void ApplyBeamColor()
+    {
+        // MaterialPropertyBlock → 이 렌더러에만 적용, 에셋 저장 상태와 무관
+        var mpb = new MaterialPropertyBlock();
+        mr.GetPropertyBlock(mpb);
+        mpb.SetColor("_Color", beamColor);
+        mr.SetPropertyBlock(mpb);
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (mr != null) ApplyBeamColor();
+    }
+#endif
 
     private void SetLaser(bool on)
     {

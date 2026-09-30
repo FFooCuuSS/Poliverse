@@ -556,12 +556,15 @@ public class PracticeMinigameSceneManager : MonoBehaviour
              */
             rhythmManager.StartSong();
 
+            float endTime = currentMinigame.GetTimerDuration;
+
             yield return new WaitUntil(
                 () =>
                     !isPracticing ||
                     nextRequested ||
                     modeChangeRequested ||
-                    rhythmManager.HasDispatchedAllEvents
+                    (rhythmManager.HasDispatchedAllEvents &&
+                     rhythmManager.SongTime >= endTime)
             );
 
             /*
