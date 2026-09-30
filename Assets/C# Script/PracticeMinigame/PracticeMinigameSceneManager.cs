@@ -435,17 +435,17 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             if (!isPracticing)
                 yield break;
 
+            yield return ShowTitlePhase();
+
+            if (!isPracticing)
+                yield break;
+
             yield return CreateMinigame();
 
             if (!isPracticing || currentMinigame == null)
             {
                 yield break;
             }
-
-            yield return ShowTitlePhase();
-
-            if (!isPracticing)
-                yield break;
 
             playMode = PracticePlayMode.Demo;
 
@@ -794,17 +794,32 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             titleCanvasGroup.alpha = 1f;
         }
 
-        if (titleText != null &&
-            currentMinigame != null)
+        // 1. 프리팹을 로드해서 미니게임 스크립트의 타이틀 가져오기
+        string planetFolderName = GetPlanetFolderName(selectedPlanet);
+        int minigameNumber = CurrentMinigameId;
+        string resourcePath = $"MinigamePrefab/{planetFolderName}/{selectedPlanet}_{minigameNumber}minigame_remake";
+
+        GameObject prefab = Resources.Load<GameObject>(resourcePath);
+        string minigameTitle = "";
+
+        if (prefab != null)
+        {
+            MiniGameBase tempMini = prefab.GetComponent<MiniGameBase>();
+            if (tempMini != null)
+            {
+                // 미니게임 스크립트에 정의된 GetMinigameTitle을 가져옵니다.
+                minigameTitle = tempMini.GetMinigameTitle;
+            }
+        }
+
+        // 2. 타이틀 텍스트 패널 및 컴포넌트 활성화 후 텍스트 세팅
+        if (titleText != null)
         {
             titleText.gameObject.SetActive(true);
-
             titleText.alpha = 1f;
 
-            titleText.text =
-                $"{selectedPlanet}-" +
-                $"{CurrentMinigameId} " +
-                $"{currentMinigame.GetMinigameTitle}";
+            // 예: "1-1 미니게임제목" 형태로 출력됩니다.
+            titleText.text = $"{selectedPlanet}-{minigameNumber} {minigameTitle}";
         }
 
         if (transitionPanel != null &&

@@ -29,6 +29,10 @@ public class Minigame_1_9 : MiniGameBase
     protected override string MinigameTitle => "가동시켜라!";
 
     protected override string MinigameExplain => " 불이 2번씩 켜지며 타이밍을 알려줍니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "타이밍에 맞게 화면을 터치해주세요"
+    };
 
     private bool ended;
     private bool inputOpen;

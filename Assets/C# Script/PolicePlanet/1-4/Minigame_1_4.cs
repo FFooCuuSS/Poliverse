@@ -13,6 +13,10 @@ public class Minigame_1_4 : MiniGameBase
     protected override string MinigameTitle => "악세서리 제거하기";
 
     protected override string MinigameExplain => "죄수의 변장이 순서대로 깜빡이며 타이밍을 알려줍니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "잠시 후 변장을 깜빡인 순서대로 터치해주세요."
+    };
 
     [Header("Round Setting")]
     [SerializeField] private int totalRound = 2;
@@ -237,6 +241,66 @@ public class Minigame_1_4 : MiniGameBase
         {
             if (acc == null) continue;
             acc.SetInteractableNow(false);
+        }
+    }
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+        if (!string.Equals(actionType, "Action", System.StringComparison.OrdinalIgnoreCase))
+            return;
+
+        Debug.Log($"[1-4 Demo] Action Index: {actionIndex}");
+
+        // 전체 actionIndex를 바탕으로 현재 라운드와 라운드 내 인덱스를 계산합니다.
+        // 한 라운드당 3개씩 진행된다고 가정 (accessoryPerRound = 3)
+        int targetRound = actionIndex / accessoryPerRound;
+        int roundLocalIndex = actionIndex % accessoryPerRound;
+
+        // 만약 데모 도중 라운드가 바뀌어야 하는 시점이라면 라운드 상태 동기화 처리
+        if (currentRound != targetRound)
+        {
+            currentRound = targetRound;
+            // 필요하다면 여기서 라운드 시작 로그나 추가 처리를 할 수 있습니다.
+            Debug.Log($"[1-4 Demo] 데모 라운드 전환: {currentRound + 1}");
+        }
+
+        // 라운드 내 순서 동기화
+        swipeCountInRound = roundLocalIndex;
+
+        switch (roundLocalIndex)
+        {
+            case 0:
+                RemoveAccessoryByType(Accessory.AccessoryType.Hat);
+                break;
+
+            case 1:
+                RemoveAccessoryByType(Accessory.AccessoryType.Glasses);
+                break;
+
+            case 2:
+                RemoveAccessoryByType(Accessory.AccessoryType.Mustache);
+                break;
+
+            default:
+                Debug.LogWarning($"[1-4 Demo] 알 수 없는 Round Local Index: {roundLocalIndex}");
+                break;
+        }
+
+        // 행동이 끝났으므로 라운드 내 카운터를 1증가시키고 라운드 종료 체크
+        swipeCountInRound++;
+        CheckRoundEnd();
+    }
+
+    // 특정 타입의 액세서리를 찾아 강제로 제거하는 헬퍼 메서드
+    private void RemoveAccessoryByType(Accessory.AccessoryType type)
+    {
+        var targetAcc = orderedAccessories.Find(acc => acc != null && acc.Type == type && !acc.IsRemoved);
+        if (targetAcc != null)
+        {
+            targetAcc.SetInteractableNow(true);
+            targetAcc.RemoveWithDelay(0f);
+            targetAcc.SetInteractableNow(false);
+            Debug.Log($"[1-4 Demo] 악세서리 자동 제거: {type}");
         }
     }
 }
