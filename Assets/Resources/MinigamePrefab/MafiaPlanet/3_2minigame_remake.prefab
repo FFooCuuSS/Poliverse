@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5af7b26653dda684281e06fbbf35572a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minigame: {fileID: 1180141133588210124}
   hand: {fileID: 715867178215862525}
   grab: {fileID: 5450990910268752055}
   target: {fileID: 793875740957211042}
@@ -53,9 +54,9 @@ MonoBehaviour:
   moveY: 7
   firstTargetX: -7
   endX: -12
+  horizontalMoveTime: 2.4
   downY: 4.4
   upY: 9.5
-  horizontalMoveTime: 2.4
   verticalMoveTime: 1.2
 --- !u!1 &5188424161739787227
 GameObject:
@@ -226,6 +227,7 @@ MonoBehaviour:
   useRhythmJudgementScore: 1
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
+  handController: {fileID: 7382125343343765783}
 --- !u!1001 &975116322537065070
 PrefabInstance:
   m_ObjectHideFlags: 0

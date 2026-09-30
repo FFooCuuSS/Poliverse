@@ -187,6 +187,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minigame3_4: {fileID: 3140207031555331764}
   cardPrefab: {fileID: 8526903590057933716, guid: b95929f00bdd79a4284b4ce7992b9d22, type: 3}
+  cardParent: {fileID: 6971243491308997188}
   cardPosition:
   - {fileID: 1940128934615994446}
   - {fileID: 1940128934615994446}
@@ -293,13 +294,14 @@ GameObject:
   - component: {fileID: 1412490299996993384}
   - component: {fileID: 21675898141653102}
   - component: {fileID: 1355846984851091619}
+  - component: {fileID: 1304870387699179458}
   m_Layer: 9
-  m_Name: Square
+  m_Name: Arrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1744755312623485662
 Transform:
   m_ObjectHideFlags: 0
@@ -469,6 +471,29 @@ MonoBehaviour:
   checkIsSuspicious: 0
   clickCount: 0
   suspiciousClickCount: 0
+--- !u!114 &1304870387699179458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2636000063274541822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.6
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &6191868643665467212
 GameObject:
   m_ObjectHideFlags: 0
@@ -559,6 +584,7 @@ MonoBehaviour:
   handStopX: 6
   expectedInputCount: 5
   requiredGoodOrPerfectCount: 1
+  arrow: {fileID: 2636000063274541822}
 --- !u!114 &689336450955789476
 MonoBehaviour:
   m_ObjectHideFlags: 0

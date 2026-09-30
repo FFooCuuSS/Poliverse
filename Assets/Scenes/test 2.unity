@@ -258,7 +258,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1721242880}
-  - {fileID: 1202494218}
   - {fileID: 2034670382}
   - {fileID: 1581541108}
   - {fileID: 1143611450}
@@ -596,17 +595,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ac46841cdadb9764f832fabab97ce553, type: 3}
---- !u!114 &281877185 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4374065609159194253, guid: 95e2d83ea71d7c240b04c891e484a7e8, type: 3}
-  m_PrefabInstance: {fileID: 1076947164}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd28cab8588880541a97cf928eb89428, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &382252842
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1699,6 +1687,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 2_2minigame_remake
       objectReference: {fileID: 0}
+    - target: {fileID: 8004529902184986114, guid: 95e2d83ea71d7c240b04c891e484a7e8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8688297604398399186, guid: 95e2d83ea71d7c240b04c891e484a7e8, type: 3}
       propertyPath: m_LocalPosition.x
       value: -3.8952372
@@ -1928,12 +1920,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   audioSource: {fileID: 1085340226}
-  currentMinigame: {fileID: 281877185}
+  currentMinigame: {fileID: 1444115651}
   loadMode: 0
   chartFile: {fileID: 4900000, guid: d69b17f77d95b8b48b88f46175f2c750, type: 3}
   addressablesKey: 
-  idA: 2
-  idB: 2
+  idA: 3
+  idB: 4
   perfectWindow: 0.03
   goodWindow: 0.07
   hitWindow: 1
@@ -2090,11 +2082,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: adcdc5585cb204f419ae8de6f44fe9a5, type: 3}
---- !u!4 &1202494218 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5297281673859481058, guid: 3a2962bc5e4d1244aacf2ca9d8586d14, type: 3}
-  m_PrefabInstance: {fileID: 1546273274}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1287856591 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5312806592081603972, guid: 930c04d3741485b49a03da135775b4ab, type: 3}
@@ -2218,6 +2205,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8d1c98e5664f6964ea0e49ee331a0b21, type: 3}
+--- !u!114 &1444115651 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3140207031555331764, guid: 3a2962bc5e4d1244aacf2ca9d8586d14, type: 3}
+  m_PrefabInstance: {fileID: 1546273274}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81dc5cfc84255e84fa5c12951bf42ae8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1458625776
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2342,19 +2340,19 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 28067532}
+    m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 5297281673859481058, guid: 3a2962bc5e4d1244aacf2ca9d8586d14, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -4.1128693
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5297281673859481058, guid: 3a2962bc5e4d1244aacf2ca9d8586d14, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.33576682
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5297281673859481058, guid: 3a2962bc5e4d1244aacf2ca9d8586d14, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.08678754
+      value: -0.05187039
       objectReference: {fileID: 0}
     - target: {fileID: 5297281673859481058, guid: 3a2962bc5e4d1244aacf2ca9d8586d14, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2387,10 +2385,6 @@ PrefabInstance:
     - target: {fileID: 6971243491308997188, guid: 3a2962bc5e4d1244aacf2ca9d8586d14, type: 3}
       propertyPath: m_Name
       value: 3_4minigame_remake
-      objectReference: {fileID: 0}
-    - target: {fileID: 6971243491308997188, guid: 3a2962bc5e4d1244aacf2ca9d8586d14, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3500,3 +3494,4 @@ SceneRoots:
   - {fileID: 162270081}
   - {fileID: 1333744286}
   - {fileID: 1076947164}
+  - {fileID: 1546273274}

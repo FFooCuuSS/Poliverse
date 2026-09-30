@@ -23,6 +23,8 @@ public class Minigame_3_4_Remake : MiniGameBase
     [Tooltip("성공으로 인정할 Good/Perfect 횟수. (예: 트랩 1번만 맞추는 게임이면 1)")]
     [SerializeField] private int requiredGoodOrPerfectCount = 1;
 
+
+    public GameObject arrow;
     // ===== 상태 =====
     private bool ended;
 
@@ -42,8 +44,8 @@ public class Minigame_3_4_Remake : MiniGameBase
     public override void StartGame()
     {
         Debug.Log("[3-4] StartGame called");
-        base.StartGame();
-
+       // base.StartGame();
+       arrow.SetActive(true);
         ended = false;
 
         perfectCnt = 0;

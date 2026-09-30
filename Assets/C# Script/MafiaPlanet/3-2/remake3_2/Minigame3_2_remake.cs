@@ -19,15 +19,15 @@ public class Minigame3_2remake : MiniGameBase
 
     private bool finished = false;
 
-
-    private void Start()
+    public override void StartGame()
     {
         IsInputLocked = false;
 
         Debug.Log("[3-2] Minigame3_2remake 시작");
-
-        base.StartGame();
+        // 추가 초기화
+        // 예: instructionText.text = MinigameExplain;
     }
+    
 
 
     private void Update()

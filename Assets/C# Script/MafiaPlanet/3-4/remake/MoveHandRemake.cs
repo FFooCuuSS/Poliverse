@@ -6,89 +6,178 @@ public class MoveHandRemake : MonoBehaviour
 {
     public GameObject hand;
 
+    // 손의 시작 위치
     Vector3 startPos = new Vector3(-6.0f, 2.0f, 0f);
     Vector3 startSet = new Vector3(-6.0f, 2.0f, 0f);
 
-    float duration = 0.5f; // 이동에 걸리는 시간(0.5초)
+    // 한 박 = 0.6초
+    float duration = 0.6f;
+
+    // 이 스크립트에서 직접 계산하는 현재 시간
+    private float currTime = 0f;
 
     bool setHand = false;
     bool startHand = false;
 
-    // ===== 이동 스케줄/상태 =====
-    private bool isMoving = false;       // 지금 이동 중인지
-    private float moveStartTime = 0f;    // 현재 이동 시작 시각
-    private Vector3 moveFrom;            // 이동 시작 위치
-    private Vector3 moveTo;              // 이동 목표 위치
+    // ===== 이동 상태 =====
+    private bool isMoving = false;
 
-    private float nextMoveTime = 5.5f;   // 다음 이동이 시작될 시각(처음은 5.5초)
-    private float stepX = 2f;            // 한 번에 x로 +2 이동
-    private float stopX = 6f;            // x가 6 이상이면 종료
+    // 이동이 시작된 시간을 저장
+    private float moveStartTime = 0f;
+
+    private Vector3 moveFrom;
+    private Vector3 moveTo;
+
+    // 첫 이동 시작 시간
+    // 6.6초에 손 세팅 후
+    // 1박(0.6초) 뒤인 7.2초에 첫 이동 시작
+    private float nextMoveTime = 0f;
+
+    // 한 번 이동할 때 X축으로 +2
+    private float stepX = 2f;
+
+    // X가 6에 도착하면 종료
+    private float stopX = 6f;
+
 
     void Update()
     {
-        // 5초에 손 위치 세팅(위쪽)
-        if (!setHand && Time.time >= 5f)
+        // Time.time을 직접 사용하지 않고
+        // 매 프레임 지난 시간을 누적해서 자체 시간 계산
+        currTime += Time.deltaTime;
+
+
+        // =========================
+        // 6.0초
+        // 손을 위쪽 위치에 세팅
+        // =========================
+        if (!setHand && currTime >= 6.0f)
         {
             hand.transform.position = startPos;
+
             setHand = true;
+
+            Debug.Log("[MoveHand] 손 등장 : " + currTime);
         }
 
-        // 5.5초에 시작 위치 세팅(아래쪽) + 이동 루프 시작 준비
-        if (!startHand && Time.time >= 5.5f)
+
+        // =========================
+        // 6.6초
+        // 손을 아래쪽 시작 위치에 세팅
+        // =========================
+        if (!startHand && currTime >= 6.6f)
         {
             hand.transform.position = startSet;
+
             startHand = true;
 
-            // 첫 이동은 5.5초에 바로 시작되도록 이미 nextMoveTime을 5.5로 잡아둠
+            Debug.Log("[MoveHand] 이동 준비 : " + currTime);
         }
 
-        // 시작 전이면 아무 것도 안 함
-        if (!startHand) return;
 
+        // 아직 6.6초가 되지 않았다면
+        // 이동 로직 실행하지 않음
+        if (!startHand)
+        {
+            return;
+        }
+
+
+        // 손 이동 처리
         MoveHand();
     }
 
+
     void MoveHand()
     {
-        float now = Time.time;
-
-        // 1) 이동 중이면: Lerp로 진행
+        // =========================
+        // 현재 이동 중
+        // =========================
         if (isMoving)
         {
-            float t = (now - moveStartTime) / duration; // 0~1 진행률
-            hand.transform.position = Vector3.Lerp(moveFrom, moveTo, t);
+            // 현재 이동 진행률 계산
+            // 0 -> 1까지 0.6초 동안 증가
+            float t =
+                (currTime - moveStartTime) / duration;
 
+
+            // 시작 위치에서 목표 위치까지 이동
+            hand.transform.position =
+                Vector3.Lerp(moveFrom, moveTo, t);
+
+
+            // =========================
             // 이동 완료
+            // =========================
             if (t >= 1f)
             {
+                // 정확한 목표 위치로 고정
                 hand.transform.position = moveTo;
+
                 isMoving = false;
 
-                // 다음 이동은 "도착한 시각 기준 +0.5초 대기 후" = 지금부터 0.5초 뒤
-                // (즉 이동 0.5초 + 대기 0.5초 = 총 1초마다 한 칸)
-                nextMoveTime = now + 0.5f;
+
+                // 이동 완료 후
+                // 1박 = 0.6초 대기
+                nextMoveTime =
+                    currTime + 0.6f;
+
+                Debug.Log(
+                    "[MoveHand] 이동 완료 : " +
+                    currTime +
+                    " / 다음 이동 : " +
+                    nextMoveTime
+                );
             }
 
-            return; // 이동 중엔 여기서 끝
+            return;
         }
 
-        // 2) 이동 중이 아니면: 다음 이동 시작 시각이 되었는지 체크
-        if (now < nextMoveTime) return;
 
-        // 종료 조건: x가 6 이상이면 더 이상 이동 안 함
+        // =========================
+        // 다음 이동 시간이 될 때까지 대기
+        // =========================
+        if (currTime < nextMoveTime)
+        {
+            return;
+        }
+
+
+        // =========================
+        // 마지막 위치에 도착했으면 종료
+        // =========================
         if (hand.transform.position.x >= stopX)
         {
             return;
         }
 
-        // 3) 새 이동 시작
+
+        // =========================
+        // 새로운 이동 시작
+        // =========================
+
+        // 현재 위치 저장
         moveFrom = hand.transform.position;
-        moveTo = moveFrom + new Vector3(stepX, 0f, 0f); // 현재 위치에서 x +2
 
-        // 혹시 마지막에 6을 넘기면 딱 6에 맞추고 싶으면 아래처럼 클램프 가능
-        //if (moveTo.x > stopX) moveTo.x = stopX;
 
-        moveStartTime = now;
+        // X축으로 +2 이동
+        moveTo =
+            moveFrom + new Vector3(stepX, 0f, 0f);
+
+
+        // 이동 시작 시간 저장
+        moveStartTime = currTime;
+
         isMoving = true;
+
+
+        Debug.Log(
+            "[MoveHand] 이동 시작 : " +
+            currTime +
+            " / " +
+            moveFrom.x +
+            " -> " +
+            moveTo.x
+        );
     }
 }
