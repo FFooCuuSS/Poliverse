@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static MiniGameBase;
 
-public class minigame_1_1_remake_DEBUG : MiniGameBase
+public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 15f;
     protected override string MinigameTitle => "범인 찾기";
@@ -63,6 +63,8 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
     private readonly Queue<int> pendingInputs = new Queue<int>();
 
     private Camera cam;
+
+    private bool isDemoMode = false;
 
     private void Log(string msg)
     {
@@ -169,6 +171,7 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
     {
         if (ended) return;
         if (roundsCompleted) return;
+        if (isDemoMode) return;
         if (!Input.GetMouseButtonDown(0)) return;
         if (cam == null) return;
 
@@ -626,5 +629,28 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase
             $"actionIndex={actionIndex}, " +
             $"enemy={expected}"
         );
+    }
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+
+        // 시범 모드가 되면 플레이어 입력 관련 상태 초기화
+        if (isDemoMode)
+        {
+            canClick = false;
+            pendingInputs.Clear();
+
+            if (inputWindowJob != null)
+            {
+                StopCoroutine(inputWindowJob);
+                inputWindowJob = null;
+            }
+
+            if (Scope != null)
+                Scope.SetActive(false);
+        }
+
+        Log($"[1-1] SetDemoMode = {isDemoMode}");
     }
 }

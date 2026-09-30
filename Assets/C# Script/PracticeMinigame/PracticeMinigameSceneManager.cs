@@ -429,8 +429,7 @@ public class PracticeMinigameSceneManager : MonoBehaviour
     private IEnumerator PracticeLoop()
     {
         for (currentTrackIndex = 0;
-             currentTrackIndex <
-             trackMinigames.Count;
+             currentTrackIndex < trackMinigames.Count;
              currentTrackIndex++)
         {
             if (!isPracticing)
@@ -438,8 +437,7 @@ public class PracticeMinigameSceneManager : MonoBehaviour
 
             yield return CreateMinigame();
 
-            if (!isPracticing ||
-                currentMinigame == null)
+            if (!isPracticing || currentMinigame == null)
             {
                 yield break;
             }
@@ -449,45 +447,24 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             if (!isPracticing)
                 yield break;
 
-            playMode =
-                PracticePlayMode.Demo;
+            playMode = PracticePlayMode.Demo;
 
-            yield return
-                PracticeCurrentMinigame();
+            yield return PracticeCurrentMinigame();
 
             if (!isPracticing)
                 yield break;
 
-            currentPhase =
-                PracticePhase.Transition;
+            currentPhase = PracticePhase.Transition;
 
-            /*
-             * 현재 게임 화면을 검게 덮은 뒤
-             * 프리팹을 교체한다.
-             */
-            yield return
-                FadeTransitionTo(1f);
+            yield return FadeTransitionTo(1f);
 
             DestroyCurrentMinigame();
             ResetCamera();
 
             yield return null;
-
-            /*
-             * 다음 for 반복에서
-             * CreateMinigame()
-             * ShowTitlePhase()
-             *
-             * 순으로 실행된다.
-             *
-             * ShowTitlePhase에서
-             * FadeTransitionTo(0)가 실행된다.
-             */
         }
 
-        currentPhase =
-            PracticePhase.Finished;
-
+        currentPhase = PracticePhase.Finished;
         practiceCoroutine = null;
     }
 
@@ -527,28 +504,11 @@ public class PracticeMinigameSceneManager : MonoBehaviour
                 playMode ==
                 PracticePlayMode.Demo;
 
-            /*
-             * 예시보기에서는 실제 플레이어 터치를 막는다.
-             */
             if (blockInputPanel != null)
             {
-                blockInputPanel.SetActive(
-                    isDemo
-                );
+                blockInputPanel.SetActive(isDemo);
             }
 
-            /*
-             * 현재 미니게임 초기화.
-             */
-            currentMinigame.StartGame();
-
-            yield return null;
-
-            /*
-             * 예시보기일 때만
-             * RhythmManager의 입력 이벤트를 받아
-             * 자동 행동을 실행한다.
-             */
             if (isDemo)
             {
                 if (practiceDemoManager != null)
@@ -574,8 +534,25 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             }
 
             /*
-             * DemoManager를 먼저 연결한 뒤
-             * 타임라인을 시작한다.
+                이제 모든 준비(입력 차단 및 데모 매니저 바인딩)가 끝난 후
+                미니게임을 시작합니다.
+            */
+            IPracticeDemoInput demoInput =
+                currentMinigame as IPracticeDemoInput;
+
+            if (demoInput != null)
+            {
+                demoInput.SetDemoMode(isDemo);
+            }
+
+            currentMinigame.StartGame();
+
+            // 데모 매니저 시작을 위한 한 프레임 대기
+            yield return null;
+
+            /*
+               DemoManager를 먼저 연결한 뒤
+               타임라인을 시작한다.
              */
             rhythmManager.StartSong();
 
@@ -873,6 +850,7 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             titleCanvasGroup.alpha = 1f;
         }
     }
+
     private IEnumerator FadeTitleOut()
     {
         if (titleCanvasGroup == null)
@@ -972,6 +950,7 @@ public class PracticeMinigameSceneManager : MonoBehaviour
             transitionPanel.SetActive(false);
         }
     }
+
     private void UpdatePracticeUI()
     {
         if (practicePanel != null)
