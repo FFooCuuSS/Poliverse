@@ -99,14 +99,14 @@ public class CaseManager_3_13 : MonoBehaviour
 
     [Header("생성 시간 설정")]
     [Tooltip("게임 시작 후 첫 물체가 생성되는 시간")]
-    [SerializeField] private float firstSpawnTime = 2.5f;
+    [SerializeField] private float firstSpawnTime = 2.4f;
 
     [Tooltip("물체가 생성되는 간격")]
-    [SerializeField] private float spawnInterval = 2f;
+    [SerializeField] private float spawnInterval = 4.8f;
 
     [Header("이동 설정")]
     [Tooltip("시작 위치에서 목표 위치까지 걸리는 시간")]
-    [SerializeField] private float travelTime = 1f;
+    [SerializeField] private float travelTime = 1.2f;
 
     [Header("랜덤 케이스 설정")]
     [Tooltip("체크 해제 시 아래 Fixed Case를 사용")]

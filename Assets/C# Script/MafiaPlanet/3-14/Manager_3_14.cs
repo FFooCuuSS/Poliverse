@@ -43,10 +43,10 @@ public class Manager_3_14 : MonoBehaviour
     [SerializeField] private float playerResetDuration = 0.15f;
 
     [Header("Round Transition")]
-    [SerializeField] private float transitionDuration = 0.25f;
+    [SerializeField] private float transitionDuration = 0.3f;
     [SerializeField] private float roundEnterOffsetX = 9f;
     [SerializeField] private float roundExitOffsetX = 9f;
-    [SerializeField] private float finalSuccessDelay = 0.25f;
+    [SerializeField] private float finalSuccessDelay = 0.3f;
 
     [Header("Final")]
     [SerializeField] private bool finishWhenLastInputResolved = true;

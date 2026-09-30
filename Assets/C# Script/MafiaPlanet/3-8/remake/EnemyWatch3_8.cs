@@ -9,8 +9,8 @@ public class EnemyWatch3_8 : MonoBehaviour
     public Sprite lookSprite;     // 잠깐 바뀔 모습
 
     [Header("시간 설정")]
-    public float changeTime = 2f;     // bush 생성 후 몇 초 뒤 바뀔지
-    public float lookDuration = 0.5f; // look 유지 시간
+    public float changeTime = 2.4f;     // bush 생성 후 몇 초 뒤 바뀔지
+    public float lookDuration = 0.6f; // look 유지 시간
 
     private SpriteRenderer sr;
     private Coroutine changeCoroutine; // 현재 실행 중인 코루틴 저장

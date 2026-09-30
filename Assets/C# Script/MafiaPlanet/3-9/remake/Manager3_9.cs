@@ -23,16 +23,16 @@ public class Manager3_9 : MonoBehaviour
 
 
     [Header("게임 시작 대기 시간")]
-    public float startDelay = 2f;
+    public float startDelay = 1.8f;
 
     [Header("패턴 ON 시간")]
-    public float patternOnTime = 0.5f;
+    public float patternOnTime = 0.6f;
 
     [Header("패턴 OFF 시간")]
-    public float patternOffTime = 0.5f;
+    public float patternOffTime = 0.6f;
 
     [Header("패턴 표시 후 입력까지 대기 시간")]
-    public float inputStartDelay = 2f;
+    public float inputStartDelay = 1.8f;
 
 
     // 랜덤으로 만들어진 정답 순서

@@ -12,12 +12,12 @@ public class Manager_3_3 : MonoBehaviour
     [Header("Scene Objects")]
     [SerializeField] private List<Hole_3_3> holes;
     [SerializeField] private GameObject key;
-    [SerializeField] private float fadeDuration = 0.2f;
+    [SerializeField] private float fadeDuration = 0.3f;
     [SerializeField] private int totalRounds = 3;
-    [SerializeField] private float[] targetTimes = { 1f, 2f, 3f };
+    [SerializeField] private float[] targetTimes = { 1.2f, 2.4f, 3.6f };
 
     [Header("Round")]
-    [SerializeField] private float nextRoundDelay = 0.25f;
+    [SerializeField] private float nextRoundDelay = 0.3f;
 
     private Rigidbody2D keyRb;
 

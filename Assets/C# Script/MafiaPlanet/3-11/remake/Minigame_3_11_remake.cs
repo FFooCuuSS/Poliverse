@@ -17,7 +17,6 @@ public class Minigame_3_11_remake : MiniGameBase
 
     private void Start()
     {
-        IsInputLocked = false;
         Debug.Log("[3-11] Minigame3_11remake 시작");
         base.StartGame();
     }
@@ -27,42 +26,8 @@ public class Minigame_3_11_remake : MiniGameBase
     {
         if (finished) return;
 
-        // 좌클릭 입력
-        if (Input.GetMouseButtonDown(0))
-        {
-            SubmitInput();
-        }
+       
     }
 
-    public override void OnRhythmEvent(string action)
-    {
-        if (finished) return;
-
-        switch (action)
-        {
-
-
-            case "Input":
-                Debug.Log("[3-11] Input 이벤트 도착");
-                break;
-        }
-    }
-
-    public void SubmitInput()
-    {
-        // 리듬매니저 입력 잠금이면 무시
-        //if (IsInputLocked) return;
-        Debug.Log("[3-11] SubmitInput 호출 - 입력 전달 준비");
-
-        // 입력을 리듬매니저로 전달
-        OnPlayerInput("Input");
-    }
-
-    // ===== 리듬매니저 판정 결과 로그 =====
-
-
-    public override void OnJudgement(JudgementResult judgement)
-    {
-        Debug.Log($"{judgement}");
-    }
+    
 }

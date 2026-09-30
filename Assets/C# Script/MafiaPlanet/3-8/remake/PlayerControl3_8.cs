@@ -6,29 +6,34 @@ public class PlayerControl3_8 : MonoBehaviour
 {
     [SerializeField] private Minigame3_8remake game; // 인스펙터로 연결
 
-    [Header("스프라이트")]
-    public Sprite normalSprite;   // 기본 모습
-    public Sprite lookSprite;     // 잠깐 바뀔 모습
-
     [Header("시간 설정")]
-    public float lookDuration = 0.5f; // look 유지 시간
+    public float lookDuration = 0.6f; // SpriteRenderer가 꺼져있는 시간
 
+    // Player 오브젝트에 붙어있는 SpriteRenderer
     private SpriteRenderer sr;
-    private Coroutine changeCoroutine; // 현재 실행 중인 코루틴 저장
+
+    // 현재 실행 중인 코루틴
+    private Coroutine changeCoroutine;
+
 
     void Awake()
     {
+        // 현재 Player 오브젝트의 SpriteRenderer 가져오기
         sr = GetComponent<SpriteRenderer>();
     }
 
+
     void Start()
     {
-        // 시작 시 normal로 맞춤
-        if (sr != null && normalSprite != null)
+        // 시작할 때 Player의 SpriteRenderer 활성화
+        // 기존 normalSprite 상태와 동일
+        if (sr != null)
         {
-            sr.sprite = normalSprite;
+            sr.enabled = true;
         }
     }
+
+
     private void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -39,11 +44,12 @@ public class PlayerControl3_8 : MonoBehaviour
         }
     }
 
-    // 외부에서 이 함수만 호출하면 됨
+
+    // 클릭했을 때 호출
     public void PlayWatchRoutine()
     {
-        // 이미 실행 중인 코루틴이 있으면 중지
-        // -> "가장 최근 bush 생성 기준으로 다시 2초 카운트" 하게 됨
+        // 이미 실행 중인 코루틴이 있다면 중지
+        // 다시 클릭하면 0.6초를 처음부터 다시 계산
         if (changeCoroutine != null)
         {
             StopCoroutine(changeCoroutine);
@@ -52,22 +58,24 @@ public class PlayerControl3_8 : MonoBehaviour
         changeCoroutine = StartCoroutine(ChangeRoutine());
     }
 
+
     private IEnumerator ChangeRoutine()
     {
-
-        // enemy look으로 변경
-        if (sr != null && lookSprite != null)
+        // 기존 lookSprite 상태
+        // Player의 SpriteRenderer를 비활성화
+        if (sr != null)
         {
-            sr.sprite = lookSprite;
+            sr.enabled = false;
         }
 
-        // 0.5초 유지
+        // 0.6초 대기
         yield return new WaitForSeconds(lookDuration);
 
-        // 다시 normal로 변경
-        if (sr != null && normalSprite != null)
+        // 기존 normalSprite 상태
+        // Player의 SpriteRenderer를 다시 활성화
+        if (sr != null)
         {
-            sr.sprite = normalSprite;
+            sr.enabled = true;
         }
 
         changeCoroutine = null;

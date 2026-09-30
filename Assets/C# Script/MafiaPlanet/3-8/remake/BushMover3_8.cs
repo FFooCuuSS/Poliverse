@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class BushMover3_8 : MonoBehaviour
 {
-    public float moveSpeed = 6.25f;     // 계산된 이동 속도
+    public float moveSpeed = 5.625f;     // 계산된 이동 속도
     public float destroyX = -10f;       // 이 위치 도달 시 삭제
-    public float stopDuration = 0.5f;   // 좌클릭 정지 시간
+    public float stopDuration = 0.6f;   // 좌클릭 정지 시간
 
     private bool isStopped = false;
 

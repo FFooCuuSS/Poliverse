@@ -11,7 +11,7 @@ public class BushSpawner3_8 : MonoBehaviour
 
     public Vector3 spawnPosition = new Vector3(10f, 0f, 0f);
 
-    public float spawnInterval = 4f;
+    public float spawnInterval = 4.8f;
 
     private List<BushMover3_8> bushes = new List<BushMover3_8>();
 

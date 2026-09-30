@@ -8,7 +8,7 @@ public class ScopeMover : MonoBehaviour
     public Vector3[] movePoints;
 
     [Header("한 구간당 걸리는 시간")]
-    public float moveTimePerStep = 0.5f;
+    public float moveTimePerStep = 0.6f;
 
     [Header("시작할 때 바로 실행할지")]
     public bool playOnStart;

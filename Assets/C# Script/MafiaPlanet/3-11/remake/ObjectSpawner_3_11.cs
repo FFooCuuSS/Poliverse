@@ -14,8 +14,8 @@ public class ObjectSpawner_3_11 : MonoBehaviour
     [SerializeField] private Transform centerPoint;
 
     [Header("소환 설정")]
-    [SerializeField] private float firstSpawnTime = 2.5f;
-    [SerializeField] private float spawnInterval = 1f;
+    [SerializeField] private float firstSpawnTime = 2.4f;
+    [SerializeField] private float spawnInterval = 1.2f;
     [SerializeField] private int totalSpawnCount = 8;
 
     [Header("오브젝트 패턴")]
@@ -24,10 +24,10 @@ public class ObjectSpawner_3_11 : MonoBehaviour
 
     [Header("이동 시간")]
     [Tooltip("소환 후 중앙에 도착하는 데 걸리는 시간")]
-    [SerializeField] private float travelTime = 1f;
+    [SerializeField] private float travelTime = 1.2f;
 
     [Tooltip("중앙을 지난 후 화면 밖까지 이동하는 시간")]
-    [SerializeField] private float afterCenterTime = 1f;
+    [SerializeField] private float afterCenterTime = 1.2f;
 
     [Header("포물선 높이")]
     [SerializeField] private float minArcHeight = 1.5f;

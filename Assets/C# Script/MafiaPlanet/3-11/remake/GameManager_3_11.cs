@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameManager_3_11 : MonoBehaviour
+public class GameManager_3_11 : MiniGameBase
 {
     [Header("연결할 스크립트")]
     [SerializeField] private ObjectSpawner_3_11 objectSpawner;
@@ -33,6 +33,7 @@ public class GameManager_3_11 : MonoBehaviour
         bombEffect.SetActive(false);
         successEffect.SetActive(false);
         StartGame();
+
     }
 
     private void Update()
@@ -54,7 +55,7 @@ public class GameManager_3_11 : MonoBehaviour
     /// <summary>
     /// 게임 시작 시 점수를 초기화하고 Spawn을 시작한다.
     /// </summary>
-    public void StartGame()
+    public new void StartGame()
     {
         currentScore = 0;
         isPlaying = true;
@@ -192,6 +193,7 @@ public class GameManager_3_11 : MonoBehaviour
     private void AddTargetScore()
     {
         PlaySuccessEffect();
+        base.ReportManualSuccess(); // 성공 보고
         currentScore += targetScore;
 
         Debug.Log(
@@ -208,6 +210,7 @@ public class GameManager_3_11 : MonoBehaviour
     private void AddBombPenalty()
     {
         PlayBombEffect();
+        base.ReportManualFail(); // 실패 보고
         currentScore -= bombPenalty;
 
         Debug.Log(

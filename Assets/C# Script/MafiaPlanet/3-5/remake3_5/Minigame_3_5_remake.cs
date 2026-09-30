@@ -29,12 +29,12 @@ public class Minigame_3_5_remake : MiniGameBase
     {
         timer += Time.deltaTime;
         timechecker += Time.deltaTime;
-        if (timer >= 0.5f) // 0.5초마다 출력
+        if (timer >= 0.6f) // 0.6초마다 출력
         {
             //Debug.Log("현재 시간: " + Time.time+"timechecker: "+timechecker);
             timer = 0f;
         }
-        if(timechecker>=3.5f&&moveStarted)
+        if(timechecker>=3.6f&&moveStarted)
         {
             scope.SetActive(true);
             scopeMover.StartMove();
