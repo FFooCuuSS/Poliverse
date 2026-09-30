@@ -56,6 +56,13 @@ public class secondGameCommand : MonoBehaviour
         minigame_3_15 = stage_3_15.GetComponent<Minigame_3_15>();
         mirror_3_15 = mirror.GetComponent<Mirror_3_15>();
 
+        // Wand Parent 비어 있으면 미니게임 루트 밑에 생성 (씬 루트로 새지 않게)
+        if (wandParent == null)
+        {
+            wandParent = stage_3_15 != null ? stage_3_15.transform : transform;
+            Debug.LogWarning($"[secondGameCommand] Wand Parent 비어 있음 → {wandParent.name} 밑에 생성");
+        }
+
         if (bossRenderer != null)
             bossDefaultSprite = bossRenderer.sprite;
     }
