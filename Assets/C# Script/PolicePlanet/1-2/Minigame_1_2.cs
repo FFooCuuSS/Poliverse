@@ -9,8 +9,11 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
 
     protected override float TimerDuration => 15f;
     protected override string MinigameTitle => "수갑 채우기";
-    protected override string MinigameExplain =>
-        "왼쪽에서 수갑이 채워져 타이밍을 알려줍니다";
+    protected override string MinigameExplain => "왼쪽에서 수갑이 채워져 타이밍을 알려줍니다";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "동일한 타이밍에 오른손에 수갑을 드래그하여 채우세요."
+    };
 
     [Header("Sequence Controller")]
     [SerializeField] private HandcuffSequenceController sequence;
@@ -204,8 +207,8 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
     }
 
     public override void ExecutePracticeAction(
-    int actionIndex,
-    string actionType)
+          int actionIndex,
+          string actionType)
     {
         Debug.Log(
             $"[1-2 Demo] ExecutePracticeAction 호출 " +
@@ -220,10 +223,6 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
 
         if (actionType != "Input")
         {
-            Debug.Log(
-                $"[1-2 Demo] Input이 아니어서 무시: {actionType}"
-            );
-
             return;
         }
 
@@ -233,6 +232,11 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
         Debug.Log(
             $"[1-2 Demo] 수갑 시범 실행! Round={roundIndex}"
         );
+
+        if (sequence != null)
+        {
+            sequence.BeginSnapFadeAll();
+        }
 
         ResolveRound(false);
 

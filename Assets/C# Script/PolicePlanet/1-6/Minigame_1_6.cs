@@ -8,6 +8,10 @@ public class Minigame_1_6 : MiniGameBase
     protected override string MinigameTitle => "배치하라!";
 
     protected override string MinigameExplain => "잠시 기다려 플랫폼 위치를 봐주세요.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "경찰 아이콘이 플랫폼 위에 도착하면 화면을 터치해주세요."
+    };
 
     public GameObject manager_1_6;
     Success_1_6 success_1_6;

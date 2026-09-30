@@ -93,6 +93,9 @@ public class HandcuffFitChecker : MonoBehaviour
     {
         if (cuffCollider == null) return;
 
+        if (minigame != null && minigame.IsDemoMode)
+            return;
+
         foreach (var handcol in handColliders)
         {
             if (handcol == null || !handcol.enabled) continue;

@@ -543,6 +543,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95bfa4a7c2f94294797a0155f87477f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 1
+  useRhythmJudgementScore: 1
+  manualTotalNodeCount: -1
+  printScoreDebugOnEnd: 1
   totalRound: 2
   accessoryPerRound: 3
   spawnManager: {fileID: 1907244580169404489}
