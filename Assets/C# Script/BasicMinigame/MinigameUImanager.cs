@@ -823,8 +823,8 @@ public class MinigameUIManager : MonoBehaviour
         {
             int idx = i;
 
-            if (i == 6) idx = 7;
-            else if (i == 7) idx = 6;
+            //if (i == 6) idx = 7;
+            //else if (i == 7) idx = 6;
 
             string path = $"MinigamePrefab/{planetName}/{selectedPlanet}_{idx}minigame_remake";
 
