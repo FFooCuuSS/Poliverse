@@ -1288,6 +1288,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9a656a99e1afcb4699f4afa19eedeeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickSound: {fileID: 8300000, guid: 519db6352aaa1bf47b4db25ac4bf7eeb, type: 3}
   objectPrefabs:
   - objectType: 0
     prefab: {fileID: 1999359512330868539, guid: 4867272a9f73a5e4f89f571976ad2bb3, type: 3}

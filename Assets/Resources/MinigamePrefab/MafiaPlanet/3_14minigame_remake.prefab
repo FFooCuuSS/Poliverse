@@ -66,6 +66,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6adca8d43248d8c42a4ea7b2ece465c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickSound: {fileID: 8300000, guid: 9627abf4c6840d846b8f24d568b66701, type: 3}
   player: {fileID: 3209375424445592564}
   roundParent: {fileID: 7210668433102356593}
   cellRootPrefab: {fileID: 0}

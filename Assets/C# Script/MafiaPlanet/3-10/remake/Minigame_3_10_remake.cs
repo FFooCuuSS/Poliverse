@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class Minigame_3_10_remake : MiniGameBase
 {
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip warningSound;
+    [Header("효과음")]
+    [SerializeField] private AudioClip clickSound;
     public GameObject warningSign1;
     public GameObject warningSign2;
     public GameObject enemy;
@@ -29,6 +34,11 @@ public class Minigame_3_10_remake : MiniGameBase
     {
         if (action == "Show")
         {
+            if (warningSound != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(warningSound);
+            }
+
             count++;
             if(count>=5)
             {
@@ -42,6 +52,10 @@ public class Minigame_3_10_remake : MiniGameBase
 
         if (action == "Spawn")
         {
+            if (clickSound != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(clickSound);
+            }
             Debug.Log("[Spawn] Spawn 이벤트 들어옴");
             SpawnObject();
         }

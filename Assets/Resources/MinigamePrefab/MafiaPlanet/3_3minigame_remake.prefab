@@ -861,6 +861,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd2544da6b24a7f41a1b3e8ec47823d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 0
   useRhythmJudgementScore: 1
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
@@ -877,6 +878,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb4bf6d97178a1146801fc65357223e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickSound: {fileID: 8300000, guid: 6c9a1ebbe535e6c45b00544d2b10411a, type: 3}
   minigame: {fileID: 7764925768978372065}
   keyMover: {fileID: 6501088130944048662}
   holes:
@@ -890,6 +892,7 @@ MonoBehaviour:
   - 0.5
   - 1.5
   - 2.5
+  nextRoundDelay: 0.3
 --- !u!1 &4460823608588399407
 GameObject:
   m_ObjectHideFlags: 0
@@ -1302,6 +1305,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97e2d3b754823ea4a986971d05c3bb75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickSound: {fileID: 8300000, guid: 519db6352aaa1bf47b4db25ac4bf7eeb, type: 3}
   speed: 10
 --- !u!1 &6008278917094485983
 GameObject:

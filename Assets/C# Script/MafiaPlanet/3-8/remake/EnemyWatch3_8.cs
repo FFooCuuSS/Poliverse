@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class EnemyWatch3_8 : MonoBehaviour
 {
+    [Header("효과음")]
+    [SerializeField] private AudioClip clickSound;
+    [Header("효과음")]
+    [SerializeField] private AudioClip walkSound;
     [Header("스프라이트")]
     public Sprite normalSprite;   // 기본 모습
     public Sprite lookSprite;     // 잠깐 바뀔 모습
@@ -51,6 +55,11 @@ public class EnemyWatch3_8 : MonoBehaviour
         if (sr != null && lookSprite != null)
         {
             sr.sprite = lookSprite;
+            if (clickSound != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(clickSound);
+            }
+
         }
 
         // 0.5초 유지
@@ -59,6 +68,11 @@ public class EnemyWatch3_8 : MonoBehaviour
         // 다시 normal로 변경
         if (sr != null && normalSprite != null)
         {
+            if (walkSound != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(walkSound);
+            }
+
             sr.sprite = normalSprite;
         }
 

@@ -729,6 +729,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1db3e7a379924342aea43592e579637, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickSound: {fileID: 8300000, guid: bb1a492cf161f0941b4a62da4dd5ff63, type: 3}
+  showSound: {fileID: 8300000, guid: 9627abf4c6840d846b8f24d568b66701, type: 3}
+  wrongSound: {fileID: 8300000, guid: 3b357af42f189f449801dc92ca800a72, type: 3}
   slots:
   - onBox: {fileID: 886913008629490407}
     pattern: {fileID: 444179996323453162}

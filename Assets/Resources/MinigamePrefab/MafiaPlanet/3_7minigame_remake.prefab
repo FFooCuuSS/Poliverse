@@ -1835,9 +1835,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9a646eeadf542443aad1467bb4a7d65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 0
   useRhythmJudgementScore: 0
   manualTotalNodeCount: 8
   printScoreDebugOnEnd: 1
+  clickSound: {fileID: 8300000, guid: 0482223c129fe7645bcc49cca06d7c39, type: 3}
   holdInput: {fileID: 6434550130528155188}
   autoBrush: {fileID: 4124443154559533714}
   leftSignObject: {fileID: 1472051747349389256}

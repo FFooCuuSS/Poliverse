@@ -7,6 +7,9 @@ public class Minigame_3_7 : MiniGameBase
     protected override string MinigameExplain => "사인을 베끼세요!";
     protected override bool UseRhythmJudgementScore => false;
 
+    [Header("효과음")]
+    [SerializeField] private AudioClip clickSound;
+
     [Header("3-7 References")]
     [SerializeField] private SignatureHoldInput_3_7 holdInput;
     [SerializeField] private SignatureAutoBrush autoBrush;
@@ -176,6 +179,11 @@ public class Minigame_3_7 : MiniGameBase
 
         if (isHolding)
         {
+            if (clickSound != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(clickSound);
+            }
+
             ReportManualSuccess();
             Debug.Log("[3-7] Manual Perfect - Holding");
         }

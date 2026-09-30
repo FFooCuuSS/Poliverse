@@ -3,6 +3,13 @@ using UnityEngine;
 
 public class HandController : MonoBehaviour
 {
+    [Header("효과음")]
+    [SerializeField] private AudioClip clickSound;
+
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip grabSound;
+
     [Header("미니게임")]
     [SerializeField] private Minigame3_2remake minigame;
 
@@ -177,6 +184,10 @@ public class HandController : MonoBehaviour
             return;
         }
 
+        if (clickSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(clickSound);
+        }
 
         isActionStarted = true;
 
@@ -244,6 +255,7 @@ public class HandController : MonoBehaviour
     /// </summary>
     private void GrabBag(GameObject bag)
     {
+        GameRoot.Instance.Audio.PlaySfx(grabSound);
         hasBag = true;
         grabbedBag = bag;
 

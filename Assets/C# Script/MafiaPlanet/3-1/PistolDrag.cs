@@ -7,6 +7,9 @@ public class PistolDrag : DirectionalDrag
     public float maxWhenBlocked = 0.2f;
     public float maxWhenReleased = 1.0f;
 
+    [Header("효과음")]
+    [SerializeField] private AudioClip gunMoveSound;
+
     [Header("상승 시작 조건")]
     public float autoRiseThresholdY = 0.5f; // y값 기준
 
@@ -36,6 +39,11 @@ public class PistolDrag : DirectionalDrag
             PistolUp up = GetComponent<PistolUp>();
             if (up != null)
             {
+                if (gunMoveSound != null)
+                {
+                    GameRoot.Instance.Audio.PlaySfx(gunMoveSound);
+                }
+
                 up.goingUp = true;
             }
 

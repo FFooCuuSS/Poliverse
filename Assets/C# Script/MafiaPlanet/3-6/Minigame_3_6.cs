@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class Minigame_3_6 : MiniGameBase
 {
+    [Header("효과음")]
+    [SerializeField] private AudioClip clickSound;
     protected override float TimerDuration => 10f;
     protected override string MinigameExplain => "빨간불 타이밍에 녹음하세요!";
 
@@ -34,6 +36,11 @@ public class Minigame_3_6 : MiniGameBase
     public void StartRecording()
     {
         if (ended) return;
+        if (clickSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(clickSound);
+        }
+
         isRecording = true;
         Debug.Log("[3-6] Recording Start");
     }

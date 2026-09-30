@@ -89,6 +89,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6e1a43c826e23649a46069981f6de57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 0
   useRhythmJudgementScore: 1
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
@@ -276,6 +277,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxX: 7
   maxY: 4
+  cuffSound: {fileID: 0}
   isDragging: 0
   banDragging: 0
   angleInDegrees: -4.199
@@ -283,6 +285,7 @@ MonoBehaviour:
   minY: 0.035119
   maxWhenBlocked: 0.2
   maxWhenReleased: 1
+  gunMoveSound: {fileID: 0}
   autoRiseThresholdY: 1
 --- !u!114 &2362031439295142397
 MonoBehaviour:
@@ -1003,6 +1006,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxX: 7
   maxY: 4
+  cuffSound: {fileID: 8300000, guid: 519db6352aaa1bf47b4db25ac4bf7eeb, type: 3}
   isDragging: 0
   banDragging: 0
 --- !u!114 &5754547437959459400
@@ -1309,6 +1313,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxX: 7
   maxY: 4
+  cuffSound: {fileID: 8300000, guid: 9627abf4c6840d846b8f24d568b66701, type: 3}
   isDragging: 0
   banDragging: 0
   angleInDegrees: -4.199
@@ -1316,6 +1321,7 @@ MonoBehaviour:
   minY: 0.035119
   maxWhenBlocked: 0.2
   maxWhenReleased: 1
+  gunMoveSound: {fileID: 0}
   autoRiseThresholdY: 1
 --- !u!114 &5089428344346499821
 MonoBehaviour:

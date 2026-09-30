@@ -185,6 +185,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60e983741f4db2f46920da22ee53b817, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickSound: {fileID: 8300000, guid: e3a4bd686a82a3444881ad9301d2af41, type: 3}
   minigame3_4: {fileID: 3140207031555331764}
   cardPrefab: {fileID: 8526903590057933716, guid: b95929f00bdd79a4284b4ce7992b9d22, type: 3}
   cardParent: {fileID: 6971243491308997188}

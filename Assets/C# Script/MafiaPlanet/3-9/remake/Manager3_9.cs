@@ -15,6 +15,14 @@ public class PatternSlot3_9
 
 public class Manager3_9 : MonoBehaviour
 {
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip clickSound;
+    [Header("효과음")]
+    [SerializeField] private AudioClip showSound;
+    [Header("효과음")]
+    [SerializeField] private AudioClip wrongSound;
+
     [Header("1~6번 패턴")]
     public PatternSlot3_9[] slots = new PatternSlot3_9[6];
 
@@ -231,6 +239,11 @@ public class Manager3_9 : MonoBehaviour
             // 해당 위치 켜기
             if (slots[slotIndex].onBox != null)
             {
+                if (showSound != null)
+                {
+                    GameRoot.Instance.Audio.PlaySfx(showSound);
+                }
+
                 slots[slotIndex]
                     .onBox
                     .SetActive(true);
@@ -355,6 +368,11 @@ public class Manager3_9 : MonoBehaviour
 
         if (slotIndex == correctIndex)
         {
+            if (clickSound != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(clickSound);
+            }
+
             Debug.Log(
                 "[3-9] " +
                 (inputIndex + 1) +
@@ -374,6 +392,11 @@ public class Manager3_9 : MonoBehaviour
 
         else
         {
+            if (wrongSound != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(wrongSound);
+            }
+
             Debug.Log(
                 "[3-9] " +
                 (inputIndex + 1) +

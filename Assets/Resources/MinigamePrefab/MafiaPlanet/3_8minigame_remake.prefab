@@ -196,6 +196,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa98c6876fe357a49a466a5d1f779406, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickSound: {fileID: 8300000, guid: 6c9a1ebbe535e6c45b00544d2b10411a, type: 3}
+  walkSound: {fileID: 8300000, guid: 0f477a0beaaf1204abe0dc51e6ac7fae, type: 3}
   normalSprite: {fileID: 21300000, guid: 2ba8e748a17d08a4bbac4b6965f327ab, type: 3}
   lookSprite: {fileID: 21300000, guid: 85cc1dac03d6d564f939a90cf7e72e63, type: 3}
   changeTime: 2.4

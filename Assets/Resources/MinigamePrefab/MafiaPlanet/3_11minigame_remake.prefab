@@ -456,6 +456,8 @@ MonoBehaviour:
   useRhythmJudgementScore: 1
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
+  bombSound: {fileID: 8300000, guid: 2b455776b4588424cbdf68dfb0312fa9, type: 3}
+  successSound: {fileID: 8300000, guid: e3a4bd686a82a3444881ad9301d2af41, type: 3}
   objectSpawner: {fileID: 8430604982184259529}
   sliceZone: {fileID: 5766097944682334580}
   targetScore: 1

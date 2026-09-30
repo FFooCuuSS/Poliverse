@@ -18,7 +18,10 @@ public class Minigame3_2remake : MiniGameBase
 
 
     private bool finished = false;
-
+    private void Start()
+    {
+        StartGame();
+    }
     public override void StartGame()
     {
         IsInputLocked = false;

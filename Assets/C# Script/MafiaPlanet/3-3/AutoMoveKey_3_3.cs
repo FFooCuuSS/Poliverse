@@ -3,6 +3,9 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class AutoMoveKey_3_3 : MonoBehaviour
 {
+
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip clickSound;
     public float speed = -15f;
 
     private bool move = false;
@@ -22,6 +25,12 @@ public class AutoMoveKey_3_3 : MonoBehaviour
 
     public void StartMove()
     {
+        if (clickSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(clickSound);
+        }
+
+
         move = true;
         blocked = false;
     }

@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5af7b26653dda684281e06fbbf35572a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickSound: {fileID: 8300000, guid: 9627abf4c6840d846b8f24d568b66701, type: 3}
+  grabSound: {fileID: 8300000, guid: 519db6352aaa1bf47b4db25ac4bf7eeb, type: 3}
   minigame: {fileID: 1180141133588210124}
   hand: {fileID: 715867178215862525}
   grab: {fileID: 5450990910268752055}

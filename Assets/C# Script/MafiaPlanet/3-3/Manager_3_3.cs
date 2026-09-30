@@ -5,6 +5,9 @@ using DG.Tweening;
 
 public class Manager_3_3 : MonoBehaviour
 {
+
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip clickSound;
     [Header("Refs")]
     [SerializeField] private Minigame_3_3_Remake minigame;
     [SerializeField] private AutoMoveKey_3_3 keyMover;
@@ -197,6 +200,11 @@ public class Manager_3_3 : MonoBehaviour
 
         holes[clickCount].Lock();
         clickCount++;
+        if (clickSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(clickSound);
+        }
+
 
         if (clickCount == holes.Count)
         {

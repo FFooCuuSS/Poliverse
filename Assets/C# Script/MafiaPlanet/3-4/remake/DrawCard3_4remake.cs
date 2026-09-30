@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class DrawCard3_4remake : MonoBehaviour
 {
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip clickSound;
     public Minigame_3_4_Remake minigame3_4;
 
     public GameObject cardPrefab;
@@ -167,6 +170,12 @@ public class DrawCard3_4remake : MonoBehaviour
         // 아직 이동을 시작하지 않은 상태
         if (!isCardMoving)
         {
+            if (clickSound != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(clickSound);
+            }
+
+
             isCardMoving = true;
 
             // 현재 위치 저장

@@ -1058,6 +1058,7 @@ MonoBehaviour:
   useRhythmJudgementScore: 0
   manualTotalNodeCount: 8
   printScoreDebugOnEnd: 1
+  clickSound: {fileID: 8300000, guid: ea15d80966c3b244c86b83e9076ee2f9, type: 3}
   lightController: {fileID: 9091651423809504523}
 --- !u!1 &6048423782053885883
 GameObject:

@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class GameManager_3_11 : MiniGameBase
 {
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip bombSound;
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip successSound;
+
     [Header("연결할 스크립트")]
     [SerializeField] private ObjectSpawner_3_11 objectSpawner;
     [SerializeField] private SliceZone_3_11 sliceZone;
@@ -159,6 +166,11 @@ public class GameManager_3_11 : MiniGameBase
     }
     public void PlayBombEffect()
     {
+        if (bombSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(bombSound);
+        }
+
         StartCoroutine(BombEffectCoroutine());
     }
 
@@ -174,6 +186,11 @@ public class GameManager_3_11 : MiniGameBase
     }
     public void PlaySuccessEffect()
     {
+        if (successSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(successSound);
+        }
+
         StartCoroutine(SuccessEffectCoroutine());
     }
 

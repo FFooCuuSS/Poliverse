@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class CarMoveRemake : MonoBehaviour
 {
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip collideSound;
+    [Header("효과음")]
+    [SerializeField] private AudioClip swipeSound;
+
     private Vector3[] lanes = new Vector3[3] {
         new Vector3(-4, -3.2f, 0),
         new Vector3(-4,  0f,   0),
@@ -55,6 +61,11 @@ public class CarMoveRemake : MonoBehaviour
 
             if (Mathf.Abs(swipeDeltaY) > 50f)
             {
+                if (swipeSound != null)
+                {
+                    GameRoot.Instance.Audio.PlaySfx(swipeSound);
+                }
+
                 if (swipeDeltaY > 0) MoveUp();
                 else MoveDown();
                 isSwiping = false;
@@ -72,6 +83,11 @@ public class CarMoveRemake : MonoBehaviour
 
         if (collision.CompareTag("Enemy"))
         {
+            if (collideSound != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(collideSound);
+            }
+
             //부딫힌 상황 부여
             Debug.Log("collapsed");
         }

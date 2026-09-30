@@ -170,6 +170,8 @@ MonoBehaviour:
   useRhythmJudgementScore: 1
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
+  warningSound: {fileID: 8300000, guid: 04f3d64784afd124482aa3c81662888d, type: 3}
+  clickSound: {fileID: 8300000, guid: e3a4bd686a82a3444881ad9301d2af41, type: 3}
   warningSign1: {fileID: 722559018474232879}
   warningSign2: {fileID: 6213553984014238580}
   enemy: {fileID: 3661165187501100620, guid: 0f639057dabfd7f468dbaa48dea2b31e, type: 3}
@@ -563,6 +565,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47ff2261025133a49814260d7b23405b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  collideSound: {fileID: 8300000, guid: 3b357af42f189f449801dc92ca800a72, type: 3}
+  swipeSound: {fileID: 8300000, guid: 9627abf4c6840d846b8f24d568b66701, type: 3}
   moveSpeed: 10
   Stage_3_10: {fileID: 954712107836511912}
 --- !u!50 &9200540098069107469

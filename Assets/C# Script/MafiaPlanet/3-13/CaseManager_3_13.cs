@@ -61,6 +61,10 @@ public class CaseManager_3_13 : MonoBehaviour
         public Transform targetPoint;
     }
 
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip clickSound;
+
     [Header("물체 프리팹")]
     [SerializeField] private ObjectPrefabData[] objectPrefabs;
 
@@ -415,6 +419,11 @@ public class CaseManager_3_13 : MonoBehaviour
 
                 if (case1SuccessStick != null)
                 {
+                    if (clickSound != null)
+                    {
+                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                    }
+
                     case1SuccessStick.SetActive(true);
                 }
 
@@ -424,6 +433,11 @@ public class CaseManager_3_13 : MonoBehaviour
 
                 if (case1SuccessKnife != null)
                 {
+                    if (clickSound != null)
+                    {
+                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                    }
+
                     case1SuccessKnife.SetActive(true);
                 }
 
@@ -433,6 +447,11 @@ public class CaseManager_3_13 : MonoBehaviour
 
                 if (case1SuccessGun != null)
                 {
+                    if (clickSound != null)
+                    {
+                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                    }
+
                     case1SuccessGun.SetActive(true);
                 }
 
@@ -442,6 +461,11 @@ public class CaseManager_3_13 : MonoBehaviour
 
                 if (case1SuccessTie != null)
                 {
+                    if (clickSound != null)
+                    {
+                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                    }
+
                     case1SuccessTie.SetActive(true);
                 }
 
@@ -463,6 +487,11 @@ public class CaseManager_3_13 : MonoBehaviour
 
                 if (case2SuccessStick != null)
                 {
+                    if (clickSound != null)
+                    {
+                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                    }
+
                     case2SuccessStick.SetActive(true);
                 }
 
@@ -472,6 +501,11 @@ public class CaseManager_3_13 : MonoBehaviour
 
                 if (case2SuccessKnife != null)
                 {
+                    if (clickSound != null)
+                    {
+                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                    }
+
                     case2SuccessKnife.SetActive(true);
                 }
 
@@ -481,6 +515,11 @@ public class CaseManager_3_13 : MonoBehaviour
 
                 if (case2SuccessGun != null)
                 {
+                    if (clickSound != null)
+                    {
+                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                    }
+
                     case2SuccessGun.SetActive(true);
                 }
 
@@ -490,6 +529,11 @@ public class CaseManager_3_13 : MonoBehaviour
 
                 if (case2SuccessTie != null)
                 {
+                    if (clickSound != null)
+                    {
+                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                    }
+
                     case2SuccessTie.SetActive(true);
                 }
 
