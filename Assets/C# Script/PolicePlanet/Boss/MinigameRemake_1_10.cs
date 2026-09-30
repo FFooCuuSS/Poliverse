@@ -2,10 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MinigameRemake_1_10 : MiniGameBase
+public class MinigameRemake_1_10 : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 15f;
-    protected override string MinigameExplain => "분류해라!";
+    protected override string MinigameTitle => "분류해라!";
+
+    protected override string MinigameExplain => " 가운데서 경찰이나 죄수가 나옵니다. 1초 후 죄수면 왼쪽 경찰이면 오른쪽을 터치해주세요.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "2번씩 나와도 순서에 맞게 왼쪽 또는 오른쪽을 터치해주세요.",
+        "곡이 빨라지면 누르는 타이밍도 빨라집니다 조심하세요"
+    };
 
     public override float perfectWindowOverride => 0.1f;
     public override float goodWindowOverride => 0.3f;
@@ -17,6 +24,15 @@ public class MinigameRemake_1_10 : MiniGameBase
     private bool ended;
     private bool inputOpen;
     private bool awaitingJudge;
+
+    private bool isDemoMode = false;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[1-10] SetDemoMode = {isDemoMode}");
+    }
 
     public override void StartGame()
     {
@@ -62,6 +78,8 @@ public class MinigameRemake_1_10 : MiniGameBase
 
     public void SubmitPlayerInput(string action = "Input")
     {
+        if (IsDemoMode) return;
+
         if (ended) return;
         if (!inputOpen) return;
         if (awaitingJudge) return;
@@ -87,6 +105,28 @@ public class MinigameRemake_1_10 : MiniGameBase
             case JudgementResult.Perfect:
                 manager?.OnAccepted(judgement);
                 break;
+        }
+    }
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+        if (string.IsNullOrEmpty(actionType))
+            return;
+
+        actionType = actionType.Trim();
+
+        if (actionType != "Input")
+            return;
+
+        if (ended)
+            return;
+
+        Debug.Log($"[1-10 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
+
+        if (manager != null)
+        {
+            // 매니저를 통해 현재 대상의 정답(경찰/죄수)을 판별하여 즉시 올바른 방향으로 처리
+            manager.ExecuteDemoAction();
         }
     }
 }

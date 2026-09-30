@@ -1,10 +1,17 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Minigame_1_6_remake : MiniGameBase
+public class Minigame_1_6_remake : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 12f;
-    protected override string MinigameExplain => "배치해라!";
+    protected override string MinigameTitle => "배치하라!";
+
+    protected override string MinigameExplain => "잠시 기다려 플랫폼 위치를 봐주세요.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "경찰 아이콘이 플랫폼 위에 도착하면 화면을 터치해주세요."
+    };
 
     [Header("Prefabs")]
     public ContainerTarget containerPrefab;
@@ -81,6 +88,15 @@ public class Minigame_1_6_remake : MiniGameBase
 
     private bool finished = false;
 
+    private bool isDemoMode = false;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[1-6] SetDemoMode = {isDemoMode}");
+    }
+
     private void Start()
     {
         SetupContainers();
@@ -90,6 +106,8 @@ public class Minigame_1_6_remake : MiniGameBase
 
     private void Update()
     {
+        if (IsDemoMode) return;
+
         if (finished) return;
         if (IsInputLocked) return;
 
@@ -388,5 +406,65 @@ public class Minigame_1_6_remake : MiniGameBase
                 sr.sprite = success ? whitePoliceSuccess : whitePoliceFail;
                 break;
         }
+    }
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+        if (string.IsNullOrEmpty(actionType))
+            return;
+
+        actionType = actionType.Trim();
+
+        if (actionType != "Input")
+            return;
+
+        Debug.Log($"[1-6 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
+
+        if (currentPolice != null)
+        {
+            // 컨테이너의 목표 X 좌표를 가져옴
+            MoveContainer1_6 mover = containers[currentPolice.laneIndex].GetComponent<MoveContainer1_6>();
+            if (mover != null)
+            {
+                float targetX = mover.GetTargetX();
+                float currentX = currentPolice.transform.position.x;
+
+                // 현재 위치에서 목표 위치까지 남은 거리를 구함 (왼쪽으로 이동하므로 currentX - targetX)
+                float remainingDist = currentX - targetX;
+
+                // PoliceMover의 이동 속도를 역산하거나 travelTime을 활용해 남은 도달 시간을 계산
+                // travelTime 동안 (policeStartX - targetX)를 이동하므로 속도 = totalDist / travelTime
+                float totalDist = policeStartX - targetX;
+                float speed = (travelTime <= 0f) ? 0f : totalDist / travelTime;
+
+                float timeToReach = (speed > 0f) ? remainingDist / speed : 0f;
+
+                // 뱃지가 플랫폼에 딱 도달하는 시점을 targetClickTime으로 정확히 설정
+                inputEnabled = true;
+                clickLocked = false;
+                targetClickTime = Time.time + timeToReach;
+
+                // 지연 시간(timeToReach) 뒤에 정확히 판정 함수가 실행되도록 코루틴 사용
+                StartCoroutine(DemoJudgeCo(timeToReach));
+                return;
+            }
+        }
+
+        // 혹시 모를 예외 상황 처리
+        inputEnabled = true;
+        clickLocked = false;
+        targetClickTime = Time.time;
+        JudgeByTimingAndLock();
+    }
+
+    private IEnumerator DemoJudgeCo(float delay)
+    {
+        if (delay > 0f)
+        {
+            yield return new WaitForSeconds(delay);
+        }
+
+        // 경찰이 정확히 플랫폼 위치에 도달했을 때 판정 및 멈춤 실행
+        JudgeByTimingAndLock();
     }
 }

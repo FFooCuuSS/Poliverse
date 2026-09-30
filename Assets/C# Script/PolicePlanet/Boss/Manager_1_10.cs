@@ -430,4 +430,38 @@ public class Manager_1_10 : MonoBehaviour
             sentPeople.RemoveAt(i);
         }
     }
+
+    public void ExecuteDemoAction()
+    {
+        if (minigame == null) return;
+
+        // 1. 대기열에서 살아있는 다음 사람을 가져옴 (없으면 현재 current 확인)
+        PersonEntry targetEntry;
+        if (current.HasValue && current.Value.go != null)
+        {
+            targetEntry = current.Value;
+            current = null;
+        }
+        else if (TryDequeueAlive(out var entry))
+        {
+            targetEntry = entry;
+        }
+        else
+        {
+            return;
+        }
+
+        // 2. 죄수(isSinner == true)면 아래/왼쪽(false), 경찰이면 위/오른쪽(true)이 정답
+        bool correctGoUp = !targetEntry.isSinner;
+
+        pendingGoUp = correctGoUp;
+        current = targetEntry;
+        pendingCorrect = (correctGoUp && !targetEntry.isSinner) || (!correctGoUp && targetEntry.isSinner);
+
+        // 3. 입력 상태를 강제로 열고 퍼펙트 판정 처리 호출
+        inputOpen = true;
+        awaitingJudge = true;
+
+        minigame.OnPlayerInput("Input");
+    }
 }

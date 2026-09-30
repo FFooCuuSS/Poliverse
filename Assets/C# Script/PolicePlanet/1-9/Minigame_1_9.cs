@@ -4,7 +4,7 @@ using UnityEngine;
 using DG.Tweening;
 using TMPro;
 
-public class Minigame_1_9 : MiniGameBase
+public class Minigame_1_9 : MiniGameBase, IPracticeDemoInput
 {
     [Header("Input Count")]
     [SerializeField] private int totalInputs = 6;
@@ -34,6 +34,15 @@ public class Minigame_1_9 : MiniGameBase
         "타이밍에 맞게 화면을 터치해주세요"
     };
 
+    private bool isDemoMode = false;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[1-9] SetDemoMode = {isDemoMode}");
+    }
+
     private bool ended;
     private bool inputOpen;
     private bool awaitingJudge;
@@ -58,6 +67,7 @@ public class Minigame_1_9 : MiniGameBase
 
     private void Update()
     {
+        if (IsDemoMode) return;
         if (ended) return;
 
         if (Input.GetMouseButtonDown(0))
@@ -257,4 +267,23 @@ public class Minigame_1_9 : MiniGameBase
     }
 
     #endregion
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+        if (string.IsNullOrEmpty(actionType))
+            return;
+
+        actionType = actionType.Trim();
+
+        if (actionType != "Input")
+            return;
+
+        if (ended)
+            return;
+
+        Debug.Log($"[1-9 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
+
+        // 데모 모드에서는 플레이어가 직접 터치한 것과 동일하게 SubmitPlayerInput 함수를 호출하여 완벽한 판정 실행
+        SubmitPlayerInput("Input");
+    }
 }
