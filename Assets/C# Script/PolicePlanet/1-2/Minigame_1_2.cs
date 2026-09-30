@@ -71,7 +71,8 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
 
         if (isDemoMode)
         {
-            Debug.Log("[1-2] Demo Start - CSV 입력을 기다립니다.");
+            Debug.Log("[1-2] Demo Start - CSV 시범 대기 중...");
+            waitingShowForNextRound = true;
         }
         else
         {
@@ -87,6 +88,8 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
 
         action = action.Trim();
 
+        // 데모 모드일 때는 PracticeDemoManager가 ExecutePracticeAction을 호출하므로,
+        // 여기서는 오직 'Show' 이벤트 타이밍에만 라운드를 스폰하도록 처리합니다.
         if (isDemoMode)
         {
             if (action == "Show")
@@ -100,6 +103,7 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
             return;
         }
 
+        // 일반 플레이어 모드
         if (action == "Show")
         {
             if (!waitingShowForNextRound)
@@ -133,7 +137,7 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
     private void StartRoundNow()
     {
         Debug.Log(
-            $"[1-2] StartRoundNow() Round={roundIndex}"
+            $"[1-2] StartRoundNow() Round={roundIndex}, IsDemo={isDemoMode}"
         );
 
         if (sequence == null)
@@ -176,6 +180,7 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
 
     public void TryResolveRound()
     {
+        // 규칙: 실제 입력을 막는 방어 코드 추가
         if (isDemoMode)
         {
             Debug.Log("[1-2] 시범 모드 중이므로 플레이어 입력 무시");
@@ -207,8 +212,8 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
     }
 
     public override void ExecutePracticeAction(
-          int actionIndex,
-          string actionType)
+      int actionIndex,
+      string actionType)
     {
         Debug.Log(
             $"[1-2 Demo] ExecutePracticeAction 호출 " +
@@ -236,9 +241,13 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
         if (sequence != null)
         {
             sequence.BeginSnapFadeAll();
+
+            // 시범 성공 시 플레이어 스냅 성공 연출(초록색 불 등)도 함께 반영
+            sequence.ApplyPlayerSnapVisual();
         }
 
-        ResolveRound(false);
+        // 중요: false 대신 true를 전달하여 OnPlayerInput("Input")이 정상적으로 호출되도록 함
+        ResolveRound(true);
 
         if (inputJob != null)
             StopCoroutine(inputJob);
@@ -262,9 +271,8 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
 
         if (roundIndex < TOTAL_ROUNDS)
         {
-            // 다음 라운드를 위해 바로 스폰 대기 상태로 전환
-            waitingShowForNextRound = false;
-            StartRoundNow(); // 데모에서는 'Show' 신호를 기다리지 않고 곧바로 다음 라운드를 스폰하여 시범 끊김 방지
+            // 다음 라운드를 위해 Show를 다시 기다리도록 설정
+            waitingShowForNextRound = true;
         }
 
         inputJob = null;

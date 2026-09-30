@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class Minigame_1_7 : MiniGameBase
+public class Minigame_1_7 : MiniGameBase, IPracticeDemoInput
 {
     [Header("Refs")]
     [SerializeField] private PrisonerSpawner1_7 prisonerSpawner;
@@ -27,6 +27,15 @@ public class Minigame_1_7 : MiniGameBase
     private bool gameEnded = false;
     private bool transitionRunning = false;
     private bool pendingShow = false;
+
+    private bool isDemoMode = false;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[1-7] SetDemoMode = {isDemoMode}");
+    }
 
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.4f;
@@ -128,6 +137,8 @@ public class Minigame_1_7 : MiniGameBase
 
     public override void OnPlayerInput(string action = null)
     {
+        if (IsDemoMode) return;
+
         if (IsInputLocked) return;
         if (!roundActive) return;
         if (transitionRunning) return;
@@ -143,6 +154,8 @@ public class Minigame_1_7 : MiniGameBase
 
     public void OnHoldButtonPressed()
     {
+        if (IsDemoMode) return;
+
         OnPlayerInput("Input");
     }
 
@@ -260,5 +273,27 @@ public class Minigame_1_7 : MiniGameBase
             pendingShow = false;
             holdJudge?.ShowPreviewUI(inputIndex, prisoner.transform);
         }
+    }
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+        if (string.IsNullOrEmpty(actionType))
+            return;
+
+        actionType = actionType.Trim();
+
+        if (actionType != "Input")
+            return;
+
+        if (gameEnded || !roundActive || prisoner == null)
+            return;
+
+        if (inputIndex >= inputPerRound)
+            return;
+
+        Debug.Log($"[1-7 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}, inputIndex={inputIndex}");
+
+        // 데모 모드에서는 실제 유저가 성공적으로 버튼을 누른 것처럼 OnPlayerInput을 호출하여 정답 처리 수행
+        OnPlayerInput("Input");
     }
 }
