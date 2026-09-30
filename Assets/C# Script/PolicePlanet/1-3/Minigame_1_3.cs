@@ -195,6 +195,26 @@ public class Minigame_1_3 : MiniGameBase
                 MovePlayerUp();
                 break;
 
+            case 3:
+                MovePlayerDown();
+                break;
+
+            case 4:
+                MovePlayerUp();
+                break;
+
+            case 5:
+                MovePlayerDown();
+                break;
+
+            case 6:
+                MovePlayerUp();
+                break;
+
+            case 7:
+                MovePlayerDown();
+                break;
+
             default:
                 Debug.LogWarning(
                     $"[1-3 Demo] 알 수 없는 Action Index: {actionIndex}"
@@ -211,7 +231,7 @@ public class Minigame_1_3 : MiniGameBase
         player.DOKill();
 
         Vector3 targetPos = player.position;
-        targetPos.y += 2f;
+        targetPos.y += 2.5f;
 
         player.DOMove(
             targetPos,
@@ -227,7 +247,7 @@ public class Minigame_1_3 : MiniGameBase
         player.DOKill();
 
         Vector3 targetPos = player.position;
-        targetPos.y -= 2f;
+        targetPos.y -= 2.5f;
 
         player.DOMove(
             targetPos,

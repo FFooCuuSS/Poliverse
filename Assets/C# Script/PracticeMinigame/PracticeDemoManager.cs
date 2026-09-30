@@ -280,6 +280,17 @@ public class PracticeDemoManager : MonoBehaviour
     {
         guideEvents.Clear();
 
+        Debug.Log(
+            $"[PracticeDemo] CSV={guideCsv?.name}, ID={minigameId}"
+        );
+
+        if (guideCsv != null)
+        {
+            Debug.Log(
+                $"[PracticeDemo] CSV ³»¿ë:\n{guideCsv.text}"
+            );
+        }
+
         if (guideCsv == null)
         {
             if (currentMinigame != null &&

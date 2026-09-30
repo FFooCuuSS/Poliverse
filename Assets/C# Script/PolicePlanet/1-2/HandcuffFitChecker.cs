@@ -82,6 +82,10 @@ public class HandcuffFitChecker : MonoBehaviour
         if (minigame == null) return;
         if (isSnapped) return;
 
+        // 시범 중에는 플레이어 입력/충돌을 받지 않음
+        if (minigame.IsDemoMode)
+            return;
+
         CheckAndSnap();
     }
 

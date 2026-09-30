@@ -812,14 +812,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45e39f8c32f448c489cd781f6e653bbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 1
   useRhythmJudgementScore: 0
   manualTotalNodeCount: 7
   printScoreDebugOnEnd: 1
+  scoreTargetCount: 10
   player: {fileID: 379004386101876771}
   backDistance: 0.4
   backDuration: 0.4
   dashDistance: 20
   dashDuration: 0.8
+  overshootDistance: 0.6
 --- !u!1 &1690320259972736052
 GameObject:
   m_ObjectHideFlags: 0
