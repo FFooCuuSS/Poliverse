@@ -8,6 +8,11 @@ public class Minigame_1_10 : MiniGameBase
     protected override string MinigameTitle => "분류해라!";
 
     protected override string MinigameExplain => " 가운데서 경찰이나 죄수가 나옵니다. 1초 후 죄수면 왼쪽 경찰이면 오른쪽을 터치해주세요.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "2번씩 나와도 순서에 맞게 왼쪽 또는 오른쪽을 터치해주세요.",
+        "곡이 빨라지면 누르는 타이밍도 빨라집니다 조심하세요"
+    };
 
     public override void StartGame()
     {

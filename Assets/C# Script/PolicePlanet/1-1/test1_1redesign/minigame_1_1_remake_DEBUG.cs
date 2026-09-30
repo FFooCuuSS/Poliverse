@@ -9,6 +9,10 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
     protected override string MinigameTitle => "범인 찾기";
 
     protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+    };
 
     // 1-1은 CSV의 Input을 쓰지만,
     // RhythmManager의 Perfect/Good/Miss 판정 점수는 사용하지 않는다.
