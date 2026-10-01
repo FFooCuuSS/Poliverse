@@ -1,9 +1,14 @@
 using UnityEngine;
 
-public class Minigame_3_14 : MiniGameBase
+public class Minigame_3_14 : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 14f;
-    protected override string MinigameExplain => "건너가세요!";
+    protected override string MinigameTitle => "젤리 블록 철거!";
+    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+    };
 
     public override float perfectWindowOverride => 0.1f;
     public override float goodWindowOverride => 0.3f;
@@ -15,6 +20,15 @@ public class Minigame_3_14 : MiniGameBase
     private bool ended;
     private bool inputOpen;
     private bool awaitingJudge;
+
+    private bool isDemoMode = false;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[3-14] SetDemoMode = {isDemoMode}");
+    }
 
     public override void StartGame()
     {

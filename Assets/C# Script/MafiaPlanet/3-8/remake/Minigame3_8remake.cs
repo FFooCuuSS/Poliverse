@@ -25,7 +25,30 @@ public class Minigame3_8remake : MiniGameBase, IPracticeDemoInput
     public void SetDemoMode(bool isDemo)
     {
         isDemoMode = isDemo;
-        Debug.Log($"[2-13] SetDemoMode = {isDemoMode}");
+        Debug.Log($"[3-8] SetDemoMode = {isDemoMode}");
+    }
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+        if (finished) return;
+        if (string.IsNullOrEmpty(actionType)) return;
+
+        actionType = actionType.Trim();
+
+        if (string.Equals(actionType, "Input", System.StringComparison.OrdinalIgnoreCase))
+        {
+            Debug.Log($"[3-8 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
+
+            // 데모 모드일 때 자동으로 클릭 입력 및 행동 수행
+            SubmitInput();
+
+            // 덤불 정지 및 플레이어 액션 연동을 위한 브로드캐스트 또는 직접 참조 제어
+            BushSpawner3_8 spawner = FindObjectOfType<BushSpawner3_8>();
+            if (spawner != null) spawner.SimulateDemoClick();
+
+            PlayerControl3_8 player = FindObjectOfType<PlayerControl3_8>();
+            if (player != null) player.PlayWatchRoutine();
+        }
     }
 
     private void Start()
@@ -41,7 +64,7 @@ public class Minigame3_8remake : MiniGameBase, IPracticeDemoInput
         if (finished) return;
 
         // 좌클릭 입력
-        if (Input.GetMouseButtonDown(0))
+        if (!isDemoMode && Input.GetMouseButtonDown(0))
         {
             SubmitInput();
         }

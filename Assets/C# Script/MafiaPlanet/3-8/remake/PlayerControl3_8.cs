@@ -36,10 +36,9 @@ public class PlayerControl3_8 : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (game != null && !game.IsDemoMode && Input.GetMouseButtonDown(0))
         {
             Debug.Log("Mouse Clicked!");
-
             PlayWatchRoutine();
         }
     }

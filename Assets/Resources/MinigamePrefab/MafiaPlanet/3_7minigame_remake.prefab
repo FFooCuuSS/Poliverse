@@ -604,6 +604,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8812f0fedaa9c546852bbfaa33a591e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minigame: {fileID: 3220121194625752119}
   holdInput: {fileID: 6434550130528155188}
   brushContainer: {fileID: 5935267436245075924}
   brushPrefab: {fileID: 2396170659095875947, guid: 7020fe771ea72df4da74f853af382391, type: 3}

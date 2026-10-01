@@ -48,27 +48,25 @@ public class EnemyWatch3_8 : MonoBehaviour
 
     private IEnumerator ChangeRoutine()
     {
-        // bush 생성 시점부터 2초 대기
         yield return new WaitForSeconds(changeTime);
 
-        // enemy look으로 변경
         if (sr != null && lookSprite != null)
         {
             sr.sprite = lookSprite;
-            if (clickSound != null)
+
+            // 안전한 널 체크 추가
+            if (clickSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
             {
                 GameRoot.Instance.Audio.PlaySfx(clickSound);
             }
-
         }
 
-        // 0.5초 유지
         yield return new WaitForSeconds(lookDuration);
 
-        // 다시 normal로 변경
         if (sr != null && normalSprite != null)
         {
-            if (walkSound != null)
+            // 안전한 널 체크 추가
+            if (walkSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
             {
                 GameRoot.Instance.Audio.PlaySfx(walkSound);
             }
