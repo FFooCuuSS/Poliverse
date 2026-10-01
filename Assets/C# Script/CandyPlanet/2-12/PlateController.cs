@@ -99,4 +99,15 @@ public class PlateController : MonoBehaviour
             transform.DOMove(target, snapMoveDuration).SetEase(snapEase);
         }
     }
+
+    /// <string>외부(데모 등)에서 레인을 즉시 지정하고 이동시킬 때 사용</string>
+    public void MoveToLaneInstant(int laneIndex)
+    {
+        if (laneAnchors == null || laneIndex < 0 || laneIndex >= laneAnchors.Length) return;
+
+        _currentLaneIndex = laneIndex;
+        Vector3 target = new Vector3(laneAnchors[laneIndex].position.x, transform.position.y, transform.position.z);
+        transform.position = target;
+        transform.DOKill();
+    }
 }

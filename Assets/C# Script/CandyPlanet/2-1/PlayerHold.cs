@@ -23,7 +23,12 @@ public class PlayerHold : MonoBehaviour
     void Update()
     {
         if (isMoving) return;
-        if (minigame_2_1 != null && minigame_2_1.IsInputLocked) return;
+        // 데모 모드일 때는 플레이어 직접 입력 차단
+        if (minigame_2_1 != null)
+        {
+            if (minigame_2_1.IsDemoMode) return;
+            if (minigame_2_1.IsInputLocked) return;
+        }
 
 #if UNITY_EDITOR || UNITY_STANDALONE
         if (Input.GetMouseButtonDown(0))
@@ -32,6 +37,12 @@ public class PlayerHold : MonoBehaviour
         if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
             StartCoroutine(DownAndUp());
 #endif
+    }
+
+    public void TriggerDemoHold()
+    {
+        if (isMoving) return;
+        StartCoroutine(DownAndUp());
     }
 
     private IEnumerator DownAndUp()

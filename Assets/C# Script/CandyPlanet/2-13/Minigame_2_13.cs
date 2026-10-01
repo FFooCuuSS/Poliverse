@@ -34,7 +34,7 @@ public class JellyEnemyTarget
     public SpriteRenderer enemyRenderer;
 }
 
-public class Minigame_2_13 : MiniGameBase
+public class Minigame_2_13 : MiniGameBase, IPracticeDemoInput
 {
     // 판정 윈도우 오버라이드
     // hitWindow를 goodWindow에 가깝게 좁혀서, 판정 하나가 다음 사이클 이벤트까지
@@ -43,7 +43,7 @@ public class Minigame_2_13 : MiniGameBase
     public override float perfectWindowOverride => 0.1f;
     public override float goodWindowOverride => 0.25f;
     public override float hitWindowOverride => 0.35f;
-    protected override string MinigameExplain => "젤리빌딩 부수기!";
+    
 
     [Header("Jelly Block Demolition - Positions")]
     [Tooltip("탄환이 처음 소환되는 위치 (좌측 상단)")]
@@ -127,7 +127,22 @@ public class Minigame_2_13 : MiniGameBase
     private int currentHitStage = 0; // 0 = 기본, 1 = 1회 명중(Stage2), 2 = 2회 명중(Stage3, 다음 타겟으로)
 
     protected override float TimerDuration => 15f;
-    protected override string MinigameTitle => "젤리 블록 철거";
+
+    protected override string MinigameTitle => "젤리 블록 철거!";
+    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+    };
+
+    private bool isDemoMode = false;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[2-13] SetDemoMode = {isDemoMode}");
+    }
 
     protected override void Awake()
     {
@@ -554,5 +569,33 @@ public class Minigame_2_13 : MiniGameBase
             target.transform.position = to;
 
         onComplete?.Invoke();
+    }
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+        if (string.IsNullOrEmpty(actionType))
+            return;
+
+        actionType = actionType.Trim();
+
+        // 이 미니게임은 "Input" 타입의 리듬 액션 타이밍에 맞춰 플레이어 입력을 시뮬레이션합니다.
+        if (!string.Equals(actionType, "Input", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        if (IsInputLocked || IsSuccess)
+            return;
+
+        Debug.Log($"[2-13 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
+
+        // 리듬 매니저로 플레이어 입력 성공 신호를 전달하여 
+        // 자동으로 Perfect 판정이 나며 투석기가 발사되도록 함
+        if (rhythmManager != null)
+        {
+            rhythmManager.ReceivePlayerInput("Input");
+        }
+        else
+        {
+            base.OnPlayerInput("Input");
+        }
     }
 }

@@ -2,14 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Minigame_2_8 : MiniGameBase
+public class Minigame_2_8 : MiniGameBase, IPracticeDemoInput
 {
     // 판정 범위 오버라이드
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.5f;
     public override float hitWindowOverride => 1f;
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "조심해라!";
+
+    protected override string MinigameTitle => "조심해라!";
+    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+    };
 
     private bool ended;
     private bool inputOpen;
@@ -21,6 +27,15 @@ public class Minigame_2_8 : MiniGameBase
     [SerializeField] private ObstacleSpawner obstacleSpawner;
     [SerializeField] private PlayerRotate playerRotate;
     [SerializeField] private PlayerSr playerSr;
+
+    private bool isDemoMode = false;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[2-8] SetDemoMode = {isDemoMode}");
+    }
 
 
     public override void StartGame()
@@ -37,15 +52,6 @@ public class Minigame_2_8 : MiniGameBase
 
         // 추가 초기화
         // 예: instructionText.text = MinigameExplain;
-    }
-
-    public void Succeed()
-    {
-        Success();
-    }
-    public void Failure()
-    {
-        Fail();
     }
 
     public override void OnRhythmEvent(string action)
@@ -120,6 +126,34 @@ public class Minigame_2_8 : MiniGameBase
             case JudgementResult.Perfect:
 
                 break;
+        }
+    }
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+        if (string.IsNullOrEmpty(actionType))
+            return;
+
+        actionType = actionType.Trim();
+
+        if (actionType != "Input")
+            return;
+
+        if (ended)
+            return;
+
+        Debug.Log($"[2-8 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
+
+        // 데모 모드에서는 입력창을 강제로 열고 올바른 회전 방향으로 자동 입력 처리
+        inputOpen = true;
+
+        if (playerRotate != null)
+        {
+            playerRotate.ExecuteDemoInput();
+        }
+        else
+        {
+            base.OnPlayerInput("Input");
         }
     }
 }

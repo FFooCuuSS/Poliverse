@@ -72,4 +72,22 @@ public class PlayerMoveByClick : MonoBehaviour
         hasMovedThisCycle = true; // 이동 로직을 수행하도록 설정
         Icicle.RaiseMoveAllowed();
     }
+
+    // 데모 모드 전용 강제 이동 함수 추가
+    public void ForceMoveForDemo()
+    {
+        if (isMoving) return;
+
+        // 데모 모드일 때는 제약 조건(canMove 등)을 무시하고 강제로 이동 및 판정 실행
+        targetPos = transform.position + Vector3.right * moveX;
+        isMoving = true;
+        hasMovedThisCycle = true;
+        canMove = false;
+
+        if (minigame != null)
+        {
+            // 성공 판정 및 리듬 입력 전달
+            minigame.OnPlayerInput("Input");
+        }
+    }
 }

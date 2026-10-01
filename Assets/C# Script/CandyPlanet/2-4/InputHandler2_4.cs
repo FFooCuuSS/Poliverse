@@ -9,6 +9,7 @@ public class InputHandler2_4 : MonoBehaviour
     void Update()
     {
         if (miniGame == null) return;
+        if (miniGame.IsDemoMode) return;
 
         if (Input.GetMouseButtonDown(0))
         {
