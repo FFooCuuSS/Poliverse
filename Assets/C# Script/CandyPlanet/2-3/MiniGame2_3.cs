@@ -2,14 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Minigame_2_3 : MiniGameBase
+public class Minigame_2_3 : MiniGameBase, IPracticeDemoInput
 {
     public override float perfectWindowOverride => 0.1f;
     public override float goodWindowOverride => 0.3f;
     public override float hitWindowOverride => 1f;
 
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "가동시켜라!";
+
+    protected override string MinigameTitle => "가동시켜라!";
+    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+    };
 
     [SerializeField] private PendulamHammer2_3 hammer;
     [SerializeField] private Player2_3 player;
@@ -22,6 +28,15 @@ public class Minigame_2_3 : MiniGameBase
     public bool IsInputOpen => inputOpen;
 
     private RhythmManager rhythmManagerRef;
+
+    private bool isDemoMode = false;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[2-3] SetDemoMode = {isDemoMode}");
+    }
 
     private double GetSongTime()
     {
@@ -81,6 +96,8 @@ public class Minigame_2_3 : MiniGameBase
 
     public override void OnPlayerInput(string action = null)
     {
+        if (IsDemoMode) return;
+
         Debug.Log($"[Minigame_2_3] 클릭 수신 @ SongTime {GetSongTime():F3}, inputOpen={inputOpen}");
 
         if (!inputOpen)
@@ -108,6 +125,35 @@ public class Minigame_2_3 : MiniGameBase
                     player.SetJudgementResult(false);
                 }
                 break;
+        }
+    }
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+        if (string.IsNullOrEmpty(actionType))
+            return;
+
+        actionType = actionType.Trim();
+
+        if (actionType != "Show" && actionType != "Input")
+            return;
+
+        Debug.Log($"[2-3 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
+
+        inputOpen = true;
+
+        if (player != null)
+        {
+            player.TriggerDemoAction();
+        }
+
+        if (rhythmManager != null)
+        {
+            rhythmManager.ReceivePlayerInput("Input");
+        }
+        else
+        {
+            OnJudgement(JudgementResult.Perfect);
         }
     }
 }

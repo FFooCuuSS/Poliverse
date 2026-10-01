@@ -1,10 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Minigame_2_5 : MiniGameBase
+public class Minigame_2_5 : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "쌓아라!";
+    protected override string MinigameTitle => "쌓아라!";
+    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+    };
 
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.45f;
@@ -28,8 +33,19 @@ public class Minigame_2_5 : MiniGameBase
     private int pipe2Count;
     private int pipe3Count;
 
+    private bool isDemoMode = false;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[2-5] SetDemoMode = {isDemoMode}");
+    }
+
     void Update()
     {
+        if (IsDemoMode) return;
+
         if (Input.GetMouseButtonDown(0))
             OnPlayerInput();
     }
@@ -96,6 +112,7 @@ public class Minigame_2_5 : MiniGameBase
 
     public override void OnPlayerInput(string action = null)
     {
+        if (IsDemoMode) return;
         if (ended) return;
         if (pendingInputCount <= 0) return;
 
@@ -127,6 +144,34 @@ public class Minigame_2_5 : MiniGameBase
             case JudgementResult.Miss:
                 Destroy(iceCream.gameObject);
                 break;
+        }
+    }
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+        if (string.IsNullOrEmpty(actionType))
+            return;
+
+        actionType = actionType.Trim();
+
+        // 입력 타이밍 시그널(Input)이 들어올 때 자동 시뮬레이션 실행
+        if (actionType != "Input")
+            return;
+
+        if (ended)
+            return;
+
+        Debug.Log($"[2-5 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
+
+        // 데모 모드에서는 시스템이 직접 입력을 받은 것처럼 처리하여 아이스크림 투입 및 판정 실행
+        if (rhythmManager != null)
+        {
+            rhythmManager.ReceivePlayerInput("Input");
+        }
+        else
+        {
+            // fallback 처리
+            OnJudgement(JudgementResult.Perfect);
         }
     }
 }

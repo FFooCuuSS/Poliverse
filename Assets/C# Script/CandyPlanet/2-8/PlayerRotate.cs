@@ -29,6 +29,8 @@ public class PlayerRotate : MonoBehaviour
 
     private void HandleStepInput()
     {
+        if (minigame_2_8 != null && minigame_2_8.IsDemoMode) return;
+
         if (Input.GetMouseButtonDown(0))
         {
             float centerX = Screen.width / 2f;
@@ -37,6 +39,15 @@ public class PlayerRotate : MonoBehaviour
             // 게이트(입력 가능 여부/중복 방지)와 실제 회전 적용은 Minigame_2_8이 전담
             minigame_2_8.SubmitPlayerInput(isLeftClick);
         }
+    }
+
+    //데모 모드 전용 자동 입력 함수 추가
+    public void ExecuteDemoInput()
+    {
+        // 장애물에 의해 판이 어느쪽으로 기울어졌는지에 따라 반대 방향을 자동으로 클릭한 것으로 처리
+        // targetAngle이 양수면 왼쪽으로 기울어진 것이므로 오른쪽(isLeftClick = false)을 눌러 복구
+        bool isLeftClick = targetAngle <= 0f;
+        minigame_2_8.SubmitPlayerInput(isLeftClick);
     }
 
     // Minigame_2_8이 게이트를 통과한 클릭에 대해서만 호출한다

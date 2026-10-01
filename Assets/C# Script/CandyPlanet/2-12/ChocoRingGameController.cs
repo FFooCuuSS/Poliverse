@@ -54,13 +54,13 @@ public class ChocoRingGameController : MonoBehaviour
             if (choice == targetCount)
             {
                 Debug.Log("정답");
-                minigame_2_12.Succeed();
+                //minigame_2_12.Succeed();
                 return;
             }
             else
             {
                 Debug.Log("오답");
-                minigame_2_12.Fail();
+                //minigame_2_12.Fail();
                 return;
             }
         }));
