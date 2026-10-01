@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class DrawCard3_4remake : MonoBehaviour
 {
-
     [Header("효과음")]
     [SerializeField] private AudioClip clickSound;
     public Minigame_3_4_Remake minigame3_4;
@@ -28,10 +27,8 @@ public class DrawCard3_4remake : MonoBehaviour
     int moveCardTurn = 0;
     int cardPosX = -4;
 
-    // 카드 이동 시간
-    // 1박 = 0.6초
+    // 카드 이동 시간 (1박 = 0.6초)
     float moveDuration = 0.6f;
-
     float moveStartTime;
 
     Vector3 startPos;
@@ -44,16 +41,24 @@ public class DrawCard3_4remake : MonoBehaviour
     bool moveCard = false;
     bool minigame3_4_started = false;
 
-
     void Start()
     {
-        // 처음에는 일반 표정 활성화
-        normalFace.GetComponent<SpriteRenderer>().enabled = true;
+        // Null 예외 방지용 안전 장치
+        if (normalFace != null)
+        {
+            var sr = normalFace.GetComponent<SpriteRenderer>();
+            if (sr != null) sr.enabled = true;
+        }
+
+        // 미니게임 참조 자동 찾기 (인스펙터 연결 안 되어있을 때 대비)
+        if (minigame3_4 == null)
+        {
+            minigame3_4 = FindObjectOfType<Minigame_3_4_Remake>();
+        }
 
         // 카드 생성
         SpawnCard();
     }
-
 
     void Update()
     {
@@ -73,123 +78,100 @@ public class DrawCard3_4remake : MonoBehaviour
         }
         else if (!minigame3_4_started)
         {
-            // 카드 5장의 배치가 전부 끝난 뒤
-            // 실제 미니게임 시작
             minigame3_4_started = true;
 
-            minigame3_4.StartGame();
+            if (minigame3_4 != null)
+            {
+                minigame3_4.StartGame();
+            }
+            else
+            {
+                Debug.LogError("[DrawCard3_4remake] minigame3_4 참조가 누락되었습니다!");
+            }
         }
     }
 
-
     void PopCard()
     {
-        // 같은 카드에서 여러 번 실행되는 것을 방지
         isPoped = true;
 
-        // 현재 차례의 카드 가져오기
-        GameObject card = spawnedCards[moveCardTurn];
-
-        // 카드 확대 연출 시작
-        StartCoroutine(cardReload(card));
+        if (moveCardTurn < spawnedCards.Count && spawnedCards[moveCardTurn] != null)
+        {
+            GameObject card = spawnedCards[moveCardTurn];
+            StartCoroutine(cardReload(card));
+        }
     }
-
 
     void SpawnCard()
     {
         Debug.Log("SpawnCards() 시작");
 
-        // 기존에 생성된 카드가 있다면 삭제
         foreach (var card in spawnedCards)
         {
-            Destroy(card);
+            if (card != null) Destroy(card);
         }
 
-        // 리스트 초기화
         spawnedCards.Clear();
 
-        // 카드 생성 위치
         Vector3 pos = transform.position;
-
         pos.x = 7f;
         pos.y = -1.8f;
 
-        // 0~4 중 수상한 카드 하나를 랜덤 선택
         int trapIndex = Random.Range(0, 5);
 
-        // 카드 총 5장 생성
         for (int i = 0; i < 5; i++)
         {
-            // 카드를 생성하면서 동시에 cardParent의 자식으로 설정
             GameObject card = Instantiate(
                 cardPrefab,
                 pos,
                 Quaternion.identity,
-                cardParent.transform
+                cardParent != null ? cardParent.transform : null
             );
 
-            // CardColor 컴포넌트 가져오기
-            CardColor cardComponent =
-                card.GetComponent<CardColor>();
+            CardColor cardComponent = card.GetComponent<CardColor>();
 
-            // CardColor가 없는 경우 오류 출력
             if (cardComponent == null)
             {
-                Debug.LogError(
-                    "Card 프리팹에 CardColor 스크립트가 없습니다!"
-                );
-
+                Debug.LogError("Card 프리팹에 CardColor 스크립트가 없습니다!");
                 continue;
             }
 
-            // 랜덤으로 선택된 한 장은 수상한 카드
             if (i == trapIndex)
             {
                 cardComponent.IsSetTrap();
             }
             else
             {
-                // 나머지는 일반 카드
                 cardComponent.IsNotTrap();
             }
 
-            // 생성된 카드를 리스트에 추가
             spawnedCards.Add(card);
         }
 
-        // 카드 생성 완료
         isCardSet = true;
     }
 
-
     void MoveCard(int cardNum)
     {
-        // 현재 이동시킬 카드
+        if (cardNum >= spawnedCards.Count || spawnedCards[cardNum] == null) return;
+
         GameObject card = spawnedCards[cardNum];
 
-        // 아직 이동을 시작하지 않은 상태
         if (!isCardMoving)
         {
-            if (clickSound != null)
+            // 오디오 매니저 예외 방지 처리
+            if (clickSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
             {
                 GameRoot.Instance.Audio.PlaySfx(clickSound);
             }
 
-
             isCardMoving = true;
-
-            // 현재 위치 저장
             startPos = card.transform.position;
-
-            // 카드가 이동할 목표 위치
-            targetPos =
-                new Vector3(cardPosX, -1.5f, 0f);
-
-            // 이동 시작 시간 저장
+            targetPos = new Vector3(cardPosX, -1.5f, 0f);
             moveStartTime = Time.time;
 
-            // 현재 카드가 수상한 카드인지 확인
-            if (card.GetComponent<CardColor>().isTrapCard)
+            CardColor colorComp = card.GetComponent<CardColor>();
+            if (colorComp != null && colorComp.isTrapCard)
             {
                 ChangeSuspicious();
             }
@@ -199,89 +181,72 @@ public class DrawCard3_4remake : MonoBehaviour
             }
         }
 
-        // 이동 진행률 계산
-        // 0.6초 동안 0 -> 1로 증가
-        float t =
-            (Time.time - moveStartTime) / moveDuration;
+        float t = (Time.time - moveStartTime) / moveDuration;
+        card.transform.position = Vector3.Lerp(startPos, targetPos, t);
 
-        // 카드 이동
-        card.transform.position =
-            Vector3.Lerp(startPos, targetPos, t);
-
-        // 이동 완료
         if (t >= 1f)
         {
-            // 정확한 최종 위치로 설정
             card.transform.position = targetPos;
-
             isCardMoving = false;
             moveCard = false;
 
-            // 다음 카드는 오른쪽으로 2만큼 떨어진 위치
             cardPosX += 2;
-
-            // 다음 카드로 넘어감
             moveCardTurn++;
 
-            // 표정을 다시 일반 표정으로 변경
             isNotSuspicious();
-
-            // 다음 카드 Pop 가능하게 설정
             isPoped = false;
         }
     }
 
-
     IEnumerator cardReload(GameObject card)
     {
-        // 카드의 원래 크기 저장
-        Vector3 originalScale =
-            card.transform.localScale;
+        if (card == null) yield break;
 
-        // 확대될 크기 계산
+        Vector3 originalScale = card.transform.localScale;
         Vector3 scale = originalScale;
 
         scale.x *= cardPopSize;
         scale.y *= cardPopSize;
 
-        // 카드 확대
         card.transform.localScale = scale;
 
-        // 1박 = 0.6초 동안 확대 상태 유지
         yield return new WaitForSeconds(0.6f);
 
-        // 원래 크기로 복구
-        card.transform.localScale = originalScale;
+        if (card != null)
+        {
+            card.transform.localScale = originalScale;
+        }
 
-        // 카드 이동 시작
         moveCard = true;
     }
 
-
     void isNotSuspicious()
     {
-        // 수상한 표정 OFF
-        suspiciousFace
-            .GetComponent<SpriteRenderer>()
-            .enabled = false;
+        if (suspiciousFace != null)
+        {
+            var sr = suspiciousFace.GetComponent<SpriteRenderer>();
+            if (sr != null) sr.enabled = false;
+        }
 
-        // 일반 표정 ON
-        normalFace
-            .GetComponent<SpriteRenderer>()
-            .enabled = true;
+        if (normalFace != null)
+        {
+            var sr = normalFace.GetComponent<SpriteRenderer>();
+            if (sr != null) sr.enabled = true;
+        }
     }
-
 
     void ChangeSuspicious()
     {
-        // 수상한 표정 ON
-        suspiciousFace
-            .GetComponent<SpriteRenderer>()
-            .enabled = true;
+        if (suspiciousFace != null)
+        {
+            var sr = suspiciousFace.GetComponent<SpriteRenderer>();
+            if (sr != null) sr.enabled = true;
+        }
 
-        // 일반 표정 OFF
-        normalFace
-            .GetComponent<SpriteRenderer>()
-            .enabled = false;
+        if (normalFace != null)
+        {
+            var sr = normalFace.GetComponent<SpriteRenderer>();
+            if (sr != null) sr.enabled = false;
+        }
     }
 }

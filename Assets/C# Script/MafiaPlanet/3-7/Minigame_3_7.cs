@@ -1,10 +1,16 @@
 using UnityEngine;
 using DG.Tweening;
 
-public class Minigame_3_7 : MiniGameBase
+public class Minigame_3_7 : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 16f;
-    protected override string MinigameExplain => "사인을 베끼세요!";
+    protected override string MinigameTitle => "젤리 블록 철거!";
+    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+    };
+
     protected override bool UseRhythmJudgementScore => false;
 
     [Header("효과음")]
@@ -37,6 +43,15 @@ public class Minigame_3_7 : MiniGameBase
     private Vector2 drawAreaTargetPos;
 
     private Sequence hideSequence;
+
+    private bool isDemoMode = false;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[2-13] SetDemoMode = {isDemoMode}");
+    }
 
     protected override void Awake()
     {
