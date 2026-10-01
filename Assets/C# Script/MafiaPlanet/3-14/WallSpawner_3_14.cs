@@ -78,22 +78,22 @@ public class WallSpawner_3_14 : MonoBehaviour
     public void MoveWallLeft()
     {
         if (minigame_3_14.IsInputLocked) return;
-        if (isMoving) return; // 이미 이동 중이면 무시
+        if (isMoving) return;
         if (clickCount >= 11 && !isEnd)
         {
-            minigame_3_14.Succeed();
             Debug.Log("끝");
             isEnd = true;
+            // Success() 호출 제거 완료
         }
         if (clickCount >= 12) return;
 
-        isMoving = true; // 이동 시작 → 잠금
+        isMoving = true;
         clickCount++;
 
         Vector3 targetPosition = wallParent.position + new Vector3(-3f, 0f, 0f);
 
         wallParent.DOMove(targetPosition, 0.2f)
             .SetEase(Ease.Linear)
-            .OnComplete(() => isMoving = false); // 이동 끝나면 다시 입력 허용
+            .OnComplete(() => isMoving = false);
     }
 }
