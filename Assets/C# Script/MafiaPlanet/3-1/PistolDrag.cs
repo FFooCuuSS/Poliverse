@@ -15,6 +15,12 @@ public class PistolDrag : DirectionalDrag
 
     protected override Vector3 GetConstrainedPosition(Vector3 current, Vector3 target)
     {
+        // 데모 모드일 때는 드래그 제약을 풀고 자유롭게 위치 이동 허용
+        if (Minigame_3_1.Instance != null && Minigame_3_1.Instance.IsDemoMode)
+        {
+            return target;
+        }
+
         if (!canPull)
             return current;
 

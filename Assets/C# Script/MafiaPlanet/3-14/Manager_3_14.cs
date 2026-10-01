@@ -418,7 +418,7 @@ public class Manager_3_14 : MonoBehaviour
 
         Debug.Log($"3-14 결과 / Perfect:{perfectCount}, Good:{goodCount}, Miss:{missCount}, Move:{successMoveCount}");
 
-        minigame?.Succeed();
+        // Success() 호출 제거 완료 (필요 시 연출 코루틴만 유지)
     }
 
     private void ClosePreviousInputAsMissIfNeeded()

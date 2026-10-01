@@ -54,6 +54,21 @@ public class Minigame_3_1 : MiniGameBase, IPracticeDemoInput
         }
     }
 
+    // --- 리듬 판정 오버라이드: 어떤 입력이든 무조건 Perfect 처리 ---
+    public override void OnJudgement(JudgementResult judgement)
+    {
+        // 강제로 Perfect 판정으로 고정 혹은 가로채기
+        base.OnJudgement(JudgementResult.Perfect);
+        Debug.Log("[3-1] 강제 퍼펙트 판정 처리 완료");
+    }
+
+    // --- 플레이어 수동 입력 시 처리 (필요시 호출) ---
+    public void SubmitManualInput(string actionName)
+    {
+        if (IsInputLocked) return;
+        OnPlayerInput(actionName);
+    }
+
     // --- IPracticeDemoInput 구현 ---
     public override void ExecutePracticeAction(int actionIndex, string actionType)
     {
@@ -64,38 +79,46 @@ public class Minigame_3_1 : MiniGameBase, IPracticeDemoInput
 
         actionType = actionType.Trim();
 
-        // 1단계: 당기는 액션 (Swipe 또는 Input1)
+        // 1단계: Swipe 또는 Input1 (당기기)
         if (string.Equals(actionType, "Swipe", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(actionType, "Input1", StringComparison.OrdinalIgnoreCase))
         {
             if (pistolDrag != null)
             {
+                pistolDrag.enabled = true;
                 pistolDrag.canPull = true;
             }
 
-            if (pistolTransform != null)
+            if (pistolTransform != null && pistolDrag != null)
             {
                 float angleRad = (pistolDrag.angleInDegrees + 90f) * Mathf.Deg2Rad;
                 Vector3 pullDir = new Vector3(Mathf.Cos(angleRad), Mathf.Sin(angleRad), 0f).normalized;
                 Vector3 targetPos = pistolTransform.position + pullDir * demoPullDistance;
 
                 pistolTransform.DOMove(targetPos, demoPullDuration).SetEase(Ease.OutQuad);
-                Debug.Log($"[3-1 Demo] {actionType} 처리 완료: 강제 당김 연출 실행");
+                Debug.Log("[3-1 Demo] Swipe 연출 실행 완료");
             }
+
+            // Miss 방지 및 퍼펙트 판정 연동을 위해 리듬 매니저에 입력 전달
+            OnPlayerInput(actionType);
         }
-        // 2단계: 뽑아 올리는 액션 (Tap 또는 Input2)
+        // 2단계: Tap 또는 Input2 (올리기)
         else if (string.Equals(actionType, "Tap", StringComparison.OrdinalIgnoreCase) ||
                  string.Equals(actionType, "Input2", StringComparison.OrdinalIgnoreCase))
         {
             if (pistolUp != null)
             {
                 pistolUp.goingUp = true;
-                Debug.Log($"[3-1 Demo] {actionType} 처리 완료: goingUp = true");
+                Debug.Log("[3-1 Demo] Tap 연출 (goingUp = true) 실행 완료");
             }
+
+            // Miss 방지 및 퍼펙트 판정 연동을 위해 리듬 매니저에 입력 전달
+            OnPlayerInput(actionType);
         }
         else
         {
-            Debug.LogWarning($"[3-1 Demo] 처리되지 않은 actionType입니다: '{actionType}'");
+            // 그 외 Show 등의 신호 처리
+            Debug.Log($"[3-1 Demo] 기타 액션 타입: {actionType}");
         }
     }
-}  
+}
