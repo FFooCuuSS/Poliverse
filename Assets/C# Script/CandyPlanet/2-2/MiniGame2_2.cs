@@ -2,14 +2,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MiniGame2_2 : MiniGameBase
+public class MiniGame2_2 : MiniGameBase, IPracticeDemoInput
 {
     // 판정 범위 오버라이드
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.5f;
     public override float hitWindowOverride => 1f;
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "피해라!";
+
+    protected override string MinigameTitle => "피해라!";
+    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+    };
+
+    private bool isDemoMode = false;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[2-2] SetDemoMode = {isDemoMode}");
+    }
 
     private bool ended;
     public int missCount = 0;
@@ -24,17 +39,6 @@ public class MiniGame2_2 : MiniGameBase
         // 예: instructionText.text = MinigameExplain;
     }
 
-    public void Succeed()
-    {
-        ended = true;
-        Success();
-    }
-    public void Failure()
-    {
-        ended = true;
-        Fail();
-    }
-
     public override void OnRhythmEvent(string action)
     {
         if (ended) return;
@@ -47,6 +51,8 @@ public class MiniGame2_2 : MiniGameBase
     }
     public override void OnPlayerInput(string action = null)
     {
+        if (IsDemoMode) return;
+
         // 입력 잠금 상태면 무시
         if (IsInputLocked) return;
         base.OnPlayerInput(action);
@@ -77,6 +83,34 @@ public class MiniGame2_2 : MiniGameBase
         {
             Debug.Log("실패");
            // Failure();
+        }
+    }
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+        if (string.IsNullOrEmpty(actionType))
+            return;
+
+        actionType = actionType.Trim();
+
+        if (actionType != "Input" && actionType != "PatternStart")
+            return;
+
+        if (ended)
+            return;
+
+        Debug.Log($"[2-2 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
+
+        // 플레이어의 이동 스크립트를 찾아 데모 강제 이동 실행 (고드름 타이밍에 맞춰 회피 동작 수행)
+        PlayerMoveByClick playerMove = GetComponentInChildren<PlayerMoveByClick>(true);
+        if (playerMove != null)
+        {
+            playerMove.ForceMoveForDemo();
+        }
+        else
+        {
+            // 플레이어를 찾지 못한 경우 기본 입력 처리
+            base.OnPlayerInput("Input");
         }
     }
 }

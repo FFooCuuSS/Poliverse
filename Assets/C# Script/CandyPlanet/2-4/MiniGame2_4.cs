@@ -3,10 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MiniGame2_4 : MiniGameBase
+public class MiniGame2_4 : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "같은 색끼리 옮겨담아라!";
+
+    protected override string MinigameTitle => "같은 색끼리 옮겨담아라!";
+    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+    };
 
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.45f;
@@ -21,6 +27,15 @@ public class MiniGame2_4 : MiniGameBase
 
     [SerializeField] private GameObject liquidPrefab;
     [SerializeField] private Sprite[] fillingSprites;
+
+    private bool isDemoMode = false;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[2-4] SetDemoMode = {isDemoMode}");
+    }
 
     // MiniGameBase를 건드리지 않고, 어떤 RhythmManager 구현체든 대응
     private double GetSongTime()
@@ -61,6 +76,8 @@ public class MiniGame2_4 : MiniGameBase
 
     public override void OnPlayerInput(string action = null)
     {
+        if (IsDemoMode) return;
+
         if (ended) return;
 
         Debug.Log($"[MiniGame2_4] 클릭 수신 @ SongTime {GetSongTime():F3}, 대기 중: {pendingBottles.Count}개");
@@ -136,6 +153,41 @@ public class MiniGame2_4 : MiniGameBase
         else
         {
             Destroy(liquid);
+        }
+    }
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+        if (string.IsNullOrEmpty(actionType))
+            return;
+
+        actionType = actionType.Trim();
+
+        if (actionType != "Input")
+            return;
+
+        if (ended)
+            return;
+
+        Debug.Log($"[2-4 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
+
+        if (pendingBottles.Count == 0)
+            return;
+
+        // 데모 모드에서는 주전자의 물 따르기 연출을 실행하고 완벽한 성공 판정 전달
+        if (kettle != null)
+        {
+            kettle.Pour();
+        }
+
+        // rhythmManager를 통해 정답/퍼펙트 판정 처리
+        if (rhythmManager != null)
+        {
+            rhythmManager.ReceivePlayerInput("Input");
+        }
+        else
+        {
+            OnJudgement(JudgementResult.Perfect);
         }
     }
 }

@@ -2,19 +2,34 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Minigame_2_9 : MiniGameBase
+public class Minigame_2_9 : MiniGameBase, IPracticeDemoInput
 {
     // 판정 범위 오버라이드
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.5f;
     public override float hitWindowOverride => 1f;
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "쌓아라!";
+
+    protected override string MinigameTitle => "쌓아라!";
+    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+    };
 
     private bool ended;
     private int totalCount = 5;
 
     [SerializeField] private CloudSpawner cloudSpawner;
+
+    private bool isDemoMode = false;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[2-9] SetDemoMode = {isDemoMode}");
+    }
 
     public override void StartGame()
     {
@@ -22,15 +37,6 @@ public class Minigame_2_9 : MiniGameBase
         ended = false;
         // 추가 초기화
         // 예: instructionText.text = MinigameExplain;
-    }
-
-    public void Succeed()
-    {
-        Success();
-    }
-    public void Failure()
-    {
-        Fail();
     }
 
     public override void OnRhythmEvent(string action)
@@ -80,6 +86,40 @@ public class Minigame_2_9 : MiniGameBase
             case JudgementResult.Perfect:
                 // 필요 시: PlaySFX("Hit");
                 break;
+        }
+    }
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+        if (string.IsNullOrEmpty(actionType))
+            return;
+
+        actionType = actionType.Trim();
+
+        // CSV의 입력 타이밍("Input") 시그널에 맞춰 작동
+        if (actionType != "Input")
+            return;
+
+        if (ended)
+            return;
+
+        Debug.Log($"[2-9 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
+
+        // 1. 손(Hand)의 잡기 연출 자동 실행
+        Hand hand = FindAnyObjectByType<Hand>();
+        if (hand != null)
+        {
+            hand.TriggerDemoGrab();
+        }
+
+        // 2. 리듬 시스템에 성공 판정 전달
+        if (rhythmManager != null)
+        {
+            rhythmManager.ReceivePlayerInput("Input");
+        }
+        else
+        {
+            base.OnPlayerInput("Input");
         }
     }
 }

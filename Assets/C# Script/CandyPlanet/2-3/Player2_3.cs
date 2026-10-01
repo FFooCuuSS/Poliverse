@@ -38,6 +38,8 @@ public class Player2_3 : MonoBehaviour
 
     void Update()
     {
+        if (minigame != null && minigame.IsDemoMode) return;
+
         if (Input.GetMouseButtonDown(0))
         {
             Debug.Log($"[Player2_3] 클릭 감지, IsInputOpen={(minigame != null ? minigame.IsInputOpen.ToString() : "minigame null")}");
@@ -48,6 +50,11 @@ public class Player2_3 : MonoBehaviour
                 StartCoroutine(ShrinkAndRestore());
             }
         }
+    }
+
+    public void TriggerDemoAction()
+    {
+        StartCoroutine(ShrinkAndRestore());
     }
 
     public void UpdateDirectionByHammerPosition(bool isHammerOnRight)
