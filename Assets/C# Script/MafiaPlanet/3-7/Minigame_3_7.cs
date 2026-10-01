@@ -50,7 +50,39 @@ public class Minigame_3_7 : MiniGameBase, IPracticeDemoInput
     public void SetDemoMode(bool isDemo)
     {
         isDemoMode = isDemo;
-        Debug.Log($"[2-13] SetDemoMode = {isDemoMode}");
+        Debug.Log($"[3-7] SetDemoMode = {isDemoMode}");
+    }
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+        if (string.IsNullOrEmpty(actionType))
+            return;
+
+        actionType = actionType.Trim();
+        Debug.Log($"[3-7 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
+
+        if (ended)
+            return;
+
+        // CSV 신호에 따른 데모 동작 분기
+        if (string.Equals(actionType, "Show", System.StringComparison.OrdinalIgnoreCase))
+        {
+            OnShowSignal();
+        }
+        else if (string.Equals(actionType, "Input", System.StringComparison.OrdinalIgnoreCase))
+        {
+            // 데모 시연 시 홀드가 안 되어 있어도 자동 성공 처리를 위해 holdInput 강제 모사 혹은 Input 시그널 연동
+            if (holdInput != null)
+            {
+                // 데모 모드에서는 홀드 상태를 강제로 true로 만들어 정상적으로 그려지게 함
+                // (필요시 리플렉션이나 홀드 속성 확장 가능, 여기서는 편의상 로직 태우기)
+            }
+            OnInputSignal();
+        }
+        else if (string.Equals(actionType, "End", System.StringComparison.OrdinalIgnoreCase))
+        {
+            OnEndSignal();
+        }
     }
 
     protected override void Awake()
@@ -190,11 +222,11 @@ public class Minigame_3_7 : MiniGameBase, IPracticeDemoInput
 
     private void JudgeHoldInput()
     {
-        bool isHolding = holdInput != null && holdInput.IsHolding;
+        bool isHolding = isDemoMode || (holdInput != null && holdInput.IsHolding);
 
         if (isHolding)
         {
-            if (clickSound != null)
+            if (clickSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
             {
                 GameRoot.Instance.Audio.PlaySfx(clickSound);
             }

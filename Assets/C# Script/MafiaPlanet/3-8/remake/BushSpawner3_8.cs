@@ -23,18 +23,23 @@ public class BushSpawner3_8 : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (minigame != null && !minigame.IsDemoMode && Input.GetMouseButtonDown(0))
         {
             StopAllBushes();
         }
-        if(bushCount>=5)
+
+        if (bushCount >= 5)
         {
             minigame.finished = true;
             return;
-
         }
 
         Cleanup();
+    }
+
+    public void SimulateDemoClick()
+    {
+        StopAllBushes();
     }
 
     IEnumerator SpawnRoutine()
