@@ -15,7 +15,10 @@ public class PistolUp : MonoBehaviour
 
     private void Start()
     {
-        minigame_3_1 = stage_3_1.GetComponent<Minigame_3_1>();
+        if (stage_3_1 != null)
+        {
+            minigame_3_1 = stage_3_1.GetComponent<Minigame_3_1>();
+        }
     }
 
     void Update()
@@ -34,11 +37,6 @@ public class PistolUp : MonoBehaviour
 
     private void CallSucceedAndDestroy()
     {
-        if (minigame_3_1 != null)
-        {
-            minigame_3_1.Succeed();
-        }
-
         Destroy(gameObject);
     }
 }
