@@ -58,7 +58,7 @@ public class Minigame1_5_Manager_remake : MiniGameBase
 
     protected override float TimerDuration => 16f;
 
-    protected override string MinigameTitle => "숨어있지 마라!";
+    protected override string MinigameTitle => "숨은 범인을 찾아라";
     protected override string MinigameExplain => "오른쪽에서 줄이 죄수위로 지나갈때 화면을 터치해주세요.";
 
     public override void StartGame()

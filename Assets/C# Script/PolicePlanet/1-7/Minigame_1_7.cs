@@ -42,7 +42,7 @@ public class Minigame_1_7 : MiniGameBase, IPracticeDemoInput
     public override float hitWindowOverride => 1f;
 
     protected override float TimerDuration => 10f;
-    protected override string MinigameTitle => "금지야";
+    protected override string MinigameTitle => "금지물품 압수";
 
     protected override string MinigameExplain => "화면에서 조사 아이콘이 뜨면 사라지기 전 정확한 타이미에 터치해주세요.";
 

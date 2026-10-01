@@ -10,11 +10,11 @@ public class Minigame_2_3 : MiniGameBase, IPracticeDemoInput
 
     protected override float TimerDuration => 5f;
 
-    protected override string MinigameTitle => "가동시켜라!";
-    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string MinigameTitle => "망치를 피해라";
+    protected override string MinigameExplain => "케이크 망치가 움직입니다.";
     protected override string[] AdditionalMinigameExplains => new string[]
     {
-        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+        "게이지에 맞춰 화면을 터치하여 피하세요."
     };
 
     [SerializeField] private PendulamHammer2_3 hammer;

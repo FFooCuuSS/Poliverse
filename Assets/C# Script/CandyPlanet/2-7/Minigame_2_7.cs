@@ -10,7 +10,9 @@ public class Minigame_2_7 : MiniGameBase
     public override float hitWindowOverride => 1f;        
 
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "À¯ÁöÇØ¶ó!";
+    protected override string MinigameTitle => "Á©¸® ÇÎÆþ";
+
+    protected override string MinigameExplain => "Á©¸®¸¦ Æ¨±â¼¼¿ä.";
 
     [Header("Stone")]
     [SerializeField] private Stone stone;

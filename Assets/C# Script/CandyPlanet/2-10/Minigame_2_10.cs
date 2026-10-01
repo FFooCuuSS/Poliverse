@@ -19,7 +19,9 @@ public class Minigame_2_10 : MiniGameBase
             return roundLength * patternCount;
         }
     }
-    protected override string MinigameExplain => "초콜릿 젓기!";
+    protected override string MinigameTitle => "초콜릿 젓기";
+
+    protected override string MinigameExplain => "온도계에 맞춰 국자를 돌리세요.";
 
     [Header("참조")]
     [SerializeField] private TemperatureController temperatureController;

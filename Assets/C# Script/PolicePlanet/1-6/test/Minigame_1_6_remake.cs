@@ -5,7 +5,7 @@ using UnityEngine;
 public class Minigame_1_6_remake : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 12f;
-    protected override string MinigameTitle => "배치하라!";
+    protected override string MinigameTitle => "경찰 인력 배치";
 
     protected override string MinigameExplain => "잠시 기다려 플랫폼 위치를 봐주세요.";
     protected override string[] AdditionalMinigameExplains => new string[]

@@ -4,11 +4,11 @@ using UnityEngine;
 public class Minigame_2_5 : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 5f;
-    protected override string MinigameTitle => "쌓아라!";
-    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string MinigameTitle => "아이스크림을 채워라";
+    protected override string MinigameExplain => "배관에서 아이스크림이 이동합니다.";
     protected override string[] AdditionalMinigameExplains => new string[]
     {
-        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+        "타이밍에 맞춰 터치하세요."
     };
 
     public override float perfectWindowOverride => 0.15f;
