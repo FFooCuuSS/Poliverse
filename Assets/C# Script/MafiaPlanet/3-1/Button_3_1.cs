@@ -8,8 +8,8 @@ public class Button_3_1 : MonoBehaviour
     public float sagAmount = 0.1f;
 
     [Header("조건")]
-    public float activateAngleThreshold = 45f;      // 각도 변화량 기준
-    public float activateDistanceThreshold = 0.2f;  // 줄이 당겨진 거리 기준
+    public float activateAngleThreshold = 45f;
+    public float activateDistanceThreshold = 0.2f;
     public PistolDrag linkedPistol;
 
     private LineRenderer line;
@@ -19,7 +19,7 @@ public class Button_3_1 : MonoBehaviour
     void Awake()
     {
         line = GetComponent<LineRenderer>();
-        line.startWidth = 1f;  // 너무 작으면 0.005 ~ 0.01로는 티가 안 남
+        line.startWidth = 1f;
         line.endWidth = 1f;
         if (startTarget != null && endTarget != null)
         {
@@ -52,11 +52,18 @@ public class Button_3_1 : MonoBehaviour
         float angleDiff = Vector2.Angle(initialDirection, currentDir);
         float displacement = Vector3.Distance(endTarget.position, initialEndPosition);
 
-        // 둘 다 만족해야만 true
         if (linkedPistol != null)
         {
-            linkedPistol.canPull = angleDiff >= activateAngleThreshold &&
-                                   displacement >= activateDistanceThreshold;
+            // 데모 모드일 때는 물리 계산에 의해 canPull이 꺼지지 않도록 고정
+            if (Minigame_3_1.Instance != null && Minigame_3_1.Instance.IsDemoMode)
+            {
+                linkedPistol.canPull = true;
+            }
+            else
+            {
+                linkedPistol.canPull = angleDiff >= activateAngleThreshold &&
+                                       displacement >= activateDistanceThreshold;
+            }
         }
     }
 }

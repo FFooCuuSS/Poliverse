@@ -1,17 +1,32 @@
 using System.Reflection;
 using UnityEngine;
 
-public class Minigame3_8remake : MiniGameBase
+public class Minigame3_8remake : MiniGameBase, IPracticeDemoInput
 {
     // ===== 미니게임 기본 정보 =====
     protected override float TimerDuration => 10f;
-    protected override string MinigameExplain => "미니게임 3-8 설명을 여기에 넣기";
+    protected override string MinigameTitle => "젤리 블록 철거!";
+    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+    };
+
     public override float perfectWindowOverride => 0.1f;
     public override float goodWindowOverride => 0.3f;
     public override float hitWindowOverride => 0.5f;
 
 
     public bool finished = false;
+
+    private bool isDemoMode = false;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[2-13] SetDemoMode = {isDemoMode}");
+    }
 
     private void Start()
     {

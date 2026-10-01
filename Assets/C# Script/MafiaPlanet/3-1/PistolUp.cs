@@ -4,38 +4,44 @@ using DG.Tweening;
 public class PistolUp : MonoBehaviour
 {
     public GameObject stage_3_1;
-    public bool goingUp = false;
+    private bool goingUpInternal = false;
+
+    public bool goingUp
+    {
+        get => goingUpInternal;
+        set
+        {
+            if (goingUpInternal != value)
+            {
+                goingUpInternal = value;
+                if (goingUpInternal)
+                {
+                    StartRise();
+                }
+            }
+        }
+    }
 
     [Header("»ó½Â ¼³Á¤")]
     public float riseTargetY = 1.5f;
     public float riseDuration = 0.5f;
 
     private bool hasStarted = false;
-    private Minigame_3_1 minigame_3_1;
 
-    private void Start()
+    private void StartRise()
     {
-        if (stage_3_1 != null)
-        {
-            minigame_3_1 = stage_3_1.GetComponent<Minigame_3_1>();
-        }
-    }
-
-    void Update()
-    {
-        if (!goingUp || hasStarted) return;
-
+        if (hasStarted) return;
         hasStarted = true;
 
         transform.DOMoveY(riseTargetY, riseDuration)
                  .SetEase(Ease.OutQuad)
                  .OnComplete(() =>
                  {
-                     Invoke(nameof(CallSucceedAndDestroy), 0.5f);
+                     Invoke(nameof(DestroySelf), 0.5f);
                  });
     }
 
-    private void CallSucceedAndDestroy()
+    private void DestroySelf()
     {
         Destroy(gameObject);
     }
