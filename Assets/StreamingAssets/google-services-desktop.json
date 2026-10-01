@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "651529722196-mmakjpjtplb5k1thm5s6c57fsu3nm3fn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hong.copspace",
+            "certificate_hash": "a21495389effeb2476af348f35e4eb93591c3ff1"
+          }
+        },
+        {
           "client_id": "651529722196-2pn2mi0u1faudg9qef7tnmpaf1q2lqc8.apps.googleusercontent.com",
           "client_type": 3
         }
