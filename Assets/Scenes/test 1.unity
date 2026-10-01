@@ -263,6 +263,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 2_9minigame_remake
       objectReference: {fileID: 0}
+    - target: {fileID: 3628888742414449684, guid: 2758d185c78649e49b697fd6a2f20f9b, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3650064631830905929, guid: 2758d185c78649e49b697fd6a2f20f9b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
