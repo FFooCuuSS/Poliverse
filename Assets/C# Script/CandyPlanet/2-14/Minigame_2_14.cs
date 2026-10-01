@@ -5,7 +5,8 @@ using UnityEngine;
 public class Minigame_2_14 : MiniGameBase
 {
     protected override float TimerDuration => 10f;
-    protected override string MinigameExplain => "막으세요!";
+    protected override string MinigameTitle => "먹는 걸 막아라";
+    protected override string MinigameExplain => "방패를 움직여 음식을 막으세요.";
 
     protected override bool UseRhythmJudgementScore => false;
 

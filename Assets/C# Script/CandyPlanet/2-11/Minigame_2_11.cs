@@ -5,7 +5,9 @@ using UnityEngine;
 public class Minigame_2_11 : MiniGameBase
 {
     protected override float TimerDuration => 10f;
-    protected override string MinigameExplain => "쌓아보세요!";
+    protected override string MinigameTitle => "마카롱 쌓기";
+
+    protected override string MinigameExplain => "타이밍에 맞춰 화면을 터치하여 마카롱을 집으세요.";
 
     private bool ended;
 

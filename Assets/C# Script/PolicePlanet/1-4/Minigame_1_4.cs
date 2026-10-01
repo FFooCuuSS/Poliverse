@@ -10,7 +10,7 @@ public class Minigame_1_4 : MiniGameBase
 
     protected override float TimerDuration => 10f;
 
-    protected override string MinigameTitle => "악세서리 제거하기";
+    protected override string MinigameTitle => "몽타주";
 
     protected override string MinigameExplain => "죄수의 변장이 순서대로 깜빡이며 타이밍을 알려줍니다.";
     protected override string[] AdditionalMinigameExplains => new string[]

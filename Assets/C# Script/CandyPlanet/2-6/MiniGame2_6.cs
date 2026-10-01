@@ -5,7 +5,13 @@ using UnityEngine;
 public class MiniGame2_6 : MiniGameBase
 {
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "좌우로 피해라!";
+    protected override string MinigameTitle => "장애물을 피해라";
+
+    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "장애물을 피해 좌우로 움직이세요."
+    };
 
     //public override float perfectWindowOverride => 0.1f;
     //public override float goodWindowOverride => 0.3f;

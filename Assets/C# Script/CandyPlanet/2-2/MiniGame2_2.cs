@@ -10,11 +10,11 @@ public class MiniGame2_2 : MiniGameBase, IPracticeDemoInput
     public override float hitWindowOverride => 1f;
     protected override float TimerDuration => 5f;
 
-    protected override string MinigameTitle => "피해라!";
-    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string MinigameTitle => "고드름을 피해라";
+    protected override string MinigameExplain => "하늘에서 고드름이 떨어집니다.";
     protected override string[] AdditionalMinigameExplains => new string[]
     {
-        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+        "화면을 터치하여 우측으로 피하세요."
     };
 
     private bool isDemoMode = false;

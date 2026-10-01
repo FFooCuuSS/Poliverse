@@ -5,7 +5,7 @@ public class Minigame_1_3 : MiniGameBase
 {
     protected override float TimerDuration => 18f;
 
-    protected override string MinigameTitle => "낭떠러지 피하기";
+    protected override string MinigameTitle => "보안장치 피하기";
 
     protected override string MinigameExplain => "상하 스와이프를 통해 낭떠러지를 피하세요";
 

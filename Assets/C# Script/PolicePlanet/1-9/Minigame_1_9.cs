@@ -26,7 +26,7 @@ public class Minigame_1_9 : MiniGameBase, IPracticeDemoInput
 
     protected override float TimerDuration => 10f;
 
-    protected override string MinigameTitle => "가동시켜라!";
+    protected override string MinigameTitle => "발전기 작동시키기";
 
     protected override string MinigameExplain => " 불이 2번씩 켜지며 타이밍을 알려줍니다.";
     protected override string[] AdditionalMinigameExplains => new string[]

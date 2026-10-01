@@ -11,7 +11,8 @@ public class Minigame_2_15 : MiniGameBase
     public override float goodWindowOverride => 0.5f;
     public override float hitWindowOverride => 1f;
     protected override float TimerDuration => 5f;
-    protected override string MinigameExplain => "피해라!";
+    protected override string MinigameTitle => "도넛 뺏어먹기";
+    protected override string MinigameExplain => "타이밍에 맞춰 음식을 먹으세요.";
 
     private bool ended;
     public int missCount = 0;

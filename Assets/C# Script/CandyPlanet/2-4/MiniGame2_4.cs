@@ -7,11 +7,11 @@ public class MiniGame2_4 : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 5f;
 
-    protected override string MinigameTitle => "같은 색끼리 옮겨담아라!";
-    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string MinigameTitle => "파르페 옮겨담기";
+    protected override string MinigameExplain => "왼쪽에서 잔이 이동합니다.";
     protected override string[] AdditionalMinigameExplains => new string[]
     {
-        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+        "타이밍에 맞춰 화면을 터치하세요."
     };
 
     public override float perfectWindowOverride => 0.15f;

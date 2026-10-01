@@ -10,12 +10,8 @@ public class Minigame_2_8 : MiniGameBase, IPracticeDemoInput
     public override float hitWindowOverride => 1f;
     protected override float TimerDuration => 5f;
 
-    protected override string MinigameTitle => "조심해라!";
-    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
-    protected override string[] AdditionalMinigameExplains => new string[]
-    {
-        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
-    };
+    protected override string MinigameTitle => "균형을 잡아라";
+    protected override string MinigameExplain => "도넛이 떨어지는 반대편을 클릭하여 균형을 잡으세요.";
 
     private bool ended;
     private bool inputOpen;
