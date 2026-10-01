@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class SignatureAutoBrush : MonoBehaviour
 {
+    [Header("Minigame Ref")]
+    [SerializeField] private Minigame_3_7 minigame;
+
     [Header("References")]
     [SerializeField] private SignatureHoldInput_3_7 holdInput;
     [SerializeField] private RectTransform brushContainer;
@@ -187,8 +190,11 @@ public class SignatureAutoBrush : MonoBehaviour
             // 핵심:
             // 펜 이동은 자동.
             // 흔적 생성은 오직 hold 중일 때만.
-            if (holdInput != null && holdInput.IsHolding)
+            bool isDemo = (minigame != null && minigame.IsDemoMode);
+            if (isDemo || (holdInput != null && holdInput.IsHolding))
+            {
                 SpawnBrushesAlongSegment(oldPos, currentPosition);
+            }
 
             if (Vector2.Distance(currentPosition, target) <= 0.001f)
                 currentPointIndex++;
