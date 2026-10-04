@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class IcicleHitPlayer : MonoBehaviour
 {
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip hitSound;
     public PlayerMoveByClick playerMove;
 
     private void OnTriggerEnter2D(Collider2D coll)
@@ -16,6 +19,11 @@ public class IcicleHitPlayer : MonoBehaviour
         if (minigame_2_2 == null) return;
 
         Debug.Log("충돌 감지 성공!");
+        if (hitSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(hitSound);
+        }
+
         minigame_2_2.missCount++;
         minigame_2_2.CheckGameResult();
 

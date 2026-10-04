@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class IceCream2_5 : MonoBehaviour
 {
+
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip clickSound;
+    private bool hasPlayedClickSound = false;
     private enum State { Fly, Drop, Conveyor }
     private State state = State.Fly;
 
@@ -50,12 +54,19 @@ public class IceCream2_5 : MonoBehaviour
 
             case State.Drop:
                 transform.position += Vector3.down * fallSpeed * Time.deltaTime;
+                if (clickSound != null && !hasPlayedClickSound)
+                {
+                    GameRoot.Instance.Audio.PlaySfx(clickSound);
+                    hasPlayedClickSound = true;
+                }
+
 
                 if (conveyorPoint != null && transform.position.y <= conveyorPoint.position.y)
                 {
                     transform.position = new Vector3(transform.position.x, conveyorPoint.position.y, transform.position.z);
                     StartConveyorMove();
                 }
+                hasPlayedClickSound = false; // Reset the click sound flag for future drops
                 break;
 
             case State.Conveyor:

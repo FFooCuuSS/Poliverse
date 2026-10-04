@@ -146,6 +146,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f3fcac20f77cee4daad7cfa028f9e30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fallingSound: {fileID: 8300000, guid: 3e72c723731a0ca4db4131cc9c2f6ee9, type: 3}
   obstacle: {fileID: 7425099751294350075, guid: 62130cc5390431045b49da3d09484d3b, type: 3}
   spawnPos1: -6
   spawnPos2: 6

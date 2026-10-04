@@ -227,6 +227,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9faac364b59eb8947be37b5bd73b82ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  waterSound: {fileID: 8300000, guid: ef6817dba9e0b034ea972126198dcb93, type: 3}
   moveSpeed: 3
   bottleRenderer: {fileID: 1628343537897072186}
   liquidMask: {fileID: 1805216816743463696}

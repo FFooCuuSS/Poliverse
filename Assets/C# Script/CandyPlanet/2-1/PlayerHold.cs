@@ -4,6 +4,10 @@ using DG.Tweening;
 
 public class PlayerHold : MonoBehaviour
 {
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip hideSound;
+
     [SerializeField] private float moveDuration = 0.1f;
     [SerializeField] private float stayDuration = 0.5f;   //아래에 머무는 시간
     [SerializeField] private float holdTargetY = -3.5f;
@@ -48,6 +52,12 @@ public class PlayerHold : MonoBehaviour
     private IEnumerator DownAndUp()
     {
         isMoving = true;
+        if (hideSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(hideSound);
+        }
+
+
 
         if (rhythmManager == null)
             rhythmManager = FindObjectOfType<RhythmManager>();

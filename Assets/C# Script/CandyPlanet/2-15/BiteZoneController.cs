@@ -4,6 +4,10 @@ using System.Collections.Generic;
 [RequireComponent(typeof(Collider2D))]
 public class BiteZoneController : MonoBehaviour
 {
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip eatingSound;
+
     public string sliceTag = "FoodPiece"; // 삭제할 조각 Tag
 
     private Collider2D capsuleCollider;
@@ -40,6 +44,10 @@ public class BiteZoneController : MonoBehaviour
                     {
                         // 타겟 조각을 먹음 -> Perfect (tracker가 파괴까지 처리함)
                         Minigame_2_15.Instance?.OnJudgement(MiniGameBase.JudgementResult.Perfect);
+                        if (eatingSound != null)
+                        {
+                            GameRoot.Instance.Audio.PlaySfx(eatingSound);
+                        }
                         Debug.Log($"{col.name} 삭제됨 (타겟 조각 - Perfect)");
                     }
                     else

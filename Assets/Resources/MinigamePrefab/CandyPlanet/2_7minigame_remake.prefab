@@ -376,6 +376,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 101f81eade1afba4f90f1ee41fca1c9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickSound: {fileID: 8300000, guid: 3c14204a223fa604b8974973158637e0, type: 3}
   touchEpsilon: 0.05
   bounceMotionHeight: 0.5
   bounceMotionDuration: 0.25

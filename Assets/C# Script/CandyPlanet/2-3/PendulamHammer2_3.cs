@@ -6,6 +6,9 @@ using UnityEngine;
 
 public class PendulamHammer2_3 : MonoBehaviour
 {
+
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip clickSound;
     public float swingAngle = 45f;
     public float swingDuration = 1f;
 
@@ -19,6 +22,12 @@ public class PendulamHammer2_3 : MonoBehaviour
 
     public void Swing()
     {
+        if (clickSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(clickSound);
+        }
+
+
         transform.DOKill();
 
         float targetAngle = goRight ? swingAngle : -swingAngle;

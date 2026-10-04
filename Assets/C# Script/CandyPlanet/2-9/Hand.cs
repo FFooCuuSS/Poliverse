@@ -2,6 +2,9 @@
 
 public class Hand : MonoBehaviour
 {
+    [Header("효과음")]
+    [SerializeField] private AudioClip grabSound;
+
     [Header("Sprite")]
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private Sprite openSprite;
@@ -66,6 +69,12 @@ public class Hand : MonoBehaviour
 
         if (grabCollider != null)
             grabCollider.enabled = true;
+        if (grabSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(grabSound);
+        }
+
+
 
         float now = Time.time;
         float interval = lastClickTime < 0 ? 0f : now - lastClickTime;

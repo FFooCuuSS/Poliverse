@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class IceCreamPipe : MonoBehaviour
 {
+
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip clickSound;
+
     [Header("변경될 이미지")]
     [SerializeField] private Sprite highlightedSprite;
 
@@ -26,6 +31,13 @@ public class IceCreamPipe : MonoBehaviour
         if (isHighlighted && highlightedSprite != null)
         {
             spriteRenderer.sprite = highlightedSprite;
+
+            if (clickSound != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(clickSound);
+            }
+
+
         }
         else
         {

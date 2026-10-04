@@ -99,8 +99,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31b347a68fdbe91469c905ba8da61c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickSound: {fileID: 8300000, guid: 3e72c723731a0ca4db4131cc9c2f6ee9, type: 3}
   moveSpeed: 3
   fallSpeed: 5
+  conveyorSpeed: 2
+  conveyorPoint: {fileID: 0}
+  destroyPoint: {fileID: 0}
 --- !u!50 &3543115084456267462
 Rigidbody2D:
   serializedVersion: 4

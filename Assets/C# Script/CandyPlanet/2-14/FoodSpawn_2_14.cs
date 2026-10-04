@@ -5,6 +5,10 @@ using DG.Tweening;
 
 public class FoodSpawn_2_14 : MonoBehaviour
 {
+
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip foodSound;
+
     public GameObject foodPrefab;
     public Sprite[] foodSprites;
 
@@ -23,6 +27,10 @@ public class FoodSpawn_2_14 : MonoBehaviour
         Vector3 spawnPos = GetOutsidePosition();
 
         GameObject food = Instantiate(foodPrefab, spawnPos, Quaternion.identity, transform);
+        if (foodSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(foodSound);
+        }
 
         SpriteRenderer sr = food.GetComponent<SpriteRenderer>();
 

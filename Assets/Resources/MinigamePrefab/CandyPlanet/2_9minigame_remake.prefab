@@ -276,6 +276,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86d61093b6b9c1f4d8c604284edb2f58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  grabSound: {fileID: 8300000, guid: 9627abf4c6840d846b8f24d568b66701, type: 3}
   spriteRenderer: {fileID: 3687320124189030076}
   openSprite: {fileID: 21300000, guid: 7aa3742e060cf0d48822f6ac6416d063, type: 3}
   grabSprite: {fileID: 21300000, guid: 599f81c8dfa44984d8021b8d2dde0be6, type: 3}

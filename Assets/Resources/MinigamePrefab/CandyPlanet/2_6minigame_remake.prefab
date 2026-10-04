@@ -204,6 +204,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5605602c981d8e4fa584adfc9a353d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickSound: {fileID: 8300000, guid: 9627abf4c6840d846b8f24d568b66701, type: 3}
   laneOffset: 5
   moveSpeed: 10
   stayTime: 0.6
