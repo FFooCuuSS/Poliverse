@@ -96,6 +96,11 @@ public class PracticeMinigameSceneManager : MonoBehaviour
     [SerializeField]
     private GameObject nextButton;
 
+    [Header("Practice End")]
+    [Tooltip("한 판이 끝난 뒤 마지막 연출을 보여주기 위해 기다리는 시간")]
+    [SerializeField, Min(0f)]
+    private float endPaddingSeconds = 1f;
+
     [Header("Transition")]
     [SerializeField]
     private GameObject transitionPanel;
@@ -566,6 +571,26 @@ public class PracticeMinigameSceneManager : MonoBehaviour
                     (rhythmManager.HasDispatchedAllEvents &&
                      rhythmManager.SongTime >= endTime)
             );
+            Debug.Log($"[Practice] 한 판 종료 SongTime={rhythmManager.SongTime:0.00}");
+
+            bool naturalEnd =
+    isPracticing &&
+    !nextRequested &&
+    !modeChangeRequested;
+
+            if (naturalEnd)
+            {
+                float waited = 0f;
+
+                while (waited < endPaddingSeconds &&
+                       isPracticing &&
+                       !nextRequested &&
+                       !modeChangeRequested)
+                {
+                    waited += Time.deltaTime;
+                    yield return null;
+                }
+            }
 
             /*
              * 이번 재생이 끝났으므로
