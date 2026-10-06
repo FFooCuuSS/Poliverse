@@ -5,7 +5,7 @@
   <string name="project_id" translatable="false">copspace-2190b</string>
   <string name="google_api_key" translatable="false">AIzaSyBsUFmWUj6eeqo8B1Y6u9JrEV7kAANk6Sg</string>
   <string name="google_crash_reporting_api_key" translatable="false">AIzaSyBsUFmWUj6eeqo8B1Y6u9JrEV7kAANk6Sg</string>
-  <string name="google_app_id" translatable="false">1:651529722196:android:f16955f599d634802f50c1</string>
-  <string name="default_android_client_id" translatable="false">651529722196-08sifc30mg0isvvkpgqnvtn29mgk1l1d.apps.googleusercontent.com</string>
+  <string name="google_app_id" translatable="false">1:651529722196:android:be2280442569eedb2f50c1</string>
+  <string name="default_android_client_id" translatable="false">651529722196-a96mtjv0suv6vsbsf4imqmkr2ql6pa7v.apps.googleusercontent.com</string>
   <string name="default_web_client_id" translatable="false">651529722196-2pn2mi0u1faudg9qef7tnmpaf1q2lqc8.apps.googleusercontent.com</string>
 </resources>
