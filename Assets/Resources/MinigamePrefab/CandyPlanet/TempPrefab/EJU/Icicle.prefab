@@ -185,6 +185,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe45417b26e72af4bb861ce210953387, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dropSound: {fileID: 8300000, guid: 3e72c723731a0ca4db4131cc9c2f6ee9, type: 3}
   roundTripTime: 0.5
   fallingSprite: {fileID: 21300000, guid: 3c8cae211e55adf4e93f522522d3bf59, type: 3}
   warningMoveDistance: 0.5

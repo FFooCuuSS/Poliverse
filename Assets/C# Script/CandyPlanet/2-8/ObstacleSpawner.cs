@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class ObstacleSpawner : MonoBehaviour
 {
+
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip fallingSound;
+
     [SerializeField] private GameObject obstacle;
     [SerializeField] private float spawnPos1 = -6f;
     [SerializeField] private float spawnPos2 = 6f;
@@ -24,6 +28,11 @@ public class ObstacleSpawner : MonoBehaviour
     public void SpawnObstacle(PlayerRotate playerRotate)
     {
         if (spawnPattern == null || spawnPattern.Length == 0) return;
+        if (fallingSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(fallingSound);
+        }
+
 
         int index = spawnPattern[currentIndex % spawnPattern.Length];
         float targetX = (index == 0) ? spawnPos1 : spawnPos2;

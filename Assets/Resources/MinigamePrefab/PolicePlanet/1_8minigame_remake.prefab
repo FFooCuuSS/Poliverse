@@ -138,6 +138,7 @@ MonoBehaviour:
   spawnXOffsetFromRightEdge: 1.2
   slowSpeed: 7.5
   fastSpeed: 15
+  demoTriggerDistance: 0.4
   spawnCount: 0
   capturedCount: 0
   escapedCount: 0
@@ -403,6 +404,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9daa829b24c367e4dac9643873b46336, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 0
   useRhythmJudgementScore: 0
   manualTotalNodeCount: 7
   printScoreDebugOnEnd: 1

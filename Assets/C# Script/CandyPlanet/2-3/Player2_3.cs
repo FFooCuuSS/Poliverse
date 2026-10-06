@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Player2_3 : MonoBehaviour
 {
+    [Header("효과음")]
+    [SerializeField] private AudioClip clickSound;
+
     [Header("스프라이트 리소스 설정")]
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private Sprite idleSprite;
@@ -42,6 +45,11 @@ public class Player2_3 : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
+            if (clickSound != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(clickSound);
+            }
+
             Debug.Log($"[Player2_3] 클릭 감지, IsInputOpen={(minigame != null ? minigame.IsInputOpen.ToString() : "minigame null")}");
 
             if (minigame != null && minigame.IsInputOpen)

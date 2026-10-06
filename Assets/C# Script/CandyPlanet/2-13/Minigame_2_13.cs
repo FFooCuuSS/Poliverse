@@ -43,7 +43,12 @@ public class Minigame_2_13 : MiniGameBase, IPracticeDemoInput
     public override float perfectWindowOverride => 0.1f;
     public override float goodWindowOverride => 0.25f;
     public override float hitWindowOverride => 0.35f;
-    
+
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip dropSound;
+    [Header("효과음")]
+    [SerializeField] private AudioClip throwingSound;
 
     [Header("Jelly Block Demolition - Positions")]
     [Tooltip("탄환이 처음 소환되는 위치 (좌측 상단)")]
@@ -306,6 +311,11 @@ public class Minigame_2_13 : MiniGameBase, IPracticeDemoInput
         }
 
         currentProjectile = Instantiate(projectilePrefab, spawnPoint.position, Quaternion.identity, transform);
+        if (dropSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(dropSound);
+        }
+
 
         projectileMotionRoutine = StartCoroutine(MoveRoutine(
             currentProjectile,
@@ -423,6 +433,11 @@ public class Minigame_2_13 : MiniGameBase, IPracticeDemoInput
         }
 
         // 2) 던지는 순간: PullBack(or Rest) -> Throw 각도로 빠르게 휘두름
+        if (throwingSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(throwingSound);
+        }
+
         float swingFrom = (catapultPullBackDuration > 0f &&
                             !Mathf.Approximately(catapultPullBackOffset, 0f))
             ? pullBackAngle

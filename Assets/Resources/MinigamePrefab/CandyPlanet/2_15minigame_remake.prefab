@@ -552,6 +552,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dcf340512cfbce4e837dad9117dd36e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  eatingSound: {fileID: 8300000, guid: f92a472f2fc4ae549b4c1707d791c0af, type: 3}
   sliceTag: FoodPiece
 --- !u!70 &1220029347054048109
 CapsuleCollider2D:

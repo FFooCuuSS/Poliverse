@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class Fork_2_11 : MonoBehaviour
 {
+    [Header("효과음")]
+    [SerializeField] private AudioClip successSound;
+    [Header("효과음")]
+    [SerializeField] private AudioClip movingSound;
+
     [Header("Move Settings")]
     public float moveSpeedX = 3f;
     public float leftX = -8f;
@@ -72,8 +77,15 @@ public class Fork_2_11 : MonoBehaviour
         isMoving = true;
 
         // 현재 위치에서 바로 아래로 이동
+        if (movingSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(movingSound);
+        }
+
+
         Vector3 downPos =
             transform.position + Vector3.down * moveDistance;
+
 
 
         while (Vector3.Distance(transform.position, downPos) > 0.05f)
@@ -124,6 +136,12 @@ public class Fork_2_11 : MonoBehaviour
         if (target != null)
         {
             Debug.Log("마카롱 획득");
+            if (successSound != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(successSound);
+            }
+
+
 
             Macaron mac = target.GetComponent<Macaron>();
             mac.isStacked = true;
@@ -178,7 +196,10 @@ public class Fork_2_11 : MonoBehaviour
     IEnumerator DropAllMacarons()
     {
         isDropping = true;
-
+        if (movingSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(movingSound);
+        }
         Vector3 platePos = new Vector3(plate.transform.position.x, transform.position.y, 0);
 
         while (Vector3.Distance(transform.position, platePos) > 0.05f)

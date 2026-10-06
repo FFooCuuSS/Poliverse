@@ -22,6 +22,10 @@ public class Minigame_2_12 : MiniGameBase, IPracticeDemoInput
     }
 
     [Header("레인 / 초코링 공통 (세트별)")]
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip fallingSound;
+
     [SerializeField]
     private List<RingLaneOrderSet> ringLaneOrderSets =
         new List<RingLaneOrderSet> { new RingLaneOrderSet() };
@@ -173,6 +177,7 @@ public class Minigame_2_12 : MiniGameBase, IPracticeDemoInput
     {
         if (shownCount >= TotalRingCount) return;
 
+
         int lane = GetLaneForIndex(shownCount);
         Transform anchor = GetLaneAnchor(lane);
         if (anchor == null) { shownCount++; return; }
@@ -191,6 +196,10 @@ public class Minigame_2_12 : MiniGameBase, IPracticeDemoInput
 
         var faller = ring.AddComponent<ChocoRingFaller>();
         faller.speed = previewFallSpeed;
+        if (fallingSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(fallingSound);
+        }
 
         shownCount++;
     }

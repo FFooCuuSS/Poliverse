@@ -366,6 +366,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4440315499065a54782ce34a66ad3ce0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveSound: {fileID: 8300000, guid: 9627abf4c6840d846b8f24d568b66701, type: 3}
   moveX: 2.5
   speed: 7
   isMoving: 0
@@ -409,6 +410,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32624ebcbfd621544b73e69c8923abf0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hitSound: {fileID: 8300000, guid: 663718f05a6ca2e4596bb6964aadab1d, type: 3}
   playerMove: {fileID: 8688912183666981504}
 --- !u!114 &1733083001852665381
 MonoBehaviour:

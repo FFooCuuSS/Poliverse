@@ -205,6 +205,7 @@ MonoBehaviour:
   useRhythmJudgementScore: 1
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
+  fallingSound: {fileID: 8300000, guid: 3e72c723731a0ca4db4131cc9c2f6ee9, type: 3}
   ringLaneOrderSets:
   - lanes: 00000000010000000200000003000000
   - lanes: 01000000020000000000000003000000

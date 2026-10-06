@@ -3,6 +3,9 @@ using System.Collections;
 
 public class Bawmquhen2_6 : MonoBehaviour
 {
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip clickSound;
+
     [SerializeField] private float laneOffset = 3f;
     [SerializeField] private float moveSpeed = 15f;
     [SerializeField] private float stayTime = 0.15f;
@@ -36,6 +39,10 @@ public class Bawmquhen2_6 : MonoBehaviour
     IEnumerator MoveAndReturn(float offset)
     {
         isMoving = true;
+        if (clickSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(clickSound);
+        }
 
         Vector3 target = centerPos + Vector3.right * offset;
 

@@ -6,6 +6,10 @@ using static MiniGameBase;
 
 public class PlayerMoveByClick : MonoBehaviour
 {
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip moveSound;
+    private bool audioPlayed = false;
     [SerializeField] private float moveX = 1.5f;
     [SerializeField] private float speed = 5f;
 
@@ -44,10 +48,17 @@ public class PlayerMoveByClick : MonoBehaviour
         // 실제 이동 로직 추가
         if (isMoving)
         {
+            if (moveSound != null && !audioPlayed)
+            {
+                GameRoot.Instance.Audio.PlaySfx(moveSound);
+                audioPlayed = true;
+            }
+
             transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
             if (Vector3.Distance(transform.position, targetPos) < 0.01f)
             {
                 isMoving = false; // 이동 완료 후 다시 클릭 가능 상태로 전환
+                audioPlayed = false; // 이동 완료 후 오디오 재생 가능 상태로 전환
             }
         }
     }

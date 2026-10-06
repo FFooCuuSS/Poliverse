@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Bottle2_4 : MonoBehaviour
 {
+
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip waterSound;
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
 
@@ -56,6 +60,12 @@ public class Bottle2_4 : MonoBehaviour
         if (liquidObject == null || isFilled) return;
 
         isFilled = true;
+        if (waterSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(waterSound);
+        }
+
+
 
         // 1. 보틀 자식으로 설정 및 기본 Transform 초기화
         liquidObject.transform.SetParent(transform);

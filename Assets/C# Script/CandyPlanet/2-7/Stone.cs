@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Stone : MonoBehaviour
 {
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip clickSound;
+
     [SerializeField] private float touchEpsilon = 0.05f;
 
     [Header("클릭 시 튕기는 연출")]
@@ -84,6 +88,11 @@ public class Stone : MonoBehaviour
         }
 
         isBouncing = true;
+        if (clickSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(clickSound);
+        }
+
 
         // Transform을 직접 움직이지 않고 currentY 변수 값만 Tweening 처리
         bounceTween = DOTween.Sequence()

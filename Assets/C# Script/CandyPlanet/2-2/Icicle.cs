@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Icicle : MonoBehaviour
 {
+    [Header("효과음")]
+    [SerializeField] private AudioClip dropSound;
+
     public static event Action OnMoveAllowed;
     public static event Action OnMoveBlocked;
     public static event Action<Icicle> OnIcicleDestroyed;
@@ -89,6 +92,11 @@ public class Icicle : MonoBehaviour
 
     private IEnumerator DropRoutine()
     {
+        if (dropSound != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(dropSound);
+        }
+
         isFalling = true;
         sr.sprite = fallingSprite;
         rb.isKinematic = false;

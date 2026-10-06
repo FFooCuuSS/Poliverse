@@ -386,6 +386,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0068d47e612cba34b8d1b316fb711ab3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  successSound: {fileID: 8300000, guid: bb1a492cf161f0941b4a62da4dd5ff63, type: 3}
+  movingSound: {fileID: 8300000, guid: 3e72c723731a0ca4db4131cc9c2f6ee9, type: 3}
   moveSpeedX: 4
   leftX: -8
   rightX: 6

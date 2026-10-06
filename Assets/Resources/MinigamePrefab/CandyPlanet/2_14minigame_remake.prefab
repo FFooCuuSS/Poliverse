@@ -241,6 +241,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2b8e02fcf89b6a4a877e1c476627b13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  foodSound: {fileID: 8300000, guid: 3e72c723731a0ca4db4131cc9c2f6ee9, type: 3}
   foodPrefab: {fileID: 3627772306848672429, guid: a933f0a3ceba8524f8a6df4f6560a007, type: 3}
   foodSprites:
   - {fileID: 21300000, guid: ae2a3509e013e2c418c01e3f98a06940, type: 3}
@@ -350,6 +351,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21ae5dfa99fe5324485ac32f3cfe32a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bounceSound: {fileID: 8300000, guid: 3c14204a223fa604b8974973158637e0, type: 3}
   player: {fileID: 6170430941325830966}
   radius: 3
 --- !u!61 &2148295014963362531

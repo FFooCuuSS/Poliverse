@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Shield_2_14 : MonoBehaviour
 {
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip bounceSound;
+
     public Transform player;
     public float radius = 2f;
 
@@ -39,6 +42,10 @@ public class Shield_2_14 : MonoBehaviour
         if (foodMove != null)
         {
             foodMove.StopMovement();
+            if (bounceSound != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(bounceSound);
+            }
         }
 
         miniGame?.ReportManualSuccess();

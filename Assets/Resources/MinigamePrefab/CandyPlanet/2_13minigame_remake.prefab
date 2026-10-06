@@ -1713,6 +1713,8 @@ MonoBehaviour:
   useRhythmJudgementScore: 1
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
+  dropSound: {fileID: 8300000, guid: 3e72c723731a0ca4db4131cc9c2f6ee9, type: 3}
+  throwingSound: {fileID: 8300000, guid: 9627abf4c6840d846b8f24d568b66701, type: 3}
   spawnPoint: {fileID: 4445640227161806566}
   catapultPoint: {fileID: 3780000057583431624}
   targetBlocks:
