@@ -211,10 +211,6 @@ public class Minigame_1_3 : MiniGameBase
                 MovePlayerUp();
                 break;
 
-            case 7:
-                MovePlayerDown();
-                break;
-
             default:
                 Debug.LogWarning(
                     $"[1-3 Demo] 알 수 없는 Action Index: {actionIndex}"
