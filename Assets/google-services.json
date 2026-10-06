@@ -57,6 +57,51 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:651529722196:android:be2280442569eedb2f50c1",
+        "android_client_info": {
+          "package_name": "com.teamhong.copspace"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "651529722196-a96mtjv0suv6vsbsf4imqmkr2ql6pa7v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teamhong.copspace",
+            "certificate_hash": "e81346d9c2d67c8bcd2615aab837e59e109aee7f"
+          }
+        },
+        {
+          "client_id": "651529722196-rvlte0ms0gmdpodsqqvd9s888n3ki0n4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teamhong.copspace",
+            "certificate_hash": "a21495389effeb2476af348f35e4eb93591c3ff1"
+          }
+        },
+        {
+          "client_id": "651529722196-2pn2mi0u1faudg9qef7tnmpaf1q2lqc8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsUFmWUj6eeqo8B1Y6u9JrEV7kAANk6Sg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "651529722196-2pn2mi0u1faudg9qef7tnmpaf1q2lqc8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"
