@@ -38,6 +38,9 @@ public class HandcuffSequenceController : MonoBehaviour
     [Header("Player Snap Toggle (플레이어 스냅 성공 시점)")]
     [SerializeField] private GameObject playerSnapDisableObject;
     [SerializeField] private GameObject playerSnapEnableObject;
+
+    [Header("Demo Snap")]
+    [SerializeField] private float demoSnapMoveDuration = 0.12f;
     public enum State { Idle, LeftMoving, RightMoving, PlayerDrag }
     public State curState { get; private set; } = State.Idle;
 
@@ -290,5 +293,25 @@ public class HandcuffSequenceController : MonoBehaviour
 
         if (playerSnapEnableObject != null)
             playerSnapEnableObject.SetActive(false);
+    }
+
+    public void PlayDemoSnap()
+    {
+        if (cuff1 == null || rightHandCollider == null)
+        {
+            ApplyPlayerSnapVisual();
+            return;
+        }
+
+        // 플레이어 스냅과 같은 위치 (오른손 콜라이더 중심)
+        // 비활성 콜라이더는 bounds가 0이라 offset으로 계산
+        Vector3 target = rightHandCollider.transform.TransformPoint(rightHandCollider.offset);
+        target.z = cuff1.transform.position.z;
+
+        cuff1.transform.DOKill();
+        cuff1.transform
+            .DOMove(target, demoSnapMoveDuration)
+            .SetEase(Ease.OutQuad)
+            .OnComplete(ApplyPlayerSnapVisual);   // 도착하면 채워진 연출
     }
 }

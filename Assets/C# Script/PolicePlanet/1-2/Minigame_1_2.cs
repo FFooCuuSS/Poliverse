@@ -14,6 +14,9 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
     {
         "동일한 타이밍에 오른손에 수갑을 드래그하여 채우세요."
     };
+    [Header("Demo")]
+    [SerializeField] private float demoHoldSeconds = 0.25f;  // 채워진 모습 보여주는 시간
+    [SerializeField] private float demoFadeSeconds = 0.25f; // 사라지는 시간
 
     [Header("Sequence Controller")]
     [SerializeField] private HandcuffSequenceController sequence;
@@ -94,11 +97,17 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
         {
             if (action == "Show")
             {
-                if (waitingShowForNextRound && roundIndex < TOTAL_ROUNDS)
+                if (inputJob != null)
                 {
-                    waitingShowForNextRound = false;
-                    StartRoundNow();
+                    StopCoroutine(inputJob);
+                    inputJob = null;
                 }
+
+                if (sequence != null)
+                    sequence.DespawnRound(0f);   // 즉시 정리 (토글 오브젝트도 원래대로)
+
+                waitingShowForNextRound = false;
+                StartRoundNow();
             }
             return;
         }
@@ -211,68 +220,39 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
         }
     }
 
-    public override void ExecutePracticeAction(
-      int actionIndex,
-      string actionType)
+
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
     {
-        Debug.Log(
-            $"[1-2 Demo] ExecutePracticeAction 호출 " +
-            $"Index={actionIndex}, Type={actionType}, " +
-            $"Demo={isDemoMode}, Round={roundIndex}"
-        );
-
-        if (string.IsNullOrEmpty(actionType))
-            return;
-
-        actionType = actionType.Trim();
-
-        if (actionType != "Input")
-        {
-            return;
-        }
-
-        if (roundIndex >= TOTAL_ROUNDS)
-            return;
-
-        Debug.Log(
-            $"[1-2 Demo] 수갑 시범 실행! Round={roundIndex}"
-        );
+        if (string.IsNullOrEmpty(actionType) || actionType.Trim() != "Input") return;
+        if (roundIndex >= TOTAL_ROUNDS) return;
 
         if (sequence != null)
-        {
-            sequence.BeginSnapFadeAll();
+            sequence.PlayDemoSnap();
 
-            // 시범 성공 시 플레이어 스냅 성공 연출(초록색 불 등)도 함께 반영
-            sequence.ApplyPlayerSnapVisual();
-        }
+        OnPlayerInput("Input");
 
-        // 중요: false 대신 true를 전달하여 OnPlayerInput("Input")이 정상적으로 호출되도록 함
-        ResolveRound(true);
+        // 라운드는 여기서 바로 넘김 → 다음 Show를 놓치지 않음
+        roundIndex++;
+        if (roundIndex < TOTAL_ROUNDS)
+            waitingShowForNextRound = true;
 
-        if (inputJob != null)
-            StopCoroutine(inputJob);
-
-        inputJob =
-            StartCoroutine(
-                DemoInputWindowCo()
-            );
+        if (inputJob != null) StopCoroutine(inputJob);
+        inputJob = StartCoroutine(DemoInputWindowCo());
     }
 
     private IEnumerator DemoInputWindowCo()
     {
-        yield return new WaitForSeconds(inputWindowSeconds);
+        // 연출만 담당. 라운드 정리는 다음 Show에서 함
+        yield return new WaitForSeconds(demoHoldSeconds);
 
         if (sequence != null)
+            sequence.BeginSnapFadeAll();
+
+        // 마지막 라운드는 다음 Show가 없으니 직접 정리
+        if (roundIndex >= TOTAL_ROUNDS && sequence != null)
         {
+            yield return new WaitForSeconds(0.2f);
             sequence.DespawnRound(despawnFadeSeconds);
-        }
-
-        roundIndex++;
-
-        if (roundIndex < TOTAL_ROUNDS)
-        {
-            // 다음 라운드를 위해 Show를 다시 기다리도록 설정
-            waitingShowForNextRound = true;
         }
 
         inputJob = null;
