@@ -36,6 +36,22 @@ public class PrisonController_1_8 : MonoBehaviour
 
     private void OnMouseDown()
     {
+        Minigame_1_8 minigame =
+            GetComponentInParent<Minigame_1_8>();
+
+        if (minigame == null)
+        {
+            minigame =
+                FindObjectOfType<Minigame_1_8>();
+        }
+
+        // Demo에서는 직접 클릭할 수 없음
+        if (minigame != null &&
+            minigame.IsDemoMode)
+        {
+            return;
+        }
+
         ActivatePrison();
     }
 
