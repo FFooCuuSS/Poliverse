@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Minigame_2_10 : MiniGameBase
+public class Minigame_2_10 : MiniGameBase, IPracticeDemoInput
 {
     // 판정 윈도우 오버라이드
     public override float perfectWindowOverride => 0.15f;
@@ -27,10 +27,63 @@ public class Minigame_2_10 : MiniGameBase
     [SerializeField] private TemperatureController temperatureController;
     [SerializeField] private ScoopDrag scoopDrag;
 
+    // 연습 시범 모드: true면 실제 스와이프는 무시하고,
+    // 플레이어 응답 구간에서 정답 타이밍마다 자동으로 국자를 젓고 스와이프를 넣는다.
+    private bool isDemoMode;
+    private readonly List<Coroutine> demoRoutines = new List<Coroutine>();
+
+    // IPracticeDemoInput 구현
+    public void SetDemoMode(bool on)
+    {
+        isDemoMode = on;
+
+        // 모드 전환 시 진행 중인 자동 입력을 전부 취소해서 실제 플레이로 넘어가지 않게 함
+        StopDemoRoutines();
+
+        // 조작 컴포넌트(국자)에도 데모 모드 전달
+        if (scoopDrag != null)
+            scoopDrag.SetDemoMode(on);
+    }
+
+    private void StopDemoRoutines()
+    {
+        foreach (var routine in demoRoutines)
+        {
+            if (routine != null)
+                StopCoroutine(routine);
+        }
+        demoRoutines.Clear();
+    }
+
+    // TemperatureController와 동일하게 dspTime 기준으로, 플레이어 구간의 각 정답 타이밍에 자동 입력
+    private IEnumerator DemoPlayerPhase(float[] inputTimes, double phaseStartDsp)
+    {
+        for (int i = 0; i < inputTimes.Length; i++)
+        {
+            while (AudioSettings.dspTime - phaseStartDsp < inputTimes[i])
+            {
+                if (!isDemoMode) yield break;
+                yield return null;
+            }
+
+            if (!isDemoMode) yield break;
+
+            // 국자 연출 + 판정 (OnPlayerInput은 시범 모드에서 막혀 있으므로 판정기에 직접 넣는다)
+            if (scoopDrag != null)
+                scoopDrag.DemoSwipe();
+
+            if (temperatureController != null)
+                temperatureController.OnSwipe();
+        }
+    }
+
 
     public override void StartGame()
     {
         base.StartGame();
+
+        // 이전 실행에서 남은 자동 입력 정리 (평소에는 비어 있어서 영향 없음)
+        StopDemoRoutines();
 
         // 이 미니게임은 HeatPattern(인스펙터에서 조정하는 라운드별 패턴)을 기준으로
         // 총 노드 수(=전체 라운드에서 플레이어가 맞춰야 할 입력 개수 합)를 런타임에 직접 지정한다.
@@ -75,6 +128,15 @@ public class Minigame_2_10 : MiniGameBase
     private void HandlePlayerPhaseStarted()
     {
         // 필요 시 플레이어 응답 구간 시작 연출/사운드를 여기에 추가
+
+        // 시범 모드: 이번 라운드의 정답 타이밍(= 시스템 드랍 시각과 동일한 상대 시간)에 맞춰 자동 입력 시작.
+        // 이 이벤트는 TemperatureController.StartPlayerPhase와 같은 프레임에 호출되므로
+        // 지금의 dspTime이 플레이어 구간의 0초 기준과 일치한다.
+        if (isDemoMode && temperatureController != null && temperatureController.Pattern != null)
+        {
+            float[] inputTimes = temperatureController.Pattern.GetSortedDropTimes(temperatureController.CurrentPatternIndex);
+            demoRoutines.Add(StartCoroutine(DemoPlayerPhase(inputTimes, AudioSettings.dspTime)));
+        }
     }
 
     // ScoopDrag에서 좌<->우 스와이프가 감지될 때 호출됨
@@ -120,6 +182,9 @@ public class Minigame_2_10 : MiniGameBase
 
     public override void OnPlayerInput(string action = null)
     {
+        // 시범 모드에서는 실제 플레이어 스와이프 무시 (자동 입력은 DemoPlayerPhase에서 직접 처리)
+        if (isDemoMode) return;
+
         // 입력 잠금 상태면 무시
         if (IsInputLocked) return;
 
