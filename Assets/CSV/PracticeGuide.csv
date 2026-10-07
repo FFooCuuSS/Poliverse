@@ -1,13 +1,13 @@
 ﻿minigame,time,type,index
 01월 01일,2,GuideText,1
 01월 02일,5,GuideText,1
-1-3,1.5,Action,0
-1-3,3,Action,1
-1-3,5.3,Action,2
-1-3,7,Action,3
-1-3,9,Action,4
-1-3,11,Action,5
-1-3,13,Action,6
+01월 03일,1.5,Action,0
+01월 03일,3,Action,1
+01월 03일,5.3,Action,2
+01월 03일,7,Action,3
+01월 03일,9,Action,4
+01월 03일,11,Action,5
+01월 03일,13,Action,6
 01월 04일,4,GuideText,1
 01월 04일,4,Action,0
 01월 04일,5,Action,1
@@ -22,3 +22,22 @@
 01월 09일,5,GuideText,1
 01월 10일,5,GuideText,1
 01월 10일,8,GuideText,2
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,
+,,,

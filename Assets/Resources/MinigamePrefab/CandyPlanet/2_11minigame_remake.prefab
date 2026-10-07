@@ -74,7 +74,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_Sprite: {fileID: 21300000, guid: ac1fa824ec5470241b291afa49cf49a4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -170,7 +170,7 @@ Transform:
   m_GameObject: {fileID: 1510174747759059888}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.95, y: -1.01, z: 0.054687075}
+  m_LocalPosition: {x: 5.95, y: -1.68, z: 0.054687075}
   m_LocalScale: {x: 0.59341, y: 0.59341, z: 0.59341}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -216,7 +216,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 79b577337267b3a47863efd81bea31a5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -475,6 +475,7 @@ MonoBehaviour:
   useRhythmJudgementScore: 0
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
+  fork: {fileID: 6525406682680764613}
   spawner: {fileID: 9094759847956891438}
   patterns:
   - name: "\uC804\uCCB4 \uB4F1\uC7A5"

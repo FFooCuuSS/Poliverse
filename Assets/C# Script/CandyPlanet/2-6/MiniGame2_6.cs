@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MiniGame2_6 : MiniGameBase
+public class MiniGame2_6 : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 5f;
     protected override string MinigameTitle => "장애물을 피해라";
@@ -13,18 +13,38 @@ public class MiniGame2_6 : MiniGameBase
         "장애물을 피해 좌우로 움직이세요."
     };
 
-    //public override float perfectWindowOverride => 0.1f;
-    //public override float goodWindowOverride => 0.3f;
-    //public override float hitWindowOverride => 0.5f;
-
     protected override bool UseRhythmJudgementScore => false;
     protected override int ManualTotalNodeCount => -1;
 
     private bool ended;
 
-    public EnemySpawner2_6 spawner;
+    private bool isDemoMode = false;
 
-    private int hitCount = 0;
+    [Header("References")]
+    [SerializeField] private EnemySpawner2_6 spawner;
+    [SerializeField] private Bawmquhen2_6 bawmquhen;
+
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+
+        Debug.Log(
+            $"[MiniGame2_6] Demo Mode = {isDemoMode}"
+        );
+
+        if (bawmquhen != null)
+        {
+            bawmquhen.SetDemoMode(isDemo);
+        }
+        else
+        {
+            Debug.LogWarning(
+                "[MiniGame2_6] Bawmquhen2_6이 연결되지 않았습니다."
+            );
+        }
+    }
+
 
     public override void StartGame()
     {
@@ -35,34 +55,120 @@ public class MiniGame2_6 : MiniGameBase
 
     public override void OnRhythmEvent(string action)
     {
-        if (ended) return;
-        if (string.IsNullOrEmpty(action)) return;
+        if (ended)
+            return;
 
-        Debug.Log($"{gameObject.name} 리듬메세지: {action}");
+        if (string.IsNullOrEmpty(action))
+            return;
 
         action = action.Trim();
+
+        Debug.Log(
+            $"[MiniGame2_6] 리듬 이벤트 = {action}"
+        );
 
         switch (action)
         {
             case "Show":
-                spawner.SpawnObstacle();
+                if (spawner == null)
+                {
+                    Debug.LogError(
+                        "[MiniGame2_6] EnemySpawner2_6이 연결되지 않았습니다."
+                    );
+
+                    return;
+                }
+
+                int safeLane = spawner.SpawnObstacle();
+
+                Debug.Log(
+                    $"[MiniGame2_6] 장애물 생성 완료 / 안전 레인 = {safeLane}"
+                );
+
+                if (isDemoMode)
+                {
+                    AutoPlayTick();
+                }
+
                 break;
         }
     }
 
 
+    private void AutoPlayTick()
+    {
+        if (ended)
+            return;
+
+        if (!isDemoMode)
+            return;
+
+        if (spawner == null)
+            return;
+
+        int safeLane = spawner.GetSafeLane();
+
+        Debug.Log(
+            $"[MiniGame2_6 AutoPlay] 현재 안전 레인 = {safeLane}"
+        );
+
+        TryMoveToLane(safeLane);
+    }
+
+
+    private void TryMoveToLane(int lane)
+    {
+        if (ended)
+            return;
+
+        if (bawmquhen == null)
+        {
+            Debug.LogError(
+                "[MiniGame2_6] Bawmquhen2_6이 연결되지 않았습니다."
+            );
+
+            return;
+        }
+
+        Debug.Log(
+            $"[MiniGame2_6] TryMoveToLane() / Lane = {lane} / Demo = {isDemoMode}"
+        );
+
+        // 데모
+        if (isDemoMode)
+        {
+            bawmquhen.MoveToSafeLane(lane);
+            return;
+        }
+
+        // 직접 플레이
+        bawmquhen.MoveToPlayerLane(lane);
+    }
+
+
     public void OnPlayerHit()
     {
-        if (ended) return;
+        if (isDemoMode)
+            return;
+
+        if (ended)
+            return;
 
         ReportManualFail();
 
-        Debug.Log("장애물 충돌!");
+        Debug.Log(
+            "[MiniGame2_6] 장애물 충돌!"
+        );
     }
+
 
     public void OnObstaclePassed()
     {
-        if (ended) return;
+        if (ended)
+            return;
+
+        if (isDemoMode)
+            return;
 
         ReportManualSuccess();
     }
