@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class IceCreamPipe : MonoBehaviour
 {
-
-
     [Header("효과음")]
     [SerializeField] private AudioClip clickSound;
 
@@ -18,6 +16,7 @@ public class IceCreamPipe : MonoBehaviour
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+
         if (spriteRenderer != null)
         {
             defaultSprite = spriteRenderer.sprite;
@@ -26,23 +25,32 @@ public class IceCreamPipe : MonoBehaviour
 
     public void SetHighlight(bool isHighlighted)
     {
-        if (spriteRenderer == null) return;
+        if (spriteRenderer == null)
+            return;
 
         if (isHighlighted && highlightedSprite != null)
         {
             spriteRenderer.sprite = highlightedSprite;
-
-            if (clickSound != null)
-            {
-                GameRoot.Instance.Audio.PlaySfx(clickSound);
-            }
-
-
         }
         else
         {
             spriteRenderer.sprite = defaultSprite;
         }
+    }
+
+    // 실제 플레이어 입력 등에서 필요할 때만 호출
+    public void PlayClickSound()
+    {
+        if (clickSound == null)
+            return;
+
+        if (GameRoot.Instance == null)
+            return;
+
+        if (GameRoot.Instance.Audio == null)
+            return;
+
+        GameRoot.Instance.Audio.PlaySfx(clickSound);
     }
 
     public float GetCenterX()

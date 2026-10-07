@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Minigame_2_11 : MiniGameBase
+public class Minigame_2_11 : MiniGameBase, IPracticeDemoInput
 {
-    protected override float TimerDuration => 10f;
+    protected override float TimerDuration => 20f;
     protected override string MinigameTitle => "마카롱 쌓기";
 
     protected override string MinigameExplain => "타이밍에 맞춰 화면을 터치하여 마카롱을 집으세요.";
@@ -15,36 +15,95 @@ public class Minigame_2_11 : MiniGameBase
 
     protected override int ManualTotalNodeCount => -1;
 
-    [SerializeField] private MacaroonSpawn spawner;
+    private bool isDemoMode;
+
+    [SerializeField]
+    private Fork_2_11 fork;
+
+    [SerializeField]
+    private MacaroonSpawn spawner;
 
     [System.Serializable]
     public class MacaronPattern
     {
         public string name;
-        // 0~4 = 1~5박에 대응하는 슬롯 인덱스
+
+        // 0~4 = 1~5박 슬롯
         public int[] activeSlots;
     }
 
     [Header("패턴 사전 (0~4번 인덱스로 참조됨)")]
     [SerializeField]
-    private List<MacaronPattern> patterns = new List<MacaronPattern>
-    {
-        /* 0 */ new MacaronPattern { name = "전체 등장",   activeSlots = new int[] { 0, 1, 2, 3, 4 } },
-        /* 1 */ new MacaronPattern { name = "1,3,5박만",   activeSlots = new int[] { 0, 2, 4 } },
-        /* 2 */ new MacaronPattern { name = "1,2,4박만",   activeSlots = new int[] { 0, 1, 3 } },
-        /* 3 */ new MacaronPattern { name = "2,3,4,5박",   activeSlots = new int[] { 1, 2, 3, 4 } },
-        /* 4 */ new MacaronPattern { name = "1,5박만",     activeSlots = new int[] { 0, 4 } },
-    };
+    private List<MacaronPattern> patterns =
+        new List<MacaronPattern>
+        {
+            /* 0 */
+            new MacaronPattern
+            {
+                name = "전체 등장",
+                activeSlots = new int[] { 0, 1, 2, 3, 4 }
+            },
 
-    [Header("등장 순서 (위 patterns 리스트의 인덱스를 순서대로 나열, 끝까지 가면 반복)")]
+            /* 1 */
+            new MacaronPattern
+            {
+                name = "1,3,5박만",
+                activeSlots = new int[] { 0, 2, 4 }
+            },
+
+            /* 2 */
+            new MacaronPattern
+            {
+                name = "1,2,4박만",
+                activeSlots = new int[] { 0, 1, 3 }
+            },
+
+            /* 3 */
+            new MacaronPattern
+            {
+                name = "2,3,4,5박",
+                activeSlots = new int[] { 1, 2, 3, 4 }
+            },
+
+            /* 4 */
+            new MacaronPattern
+            {
+                name = "1,5박만",
+                activeSlots = new int[] { 0, 4 }
+            },
+        };
+
+    [Header("등장 순서")]
     [SerializeField]
-    private List<int> patternOrder = new List<int> { 0, 2, 1, 3, 4 };
+    private List<int> patternOrder =
+        new List<int> { 0, 2, 1, 3, 4 };
 
-    // patternOrder에서 다음으로 읽을 위치
     private int orderCursor = 0;
 
     private int accumulatedTotalNodeCount = 0;
+
     public bool IsEnded => ended;
+
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+
+        Debug.Log(
+            $"[Minigame_2_11] Demo Mode = {isDemoMode}"
+        );
+
+        if (fork != null)
+        {
+            fork.SetDemoMode(isDemo);
+        }
+        else
+        {
+            Debug.LogWarning(
+                "[Minigame_2_11] Fork_2_11이 연결되지 않았습니다."
+            );
+        }
+    }
 
     public override void StartGame()
     {
@@ -57,25 +116,34 @@ public class Minigame_2_11 : MiniGameBase
 
     public override void OnRhythmEvent(string action)
     {
-        if (ended) return;
-        if (string.IsNullOrEmpty(action)) return;
+        if (ended)
+            return;
 
-        Debug.Log($"{gameObject.name} 리듬메세지: {action}");
+        if (string.IsNullOrEmpty(action))
+            return;
 
         action = action.Trim();
+
+        Debug.Log(
+            $"[Minigame_2_11] 리듬 이벤트 = {action}"
+        );
 
         switch (action)
         {
             case "Show":
+
+                // Demo / Player 모두 마카롱 생성
                 SpawnNextRound();
+
                 break;
         }
     }
+
     public void SpawnNextRound()
     {
-        if (ended) return;
+        if (ended)
+            return;
 
-        // 등장 순서 리스트를 끝까지 다 돌았으면 더 이상 진행하지 않고 종료
         if (patternOrder == null || orderCursor >= patternOrder.Count)
         {
             FinishAllRounds();
@@ -87,7 +155,7 @@ public class Minigame_2_11 : MiniGameBase
 
         if (patterns == null || patternIndex < 0 || patternIndex >= patterns.Count)
         {
-            Debug.LogWarning($"[Minigame_2_11] patternOrder에 잘못된 인덱스({patternIndex})가 있습니다. 종료 처리.");
+            Debug.LogWarning($"[Minigame_2_11] 잘못된 패턴 인덱스 = {patternIndex}");
             FinishAllRounds();
             return;
         }
@@ -97,69 +165,109 @@ public class Minigame_2_11 : MiniGameBase
         int spawnedCount = spawner.SpawnMacarons(pattern.activeSlots);
 
         accumulatedTotalNodeCount += spawnedCount;
+
         SetRuntimeTotalNodeCount(accumulatedTotalNodeCount);
 
-        Debug.Log($"[Minigame_2_11] 패턴 '{pattern.name}' 적용 ({orderCursor}/{patternOrder.Count}), 스폰={spawnedCount}, 누적 총량={accumulatedTotalNodeCount}");
+        Debug.Log($"[Minigame_2_11] 패턴 '{pattern.name}' ({orderCursor}/{patternOrder.Count}) 스폰 = {spawnedCount}");
     }
 
-    // patternOrder를 끝까지 다 돌았을 때 호출 - 미니게임 종료
-    private void FinishAllRounds()
-    {
-        if (ended) return;
-        ended = true;
-
-        Debug.Log("[Minigame_2_11] 모든 패턴 진행 완료 - 미니게임 종료");
-
-        Success(); // 전체 패턴을 다 소화하면 성공 처리. 성공/실패 기준을 다르게 하고 싶으면 여기만 바꾸면 됨
-    }
-    // patternOrder를 순서대로 하나씩 읽어서, 거기 적힌 인덱스로 patterns에서 패턴을 꺼낸다.
-    // 마지막 인덱스까지 다 읽으면 orderCursor가 다시 0으로 돌아가 처음부터 반복.
-    private MacaronPattern NextPattern()
-    {
-        if (patterns == null || patterns.Count == 0)
-        {
-            Debug.LogWarning("[Minigame_2_11] 등록된 패턴이 없습니다. 기본(전체) 패턴 사용.");
-            return new MacaronPattern { name = "기본", activeSlots = null };
-        }
-
-        if (patternOrder == null || patternOrder.Count == 0)
-        {
-            Debug.LogWarning("[Minigame_2_11] patternOrder가 비어있습니다. patterns[0] 사용.");
-            return patterns[0];
-        }
-
-        int patternIndex = patternOrder[orderCursor % patternOrder.Count];
-
-        orderCursor++;
-
-        if (patternIndex < 0 || patternIndex >= patterns.Count)
-        {
-            Debug.LogWarning($"[Minigame_2_11] patternOrder에 잘못된 인덱스({patternIndex})가 있습니다. patterns[0] 사용.");
-            return patterns[0];
-        }
-
-        return patterns[patternIndex];
-    }
 
     public override void OnPlayerInput(string action = null)
     {
         if (ended)
             return;
 
-        Debug.Log("플레이어 클릭 입력");
+        if (isDemoMode)
+            return;
+
+        Debug.Log(
+            "[Minigame_2_11] 플레이어 클릭 입력"
+        );
     }
+
 
     public void MacaronSuccess()
     {
+        if (ended)
+            return;
+
+        if (isDemoMode)
+            return;
+
         ReportManualSuccess();
 
-        Debug.Log("마카롱 쌓기 성공");
+        Debug.Log(
+            "마카롱 쌓기 성공"
+        );
     }
 
     public void MacaronFail()
     {
+        if (ended)
+            return;
+
+        if (isDemoMode)
+            return;
+
         ReportManualFail();
 
-        Debug.Log("마카롱 쌓기 실패");
+        Debug.Log(
+            "마카롱 쌓기 실패"
+        );
+    }
+
+
+    private void FinishAllRounds()
+    {
+        if (ended)
+            return;
+
+        ended = true;
+
+        Debug.Log(
+            "[Minigame_2_11] " +
+            "모든 패턴 진행 완료 - 미니게임 종료"
+        );
+
+        Success();
+    }
+
+
+    private MacaronPattern NextPattern()
+    {
+        if (patterns == null ||
+            patterns.Count == 0)
+        {
+            Debug.LogWarning(
+                "[Minigame_2_11] 등록된 패턴이 없습니다."
+            );
+
+            return new MacaronPattern
+            {
+                name = "기본",
+                activeSlots = null
+            };
+        }
+
+        if (patternOrder == null ||
+            patternOrder.Count == 0)
+        {
+            return patterns[0];
+        }
+
+        int patternIndex =
+            patternOrder[
+                orderCursor % patternOrder.Count
+            ];
+
+        orderCursor++;
+
+        if (patternIndex < 0 ||
+            patternIndex >= patterns.Count)
+        {
+            return patterns[0];
+        }
+
+        return patterns[patternIndex];
     }
 }

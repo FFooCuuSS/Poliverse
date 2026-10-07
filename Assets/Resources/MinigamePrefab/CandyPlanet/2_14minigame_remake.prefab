@@ -193,10 +193,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d386db87373826a48ae06ec5c4ca120c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  practiceTimingMode: 0
+  practiceTimingMode: 1
   useRhythmJudgementScore: 1
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
+  shield: {fileID: 5889994766840224150}
+  spawner: {fileID: 861063586331414893}
 --- !u!1 &7254788973823480484
 GameObject:
   m_ObjectHideFlags: 0

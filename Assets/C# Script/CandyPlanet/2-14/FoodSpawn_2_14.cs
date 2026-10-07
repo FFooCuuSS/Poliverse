@@ -27,7 +27,7 @@ public class FoodSpawn_2_14 : MonoBehaviour
         Vector3 spawnPos = GetOutsidePosition();
 
         GameObject food = Instantiate(foodPrefab, spawnPos, Quaternion.identity, transform);
-        if (foodSound != null)
+        if (foodSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
         {
             GameRoot.Instance.Audio.PlaySfx(foodSound);
         }
