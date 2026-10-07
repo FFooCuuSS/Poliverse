@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Minigame_2_15 : MiniGameBase
+public class Minigame_2_15 : MiniGameBase, IPracticeDemoInput
 {
     public static Minigame_2_15 Instance;
 
@@ -19,6 +19,15 @@ public class Minigame_2_15 : MiniGameBase
 
     // BiteZoneController가 판정 직후 참고할 수 있도록 마지막 결과를 저장 (필요 시 UI 등에서 활용)
     public JudgementResult LastJudgement { get; private set; }
+
+    // 연습 시범 모드. BiteZoneController가 이 값을 보고 마우스 대신 자동으로 먹는다.
+    public bool IsDemoMode { get; private set; }
+
+    // IPracticeDemoInput 구현
+    public override void SetDemoMode(bool on)
+    {
+        IsDemoMode = on;
+    }
 
     protected override void Awake()
     {
@@ -58,6 +67,9 @@ public class Minigame_2_15 : MiniGameBase
 
     public override void OnPlayerInput(string action = null)
     {
+        // 시범 모드에서는 실제 플레이어 입력 무시
+        if (IsDemoMode) return;
+
         // BiteZoneController가 이제 OnJudgement를 직접 호출하므로 이 경로는 사용하지 않음.
         if (IsInputLocked) return;
         base.OnPlayerInput(action);

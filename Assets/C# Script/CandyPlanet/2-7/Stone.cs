@@ -88,7 +88,7 @@ public class Stone : MonoBehaviour
         }
 
         isBouncing = true;
-        if (clickSound != null)
+        if (clickSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
         {
             GameRoot.Instance.Audio.PlaySfx(clickSound);
         }

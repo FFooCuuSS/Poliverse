@@ -15,8 +15,12 @@ using UnityEngine.Serialization;
 ///  - 국자가 중앙(centerPoint.x)을 지나 좌<->우로 넘어갈 때마다,
 ///    그 순간을 하나의 "스와이프" 입력으로 간주해 OnSwipeDetected를 발생시킨다.
 ///    (이 스와이프 이벤트는 Minigame_2_10의 판정 입력으로 그대로 이어진다)
+///
+///  - 연습 시범 모드(SetDemoMode(true))에서는 마우스 입력을 무시하고,
+///    DemoSwipe()가 호출될 때마다 국자를 반대편으로 자동으로 저어준다.
+///    (시범 모드에서는 isDragging이 항상 false라 OnSwipeDetected는 발생하지 않는다)
 /// </summary>
-public class ScoopDrag : MonoBehaviour
+public class ScoopDrag : MonoBehaviour, IPracticeDemoInput
 {
     [Header("타원 궤적")]
     public Transform centerPoint;
@@ -45,6 +49,10 @@ public class ScoopDrag : MonoBehaviour
     [Tooltip("스와이프 판정 후 다음 스와이프까지 최소 대기 시간(연속 트리거 방지, 초)")]
     [SerializeField] private float swipeCooldown = 0.15f;
 
+    [Header("시범 모드")]
+    [Tooltip("시범 모드에서 국자가 오가는 지점의 세로 방향. 음수면 냄비 아래쪽(앞쪽)을 지나며 젓는다")]
+    [SerializeField] private float demoVerticalDir = -0.5f;
+
     /// <summary>좌 또는 우로 스와이프가 감지될 때마다 호출된다.</summary>
     public event Action OnSwipeDetected;
 
@@ -59,6 +67,28 @@ public class ScoopDrag : MonoBehaviour
     // 마우스 입력으로 계산된, 국자가 향해 가야 할 타원 위의 목표 지점
     private Vector2 targetPos;
 
+    private bool isDemoMode;
+
+    // IPracticeDemoInput 구현
+    public void SetDemoMode(bool on)
+    {
+        isDemoMode = on;
+
+        // 모드 전환 시 드래그 상태 초기화 (데모 <-> 실제 플레이 간 상태가 섞이지 않게)
+        isDragging = false;
+        lastSide = 0;
+    }
+
+    /// <summary>시범 모드에서 국자를 현재 위치의 반대편으로 저어준다.</summary>
+    public void DemoSwipe()
+    {
+        if (centerPoint == null) return;
+
+        int nextSide = transform.position.x < centerPoint.position.x ? 1 : -1;
+        Vector2 dir = new Vector2(nextSide, demoVerticalDir).normalized;
+        targetPos = (Vector2)centerPoint.position + new Vector2(dir.x * radiusX, dir.y * radiusY);
+    }
+
     private void Start()
     {
         baseScale = transform.localScale;
@@ -69,33 +99,37 @@ public class ScoopDrag : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        // 시범 모드에서는 마우스 입력을 보지 않음 (targetPos는 DemoSwipe가 갱신)
+        if (!isDemoMode)
         {
-            Vector2 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Collider2D col = GetComponent<Collider2D>();
-
-            if (col != null && col.OverlapPoint(mouseWorld))
+            if (Input.GetMouseButtonDown(0))
             {
-                isDragging = true;
-                lastPosition = transform.position;
-                lastSide = 0;
+                Vector2 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                Collider2D col = GetComponent<Collider2D>();
+
+                if (col != null && col.OverlapPoint(mouseWorld))
+                {
+                    isDragging = true;
+                    lastPosition = transform.position;
+                    lastSide = 0;
+                }
             }
-        }
 
-        if (Input.GetMouseButtonUp(0)) isDragging = false;
+            if (Input.GetMouseButtonUp(0)) isDragging = false;
 
-        if (isDragging)
-        {
-            Vector2 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2 center = centerPoint.position;
+            if (isDragging)
+            {
+                Vector2 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                Vector2 center = centerPoint.position;
 
-            Vector2 direction = mouseWorld - center;
-            if (direction.sqrMagnitude > 0.0001f)
-                direction.Normalize();
+                Vector2 direction = mouseWorld - center;
+                if (direction.sqrMagnitude > 0.0001f)
+                    direction.Normalize();
 
-            // 단위 원 방향 벡터를 축마다 다른 반경(radiusX, radiusY)으로 스케일하면
-            // 정확히 그 타원(x²/radiusX² + y²/radiusY² = 1) 위의 점이 된다.
-            targetPos = center + new Vector2(direction.x * radiusX, direction.y * radiusY);
+                // 단위 원 방향 벡터를 축마다 다른 반경(radiusX, radiusY)으로 스케일하면
+                // 정확히 그 타원(x²/radiusX² + y²/radiusY² = 1) 위의 점이 된다.
+                targetPos = center + new Vector2(direction.x * radiusX, direction.y * radiusY);
+            }
         }
 
         // 드래그 중이 아니어도 마지막 목표 지점까지는 부드럽게 이동을 마무리한다.

@@ -3,11 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Minigame_2_7 : MiniGameBase
+public class Minigame_2_7 : MiniGameBase, IPracticeDemoInput
 {
-    public override float perfectWindowOverride => 0.15f; 
-    public override float goodWindowOverride => 0.2f;     
-    public override float hitWindowOverride => 1f;        
+    public override float perfectWindowOverride => 0.15f;
+    public override float goodWindowOverride => 0.2f;
+    public override float hitWindowOverride => 1f;
 
     protected override float TimerDuration => 5f;
     protected override string MinigameTitle => "젤리 핑퐁";
@@ -36,6 +36,20 @@ public class Minigame_2_7 : MiniGameBase
     private float touchTimer;
     private float lastClickTime = -999f; // 선입력 버퍼용, 가장 최근 클릭 시각
     private bool isFirstTouch = true; // 게임 시작 후 첫 접촉인지 (여유시간 부여용)
+
+    // 연습 시범 모드: true면 마우스 입력을 무시하고 젤리가 닿을 때마다 자동으로 성공 처리
+    private bool isDemoMode;
+
+    // IPracticeDemoInput 구현
+    public override void SetDemoMode(bool on)
+    {
+        isDemoMode = on;
+
+        // 모드 전환 시 입력 대기 상태를 초기화해서 이전 모드의 상태가 넘어가지 않게 함
+        waitingForInput = false;
+        touchTimer = 0f;
+        lastClickTime = -999f;
+    }
 
 
     public override void StartGame()
@@ -72,6 +86,14 @@ public class Minigame_2_7 : MiniGameBase
     {
         if (ended) return;
 
+        // 시범 모드: 마우스 입력은 보지 않음. 혹시 대기 중인 판정이 있으면 성공 처리
+        if (isDemoMode)
+        {
+            if (waitingForInput)
+                Judge(true);
+            return;
+        }
+
         // 게임 시작 직후 일정 시간은 클릭 감지 자체를 스킵
         bool inputIgnored = Time.time - gameStartTime < inputIgnoreAfterStart;
 
@@ -107,9 +129,16 @@ public class Minigame_2_7 : MiniGameBase
         Debug.Log("Touch 발생");
         if (ended) return;
 
+        // 시범 모드: 젤리가 닿는 순간 정확한 타이밍에 튕긴 것으로 처리
+        if (isDemoMode)
+        {
+            Judge(true);
+            return;
+        }
+
         if (Time.time - lastClickTime <= perfectWindowOverride)
         {
-            Judge(true); 
+            Judge(true);
             return;
         }
 
@@ -126,7 +155,7 @@ public class Minigame_2_7 : MiniGameBase
         if (success)
         {
             stone.PlayBounceMotion(); // 실제 접촉 시점에 맞춰 튕기는 연출 
-            ReportManualSuccess();  
+            ReportManualSuccess();
         }
         else
         {
@@ -143,6 +172,9 @@ public class Minigame_2_7 : MiniGameBase
 
     public override void OnPlayerInput(string action = null)
     {
+        // 시범 모드에서는 실제 플레이어 입력 무시
+        if (isDemoMode) return;
+
         // 입력 잠금 상태면 무시
         if (IsInputLocked) return;
         base.OnPlayerInput(action);
