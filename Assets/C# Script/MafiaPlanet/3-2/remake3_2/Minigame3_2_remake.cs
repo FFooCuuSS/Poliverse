@@ -5,8 +5,13 @@ public class Minigame3_2remake : MiniGameBase
     // ===== 미니게임 기본 정보 =====
     protected override float TimerDuration => 10f;
 
-    protected override string MinigameExplain =>
-        "미니게임 3-2 설명을 여기에 넣기";
+    protected override string MinigameTitle => "거래 가방 전달";
+
+    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "장애물을 피해 좌우로 움직이세요."
+    };
 
     public override float perfectWindowOverride => 0.1f;
     public override float goodWindowOverride => 0.3f;
@@ -18,20 +23,42 @@ public class Minigame3_2remake : MiniGameBase
 
 
     private bool finished = false;
+    private bool isDemoMode;
+
     private void Start()
     {
         StartGame();
     }
+
     public override void StartGame()
     {
+        base.StartGame();
         IsInputLocked = false;
 
         Debug.Log("[3-2] Minigame3_2remake 시작");
         // 추가 초기화
         // 예: instructionText.text = MinigameExplain;
     }
-    
 
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+
+        Debug.Log(
+            $"[3-2] Demo Mode = {isDemoMode}"
+        );
+
+        if (handController != null)
+        {
+            handController.SetDemoMode(isDemo);
+        }
+        else
+        {
+            Debug.LogWarning(
+                "[3-2] HandController가 연결되지 않았습니다."
+            );
+        }
+    }
 
     private void Update()
     {
@@ -39,6 +66,7 @@ public class Minigame3_2remake : MiniGameBase
         {
             return;
         }
+        if (isDemoMode) return;
 
         // 좌클릭
         if (Input.GetMouseButtonDown(0))
@@ -50,10 +78,10 @@ public class Minigame3_2remake : MiniGameBase
 
     public override void OnRhythmEvent(string action)
     {
-        if (finished)
-        {
+        if (finished || string.IsNullOrEmpty(action))
             return;
-        }
+
+        action = action.Trim();
 
         switch (action)
         {
@@ -66,10 +94,7 @@ public class Minigame3_2remake : MiniGameBase
 
     public void SubmitInput()
     {
-        if (finished)
-        {
-            return;
-        }
+        if (finished || isDemoMode) return;
 
         Debug.Log("[3-2] 좌클릭");
 

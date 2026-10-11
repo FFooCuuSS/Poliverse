@@ -56,6 +56,16 @@ public class HandController : MonoBehaviour
     // 현재 실행 중인 가로 이동 Tween
     private Tween horizontalTween;
 
+    // 데모 모드 여부
+    private bool isDemoMode = false;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+
+        Debug.Log("[Hand] 데모 모드: " + isDemoMode);
+    }
+
 
     private void Start()
     {
@@ -329,12 +339,20 @@ public class HandController : MonoBehaviour
     /// </summary>
     public void EnterBag(GameObject bag)
     {
+        if (bag == null) return;
+
         currentBag = bag;
 
         Debug.Log(
             "[Hand] Bag 충돌 시작 : " +
             bag.name
         );
+
+        if (isDemoMode && !isActionStarted)
+        {
+            Debug.Log("[Hand] 데모 자동 잡기 실행");
+            StartGrabAction();
+        }
     }
 
 

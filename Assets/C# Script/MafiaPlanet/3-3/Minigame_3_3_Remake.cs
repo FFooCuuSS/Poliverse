@@ -3,7 +3,14 @@ using UnityEngine;
 public class Minigame_3_3_Remake : MiniGameBase
 {
     protected override float TimerDuration => 20f;
-    protected override string MinigameExplain => "타이밍에 맞춰 열쇠를 맞춰라!";
+
+    protected override string MinigameTitle => "열쇠를 맞춰라";
+
+    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "장애물을 피해 좌우로 움직이세요."
+    };
 
     [Header("Manager")]
     [SerializeField] private Manager_3_3 manager;
