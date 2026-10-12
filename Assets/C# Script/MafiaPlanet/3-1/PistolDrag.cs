@@ -47,7 +47,10 @@ public class PistolDrag : DirectionalDrag
             {
                 if (gunMoveSound != null)
                 {
-                    GameRoot.Instance.Audio.PlaySfx(gunMoveSound);
+                    if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                    {
+                        GameRoot.Instance.Audio.PlaySfx(gunMoveSound);
+                    }
                 }
 
                 up.goingUp = true;

@@ -241,7 +241,10 @@ public class Manager3_9 : MonoBehaviour
             {
                 if (showSound != null)
                 {
-                    GameRoot.Instance.Audio.PlaySfx(showSound);
+                    if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                    {
+                        GameRoot.Instance.Audio.PlaySfx(showSound);
+                    }
                 }
 
                 slots[slotIndex]
@@ -370,7 +373,10 @@ public class Manager3_9 : MonoBehaviour
         {
             if (clickSound != null)
             {
-                GameRoot.Instance.Audio.PlaySfx(clickSound);
+                if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                {
+                    GameRoot.Instance.Audio.PlaySfx(clickSound);
+                }
             }
 
             Debug.Log(
@@ -394,7 +400,10 @@ public class Manager3_9 : MonoBehaviour
         {
             if (wrongSound != null)
             {
-                GameRoot.Instance.Audio.PlaySfx(wrongSound);
+                if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                {
+                    GameRoot.Instance.Audio.PlaySfx(wrongSound);
+                }
             }
 
             Debug.Log(

@@ -22,7 +22,10 @@ public class ScopeShooter : MonoBehaviour
             {
                 if (hitSound != null)
                 {
-                    GameRoot.Instance.Audio.PlaySfx(hitSound);
+                    if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                    {
+                        GameRoot.Instance.Audio.PlaySfx(hitSound);
+                    }
                 }
 
 
@@ -33,7 +36,10 @@ public class ScopeShooter : MonoBehaviour
             {
                 if (missSound != null)
                 {
-                    GameRoot.Instance.Audio.PlaySfx(missSound);
+                    if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                    {
+                        GameRoot.Instance.Audio.PlaySfx(missSound);
+                    }
                 }
                 Debug.Log("Missed!");
             }

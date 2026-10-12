@@ -63,7 +63,10 @@ public class CarMoveRemake : MonoBehaviour
             {
                 if (swipeSound != null)
                 {
-                    GameRoot.Instance.Audio.PlaySfx(swipeSound);
+                    if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                    {
+                        GameRoot.Instance.Audio.PlaySfx(swipeSound);
+                    }
                 }
 
                 if (swipeDeltaY > 0) MoveUp();
@@ -85,7 +88,10 @@ public class CarMoveRemake : MonoBehaviour
         {
             if (collideSound != null)
             {
-                GameRoot.Instance.Audio.PlaySfx(collideSound);
+                if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                {
+                    GameRoot.Instance.Audio.PlaySfx(collideSound);
+                }
             }
 
             //부딫힌 상황 부여

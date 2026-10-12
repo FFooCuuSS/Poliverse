@@ -198,7 +198,10 @@ public class Minigame_2_12 : MiniGameBase, IPracticeDemoInput
         faller.speed = previewFallSpeed;
         if (fallingSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(fallingSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(fallingSound);
+            }
         }
 
         shownCount++;

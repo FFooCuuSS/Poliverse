@@ -27,7 +27,10 @@ public class AutoMoveKey_3_3 : MonoBehaviour
     {
         if (clickSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(clickSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(clickSound);
+            }
         }
 
 

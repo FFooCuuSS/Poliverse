@@ -62,7 +62,10 @@ public class Bottle2_4 : MonoBehaviour
         isFilled = true;
         if (waterSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(waterSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(waterSound);
+            }
         }
 
 

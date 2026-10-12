@@ -421,7 +421,10 @@ public class CaseManager_3_13 : MonoBehaviour
                 {
                     if (clickSound != null)
                     {
-                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                        {
+                            GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        }
                     }
 
                     case1SuccessStick.SetActive(true);
@@ -435,7 +438,10 @@ public class CaseManager_3_13 : MonoBehaviour
                 {
                     if (clickSound != null)
                     {
-                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                        {
+                            GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        }
                     }
 
                     case1SuccessKnife.SetActive(true);
@@ -449,7 +455,10 @@ public class CaseManager_3_13 : MonoBehaviour
                 {
                     if (clickSound != null)
                     {
-                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                        {
+                            GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        }
                     }
 
                     case1SuccessGun.SetActive(true);
@@ -463,7 +472,10 @@ public class CaseManager_3_13 : MonoBehaviour
                 {
                     if (clickSound != null)
                     {
-                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                        {
+                            GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        }
                     }
 
                     case1SuccessTie.SetActive(true);
@@ -489,7 +501,10 @@ public class CaseManager_3_13 : MonoBehaviour
                 {
                     if (clickSound != null)
                     {
-                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                        {
+                            GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        }
                     }
 
                     case2SuccessStick.SetActive(true);
@@ -503,7 +518,10 @@ public class CaseManager_3_13 : MonoBehaviour
                 {
                     if (clickSound != null)
                     {
-                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                        {
+                            GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        }
                     }
 
                     case2SuccessKnife.SetActive(true);
@@ -517,7 +535,10 @@ public class CaseManager_3_13 : MonoBehaviour
                 {
                     if (clickSound != null)
                     {
-                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                        {
+                            GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        }
                     }
 
                     case2SuccessGun.SetActive(true);
@@ -531,7 +552,10 @@ public class CaseManager_3_13 : MonoBehaviour
                 {
                     if (clickSound != null)
                     {
-                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                        {
+                            GameRoot.Instance.Audio.PlaySfx(clickSound);
+                        }
                     }
 
                     case2SuccessTie.SetActive(true);

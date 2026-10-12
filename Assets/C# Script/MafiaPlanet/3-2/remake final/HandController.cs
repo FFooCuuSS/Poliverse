@@ -196,7 +196,10 @@ public class HandController : MonoBehaviour
 
         if (clickSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(clickSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(clickSound);
+            }
         }
 
         isActionStarted = true;
@@ -265,7 +268,10 @@ public class HandController : MonoBehaviour
     /// </summary>
     private void GrabBag(GameObject bag)
     {
-        GameRoot.Instance.Audio.PlaySfx(grabSound);
+        if (clickSound!=null&& GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(clickSound);
+        }
         hasBag = true;
         grabbedBag = bag;
 

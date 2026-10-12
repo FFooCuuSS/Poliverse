@@ -36,7 +36,10 @@ public class Minigame_3_10_remake : MiniGameBase
         {
             if (warningSound != null)
             {
-                GameRoot.Instance.Audio.PlaySfx(warningSound);
+                if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                {
+                    GameRoot.Instance.Audio.PlaySfx(warningSound);
+                }
             }
 
             count++;
@@ -54,7 +57,10 @@ public class Minigame_3_10_remake : MiniGameBase
         {
             if (clickSound != null)
             {
-                GameRoot.Instance.Audio.PlaySfx(clickSound);
+                if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                {
+                    GameRoot.Instance.Audio.PlaySfx(clickSound);
+                }
             }
             Debug.Log("[Spawn] Spawn 이벤트 들어옴");
             SpawnObject();

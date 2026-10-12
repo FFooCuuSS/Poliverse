@@ -38,7 +38,10 @@ public class Minigame_3_6 : MiniGameBase
         if (ended) return;
         if (clickSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(clickSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(clickSound);
+            }
         }
 
         isRecording = true;

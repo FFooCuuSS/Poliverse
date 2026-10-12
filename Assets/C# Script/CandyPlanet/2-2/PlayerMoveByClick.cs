@@ -50,8 +50,12 @@ public class PlayerMoveByClick : MonoBehaviour
         {
             if (moveSound != null && !audioPlayed)
             {
-                GameRoot.Instance.Audio.PlaySfx(moveSound);
-                audioPlayed = true;
+                if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                {
+                    GameRoot.Instance.Audio.PlaySfx(moveSound);   
+                    audioPlayed = true;
+
+                }
             }
 
             transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);

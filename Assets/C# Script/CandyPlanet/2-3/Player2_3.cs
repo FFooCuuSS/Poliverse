@@ -47,7 +47,10 @@ public class Player2_3 : MonoBehaviour
         {
             if (clickSound != null)
             {
-                GameRoot.Instance.Audio.PlaySfx(clickSound);
+                if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                {
+                    GameRoot.Instance.Audio.PlaySfx(clickSound);
+                }
             }
 
             Debug.Log($"[Player2_3] 클릭 감지, IsInputOpen={(minigame != null ? minigame.IsInputOpen.ToString() : "minigame null")}");

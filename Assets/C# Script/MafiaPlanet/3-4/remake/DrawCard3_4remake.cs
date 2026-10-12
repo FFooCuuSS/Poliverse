@@ -162,7 +162,10 @@ public class DrawCard3_4remake : MonoBehaviour
             // 오디오 매니저 예외 방지 처리
             if (clickSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
             {
-                GameRoot.Instance.Audio.PlaySfx(clickSound);
+                if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                {
+                    GameRoot.Instance.Audio.PlaySfx(clickSound);
+                }
             }
 
             isCardMoving = true;

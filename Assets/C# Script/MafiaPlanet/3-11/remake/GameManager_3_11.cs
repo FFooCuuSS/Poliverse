@@ -168,7 +168,10 @@ public class GameManager_3_11 : MiniGameBase
     {
         if (bombSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(bombSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(bombSound);
+            }
         }
 
         StartCoroutine(BombEffectCoroutine());
@@ -188,7 +191,10 @@ public class GameManager_3_11 : MiniGameBase
     {
         if (successSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(successSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(successSound);
+            }
         }
 
         StartCoroutine(SuccessEffectCoroutine());

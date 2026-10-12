@@ -30,7 +30,10 @@ public class ObstacleSpawner : MonoBehaviour
         if (spawnPattern == null || spawnPattern.Length == 0) return;
         if (fallingSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(fallingSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(fallingSound);
+            }
         }
 
 

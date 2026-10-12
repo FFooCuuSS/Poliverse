@@ -21,7 +21,10 @@ public class IcicleHitPlayer : MonoBehaviour
         Debug.Log("충돌 감지 성공!");
         if (hitSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(hitSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(hitSound);
+            }
         }
 
         minigame_2_2.missCount++;

@@ -202,7 +202,10 @@ public class Manager_3_3 : MonoBehaviour
         clickCount++;
         if (clickSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(clickSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(clickSound);
+            }
         }
 
 

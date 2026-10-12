@@ -313,7 +313,10 @@ public class Minigame_2_13 : MiniGameBase, IPracticeDemoInput
         currentProjectile = Instantiate(projectilePrefab, spawnPoint.position, Quaternion.identity, transform);
         if (dropSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(dropSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(dropSound);
+            }
         }
 
 
@@ -435,7 +438,10 @@ public class Minigame_2_13 : MiniGameBase, IPracticeDemoInput
         // 2) 던지는 순간: PullBack(or Rest) -> Throw 각도로 빠르게 휘두름
         if (throwingSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(throwingSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(throwingSound);
+            }
         }
 
         float swingFrom = (catapultPullBackDuration > 0f &&

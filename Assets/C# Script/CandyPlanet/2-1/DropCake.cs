@@ -19,7 +19,10 @@ public class DropCake : MonoBehaviour
         processedCount++;
         if (dropSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(dropSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(dropSound);
+            }
         }
 
 

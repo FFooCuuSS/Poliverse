@@ -54,7 +54,10 @@ public class PlayerHold : MonoBehaviour
         isMoving = true;
         if (hideSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(hideSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(hideSound);
+            }
         }
 
 

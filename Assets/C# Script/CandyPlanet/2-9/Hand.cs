@@ -71,7 +71,10 @@ public class Hand : MonoBehaviour
             grabCollider.enabled = true;
         if (grabSound != null)
         {
-            GameRoot.Instance.Audio.PlaySfx(grabSound);
+            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            {
+                GameRoot.Instance.Audio.PlaySfx(grabSound);
+            }
         }
 
 
