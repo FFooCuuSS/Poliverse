@@ -216,6 +216,7 @@ GameObject:
   - component: {fileID: 5766097944682334580}
   - component: {fileID: 3690326561501875911}
   - component: {fileID: 2298496610463236830}
+  - component: {fileID: 1686225208114957740}
   m_Layer: 0
   m_Name: SlicePoint
   m_TagString: Untagged
@@ -324,6 +325,29 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &1686225208114957740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6018954875580800972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.5
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &6176077491542735773
 GameObject:
   m_ObjectHideFlags: 0

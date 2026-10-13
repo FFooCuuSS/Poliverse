@@ -3,6 +3,11 @@ using DG.Tweening;
 
 public class UpDown : MonoBehaviour
 {
+
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip elevatorSound;
+
+
     public GameObject ManagerObj;
     public bool goUp;
     public float speed = 1f;
@@ -35,6 +40,11 @@ public class UpDown : MonoBehaviour
     {
         if (isMoving) return;
         isMoving = true;
+        if (elevatorSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(elevatorSound);
+        }
+
 
         float direction = goUp ? 1f : -1f;
         Vector3 startPos = transform.position;

@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class Minigame_1_7 : MiniGameBase, IPracticeDemoInput
 {
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip clickSound;
+
     [Header("Refs")]
     [SerializeField] private PrisonerSpawner1_7 prisonerSpawner;
     [SerializeField] private HoldCheck1_7 holdJudge;
@@ -148,6 +151,11 @@ public class Minigame_1_7 : MiniGameBase, IPracticeDemoInput
         if (awaitingJudge) return;
 
         awaitingJudge = true;
+        if (clickSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(clickSound);
+        }
+
 
         base.OnPlayerInput(action ?? "Input");
     }

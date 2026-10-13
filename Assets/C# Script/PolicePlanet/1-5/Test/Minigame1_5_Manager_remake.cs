@@ -15,6 +15,9 @@ public class Minigame1_5_Manager_remake : MiniGameBase
         public float waitTime = 1.5f;
     }
 
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip hitSound;
+
     [Header("References")]
     [SerializeField] private Transform hand;
     [SerializeField] private Camera mainCam;
@@ -301,6 +304,11 @@ public class Minigame1_5_Manager_remake : MiniGameBase
 
         if (prisoners != null && i < prisoners.Length && prisoners[i] != null)
             prisoners[i].PlayHit();
+
+        if (hitSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(hitSound);
+        }
 
         Debug.Log($"[1-5] HIT R={currentRoundIndex} Case={currentCaseNum} Idx={i} " +
                   $"HandX={hand.position.x:F2} TargetX={targets[i].position.x:F2}");

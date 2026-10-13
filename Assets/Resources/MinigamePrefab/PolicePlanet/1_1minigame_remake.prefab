@@ -138,6 +138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dcce73cda07fc446b46f4b01a1171b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 0
   useRhythmJudgementScore: 0
   manualTotalNodeCount: 12
   printScoreDebugOnEnd: 1
@@ -526,6 +527,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 912d85fb184985a4eb4c537985232426, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hitSound: {fileID: 8300000, guid: 6c9a1ebbe535e6c45b00544d2b10411a, type: 3}
   hitSprite: {fileID: 21300000, guid: f17de85914ba1ff42b688eb7e6838292, type: 3}
 --- !u!114 &4036641419777032212
 MonoBehaviour:
@@ -684,6 +686,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 912d85fb184985a4eb4c537985232426, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hitSound: {fileID: 8300000, guid: 6c9a1ebbe535e6c45b00544d2b10411a, type: 3}
   hitSprite: {fileID: 21300000, guid: f2bbd6b47f6d81443a1401d2438f9bc9, type: 3}
 --- !u!114 &525245732270909256
 MonoBehaviour:
@@ -824,6 +827,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 912d85fb184985a4eb4c537985232426, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hitSound: {fileID: 8300000, guid: 6c9a1ebbe535e6c45b00544d2b10411a, type: 3}
   hitSprite: {fileID: 21300000, guid: bf139ab1af75f3c44b41697b93932174, type: 3}
 --- !u!114 &2928554563817990234
 MonoBehaviour:
@@ -983,6 +987,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 912d85fb184985a4eb4c537985232426, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hitSound: {fileID: 8300000, guid: 6c9a1ebbe535e6c45b00544d2b10411a, type: 3}
   hitSprite: {fileID: 21300000, guid: 0db40814d3d0c7e4b8fa666bdf568848, type: 3}
 --- !u!114 &1001755404965510433
 MonoBehaviour:

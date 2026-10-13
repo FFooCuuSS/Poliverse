@@ -1206,6 +1206,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8725f7aabbc2d141bd7ae8043cf5147, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minigame: {fileID: 0}
+  swipeSound: {fileID: 8300000, guid: 9627abf4c6840d846b8f24d568b66701, type: 3}
   maxX: 7
   maxY: 4
   isDragging: 0
@@ -1223,7 +1225,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stage_1_3: {fileID: 9053008695175432682}
-  goalCollider: {fileID: 963160968785634276}
+  PlayerFail: {fileID: 0}
+  hitSound: {fileID: 0}
+  respawnDelay: 0.25
+  respawnStartPos: {x: -9, y: -1.4, z: 0}
+  respawnEndPos: {x: -7.42, y: -1.4, z: 0}
+  respawnMoveTime: 0.5
+  invincibleTime: 1
+  blinkInterval: 0.1
+  blinkMinAlpha: 0.25
+  failDuration: 0.25
+  failSpinZ: -30
+  failDropY: 0.1
+  failScaleDownTo: 0
 --- !u!136 &171408861301659807
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1559,3 +1573,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45e39f8c32f448c489cd781f6e653bbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 0
+  useRhythmJudgementScore: 1
+  manualTotalNodeCount: -1
+  printScoreDebugOnEnd: 1
+  scoreTargetCount: 10
+  player: {fileID: 0}
+  backDistance: 0.4
+  backDuration: 0.15
+  dashDistance: 20
+  dashDuration: 0.35
+  overshootDistance: 0.6

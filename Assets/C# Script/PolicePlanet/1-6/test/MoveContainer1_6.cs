@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class MoveContainer1_6 : MonoBehaviour
 {
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip moveSound;
+
     [Header("Container Move")]
     public float startX = 12f;
 
@@ -57,7 +60,12 @@ public class MoveContainer1_6 : MonoBehaviour
 
     public bool IsMoving()
     {
+        if (moveSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(moveSound);
+        }
         return isMoving;
+
     }
 
     public bool HasArrived()

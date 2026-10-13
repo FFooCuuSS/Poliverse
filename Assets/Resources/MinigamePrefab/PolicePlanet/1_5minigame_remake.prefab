@@ -1890,6 +1890,7 @@ MonoBehaviour:
   useRhythmJudgementScore: 0
   manualTotalNodeCount: 14
   printScoreDebugOnEnd: 1
+  hitSound: {fileID: 8300000, guid: 177c60eefc144104fa8c75d075f73859, type: 3}
   hand: {fileID: 9198725016839572853}
   mainCam: {fileID: 0}
   mainParent: {fileID: 6799748189946725150}

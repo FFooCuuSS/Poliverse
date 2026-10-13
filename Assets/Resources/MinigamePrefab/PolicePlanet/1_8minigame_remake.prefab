@@ -328,6 +328,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60a4168685dcdce48b33d690829e0d02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  prisonSound: {fileID: 8300000, guid: 04ab22394ca9d8a4ea2b489ee2e4a9a2, type: 3}
   downDeltaY: 4.2
   downDuration: 0.12
   staySeconds: 0.3

@@ -18,6 +18,9 @@ public class PlayerReachChecker : MonoBehaviour
 
     private Sprite originalSprite;
 
+    [Header("효과음")]
+    [SerializeField] private AudioClip hitSound;
+
     // ===== Respawn Settings =====
     [Header("Respawn")]
     [SerializeField] private float respawnDelay = 0.25f; // 실패 연출 후 추가 텀
@@ -101,6 +104,12 @@ public class PlayerReachChecker : MonoBehaviour
 
         // 실패 스프라이트로 교체
         if (PlayerFail != null) sr.sprite = PlayerFail;
+
+        if (hitSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(hitSound);
+        }
+
 
         // 트윈 정리
         transform.DOKill(true);

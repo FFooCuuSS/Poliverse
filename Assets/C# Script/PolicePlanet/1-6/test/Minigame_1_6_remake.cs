@@ -13,6 +13,8 @@ public class Minigame_1_6_remake : MiniGameBase, IPracticeDemoInput
         "경찰 아이콘이 플랫폼 위에 도착하면 화면을 터치해주세요."
     };
 
+    [Header("효과음")]
+    [SerializeField] private AudioClip moveSound;
     [Header("Prefabs")]
     public ContainerTarget containerPrefab;
     public PoliceMover policePrefab;
@@ -186,6 +188,10 @@ public class Minigame_1_6_remake : MiniGameBase, IPracticeDemoInput
 
         p.InitMoveToTarget(policeStartX, targetX, travelTime);
         p.OnAutoDestroyed += OnPoliceAutoDestroyed;
+        if (moveSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(moveSound);
+        }
 
         currentPolice = p;
 

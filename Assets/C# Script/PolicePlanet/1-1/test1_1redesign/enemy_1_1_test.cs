@@ -6,6 +6,10 @@ public class enemy_1_1_test : MonoBehaviour
     private SpriteRenderer sr;
     private Sprite originalSprite;
 
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip hitSound;
+
+
     [Header("Hit Visual")]
     public Sprite hitSprite;
 
@@ -25,6 +29,10 @@ public class enemy_1_1_test : MonoBehaviour
     {
         if (sr == null) return;
         if (hitSprite == null) return;
+        if (hitSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(hitSound);
+        }
 
         sr.sprite = hitSprite;
     }

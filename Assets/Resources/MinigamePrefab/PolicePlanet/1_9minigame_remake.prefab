@@ -148,6 +148,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6bf69f67a6f4f943b687b216cf8b958, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 0
+  useRhythmJudgementScore: 1
+  manualTotalNodeCount: -1
+  printScoreDebugOnEnd: 1
   totalInputs: 6
   endingSuccessThreshold: 4
   rope: {fileID: 1756486582245401636}
@@ -547,6 +551,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8725f7aabbc2d141bd7ae8043cf5147, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minigame: {fileID: 0}
   maxX: 7
   maxY: 4
   isDragging: 0
@@ -712,6 +717,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ccf34bf907528a48a4300498a221ae5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickSound: {fileID: 8300000, guid: 2b4652245ff41844ab215189a5993669, type: 3}
   stretchOffset: {x: 5, y: 0, z: 0}
   stretchDuration: 0.2
   shrinkDuration: 0.2

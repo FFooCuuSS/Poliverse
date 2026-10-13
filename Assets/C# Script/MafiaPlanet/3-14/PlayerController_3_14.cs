@@ -3,6 +3,10 @@ using DG.Tweening;
 
 public class PlayerController_3_14 : MonoBehaviour
 {
+
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip swingSound;
+
     [Header("Move")]
     [SerializeField] private float stepX = 3f;
 
@@ -44,6 +48,11 @@ public class PlayerController_3_14 : MonoBehaviour
     public void MoveRightOneStep(float duration)
     {
         currentStep++;
+        if (swingSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(swingSound);
+        }
+
 
         Vector3 target = roundStartPosition + new Vector3(stepX * currentStep, 0f, 0f);
 

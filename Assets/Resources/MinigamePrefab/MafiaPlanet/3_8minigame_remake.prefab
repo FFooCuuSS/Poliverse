@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6965530236679220313}
   - component: {fileID: 6744702117986668963}
   - component: {fileID: 6211371527569073349}
+  - component: {fileID: 1989818356188875510}
   m_Layer: 0
   m_Name: player
   m_TagString: Untagged
@@ -99,6 +100,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   game: {fileID: 2745036349988099359}
   lookDuration: 0.6
+--- !u!114 &1989818356188875510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4165897825190074734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.6
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &5087641815241819783
 GameObject:
   m_ObjectHideFlags: 0
@@ -110,6 +134,7 @@ GameObject:
   - component: {fileID: 2044970313832581196}
   - component: {fileID: 9026614788424238786}
   - component: {fileID: 2389455935259854402}
+  - component: {fileID: 802528892711041499}
   m_Layer: 0
   m_Name: enemy
   m_TagString: Untagged
@@ -202,6 +227,29 @@ MonoBehaviour:
   lookSprite: {fileID: 21300000, guid: 85cc1dac03d6d564f939a90cf7e72e63, type: 3}
   changeTime: 2.4
   lookDuration: 0.6
+--- !u!114 &802528892711041499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5087641815241819783}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5506a3c1ccd98468036ba5e35c6e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rhythm: {fileID: 0}
+  test: {fileID: 0}
+  moveY: 0.18
+  roundTripTime: 0.6
+  squashX: 0.06
+  squashY: 0.1
+  scaleDelay: 0.02
+  playOnEnable: 1
+  useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5
 --- !u!1 &6835181036007384522
 GameObject:
   m_ObjectHideFlags: 0

@@ -3,6 +3,10 @@ using DG.Tweening;
 
 public class PrisonController_1_8 : MonoBehaviour
 {
+
+
+    [Header("효과음")]
+    [SerializeField] private AudioClip prisonSound;
     [Header("Delta Move")]
     public float downDeltaY = 3f;      
     public float downDuration = 0.12f; 
@@ -65,8 +69,13 @@ public class PrisonController_1_8 : MonoBehaviour
         Vector3 downPos = basePos + Vector3.down * downDeltaY;
 
         IsActive = true;
+        if (prisonSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(prisonSound);
+        }
 
         moveTween = DOTween.Sequence()
+
             // 쾅 내려감
             .Append(transform.DOMove(downPos, downDuration)
                 .SetEase(Ease.InBack, slamOvershoot))

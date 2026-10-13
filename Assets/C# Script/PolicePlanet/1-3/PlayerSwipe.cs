@@ -5,7 +5,8 @@ public class PlayerSwipe : MonoBehaviour
 {
     [SerializeField] private float swipeThreshold = 50f;
     [SerializeField] private float moveDuration = 0.2f;
-
+    [Header("효과음")]
+    [SerializeField] private AudioClip swipeSound;
     [Header("Lane Settings")]
     [SerializeField] private float bottomY = 0f;
     [SerializeField] private float laneDistance = 1f;
@@ -79,6 +80,11 @@ public class PlayerSwipe : MonoBehaviour
 
     private void HandleSwipe(Vector2 endPos)
     {
+        if (swipeSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(swipeSound);
+        }
+
         float deltaY = endPos.y - startPos.y;
 
         if (Mathf.Abs(deltaY) < swipeThreshold)

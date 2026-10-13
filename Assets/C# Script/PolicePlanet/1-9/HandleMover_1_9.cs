@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class HandleMover_1_9 : MonoBehaviour
 {
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip clickSound;
     private Vector3 initialLocalPosition;
     private Tween moveTween;
 
@@ -17,6 +19,11 @@ public class HandleMover_1_9 : MonoBehaviour
 
     public void PlayStretch()
     {
+        if (clickSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(clickSound);
+        }
+
         moveTween?.Kill();
         transform.localPosition = initialLocalPosition;
 

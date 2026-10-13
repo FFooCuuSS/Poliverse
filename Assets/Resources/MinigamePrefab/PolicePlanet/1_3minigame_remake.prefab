@@ -4609,6 +4609,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stage_1_3: {fileID: 1672421086405216488}
   PlayerFail: {fileID: 21300000, guid: 271acddeb75b9cb43a25375fb581e1f5, type: 3}
+  hitSound: {fileID: 8300000, guid: 663718f05a6ca2e4596bb6964aadab1d, type: 3}
   respawnDelay: 0.25
   respawnStartPos: {x: -9, y: -1.4, z: 0}
   respawnEndPos: {x: -7.42, y: -1.4, z: 0}
@@ -4696,6 +4697,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   swipeThreshold: 50
   moveDuration: 0.2
+  swipeSound: {fileID: 8300000, guid: 9627abf4c6840d846b8f24d568b66701, type: 3}
   bottomY: -1.44
   laneDistance: 3
   currentLane: 0

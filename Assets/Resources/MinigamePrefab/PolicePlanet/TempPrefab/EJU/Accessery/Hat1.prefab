@@ -146,6 +146,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8725f7aabbc2d141bd7ae8043cf5147, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minigame: {fileID: 0}
+  swipeSound: {fileID: 8300000, guid: 9627abf4c6840d846b8f24d568b66701, type: 3}
   maxX: 7
   maxY: 4
   isDragging: 0
@@ -176,6 +178,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2abcc14a3f57b44fb3dc99a74f18b6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  accessoryType: 0
 --- !u!114 &7752743037494564061
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,3 +200,5 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5

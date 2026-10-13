@@ -135,6 +135,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70ee45b8b217e894e9a47ad0ffec542e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 0
+  useRhythmJudgementScore: 1
+  manualTotalNodeCount: -1
+  printScoreDebugOnEnd: 1
+  clickSound: {fileID: 8300000, guid: bb1a492cf161f0941b4a62da4dd5ff63, type: 3}
   prisonerSpawner: {fileID: 8328137765551624356}
   holdJudge: {fileID: 6633415375601139176}
   basket: {fileID: 1114006704717622196}

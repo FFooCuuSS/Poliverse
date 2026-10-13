@@ -5,6 +5,10 @@ public class DragAndDrop : MonoBehaviour
     [Header("Refs")]
     public Minigame_1_2 minigame;
 
+    [Header("È¿°úÀ½")]
+    [SerializeField] private AudioClip swipeSound;
+    bool hasPlayedSwipeSound = false;
+
     [Header("Constraint")]
     [SerializeField] protected float maxX = 7f;
     [SerializeField] protected float maxY = 4f;
@@ -29,7 +33,7 @@ public class DragAndDrop : MonoBehaviour
 
         if (banDragging)
             return;
-
+        hasPlayedSwipeSound = false;
         isDragging = true;
         Vector3 mouseWorldPos = GetMouseWorldPos();
         offset = transform.position - mouseWorldPos;
@@ -37,6 +41,12 @@ public class DragAndDrop : MonoBehaviour
 
     protected virtual void OnMouseUp()
     {
+        if (!hasPlayedSwipeSound && swipeSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(swipeSound);
+            hasPlayedSwipeSound = true;
+        }
+
         isDragging = false;
     }
 

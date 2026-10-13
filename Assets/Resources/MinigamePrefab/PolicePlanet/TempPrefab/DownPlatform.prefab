@@ -229,6 +229,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79ae27b8d161f8f4f81450454d1471d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  elevatorSound: {fileID: 8300000, guid: d7812c01db1a63e46a69aa1a93a2633a, type: 3}
   ManagerObj: {fileID: 0}
   goUp: 0
   speed: 16
@@ -253,3 +254,5 @@ MonoBehaviour:
   scaleDelay: 0.02
   playOnEnable: 1
   useUnscaledTime: 0
+  fallbackAutoBounce: 1
+  fallbackPeriod: 0.5

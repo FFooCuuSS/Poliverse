@@ -13,6 +13,9 @@ public class HandcuffSequenceController : MonoBehaviour
     public CircleCollider2D leftHandCollider;
     public CircleCollider2D rightHandCollider;
 
+    [Header("효과음")]
+    [SerializeField] private AudioClip handcuffSound;
+
     [Header("Cuffs (FitChecker들)")]
     [SerializeField] private HandcuffFitChecker[] cuffs;
 
@@ -278,6 +281,11 @@ public class HandcuffSequenceController : MonoBehaviour
 
         if (playerSnapEnableObject != null)
             playerSnapEnableObject.SetActive(true);
+        if (handcuffSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        {
+            GameRoot.Instance.Audio.PlaySfx(handcuffSound);
+        }
+
     }
 
     private void ResetRoundVisuals()
