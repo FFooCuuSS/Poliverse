@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Minigame3_2remake : MiniGameBase
+public class Minigame3_2remake : MiniGameBase, IPracticeDemoInput
 {
     // ===== 미니게임 기본 정보 =====
     protected override float TimerDuration => 10f;
@@ -23,7 +23,7 @@ public class Minigame3_2remake : MiniGameBase
 
 
     private bool finished = false;
-    private bool isDemoMode;
+    private bool isDemoMode = false;
 
     private void Start()
     {
@@ -44,20 +44,12 @@ public class Minigame3_2remake : MiniGameBase
     {
         isDemoMode = isDemo;
 
-        Debug.Log(
-            $"[3-2] Demo Mode = {isDemoMode}"
-        );
-
         if (handController != null)
         {
             handController.SetDemoMode(isDemo);
         }
-        else
-        {
-            Debug.LogWarning(
-                "[3-2] HandController가 연결되지 않았습니다."
-            );
-        }
+
+        Debug.Log("[3-2] 데모 모드: " + isDemoMode);
     }
 
     private void Update()
@@ -90,7 +82,6 @@ public class Minigame3_2remake : MiniGameBase
                 break;
         }
     }
-
 
     public void SubmitInput()
     {

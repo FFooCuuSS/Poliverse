@@ -42,6 +42,8 @@ public class Manager3_9 : MonoBehaviour
     [Header("패턴 표시 후 입력까지 대기 시간")]
     public float inputStartDelay = 1.8f;
 
+    [Header("데모 설정")]
+    [SerializeField] private float autoInputInterval = 0.6f;
 
     // 랜덤으로 만들어진 정답 순서
     // 예:
@@ -60,11 +62,17 @@ public class Manager3_9 : MonoBehaviour
     // 현재 플레이어 입력 가능 여부
     private bool canInput = false;
 
+    private bool isDemoMode;
+    private bool gameRoutineStarted;
 
     private void Start()
     {
         // 시작할 때 모든 onBox를 끈다.
         SetAllOnBoxes(false);
+
+        // 데모
+        if (minigame != null)
+            isDemoMode = minigame.IsDemoMode;
 
         // 게임 진행 시작
         StartCoroutine(GameRoutine());
@@ -76,6 +84,9 @@ public class Manager3_9 : MonoBehaviour
     /// </summary>
     private IEnumerator GameRoutine()
     {
+        if (gameRoutineStarted) yield break;
+        gameRoutineStarted = true;
+
         Debug.Log("[3-9] 게임 시작");
 
         // 게임 시작 후 2초 대기
@@ -113,20 +124,24 @@ public class Manager3_9 : MonoBehaviour
         // 입력 시작
         // =========================
 
+        // 시범 모드가 설정된 값을 입력 시작 직전에 다시 확인
+        if (minigame != null)
+            isDemoMode = minigame.IsDemoMode;
+
         StartInput();
 
-
-        // 6번의 입력이 끝날 때까지 대기
-        while (canInput)
+        if (isDemoMode)
         {
-            yield return null;
+            // 데모에서는 정답 순서대로 자동 입력
+            yield return StartCoroutine(AutoInputRoutine());
         }
-
-
-        Debug.Log(
-            "[3-9] 모든 입력 완료"
-        );
-
+        else
+        {
+            // 일반 모드에서는 플레이어 입력 대기
+            while (canInput)
+                yield return null;
+        }
+        Debug.Log("[3-9] 모든 입력 완료");
 
         // =========================
         // 최종 결과 판정
@@ -304,11 +319,25 @@ public class Manager3_9 : MonoBehaviour
         );
     }
 
-
     /// <summary>
     /// PatternButton3_9에서 호출
     /// </summary>
     public void OnPatternClicked(int slotIndex)
+    {
+        // 데모 중에는 플레이어가 직접 누를 수 없다.
+        if (isDemoMode)
+        {
+            Debug.Log("[3-9] 데모 중 플레이어 입력 무시");
+            return;
+        }
+
+        HandlePatternInput(slotIndex);
+    }
+
+    /// <summary>
+    /// 일반 입력과 데모 자동 입력이 공통으로 사용하는 입력 처리
+    /// </summary>
+    private void HandlePatternInput(int slotIndex)
     {
         if (!canInput)
         {
@@ -328,116 +357,67 @@ public class Manager3_9 : MonoBehaviour
             return;
         }
 
-
-        // ==============================
-        // 클릭한 위치 onBox 끄기
-        // ==============================
-
-        GameObject clickedOnBox =
-            slots[slotIndex].onBox;
+        // 클릭한 위치의 onBox 끄기
+        GameObject clickedOnBox = slots[slotIndex] != null
+            ? slots[slotIndex].onBox
+            : null;
 
         if (clickedOnBox == null)
         {
             Debug.LogError(
-                "[3-9] slot " +
-                (slotIndex + 1) +
-                "의 onBox가 Inspector에 연결되지 않음"
-            );
+                "[3-9] slot " + (slotIndex + 1) +
+                "의 onBox가 Inspector에 연결되지 않음");
         }
         else
         {
-            Debug.Log(
-                "[3-9] onBox OFF 시도 : " +
-                clickedOnBox.name
-            );
-
             clickedOnBox.SetActive(false);
-
-            Debug.Log(
-                "[3-9] OFF 이후 activeSelf = " +
-                clickedOnBox.activeSelf
-            );
         }
 
-
-        // 현재 정답
-        int correctIndex =
-            answerPattern[inputIndex];
-
-
-        // ==============================
-        // 정답
-        // ==============================
+        int correctIndex = answerPattern[inputIndex];
 
         if (slotIndex == correctIndex)
         {
-            if (clickSound != null)
+            if (clickSound != null &&
+                GameRoot.Instance != null &&
+                GameRoot.Instance.Audio != null)
             {
-                if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
-                {
-                    GameRoot.Instance.Audio.PlaySfx(clickSound);
-                }
+                GameRoot.Instance.Audio.PlaySfx(clickSound);
             }
 
             Debug.Log(
-                "[3-9] " +
-                (inputIndex + 1) +
-                "번째 입력 성공 : " +
-                (slotIndex + 1)
-            );
+                "[3-9] " + (inputIndex + 1) +
+                "번째 입력 성공 : " + (slotIndex + 1));
 
             if (minigame != null)
-            {
                 minigame.ReportPatternSuccess();
-            }
         }
-
-        // ==============================
-        // 오답
-        // ==============================
-
         else
         {
-            if (wrongSound != null)
+            if (wrongSound != null &&
+                GameRoot.Instance != null &&
+                GameRoot.Instance.Audio != null)
             {
-                if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
-                {
-                    GameRoot.Instance.Audio.PlaySfx(wrongSound);
-                }
+                GameRoot.Instance.Audio.PlaySfx(wrongSound);
             }
 
             Debug.Log(
-                "[3-9] " +
-                (inputIndex + 1) +
-                "번째 입력 실패" +
-                " / 클릭 = " +
-                (slotIndex + 1) +
-                " / 정답 = " +
-                (correctIndex + 1)
-            );
+                "[3-9] " + (inputIndex + 1) +
+                "번째 입력 실패 / 클릭 = " + (slotIndex + 1) +
+                " / 정답 = " + (correctIndex + 1));
 
             if (minigame != null)
-            {
                 minigame.ReportPatternFail();
-            }
         }
 
-
-        // 다음 입력으로 이동
         inputIndex++;
 
-
-        // 6개 입력 완료
         if (inputIndex >= answerPattern.Count)
         {
             Debug.Log("[3-9] 6개 입력 완료");
-
             SetAllOnBoxes(false);
-
             canInput = false;
         }
     }
-
 
     /// <summary>
     /// 모든 onBox 켜기 / 끄기
@@ -463,5 +443,27 @@ public class Manager3_9 : MonoBehaviour
                     .SetActive(active);
             }
         }
+    }
+
+    private IEnumerator AutoInputRoutine()
+    {
+        Debug.Log("[3-9] 데모 자동 입력 시작");
+
+        while (canInput && inputIndex < answerPattern.Count)
+        {
+            int correctIndex = answerPattern[inputIndex];
+
+            // 정답 패턴을 자동 입력
+            HandlePatternInput(correctIndex);
+
+            if (canInput)
+            {
+                yield return new WaitForSeconds(
+                    Mathf.Max(0.05f, autoInputInterval)
+                );
+            }
+        }
+
+        Debug.Log("[3-9] 데모 자동 입력 완료");
     }
 }

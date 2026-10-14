@@ -25,18 +25,25 @@ public class Recorder_3_6 : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     // 버튼 EventTrigger에서 직접 연결할 수 있게 public으로 둠
     public void StartRecord()
     {
+        if (minigame.IsDemoMode)
+            return;
+
         if (minigame != null)
             minigame.StartRecording();
     }
 
     public void StopRecord()
     {
+        if (minigame.IsDemoMode)
+            return;
+
         if (minigame != null)
             minigame.StopRecording();
     }
 
     private void OnDisable()
     {
-        StopRecord();
+        if (minigame != null && !minigame.IsDemoMode)
+            minigame.StopRecording();
     }
 }

@@ -56,12 +56,18 @@ public class HandController : MonoBehaviour
     // 현재 실행 중인 가로 이동 Tween
     private Tween horizontalTween;
 
-    // 데모 모드 여부
+    // 데모 모드
+    [Header("데모 자동 동작")]
+    [SerializeField] private float demoSuccessX = -7f;
+    [SerializeField] private float demoPositionTolerance = 0.05f;
+
     private bool isDemoMode = false;
+    private bool hasTriggeredDemo = false;
 
     public void SetDemoMode(bool isDemo)
     {
         isDemoMode = isDemo;
+        hasTriggeredDemo = false;
 
         Debug.Log("[Hand] 데모 모드: " + isDemoMode);
     }
@@ -90,6 +96,27 @@ public class HandController : MonoBehaviour
 
     private void Update()
     {
+        // 데모 중 설정한 X좌표에 도착했는지 확인
+        if (isDemoMode &&
+            !hasTriggeredDemo &&
+            !isActionStarted &&
+            hand.activeInHierarchy)
+        {
+            float currentX = hand.transform.position.x;
+
+            if (Mathf.Abs(currentX - demoSuccessX)
+                <= demoPositionTolerance)
+            {
+                hasTriggeredDemo = true;
+
+                Debug.Log(
+                    "[Hand] 데모 성공 좌표 도착: " + currentX
+                );
+
+                StartGrabAction();
+            }
+        }
+
         // Bag을 잡은 상태라면
         // Grab의 자식 Target 위치를 계속 따라간다.
         if (hasBag &&
@@ -162,6 +189,15 @@ public class HandController : MonoBehaviour
             // 안전장치
             if (isActionStarted)
             {
+                return;
+            }
+
+            if (isDemoMode)
+            {
+                // 데모에서 성공 좌표에 도착하지 못했다면
+                // 기존 이동 종료 시 자동 동작을 실행하지 않는다.
+                Debug.Log("[Hand] 이동 종료. 데모 좌표 확인: "
+                          + hand.transform.position.x);
                 return;
             }
 
@@ -353,12 +389,6 @@ public class HandController : MonoBehaviour
             "[Hand] Bag 충돌 시작 : " +
             bag.name
         );
-
-        if (isDemoMode && !isActionStarted)
-        {
-            Debug.Log("[Hand] 데모 자동 잡기 실행");
-            StartGrabAction();
-        }
     }
 
 
@@ -371,7 +401,6 @@ public class HandController : MonoBehaviour
         {
             return;
         }
-
 
         currentBag = null;
 

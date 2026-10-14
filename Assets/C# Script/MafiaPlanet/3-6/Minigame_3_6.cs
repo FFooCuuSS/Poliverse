@@ -1,11 +1,17 @@
 using UnityEngine;
 
-public class Minigame_3_6 : MiniGameBase
+public class Minigame_3_6 : MiniGameBase, IPracticeDemoInput
 {
     [Header("효과음")]
     [SerializeField] private AudioClip clickSound;
     protected override float TimerDuration => 10f;
-    protected override string MinigameExplain => "빨간불 타이밍에 녹음하세요!";
+    protected override string MinigameTitle => "도청기 설치";
+
+    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "장애물을 피해 좌우로 움직이세요."
+    };
 
     // 이 미니게임은 RhythmManager의 입력 타이밍 판정을 쓰지 않는다.
     // CSV의 Input 노드 순간에 버튼이 눌려 있는지만 직접 검사한다.
@@ -21,6 +27,20 @@ public class Minigame_3_6 : MiniGameBase
     private bool isRecording;
     private bool ended;
 
+    private bool isDemoMode;
+
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+
+        // 데모에서는 플레이어가 녹음 중인 상태를 조작하지 못함
+        isRecording = false;
+
+        Debug.Log("[3-6] 데모 모드: " + isDemoMode);
+    }
+
     public override void StartGame()
     {
         base.StartGame();
@@ -35,7 +55,7 @@ public class Minigame_3_6 : MiniGameBase
     // 버튼 PointerDown에서 호출
     public void StartRecording()
     {
-        if (ended) return;
+        if (isDemoMode || ended) return;
         if (clickSound != null)
         {
             if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
@@ -51,6 +71,7 @@ public class Minigame_3_6 : MiniGameBase
     // 버튼 PointerUp에서 호출
     public void StopRecording()
     {
+        if (isDemoMode) return;
         isRecording = false;
         Debug.Log("[3-6] Recording Stop");
     }
@@ -94,6 +115,13 @@ public class Minigame_3_6 : MiniGameBase
 
     private void JudgeRecordingNode()
     {
+        if (isDemoMode)
+        {
+            ReportManualSuccess();
+            Debug.Log("[3-6] 데모 자동 성공 판정");
+            return;
+        }
+
         if (isRecording)
         {
             ReportManualSuccess();
