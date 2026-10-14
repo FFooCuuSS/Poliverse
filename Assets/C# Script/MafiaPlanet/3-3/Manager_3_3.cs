@@ -35,6 +35,14 @@ public class Manager_3_3 : MonoBehaviour
     private float roundStartTime;
     private Vector3 keyStartPos;
 
+    private bool isDemoMode = false;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log("[3-3 Manager] 데모 모드: " + isDemoMode);
+    }
+
     private void Awake()
     {
         if (key != null)
@@ -135,6 +143,11 @@ public class Manager_3_3 : MonoBehaviour
 
         inputClosed = false;
         roundChanging = false;
+
+        if (isDemoMode)
+        {
+            StartCoroutine(DemoAutoLockFlow());
+        }
     }
 
     private void FadeOut(GameObject go)
@@ -265,5 +278,41 @@ public class Manager_3_3 : MonoBehaviour
         keyRb.velocity = Vector2.zero;
         keyRb.angularVelocity = 0f;
         keyRb.Sleep();
+    }
+
+    private IEnumerator DemoAutoLockFlow()
+    {
+        if (holes == null || holes.Count == 0)
+            yield break;
+
+        // 기존 targetTimes에 맞춰 각 구멍을 자동으로 잠근다.
+        for (int i = 0; i < holes.Count; i++)
+        {
+            float targetTime =
+                (targetTimes != null && i < targetTimes.Length)
+                    ? targetTimes[i]
+                    : i + 1f;
+
+            while (GetRoundTime() < targetTime)
+                yield return null;
+
+            if (holes[i] != null)
+            {
+                holes[i].Lock();
+
+                Debug.Log(
+                    $"[3-3 Demo] Hole {i} 자동 잠금, 시간: {targetTime}"
+                );
+            }
+        }
+
+        inputClosed = true;
+        minigame?.ForceCloseInput();
+
+        // 플레이어가 모든 구멍을 클릭했을 때와 같은 후속 동작
+        if (!autoInsertRunning)
+        {
+            StartCoroutine(AutoInsertKey());
+        }
     }
 }

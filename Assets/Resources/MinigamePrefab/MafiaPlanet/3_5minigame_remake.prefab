@@ -116,6 +116,7 @@ MonoBehaviour:
   printScoreDebugOnEnd: 1
   scope: {fileID: 1883256934224837684}
   scopeMover: {fileID: 5005005604567533292}
+  scopeShooter: {fileID: 8721182206319805103}
 --- !u!1 &1009106037854274116
 GameObject:
   m_ObjectHideFlags: 0
@@ -408,6 +409,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hitSound: {fileID: 8300000, guid: 177c60eefc144104fa8c75d075f73859, type: 3}
   missSound: {fileID: 8300000, guid: 6c9a1ebbe535e6c45b00544d2b10411a, type: 3}
+  minigame: {fileID: 7609176045935186368}
 --- !u!1 &1981941446290920324
 GameObject:
   m_ObjectHideFlags: 0
