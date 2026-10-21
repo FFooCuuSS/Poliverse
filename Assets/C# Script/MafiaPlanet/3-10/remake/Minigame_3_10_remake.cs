@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Minigame_3_10_remake : MiniGameBase
+public class Minigame_3_10_remake : MiniGameBase, IPracticeDemoInput
 {
 
     [Header("효과음")]
@@ -22,11 +22,70 @@ public class Minigame_3_10_remake : MiniGameBase
     private int index2;
     private int count;
 
+    protected override string MinigameTitle => "안전 운전";
+
+    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "장애물을 피해 좌우로 움직이세요."
+    };
+
+    [Header("자동 데모")]
+    [SerializeField] private CarMoveRemake car;
+
+    private bool isDemoMode;
+
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+
+        if (car == null)
+            car = FindObjectOfType<CarMoveRemake>();
+
+        if (car != null)
+        {
+            car.SetWarningSigns(warningSign1, warningSign2);
+            car.SetDemoMode(isDemoMode);
+        }
+
+        Debug.Log("[3-10] 데모 모드: " + isDemoMode);
+    }
+
     void Start()
     {
         count = 0;
+
+        if (car == null)
+            car = FindObjectOfType<CarMoveRemake>();
+
+        if (car != null)
+        {
+            car.SetWarningSigns(warningSign1, warningSign2);
+            car.SetDemoMode(isDemoMode);
+        }
+        else
+        {
+            Debug.LogError("[3-10] CarMoveRemake를 찾을 수 없습니다.");
+        }
+
+        if (spawnPoints == null || spawnPoints.Length < 3)
+        {
+            Debug.LogError("[3-10] Spawn Points를 3개 이상 연결해야 합니다.");
+            return;
+        }
+
+        if (warningSign1 == null || warningSign2 == null || enemy == null)
+        {
+            Debug.LogError("[3-10] 경고 표지판 또는 Enemy가 연결되지 않았습니다.");
+            return;
+        }
+
+        warningSign1.SetActive(false);
+        warningSign2.SetActive(false);
+
         base.StartGame();
-        // 시작할 때 랜덤 위치 먼저 세팅
         SetRandomPositions();
     }
 
@@ -93,6 +152,7 @@ public class Minigame_3_10_remake : MiniGameBase
         warningSign2.SetActive(true);
 
         // 2초 후 숨기기 + 재배치
+        CancelInvoke(nameof(Hide));
         Invoke(nameof(Hide), 2f);
     }
 

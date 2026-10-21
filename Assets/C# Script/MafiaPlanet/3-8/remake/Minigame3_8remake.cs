@@ -51,6 +51,35 @@ public class Minigame3_8remake : MiniGameBase, IPracticeDemoInput
         }
     }
 
+    public void PerformDemoClick()
+    {
+        if (finished || !isDemoMode)
+            return;
+
+        Debug.Log("[3-8 Demo] 범인이 뒤돌아봄 - 자동 클릭!");
+
+        // 기존 게임 입력 처리
+        SubmitInput();
+
+        // 덤불 정지
+        BushSpawner3_8 spawner =
+            FindObjectOfType<BushSpawner3_8>();
+
+        if (spawner != null)
+        {
+            spawner.SimulateDemoClick();
+        }
+
+        // 플레이어 숨기기
+        PlayerControl3_8 player =
+            FindObjectOfType<PlayerControl3_8>();
+
+        if (player != null)
+        {
+            player.PlayWatchRoutine();
+        }
+    }
+
     private void Start()
     {
         IsInputLocked = false;

@@ -14,12 +14,23 @@ public class ContainerTrigger_3_13 : MiniGameBase
     private readonly List<MovingObject_3_13> overlapObjects =
         new List<MovingObject_3_13>();
 
+    private bool isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+    }
+
     private void Update()
     {
-        if (!Input.GetMouseButtonDown(0))
+        if (isDemoMode)
         {
+            CheckDemoInput();
             return;
         }
+
+        if (!Input.GetMouseButtonDown(0))
+            return;
 
         CheckInput();
     }
@@ -167,5 +178,32 @@ public class ContainerTrigger_3_13 : MiniGameBase
     public void ClearObject()
     {
         overlapObjects.Clear();
+    }
+
+    private void CheckDemoInput()
+    {
+        for (int i = 0; i < overlapObjects.Count; i++)
+        {
+            MovingObject_3_13 obj = overlapObjects[i];
+
+            if (obj == null || obj.IsProcessed)
+                continue;
+
+            // 컨테이너 종류가 다르면 처리하지 않는다.
+            if (obj.ObjectType != containerType)
+                continue;
+
+            if (caseManager == null)
+                return;
+
+            base.ReportManualSuccess();
+
+            caseManager.ShowSuccessObject(obj.ObjectType);
+
+            overlapObjects.RemoveAt(i);
+            obj.ProcessSuccess();
+
+            return;
+        }
     }
 }

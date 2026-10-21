@@ -11,6 +11,14 @@ public class secondGameCommand : MonoBehaviour
     private Minigame_3_15 minigame_3_15;
     private Mirror_3_15 mirror_3_15;
 
+    private bool isDemoMode = false;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+    }
+
+
     [System.Serializable]
     public struct WandPatternData
     {

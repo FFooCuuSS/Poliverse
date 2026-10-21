@@ -4,7 +4,7 @@ using DG.Tweening;
 
 // 3-12 잠입 계획 세우기
 // CSV: Warn(적 예고) → Turn(적 회전) → Swipe(이동) → Swipe(이동) 4박 루프
-public class Minigame_3_12 : MiniGameBase
+public class Minigame_3_12 : MiniGameBase, IPracticeDemoInput
 {
     public enum Dir { Up, Right, Down, Left }
 
@@ -30,7 +30,7 @@ public class Minigame_3_12 : MiniGameBase
 
     // ───────── 기본 설정 ─────────
     protected override float TimerDuration => 25f;
-    protected override string MinigameTitle => "잠입 계획 세우기";
+    protected override string MinigameTitle => "침입 계획 세우기";
     protected override string MinigameExplain => "경비원이 고개를 돌린 뒤, 박자에 맞춰 다음 칸으로 이동하세요!";
     protected override string[] AdditionalMinigameExplains => new[]
     {
@@ -130,6 +130,21 @@ public class Minigame_3_12 : MiniGameBase
     private Vector2Int Current => path[pathIndex];
     private bool HasForward => pathIndex + 1 < path.Length;
     private Vector2Int Forward => path[pathIndex + 1];
+    
+    // 데모
+    private bool isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+
+        // 데모 중에는 플레이어 입력을 초기화
+        pressing = false;
+        swipeFired = false;
+        pendingDir = null;
+
+        Debug.Log("[3-12] 데모 모드: " + isDemoMode);
+    }
 
     // ───────── Lifecycle ─────────
     protected override void Awake()
@@ -349,21 +364,41 @@ public class Minigame_3_12 : MiniGameBase
         Success();
     }
 
-    // 연습 예시보기: 안전하면 앞으로 한 칸 (점수 없음)
-    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    // 데모 모드: 안전한 경우에만 다음 경로 칸으로 이동
+    public override void ExecutePracticeAction(
+        int actionIndex,
+        string actionType)
     {
-        if (escaped || actionType != "Swipe" || !HasForward) return;
-        if (IsInCone(Forward)) return;
+        if (!isDemoMode)
+            return;
+
+        if (!playing || escaped)
+            return;
+
+        if (actionType != "Swipe" || !HasForward)
+            return;
+
+        // 다음 칸이 경비원의 시야에 있으면 기다림
+        if (IsInCone(Forward))
+            return;
 
         pathIndex++;
         MovePlayerFx();
-        if (pathIndex == path.Length - 1) escaped = true;
+
+        // 출구에 도착하면 데모 종료
+        if (pathIndex == path.Length - 1)
+        {
+            escaped = true;
+
+            foreach (var e in enemies)
+                HideGhost(e);
+        }
     }
 
     // ───────── Input ─────────
     private void Update()
     {
-        if (!playing || escaped) return;
+        if (!playing || escaped || isDemoMode) return;
 
         if (Input.GetMouseButtonDown(0))
         {

@@ -29,6 +29,13 @@ public class manager_3_15 : MonoBehaviour
     private secondGameCommand sGC;
     private weaponSpawner_3_15[] spawners = new weaponSpawner_3_15[0];
 
+    private bool isDemoMode = false;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+    }
+
     private void Awake()
     {
         darkImg = DarkPanel != null ? DarkPanel.GetComponent<Image>() : null;
@@ -48,6 +55,26 @@ public class manager_3_15 : MonoBehaviour
 
         // StartGame 전에는 스폰 금지
         SetSpawnersBanned(true);
+    }
+
+    private void Update()
+    {
+        if (!isDemoMode || state != State.MG1)
+            return;
+
+        weapon_3_15[] weapons = FindObjectsOfType<weapon_3_15>();
+
+        foreach (weapon_3_15 weapon in weapons)
+        {
+            if (weapon == null || !weapon.gameObject.activeInHierarchy)
+                continue;
+
+            if (!weapon.IsMagicWand)
+                continue;
+
+            DemoClickMagicWand(weapon);
+            break;
+        }
     }
 
     // Minigame_3_15.StartGame()에서만 호출
@@ -77,6 +104,18 @@ public class manager_3_15 : MonoBehaviour
         {
             minigame?.ReportMiss("페이즈1 일반 무기 클릭");
         }
+    }
+
+    public void DemoClickMagicWand(weapon_3_15 weapon)
+    {
+        if (!isDemoMode || state != State.MG1 || weapon == null)
+            return;
+
+        if (!weapon.IsMagicWand)
+            return;
+
+        OnWeaponClicked(true);
+        weapon.gameObject.SetActive(false);
     }
 
     private void SetSpawnersBanned(bool ban)
