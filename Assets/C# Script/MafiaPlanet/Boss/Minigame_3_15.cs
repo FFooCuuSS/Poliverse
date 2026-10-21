@@ -1,12 +1,18 @@
 using UnityEngine;
 
-public class Minigame_3_15 : MiniGameBase
+public class Minigame_3_15 : MiniGameBase, IPracticeDemoInput
 {
     [SerializeField] private manager_3_15 manager;
     [SerializeField] private bool logJudgement = true;
 
     protected override float TimerDuration => 70f;
-    protected override string MinigameExplain => "무기를 파괴하세요!";
+    protected override string MinigameTitle => "마법중년 마피아";
+
+    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "장애물을 피해 좌우로 움직이세요."
+    };
 
     // 타이밍 판정이 아니라 맞음/틀림 판정 → Manual Score
     protected override bool UseRhythmJudgementScore => false;
@@ -14,6 +20,16 @@ public class Minigame_3_15 : MiniGameBase
 
     private int hitCount;
     private int missCount;
+
+    private bool isDemoMode = false;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+
+        if (manager != null)
+            manager.SetDemoMode(isDemoMode);
+    }
 
     protected override void Awake()
     {
@@ -28,8 +44,15 @@ public class Minigame_3_15 : MiniGameBase
         hitCount = 0;
         missCount = 0;
 
-        if (manager != null) manager.BeginGame();
-        else Debug.LogError("[Minigame_3_15] manager_3_15 참조 없음");
+        if (manager != null)
+        {
+            manager.SetDemoMode(isDemoMode);
+            manager.BeginGame();
+        }
+        else
+        {
+            Debug.LogError("[Minigame_3_15] manager_3_15 참조 없음");
+        }
     }
 
     public void ReportHit(string reason = "")

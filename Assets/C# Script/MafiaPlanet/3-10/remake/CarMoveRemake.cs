@@ -30,6 +30,23 @@ public class CarMoveRemake : MonoBehaviour
     Rigidbody2D rb;
     Collider2D col;
 
+    private bool isDemoMode;
+    private GameObject warningSign1;
+    private GameObject warningSign2;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        isSwiping = false;
+    }
+
+    public void SetWarningSigns(GameObject sign1, GameObject sign2)
+    {
+        warningSign1 = sign1;
+        warningSign2 = sign2;
+    }
+
+
     void Start()
     {
         targetPosition = lanes[currentLane];
@@ -42,42 +59,59 @@ public class CarMoveRemake : MonoBehaviour
     {
         if (isFinished)
         {
-            FreezeSelf();   // 자동차 정지
-            GameFinished();  // 게임 종료 처리
+            FreezeSelf();
+            GameFinished();
             return;
         }
 
-        // === 스와이프 입력 처리 ===
-        if (Input.GetMouseButtonDown(0))
+        if (isDemoMode)
         {
-            swipeStartPos = Input.mousePosition;
-            isSwiping = true;
+            HandleDemoMovement();
         }
-
-        if (Input.GetMouseButton(0) && isSwiping)
+        else
         {
-            Vector2 swipeCurrentPos = Input.mousePosition;
-            float swipeDeltaY = swipeCurrentPos.y - swipeStartPos.y;
-
-            if (Mathf.Abs(swipeDeltaY) > 50f)
+            // === 스와이프 입력 처리 ===
+            if (Input.GetMouseButtonDown(0))
             {
-                if (swipeSound != null)
-                {
-                    if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
-                    {
-                        GameRoot.Instance.Audio.PlaySfx(swipeSound);
-                    }
-                }
-
-                if (swipeDeltaY > 0) MoveUp();
-                else MoveDown();
-                isSwiping = false;
+                swipeStartPos = Input.mousePosition;
+                isSwiping = true;
             }
+
+            if (Input.GetMouseButton(0) && isSwiping)
+            {
+                Vector2 swipeCurrentPos = Input.mousePosition;
+                float swipeDeltaY = swipeCurrentPos.y - swipeStartPos.y;
+
+                if (Mathf.Abs(swipeDeltaY) > 50f)
+                {
+                    if (swipeSound != null)
+                    {
+                        if (GameRoot.Instance != null &&
+                            GameRoot.Instance.Audio != null)
+                        {
+                            GameRoot.Instance.Audio.PlaySfx(swipeSound);
+                        }
+                    }
+
+                    if (swipeDeltaY > 0)
+                        MoveUp();
+                    else
+                        MoveDown();
+
+                    isSwiping = false;
+                }
+            }
+
+            if (Input.GetMouseButtonUp(0))
+                isSwiping = false;
         }
 
-        if (Input.GetMouseButtonUp(0)) isSwiping = false;
-
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
+        // ★ 데모와 일반 모드 모두 자동차가 이동하도록 처리
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            targetPosition,
+            moveSpeed * Time.deltaTime
+        );
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -141,6 +175,39 @@ public class CarMoveRemake : MonoBehaviour
         {
             currentLane--;
             targetPosition = lanes[currentLane];
+        }
+    }
+
+    private void HandleDemoMovement()
+    {
+        if (warningSign1 == null || warningSign2 == null)
+            return;
+
+        // 경고 표지판 두 개가 모두 켜졌을 때만 판단
+        if (!warningSign1.activeSelf || !warningSign2.activeSelf)
+            return;
+
+        // 경고 표지판이 있는 도로의 Y 좌표
+        float dangerY1 = warningSign1.transform.position.y;
+        float dangerY2 = warningSign2.transform.position.y;
+
+        // 세 도로 중 위험 표시가 없는 도로 찾기
+        for (int i = 0; i < lanes.Length; i++)
+        {
+            float laneY = lanes[i].y;
+
+            bool isDangerLane =
+                Mathf.Abs(laneY - dangerY1) < 0.5f ||
+                Mathf.Abs(laneY - dangerY2) < 0.5f;
+
+            if (!isDangerLane)
+            {
+                currentLane = i;
+                targetPosition = lanes[i];
+
+                Debug.Log("[3-10 데모] 안전 도로 이동: " + i);
+                return;
+            }
         }
     }
 }
