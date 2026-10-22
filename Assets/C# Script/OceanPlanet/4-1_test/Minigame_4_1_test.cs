@@ -11,6 +11,10 @@ public class Minigame_4_1_test : MiniGameBase
     [SerializeField]
     private ShowEffact doorEffect;
 
+    [Header("Scope")]
+    [SerializeField]
+    private ScopeMoving scopeMoving;
+
     [Header("Test Input")]
     [SerializeField]
     private KeyCode playerInputKey = KeyCode.Space;
@@ -36,12 +40,13 @@ public class Minigame_4_1_test : MiniGameBase
         if (action == "Show")
 
         {
+            scopeMoving.StopMoving();
             doorEffect.BlinkEffect();
         }
 
         if (action == "Input")
         {
-            
+            scopeMoving.StartMoving();
             // 입력 가능 상태 만들기
         }
     }
@@ -57,6 +62,13 @@ public class Minigame_4_1_test : MiniGameBase
         if (rhythmManager != null)
         {
             rhythmManager.ReceivePlayerInput();
+        }
+    }
+    private void OnDisable()
+    {
+        if (scopeMoving != null)
+        {
+            scopeMoving.StopMoving();
         }
     }
 }

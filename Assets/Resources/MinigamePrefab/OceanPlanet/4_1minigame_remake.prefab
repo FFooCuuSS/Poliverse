@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 715092278246181461}
   - component: {fileID: 1621990143379408572}
+  - component: {fileID: 7109224712052789205}
   m_Layer: 0
   m_Name: Scope
   m_TagString: Untagged
@@ -72,7 +73,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 7482667652216324306, guid: 2be18e5bd63c02445bb694b81f0643ca, type: 3}
   m_Color: {r: 0.49056602, g: 0.035481147, b: 0.035481147, a: 1}
   m_FlipX: 0
@@ -84,6 +85,20 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &7109224712052789205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 369070422479657535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1eef4b11be6fb149b036dbdadde5e89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveDistance: 1
+  moveInterval: 0.5
 --- !u!1 &2083059906496996206
 GameObject:
   m_ObjectHideFlags: 0
@@ -157,7 +172,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 7482667652216324306, guid: 2be18e5bd63c02445bb694b81f0643ca, type: 3}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_FlipX: 0
@@ -254,7 +269,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 7482667652216324306, guid: 2be18e5bd63c02445bb694b81f0643ca, type: 3}
   m_Color: {r: 0.084905505, g: 1, b: 0.9001064, a: 1}
   m_FlipX: 0
@@ -392,12 +407,12 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 715092278246181461}
   - {fileID: 2845208344226143866}
   - {fileID: 8903577032713509415}
   - {fileID: 4926265907592839149}
   - {fileID: 7245287052815759876}
   - {fileID: 8613044898837639503}
-  - {fileID: 715092278246181461}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2489980337598317205
@@ -418,6 +433,8 @@ MonoBehaviour:
   printScoreDebugOnEnd: 1
   playerEffect: {fileID: 2996211528121699766}
   doorEffect: {fileID: 48055867132764485}
+  scopeMoving: {fileID: 7109224712052789205}
+  playerInputKey: 32
 --- !u!1 &6060553793791895318
 GameObject:
   m_ObjectHideFlags: 0
