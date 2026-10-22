@@ -48,30 +48,45 @@ public class EnemyWatch3_8 : MonoBehaviour
 
     private IEnumerator ChangeRoutine()
     {
+        // 범인이 뒤돌아보기 전까지 대기
         yield return new WaitForSeconds(changeTime);
 
         if (sr != null && lookSprite != null)
         {
+            // 범인이 뒤돌아봄
             sr.sprite = lookSprite;
 
-            // 안전한 널 체크 추가
-            if (clickSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            if (clickSound != null &&
+                GameRoot.Instance != null &&
+                GameRoot.Instance.Audio != null)
             {
                 GameRoot.Instance.Audio.PlaySfx(clickSound);
             }
+
+            // 실제로 뒤돌아보는 순간 데모 클릭
+            Minigame3_8remake game =
+                FindObjectOfType<Minigame3_8remake>();
+
+            if (game != null && game.IsDemoMode)
+            {
+                game.PerformDemoClick();
+            }
         }
 
+        // 뒤돌아보는 시간 동안 유지
         yield return new WaitForSeconds(lookDuration);
 
         if (sr != null && normalSprite != null)
         {
-            // 안전한 널 체크 추가
-            if (walkSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            // 다시 앞을 봄
+            sr.sprite = normalSprite;
+
+            if (walkSound != null &&
+                GameRoot.Instance != null &&
+                GameRoot.Instance.Audio != null)
             {
                 GameRoot.Instance.Audio.PlaySfx(walkSound);
             }
-
-            sr.sprite = normalSprite;
         }
 
         changeCoroutine = null;

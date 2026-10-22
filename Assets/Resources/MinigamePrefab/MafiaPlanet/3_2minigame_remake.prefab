@@ -60,6 +60,8 @@ MonoBehaviour:
   downY: 4.4
   upY: 9.5
   verticalMoveTime: 1.2
+  demoSuccessX: -6.5
+  demoPositionTolerance: 0.05
 --- !u!1 &5188424161739787227
 GameObject:
   m_ObjectHideFlags: 0

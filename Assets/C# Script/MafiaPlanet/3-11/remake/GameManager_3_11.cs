@@ -27,12 +27,21 @@ public class GameManager_3_11 : MiniGameBase
 
     // 게임이 진행 중인지 확인
     private bool isPlaying = false;
-
+    
     // 외부에서 현재 점수를 확인할 때 사용
     public int CurrentScore => currentScore;
 
     // 외부에서 게임 진행 상태를 확인할 때 사용
     public bool IsPlaying => isPlaying;
+
+    //데모
+    private bool isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log("[3-11 GameManager] 데모 모드: " + isDemoMode);
+    }
 
     private void Start()
     {
@@ -47,6 +56,30 @@ public class GameManager_3_11 : MiniGameBase
     {
         if (!isPlaying)
         {
+            return;
+        }
+
+        if (isDemoMode)
+        {
+            if (sliceZone == null)
+                return;
+
+            FlyingObject_3_11 target = sliceZone.GetClosestObject();
+
+            // 물체가 없으면 아무것도 하지 않음
+            if (target == null)
+                return;
+
+            // 폭탄이면 자동 터치하지 않음
+            if (target.CompareTag("Bomb"))
+                return;
+
+            // 과일만 자동 처리
+            if (target.CompareTag("Target"))
+            {
+                CheckSliceInput();
+            }
+
             return;
         }
 

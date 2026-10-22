@@ -1,10 +1,10 @@
 using UnityEngine;
 
-public class Minigame_3_3_Remake : MiniGameBase
+public class Minigame_3_3_Remake : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 20f;
 
-    protected override string MinigameTitle => "열쇠를 맞춰라";
+    protected override string MinigameTitle => "문따기";
 
     protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
     protected override string[] AdditionalMinigameExplains => new string[]
@@ -18,6 +18,27 @@ public class Minigame_3_3_Remake : MiniGameBase
     private bool ended;
     private bool inputOpen;
 
+    private bool isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+
+        if (manager != null)
+            manager.SetDemoMode(isDemo);
+
+        // 드래그로 열쇠를 움직이는 플레이어 입력도 차단
+        BlockingDirectionalDrag[] dragObjects =
+            FindObjectsOfType<BlockingDirectionalDrag>();
+
+        foreach (var drag in dragObjects)
+        {
+            if (drag != null)
+                drag.SetDemoMode(isDemo);
+        }
+
+        Debug.Log("[3-3] 데모 모드: " + isDemoMode);
+    }
 
     public override void StartGame()
     {
@@ -56,6 +77,7 @@ public class Minigame_3_3_Remake : MiniGameBase
     {
         if (ended) return;
         if (!inputOpen) return;
+        if (isDemoMode) return;
 
         if (Input.GetMouseButtonDown(0))
         {
