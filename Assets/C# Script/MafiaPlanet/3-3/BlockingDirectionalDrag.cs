@@ -13,6 +13,13 @@ public class BlockingDirectionalDrag : DirectionalDrag
     private Vector3 lastValidPosition;
     private bool isBlocked = false;
 
+    private bool isDemoMode = false;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+    }
+
     private void Start()
     {
         minigame_3_3 = stage_3_3.GetComponent<Minigame_3_3>();
@@ -20,6 +27,8 @@ public class BlockingDirectionalDrag : DirectionalDrag
 
     protected override void OnMouseDown()
     {
+        if (isDemoMode) return;
+
         base.OnMouseDown();
         lastValidPosition = transform.position;
         isBlocked = false;
@@ -27,6 +36,8 @@ public class BlockingDirectionalDrag : DirectionalDrag
 
     protected override void Update()
     {
+        if (isDemoMode) return;
+
         if (!isDragging || banDragging || isBlocked) return;
 
         Vector3 mouseWorldPos = GetMouseWorldPos();

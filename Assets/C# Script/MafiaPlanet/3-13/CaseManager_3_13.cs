@@ -4,6 +4,36 @@ using UnityEngine;
 
 public class CaseManager_3_13 : MonoBehaviour
 {
+    private bool isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+
+        ApplyDemoModeToContainers();
+    }
+
+    private void ApplyDemoModeToContainers()
+    {
+        if (case1Container != null)
+        {
+            ContainerTrigger_3_13[] triggers =
+                case1Container.GetComponentsInChildren<ContainerTrigger_3_13>(true);
+
+            foreach (ContainerTrigger_3_13 trigger in triggers)
+                trigger.SetDemoMode(isDemoMode);
+        }
+
+        if (case2Container != null)
+        {
+            ContainerTrigger_3_13[] triggers =
+                case2Container.GetComponentsInChildren<ContainerTrigger_3_13>(true);
+
+            foreach (ContainerTrigger_3_13 trigger in triggers)
+                trigger.SetDemoMode(isDemoMode);
+        }
+    }
+
     // 물체 종류를 구분하기 위한 열거형
     public enum ObjectType
     {
@@ -628,6 +658,8 @@ public class CaseManager_3_13 : MonoBehaviour
         }
 
         Debug.Log("현재 Case : " + currentCase);
+
+        ApplyDemoModeToContainers();
     }
 
     /// <summary>

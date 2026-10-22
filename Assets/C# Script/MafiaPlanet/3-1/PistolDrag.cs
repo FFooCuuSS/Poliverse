@@ -13,12 +13,21 @@ public class PistolDrag : DirectionalDrag
     [Header("상승 시작 조건")]
     public float autoRiseThresholdY = 0.5f; // y값 기준
 
+    private void Update()
+    {
+        if (Minigame_3_1.Instance != null &&
+            Minigame_3_1.Instance.IsDemoMode)
+        {
+            canPull = false;
+        }
+    }
+
     protected override Vector3 GetConstrainedPosition(Vector3 current, Vector3 target)
     {
-        // 데모 모드일 때는 드래그 제약을 풀고 자유롭게 위치 이동 허용
+        // 데모 중 플레이어의 드래그로 총이 움직이지 않도록 함
         if (Minigame_3_1.Instance != null && Minigame_3_1.Instance.IsDemoMode)
         {
-            return target;
+            return current;
         }
 
         if (!canPull)

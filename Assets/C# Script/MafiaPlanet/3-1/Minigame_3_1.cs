@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class Minigame_3_1 : MiniGameBase, IPracticeDemoInput
 {
-    protected override float TimerDuration => 3f;
+    protected override float TimerDuration => 20f;
 
     protected override string MinigameTitle => "젤리 블록 철거!";
     protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
@@ -70,55 +70,59 @@ public class Minigame_3_1 : MiniGameBase, IPracticeDemoInput
     }
 
     // --- IPracticeDemoInput 구현 ---
-    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    public void ExecutePracticeAction(int actionIndex, string actionType)
     {
-        Debug.Log($"[3-1 Demo] ExecutePracticeAction 호출됨! Index: {actionIndex}, Type: '{actionType}'");
-
-        if (string.IsNullOrEmpty(actionType))
+        if (!isDemoMode)
             return;
 
-        actionType = actionType.Trim();
+        if (pistolDrag == null)
+            pistolDrag = FindObjectOfType<PistolDrag>();
 
-        // 1단계: Swipe 또는 Input1 (당기기)
-        if (string.Equals(actionType, "Swipe", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(actionType, "Input1", StringComparison.OrdinalIgnoreCase))
+        if (pistolUp == null)
+            pistolUp = FindObjectOfType<PistolUp>();
+
+        if (pistolDrag == null || pistolUp == null)
         {
-            if (pistolDrag != null)
-            {
-                pistolDrag.enabled = true;
-                pistolDrag.canPull = true;
-            }
-
-            if (pistolTransform != null && pistolDrag != null)
-            {
-                float angleRad = (pistolDrag.angleInDegrees + 90f) * Mathf.Deg2Rad;
-                Vector3 pullDir = new Vector3(Mathf.Cos(angleRad), Mathf.Sin(angleRad), 0f).normalized;
-                Vector3 targetPos = pistolTransform.position + pullDir * demoPullDistance;
-
-                pistolTransform.DOMove(targetPos, demoPullDuration).SetEase(Ease.OutQuad);
-                Debug.Log("[3-1 Demo] Swipe 연출 실행 완료");
-            }
-
-            // Miss 방지 및 퍼펙트 판정 연동을 위해 리듬 매니저에 입력 전달
-            OnPlayerInput(actionType);
+            Debug.LogWarning("[Minigame_3_1] PistolDrag 또는 PistolUp을 찾을 수 없습니다.");
+            return;
         }
-        // 2단계: Tap 또는 Input2 (올리기)
-        else if (string.Equals(actionType, "Tap", StringComparison.OrdinalIgnoreCase) ||
-                 string.Equals(actionType, "Input2", StringComparison.OrdinalIgnoreCase))
-        {
-            if (pistolUp != null)
-            {
-                pistolUp.goingUp = true;
-                Debug.Log("[3-1 Demo] Tap 연출 (goingUp = true) 실행 완료");
-            }
 
-            // Miss 방지 및 퍼펙트 판정 연동을 위해 리듬 매니저에 입력 전달
-            OnPlayerInput(actionType);
-        }
-        else
+        if (pistolTransform == null)
+            pistolTransform = pistolDrag.transform;
+
+        // 총을 당기는 동작
+        if (actionType == "Swipe" || actionType == "Input1")
         {
-            // 그 외 Show 등의 신호 처리
-            Debug.Log($"[3-1 Demo] 기타 액션 타입: {actionType}");
+            pistolDrag.canPull = false;
+
+            float angle = pistolDrag.angleInDegrees * Mathf.Deg2Rad;
+
+            Vector3 direction = new Vector3(
+                Mathf.Cos(angle),
+                Mathf.Sin(angle),
+                0f
+            );
+
+            Vector3 targetPos =
+                pistolTransform.position + direction * demoPullDistance;
+
+            pistolTransform.DOKill();
+
+            pistolTransform.DOMove(targetPos, demoPullDuration)
+                .SetEase(Ease.OutQuad)
+                .OnComplete(() =>
+                {
+                    if (isDemoMode && pistolUp != null)
+                    {
+                        pistolUp.goingUp = true;
+                    }
+                });
+        }
+
+        // 총을 올리는 입력도 데모에서는 자동으로 실행
+        else if (actionType == "Tap" || actionType == "Input2")
+        {
+            pistolUp.goingUp = true;
         }
     }
 }

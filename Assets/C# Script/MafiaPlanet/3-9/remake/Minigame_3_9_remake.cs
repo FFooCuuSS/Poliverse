@@ -1,19 +1,34 @@
 using UnityEngine;
 
-public class Minigame_3_9_remake : MiniGameBase
+public class Minigame_3_9_remake : MiniGameBase, IPracticeDemoInput
 {
     // ===== 미니게임 기본 정보 =====
 
     protected override float TimerDuration => 20f;
 
-    protected override string MinigameExplain =>
-        "빛난 순서를 기억해서 같은 순서로 클릭하세요.";
+    protected override string MinigameTitle => "암호 맞추기";
+
+    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "장애물을 피해 좌우로 움직이세요."
+    };
 
 
     // RhythmManager 판정 사용 안 함
     // ReportManualSuccess / Fail을 사용한다.
     protected override bool UseRhythmJudgementScore =>
         false;
+
+    private bool isDemoMode;
+
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log("[3-9] 데모 모드: " + isDemoMode);
+    }
 
 
     private void Start()
@@ -93,7 +108,7 @@ public class Minigame_3_9_remake : MiniGameBase
                 "[3-9] 최종 성공"
             );
 
-            Success();
+            //Success();
         }
         else
         {
@@ -101,7 +116,7 @@ public class Minigame_3_9_remake : MiniGameBase
                 "[3-9] 최종 실패"
             );
 
-            Fail();
+            //Fail();
         }
     }
 }
