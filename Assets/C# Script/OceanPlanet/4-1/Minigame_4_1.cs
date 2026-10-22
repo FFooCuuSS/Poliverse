@@ -1,5 +1,5 @@
 using UnityEngine;
-
+//CommitTest
 public class Minigame_4_1 : MiniGameBase
 {
     protected override float TimerDuration => 20f;
