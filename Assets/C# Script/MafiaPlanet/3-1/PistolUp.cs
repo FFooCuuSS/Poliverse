@@ -45,4 +45,11 @@ public class PistolUp : MonoBehaviour
     {
         Destroy(gameObject);
     }
+
+    public void ForceRise()
+    {
+        hasStarted = false;
+        goingUpInternal = true;
+        StartRise();
+    }
 }

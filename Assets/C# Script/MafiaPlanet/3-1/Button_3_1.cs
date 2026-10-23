@@ -26,6 +26,11 @@ public class Button_3_1 : MonoBehaviour
             line.startWidth = 1f;
             line.endWidth = 1f;
         }
+
+        // 만약 인스펙터에서 할당하지 않았다면 안전하게 자동 할당
+        if (startTarget == null) startTarget = transform;
+        if (endTarget == null && transform.childCount > 0) endTarget = transform.GetChild(0);
+
         if (startTarget != null && endTarget != null)
         {
             initialDirection = (endTarget.position - startTarget.position).normalized;
@@ -37,7 +42,7 @@ public class Button_3_1 : MonoBehaviour
     {
         if (startTarget == null || endTarget == null) return;
 
-        // 데모 모드일 때 플레이어 조작 차단 및 위치 고정
+        // 데모 모드일 때 플레이어 조작 차단 및 위치 고정 (애니메이션 중 아닐 때)
         if (Minigame_3_1.Instance != null && Minigame_3_1.Instance.IsDemoMode)
         {
             if (!isDemoAnimating)
@@ -80,36 +85,47 @@ public class Button_3_1 : MonoBehaviour
         }
     }
 
-    // 데모 모드에서 좌우 위치에 맞춰 당겨지는 애니메이션 실행
-    public void PlayDemoPullAnimation(float duration, float pullDistance, System.Action onComplete)
+    // 데모 모드에서 당겨지는 애니메이션 실행
+    public void PlayDemoPullAnimation(float duration, float pullDistance, Vector2 direction, System.Action onComplete)
     {
-        StartCoroutine(DemoPullRoutine(duration, pullDistance, onComplete));
+        if (endTarget == null || startTarget == null)
+        {
+            Debug.LogWarning("[Button_3_1] startTarget 또는 endTarget이 지정되지 않았습니다.");
+            onComplete?.Invoke();
+            return;
+        }
+
+        if (!isDemoAnimating)
+            StartCoroutine(DemoPullRoutine(duration, pullDistance, direction, onComplete));
     }
 
-    private IEnumerator DemoPullRoutine(float duration, float pullDistance, System.Action onComplete)
+    private IEnumerator DemoPullRoutine(float duration, float pullDistance, Vector2 dir, System.Action onComplete)
     {
         isDemoAnimating = true;
         Vector3 startPos = initialEndPosition;
-
-        Vector2 dir = initialDirection;
-        if (transform.position.x < 0f)
-        {
-            dir = -initialDirection; // 왼쪽 버튼은 방향 반전
-        }
-
-        Vector3 targetPos = initialEndPosition + (Vector3)dir * pullDistance;
+        Vector3 targetPos = initialEndPosition + (Vector3)dir.normalized * pullDistance;
 
         float elapsed = 0f;
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / duration;
-            endTarget.position = Vector3.Lerp(startPos, targetPos, t);
+            float t = Mathf.Clamp01(elapsed / duration);
+            if (endTarget != null)
+                endTarget.position = Vector3.Lerp(startPos, targetPos, t);
             yield return null;
         }
-        endTarget.position = targetPos;
 
-        isDemoAnimating = false;
+        if (endTarget != null)
+            endTarget.position = targetPos;
+
         onComplete?.Invoke();
+    }
+
+    // 데모 종료/리셋 시 호출
+    public void ResetDemo()
+    {
+        StopAllCoroutines();
+        isDemoAnimating = false;
+        if (endTarget != null) endTarget.position = initialEndPosition;
     }
 }
