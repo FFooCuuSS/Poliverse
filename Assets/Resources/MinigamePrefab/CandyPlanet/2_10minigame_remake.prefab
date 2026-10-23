@@ -345,6 +345,7 @@ MonoBehaviour:
   artFacesRightByDefault: 1
   minSwipeSpeed: 1
   swipeCooldown: 0.15
+  demoVerticalDir: -0.5
 --- !u!1 &4364650041406890892
 GameObject:
   m_ObjectHideFlags: 0
@@ -649,7 +650,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 1.652318, y: 0.529859, z: 0.02861662}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.2, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3431615689524325709}
