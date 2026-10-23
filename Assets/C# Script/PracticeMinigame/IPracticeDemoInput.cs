@@ -6,3 +6,8 @@ public interface IPracticeDemoInput
 {
     void SetDemoMode(bool isDemo);
 }
+
+public interface IPracticeDemoActionInput : IPracticeDemoInput
+{
+    void ExecutePracticeAction(int actionIndex, string actionType);
+}

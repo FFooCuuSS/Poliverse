@@ -96,8 +96,11 @@ MonoBehaviour:
   pistolDrag: {fileID: 496023626400619722}
   pistolUp: {fileID: 5089428344346499821}
   pistolTransform: {fileID: 352389623858886036}
-  demoPullDistance: 0.5
-  demoPullDuration: 0.2
+  button3_1: {fileID: 5754547437959459400}
+  demoPullDistance: 5
+  demoHandAngle: 45
+  demoHandDuration: 0.5
+  demoPistolDuration: 1
 --- !u!1 &2579040509052450318
 GameObject:
   m_ObjectHideFlags: 0
