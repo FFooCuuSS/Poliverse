@@ -93,6 +93,11 @@ MonoBehaviour:
   useRhythmJudgementScore: 1
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
+  pistolDrag: {fileID: 496023626400619722}
+  pistolUp: {fileID: 5089428344346499821}
+  pistolTransform: {fileID: 352389623858886036}
+  demoPullDistance: 0.5
+  demoPullDuration: 0.2
 --- !u!1 &2579040509052450318
 GameObject:
   m_ObjectHideFlags: 0
@@ -275,9 +280,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4033b9704dae8a641a674939a4f2cc00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minigame: {fileID: 0}
+  swipeSound: {fileID: 0}
   maxX: 7
   maxY: 4
-  cuffSound: {fileID: 0}
   isDragging: 0
   banDragging: 0
   angleInDegrees: -4.199
@@ -300,7 +306,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stage_3_1: {fileID: 1872489371240190276}
-  goingUp: 0
   riseTargetY: 10
   riseDuration: 0.5
 --- !u!1 &3158450903093627012
@@ -1004,9 +1009,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8725f7aabbc2d141bd7ae8043cf5147, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minigame: {fileID: 0}
+  swipeSound: {fileID: 0}
   maxX: 7
   maxY: 4
-  cuffSound: {fileID: 8300000, guid: 519db6352aaa1bf47b4db25ac4bf7eeb, type: 3}
   isDragging: 0
   banDragging: 0
 --- !u!114 &5754547437959459400
@@ -1311,9 +1317,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4033b9704dae8a641a674939a4f2cc00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minigame: {fileID: 0}
+  swipeSound: {fileID: 0}
   maxX: 7
   maxY: 4
-  cuffSound: {fileID: 8300000, guid: 9627abf4c6840d846b8f24d568b66701, type: 3}
   isDragging: 0
   banDragging: 0
   angleInDegrees: -4.199
@@ -1336,7 +1343,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stage_3_1: {fileID: 1872489371240190276}
-  goingUp: 0
   riseTargetY: 10
   riseDuration: 0.5
 --- !u!1 &6317946241562043065

@@ -75,54 +75,66 @@ public class Minigame_3_1 : MiniGameBase, IPracticeDemoInput
         if (!isDemoMode)
             return;
 
-        if (pistolDrag == null)
-            pistolDrag = FindObjectOfType<PistolDrag>();
-
-        if (pistolUp == null)
-            pistolUp = FindObjectOfType<PistolUp>();
-
-        if (pistolDrag == null || pistolUp == null)
+        if (!IsInputLocked)
         {
-            Debug.LogWarning("[Minigame_3_1] PistolDrag 또는 PistolUp을 찾을 수 없습니다.");
-            return;
+            OnPlayerInput(actionType);
         }
 
-        if (pistolTransform == null)
-            pistolTransform = pistolDrag.transform;
+        Button_3_1[] buttons = FindObjectsOfType<Button_3_1>();
+        PistolDrag[] drags = FindObjectsOfType<PistolDrag>();
 
-        // 총을 당기는 동작
-        if (actionType == "Swipe" || actionType == "Input1")
+        Button_3_1 targetButton = null;
+        PistolDrag targetDrag = null;
+
+        if (buttons.Length > 0)
         {
-            pistolDrag.canPull = false;
+            Array.Sort(buttons, (a, b) => a.transform.position.x.CompareTo(b.transform.position.x));
+            Array.Sort(drags, (a, b) => a.transform.position.x.CompareTo(b.transform.position.x));
 
-            float angle = pistolDrag.angleInDegrees * Mathf.Deg2Rad;
+            int targetIdx = (actionIndex / 2) % buttons.Length;
+            targetButton = buttons[targetIdx];
+            targetDrag = drags[targetIdx];
+        }
 
-            Vector3 direction = new Vector3(
-                Mathf.Cos(angle),
-                Mathf.Sin(angle),
-                0f
-            );
+        if (targetDrag == null) targetDrag = pistolDrag;
+        if (targetDrag != null) targetDrag.canPull = false;
 
-            Vector3 targetPos =
-                pistolTransform.position + direction * demoPullDistance;
+        PistolUp targetUp = targetDrag != null ? targetDrag.GetComponent<PistolUp>() : pistolUp;
 
-            pistolTransform.DOKill();
+        // 1. Input1 (또는 Swipe): 버튼(선)과 총이 함께 당겨지는 연출
+        if (actionType == "Input1" || actionType == "Swipe")
+        {
+            if (targetButton != null)
+            {
+                targetButton.PlayDemoPullAnimation(demoPullDuration, demoPullDistance, null);
+            }
 
-            pistolTransform.DOMove(targetPos, demoPullDuration)
-                .SetEase(Ease.OutQuad)
-                .OnComplete(() =>
+            if (targetDrag != null)
+            {
+                Transform pTransform = targetDrag.transform;
+                float angle = targetDrag.angleInDegrees * Mathf.Deg2Rad;
+                Vector3 direction = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
+
+                // 왼쪽(X < 0)에 있는 총은 X 방향 대칭 반전
+                if (pTransform.position.x < 0f)
                 {
-                    if (isDemoMode && pistolUp != null)
-                    {
-                        pistolUp.goingUp = true;
-                    }
-                });
-        }
+                    direction.x = -direction.x;
+                }
 
-        // 총을 올리는 입력도 데모에서는 자동으로 실행
-        else if (actionType == "Tap" || actionType == "Input2")
+                Vector3 targetPos = pTransform.position + direction * demoPullDistance;
+
+                pTransform.DOKill();
+                pTransform.DOMove(targetPos, demoPullDuration)
+                    .SetEase(Ease.OutQuad);
+            }
+        }
+        // 2. Input2 (또는 Tap): 총이 위로 솟아오름
+        else if (actionType == "Input2" || actionType == "Tap")
         {
-            pistolUp.goingUp = true;
+            if (targetUp != null)
+            {
+                targetUp.goingUp = true;
+            }
         }
     }
 }
