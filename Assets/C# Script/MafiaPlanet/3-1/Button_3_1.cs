@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class Button_3_1 : MonoBehaviour
 {
@@ -15,12 +16,16 @@ public class Button_3_1 : MonoBehaviour
     private LineRenderer line;
     private Vector2 initialDirection;
     private Vector3 initialEndPosition;
+    private bool isDemoAnimating = false;
 
     void Awake()
     {
         line = GetComponent<LineRenderer>();
-        line.startWidth = 1f;
-        line.endWidth = 1f;
+        if (line != null)
+        {
+            line.startWidth = 1f;
+            line.endWidth = 1f;
+        }
         if (startTarget != null && endTarget != null)
         {
             initialDirection = (endTarget.position - startTarget.position).normalized;
@@ -31,6 +36,19 @@ public class Button_3_1 : MonoBehaviour
     void LateUpdate()
     {
         if (startTarget == null || endTarget == null) return;
+
+        // 데모 모드일 때 플레이어 조작 차단 및 위치 고정
+        if (Minigame_3_1.Instance != null && Minigame_3_1.Instance.IsDemoMode)
+        {
+            if (!isDemoAnimating)
+            {
+                endTarget.position = initialEndPosition;
+            }
+            if (linkedPistol != null)
+            {
+                linkedPistol.canPull = false;
+            }
+        }
 
         Vector3 p0 = startTarget.position;
         Vector3 p2 = endTarget.position;
@@ -47,23 +65,51 @@ public class Button_3_1 : MonoBehaviour
             line.SetPosition(i, point);
         }
 
-        // 현재 줄 방향과 거리 계산
-        Vector2 currentDir = (endTarget.position - startTarget.position).normalized;
-        float angleDiff = Vector2.Angle(initialDirection, currentDir);
-        float displacement = Vector3.Distance(endTarget.position, initialEndPosition);
-
-        if (linkedPistol != null)
+        // 일반 모드일 때만 플레이어 입력 조건 체크
+        if (Minigame_3_1.Instance == null || !Minigame_3_1.Instance.IsDemoMode)
         {
-            // 데모 모드일 때는 물리 계산에 의해 canPull이 꺼지지 않도록 고정
-            if (Minigame_3_1.Instance != null && Minigame_3_1.Instance.IsDemoMode)
-            {
-                linkedPistol.canPull = true;
-            }
-            else
+            Vector2 currentDir = (endTarget.position - startTarget.position).normalized;
+            float angleDiff = Vector2.Angle(initialDirection, currentDir);
+            float displacement = Vector3.Distance(endTarget.position, initialEndPosition);
+
+            if (linkedPistol != null)
             {
                 linkedPistol.canPull = angleDiff >= activateAngleThreshold &&
-                                       displacement >= activateDistanceThreshold;
+                                      displacement >= activateDistanceThreshold;
             }
         }
+    }
+
+    // 데모 모드에서 좌우 위치에 맞춰 당겨지는 애니메이션 실행
+    public void PlayDemoPullAnimation(float duration, float pullDistance, System.Action onComplete)
+    {
+        StartCoroutine(DemoPullRoutine(duration, pullDistance, onComplete));
+    }
+
+    private IEnumerator DemoPullRoutine(float duration, float pullDistance, System.Action onComplete)
+    {
+        isDemoAnimating = true;
+        Vector3 startPos = initialEndPosition;
+
+        Vector2 dir = initialDirection;
+        if (transform.position.x < 0f)
+        {
+            dir = -initialDirection; // 왼쪽 버튼은 방향 반전
+        }
+
+        Vector3 targetPos = initialEndPosition + (Vector3)dir * pullDistance;
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+            endTarget.position = Vector3.Lerp(startPos, targetPos, t);
+            yield return null;
+        }
+        endTarget.position = targetPos;
+
+        isDemoAnimating = false;
+        onComplete?.Invoke();
     }
 }
