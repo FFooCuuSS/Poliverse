@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Minigame_1_4 : MiniGameBase
+public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
 {
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.4f;
@@ -35,6 +35,22 @@ public class Minigame_1_4 : MiniGameBase
     private bool ended;
 
     private readonly List<Accessory> orderedAccessories = new List<Accessory>();
+
+    private bool isDemoMode;
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool value)
+    {
+        isDemoMode = value;
+
+        foreach (var acc in orderedAccessories)
+        {
+            if (acc != null)
+                acc.SetDemoInputBlocked(value);
+        }
+
+        Debug.Log($"[1-4 Demo] 데모 모드: {isDemoMode}");
+    }
 
     // 입력은 들어왔지만 아직 판정 전인 악세사리
     private Accessory pendingAccessory;
@@ -80,6 +96,15 @@ public class Minigame_1_4 : MiniGameBase
             }
         }
 
+        if (isDemoMode)
+        {
+            foreach (var acc in orderedAccessories)
+            {
+                if (acc != null)
+                    acc.SetDemoInputBlocked(true);
+            }
+        }
+
         StartRound();
     }
 
@@ -114,6 +139,7 @@ public class Minigame_1_4 : MiniGameBase
 
     public void TryAccessoryInput(Accessory clickedAccessory)
     {
+        if (isDemoMode) return;
         if (clickedAccessory == null) return;
         if (IsInputLocked) return;
         if (ended || roundEnding) return;

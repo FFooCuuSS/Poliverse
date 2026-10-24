@@ -67,6 +67,9 @@ public class PlayerReachChecker : MonoBehaviour
 
     private void Update()
     {
+        if (minigame_1_3 != null && minigame_1_3.IsDemoMode)
+            return;
+
         if (isRespawning) return;
         if (Time.time < invincibleUntil) return;
 
