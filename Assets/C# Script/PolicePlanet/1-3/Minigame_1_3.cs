@@ -1,7 +1,7 @@
 using UnityEngine;
 using DG.Tweening;
 
-public class Minigame_1_3 : MiniGameBase
+public class Minigame_1_3 : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 18f;
 
@@ -34,6 +34,16 @@ public class Minigame_1_3 : MiniGameBase
 
     private int failCount;
     private bool scoreFilled;
+
+    private bool isDemoMode;
+
+    public bool IsDemoMode => isDemoMode;
+
+    public void SetDemoMode(bool isDemo)
+    {
+        isDemoMode = isDemo;
+        Debug.Log($"[1-3 Demo] 데모 모드: {isDemoMode}");
+    }
 
     private void Start()
     {

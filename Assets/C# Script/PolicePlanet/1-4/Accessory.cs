@@ -86,6 +86,9 @@ public class Accessory : MonoBehaviour
 
     private void OnMouseUp()
     {
+        if (minigame != null && minigame.IsDemoMode)
+            return;
+
         if (InputLocked) return;
         if (!IsInteractableNow) return;
 
@@ -94,6 +97,10 @@ public class Accessory : MonoBehaviour
 
     public void OnSlide()
     {
+        Minigame_1_4 game = FindObjectOfType<Minigame_1_4>();
+
+        if (game != null && game.IsDemoMode) return;
+
         if (InputLocked) return;
         if (!IsInteractableNow) return;
         if (IsRemoved) return;
@@ -183,5 +190,22 @@ public class Accessory : MonoBehaviour
             for (int i = 0; i < fadeTweens.Length; i++)
                 fadeTweens[i]?.Kill();
         }
+    }
+
+    public void SetDemoInputBlocked(bool blocked)
+    {
+        if (drag == null)
+            drag = GetComponent<DragAndDrop>();
+
+        if (drag != null)
+        {
+            drag.enabled = !blocked;
+
+            if (blocked)
+                drag.banDragging = true;
+        }
+
+        if (blocked)
+            LockInput();
     }
 }

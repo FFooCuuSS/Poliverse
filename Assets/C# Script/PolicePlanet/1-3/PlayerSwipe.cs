@@ -34,6 +34,11 @@ public class PlayerSwipe : MonoBehaviour
 
     void Update()
     {
+        Minigame_1_3 demoGame =
+        FindObjectOfType<Minigame_1_3>();
+
+        if (demoGame != null && demoGame.IsDemoMode) return;
+
         if (isMoving) return;
         if (miniGameBase != null && miniGameBase.IsInputLocked) return;
 
