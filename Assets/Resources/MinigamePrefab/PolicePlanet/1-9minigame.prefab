@@ -196,7 +196,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.2, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8061461197510778090}
@@ -265,6 +265,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8725f7aabbc2d141bd7ae8043cf5147, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minigame: {fileID: 0}
+  swipeSound: {fileID: 0}
   maxX: 7
   maxY: 4
   isDragging: 0
@@ -501,9 +503,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6bf69f67a6f4f943b687b216cf8b958, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  practiceTimingMode: 0
+  useRhythmJudgementScore: 1
+  manualTotalNodeCount: -1
+  printScoreDebugOnEnd: 1
+  totalInputs: 6
+  endingSuccessThreshold: 4
   rope: {fileID: 7335304602941542761}
   brightBackground: {fileID: 5922741785422673140}
   handleMover: {fileID: 5813131642504420247}
+  movingObject: {fileID: 0}
+  activateObject: {fileID: 0}
+  lightEffect: {fileID: 0}
 --- !u!1 &8735167419556465281
 GameObject:
   m_ObjectHideFlags: 0
@@ -607,13 +618,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8ca9dcc816afbc4fa54f198e3f1510c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stage_1_9: {fileID: 8431097277835563127}
+  minigame_1_9: {fileID: 0}
   distanceThreshold: 50
-  movingObject: {fileID: 5052963048036772908}
-  activateObject: {fileID: 5922741785422673140}
-  lightEffect: {fileID: 7876057912782618423}
-  targetSpriteRenderer: {fileID: 8324146134664091102}
-  successSprite: {fileID: 21300000, guid: 48a29e35c80c33741a27f835307a9abb, type: 3}
 --- !u!114 &7335304602941542761
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -627,6 +633,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ropeStart: {fileID: 8834836149930506080}
+  ropeEnd: {fileID: 0}
 --- !u!114 &5259817820591263066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -654,6 +661,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8725f7aabbc2d141bd7ae8043cf5147, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minigame: {fileID: 0}
+  swipeSound: {fileID: 0}
   maxX: 7
   maxY: 4
   isDragging: 0
@@ -819,6 +828,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ccf34bf907528a48a4300498a221ae5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clickSound: {fileID: 0}
   stretchOffset: {x: 5, y: 0, z: 0}
   stretchDuration: 0.2
   shrinkDuration: 0.2
