@@ -8,7 +8,7 @@ public class MiniGame2_4 : MiniGameBase, IPracticeDemoInput
     protected override float TimerDuration => 5f;
 
     protected override string MinigameTitle => "파르페 옮겨담기";
-    protected override string MinigameExplain => "왼쪽에서 잔이 이동합니다.";
+    protected override string MinigameExplain => "왼쪽에서 잔이 오른쪽으로 이동합니다.";
     protected override string[] AdditionalMinigameExplains => new string[]
     {
         "타이밍에 맞춰 화면을 터치하세요."

@@ -12,7 +12,11 @@ public class Minigame_2_12 : MiniGameBase, IPracticeDemoInput
     protected override float TimerDuration => timerDurationOverride;
 
     protected override string MinigameTitle => "초코링 받기";
-    protected override string MinigameExplain => "떨어지는 순서를 기억하고 접시로 받으세요.";
+    protected override string MinigameExplain => "떨어지는 순서를 기억하세요.";
+    protected override string[] AdditionalMinigameExplains => new string[]
+    {
+        "기억한 순서대로 터치하세요."
+    };
 
     [System.Serializable]
     public class RingLaneOrderSet
