@@ -7,10 +7,10 @@ public class Minigame3_2remake : MiniGameBase, IPracticeDemoInput
 
     protected override string MinigameTitle => "거래 가방 전달";
 
-    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
+    protected override string MinigameExplain => "손이 오른쪽에서 왼쪽으로 이동합니다.";
     protected override string[] AdditionalMinigameExplains => new string[]
     {
-        "장애물을 피해 좌우로 움직이세요."
+        "타이밍에 맞춰 검은 가방을 잡으세요."
     };
 
     public override float perfectWindowOverride => 0.1f;

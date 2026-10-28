@@ -29,7 +29,7 @@ public class PistolDrag : DirectionalDrag
         {
             return current;
         }
-
+        
         if (!canPull)
             return current;
 

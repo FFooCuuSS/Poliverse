@@ -5,7 +5,7 @@ public class Minigame3_8remake : MiniGameBase, IPracticeDemoInput
 {
     // ===== 미니게임 기본 정보 =====
     protected override float TimerDuration => 10f;
-    protected override string MinigameTitle => "젤리 블록 철거!";
+    protected override string MinigameTitle => "미행";
     protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
     protected override string[] AdditionalMinigameExplains => new string[]
     {

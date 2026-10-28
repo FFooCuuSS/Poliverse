@@ -6,11 +6,7 @@ public class Minigame_3_3_Remake : MiniGameBase, IPracticeDemoInput
 
     protected override string MinigameTitle => "문따기";
 
-    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
-    protected override string[] AdditionalMinigameExplains => new string[]
-    {
-        "장애물을 피해 좌우로 움직이세요."
-    };
+    protected override string MinigameExplain => "바깥쪽 고리부터 차례대로 터치해 각 고리의 구멍을 일직선으로 맞추세요.";
 
     [Header("Manager")]
     [SerializeField] private Manager_3_3 manager;
