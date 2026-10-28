@@ -11,7 +11,7 @@ public class Minigame_2_9 : MiniGameBase, IPracticeDemoInput
     protected override float TimerDuration => 5f;
 
     protected override string MinigameTitle => "빙수 받기";
-    protected override string MinigameExplain => "빛나는 구름을 잡으세요.";
+    protected override string MinigameExplain => "빛나는 구름이 손에 오면 터치하세요.";
 
     private bool ended;
     private int totalCount = 5;
