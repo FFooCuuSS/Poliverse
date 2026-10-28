@@ -5,7 +5,7 @@ public class Minigame_3_6 : MiniGameBase, IPracticeDemoInput
     [Header("효과음")]
     [SerializeField] private AudioClip clickSound;
     protected override float TimerDuration => 10f;
-    protected override string MinigameTitle => "도청기 설치";
+    protected override string MinigameTitle => "통화 내용 감청";
 
     protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
     protected override string[] AdditionalMinigameExplains => new string[]

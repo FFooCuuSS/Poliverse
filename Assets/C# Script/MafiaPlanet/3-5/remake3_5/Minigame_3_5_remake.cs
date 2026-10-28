@@ -13,7 +13,7 @@ public class Minigame_3_5_remake : MiniGameBase, IPracticeDemoInput
 
     protected override float TimerDuration => 15f;
 
-    protected override string MinigameTitle => "¹®µû±â";
+    protected override string MinigameTitle => "µµÃ»±â ¼³Ä¡";
 
     protected override string MinigameExplain => "¹Ù¿òÄíÇîÀÌ °è¼Ó ±¼·¯°©´Ï´Ù.";
     protected override string[] AdditionalMinigameExplains => new string[]
