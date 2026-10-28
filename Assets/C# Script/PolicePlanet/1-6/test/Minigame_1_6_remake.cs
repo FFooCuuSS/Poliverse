@@ -5,6 +5,15 @@ using UnityEngine;
 public class Minigame_1_6_remake : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 12f;
+
+    // 1-6은 CSV Input이 "경찰 출발" 시점이고 실제 터치는 도착(+travelTime) 시점이라
+    // RhythmManager 판정(노트 시각 기준)을 쓰면 항상 Miss가 된다.
+    // → 미니게임이 직접 판정하고 ReportManualSuccess/Fail로 보고한다.
+    protected override bool UseRhythmJudgementScore => false;
+    protected override int ManualTotalNodeCount => 3;
+
+    [Header("Debug")]
+    [SerializeField] private bool judgeLog = true;
     protected override string MinigameTitle => "경찰 인력 배치";
 
     protected override string MinigameExplain => "잠시 기다려 플랫폼 위치를 봐주세요.";
@@ -119,6 +128,11 @@ public class Minigame_1_6_remake : MiniGameBase, IPracticeDemoInput
         }
     }
 
+    public override void OnJudgement(JudgementResult judgement)
+    {
+        // RhythmManager 판정(CheckMiss 포함)은 1-6 점수에 쓰지 않는다.
+    }
+
     public override void OnRhythmEvent(string action)
     {
         if (finished) return;
@@ -211,7 +225,11 @@ public class Minigame_1_6_remake : MiniGameBase, IPracticeDemoInput
         clickLocked = false;
 
         inputOnTime = Time.time;
-        targetClickTime = inputOnTime + 1f;
+        // 경찰은 Spawn 시점부터 travelTime 뒤에 플랫폼에 도착한다.
+        targetClickTime = inputOnTime + travelTime;
+
+        if (judgeLog)
+            Debug.Log($"[1-6 Judge] INPUT 노트 → 도착 예정 {travelTime:F2}s 뒤");
     }
 
     private void JudgeByTimingAndLock()
@@ -224,21 +242,25 @@ public class Minigame_1_6_remake : MiniGameBase, IPracticeDemoInput
         currentPolice.LockHere();
 
         float now = Time.time;
-        float delta = Mathf.Abs(now - targetClickTime);
+        float diff = now - targetClickTime;
+        float delta = Mathf.Abs(diff);
 
-        if (delta <= perfectWindow)
+        if (delta <= goodWindow)
         {
             hitCount++;
             judgedCount++;
-        }
-        else if (delta <= goodWindow)
-        {
-            hitCount++;
-            judgedCount++;
+            ReportManualSuccess();
+
+            if (judgeLog)
+                Debug.Log($"[1-6 Judge] HIT #{judgedCount} diff={diff * 1000:F0}ms (허용 ±{goodWindow * 1000:F0}ms)");
         }
         else
         {
             judgedCount++;
+            ReportManualFail();
+
+            if (judgeLog)
+                Debug.Log($"[1-6 Judge] MISS #{judgedCount} diff={diff * 1000:F0}ms (허용 ±{goodWindow * 1000:F0}ms)");
         }
 
         CheckFinishIfDone();
@@ -249,6 +271,10 @@ public class Minigame_1_6_remake : MiniGameBase, IPracticeDemoInput
         if (p != currentPolice) return;
 
         judgedCount++;
+        ReportManualFail();
+
+        if (judgeLog)
+            Debug.Log($"[1-6 Judge] MISS #{judgedCount} 터치 없음 (화면 밖으로 나감)");
 
         inputEnabled = false;
         clickLocked = true;

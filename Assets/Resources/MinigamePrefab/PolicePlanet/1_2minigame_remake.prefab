@@ -663,7 +663,9 @@ MonoBehaviour:
   demoHoldSeconds: 0.25
   demoFadeSeconds: 0.25
   sequence: {fileID: 6658938432188598086}
-  cuffs: []
+  cuffs:
+  - {fileID: 7184838558020538625}
+  - {fileID: 4275712946937975648}
   inputWindowSeconds: 0.3
   despawnFadeSeconds: 0.05
 --- !u!114 &6658938432188598086
@@ -690,7 +692,7 @@ MonoBehaviour:
   cuff2: {fileID: 4275712946937975648}
   chainGenerator: {fileID: 1503856696520320065}
   cuff2LeftHandArrivedWorldPos: {x: -3.74, y: 2.61, z: 0}
-  delayBetweenHands: 0.2
+  delayBetweenHands: 0.05
   snapFadeStartDelay: 0
   snapFadeDuration: 0.1
   autoAttachDisableObject: {fileID: 6654843241941395401}

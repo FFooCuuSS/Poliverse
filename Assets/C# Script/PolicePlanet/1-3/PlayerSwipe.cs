@@ -18,6 +18,9 @@ public class PlayerSwipe : MonoBehaviour
     private bool isSwiping;
     private bool isMoving;
 
+    // 리스폰 중 등 외부에서 입력을 막을 때
+    [HideInInspector] public bool inputBlocked;
+
     private MiniGameBase miniGameBase;
 
     private float TopY => bottomY + laneDistance;
@@ -39,6 +42,7 @@ public class PlayerSwipe : MonoBehaviour
 
         if (demoGame != null && demoGame.IsDemoMode) return;
 
+        if (inputBlocked) return;
         if (isMoving) return;
         if (miniGameBase != null && miniGameBase.IsInputLocked) return;
 
@@ -120,6 +124,18 @@ public class PlayerSwipe : MonoBehaviour
         transform.DOMove(targetPos, moveDuration)
             .SetEase(Ease.OutCubic)
             .OnComplete(() => isMoving = false);
+    }
+
+    // 리스폰 등으로 위치가 강제로 바뀌었을 때 레인 상태를 맞춘다.
+    // (기존엔 위 레인에서 실패 → 아래로 리스폰돼도 currentLane=1로 남아서
+    //  위로 스와이프해도 '같은 레인'으로 판단돼 움직이지 않았다)
+    public void SyncLaneToY(float y)
+    {
+        float mid = (bottomY + TopY) * 0.5f;
+        currentLane = y >= mid ? 1 : 0;
+
+        isMoving = false;
+        isSwiping = false;
     }
 
     private float GetLaneY(int lane)

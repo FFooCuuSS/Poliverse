@@ -18,6 +18,28 @@ public class Manager_1_8 : MonoBehaviour
     [SerializeField] private float slowSpeed = 8f;
     [SerializeField] private float fastSpeed = 16f;
 
+    [Header("Arrival Timing (기기 화면비와 무관하게 도착 시각 고정)")]
+    [Tooltip("켜면 속도 대신 'Show 후 감옥 도착까지 걸리는 시간'으로 이동한다")]
+    [SerializeField] private bool useFixedTravelTime = true;
+    [SerializeField] private float slowTravelTime = 2.0f;
+    [SerializeField] private float fastTravelTime = 1.0f;
+
+    [Header("Input")]
+    [Tooltip("켜면 감옥이 아니라 화면 아무 곳이나 터치해도 감옥이 내려온다 (설명 문구와 일치)")]
+    [SerializeField] private bool tapAnywhere = true;
+
+    [Header("Debug")]
+    [SerializeField] private bool judgeLog = true;
+
+    private double SongT
+    {
+        get
+        {
+            RhythmManager rm = FindObjectOfType<RhythmManager>();
+            return rm != null ? rm.SongTime : -1;
+        }
+    }
+
     [Header("Demo")]
     [SerializeField] private float demoTriggerDistance = 0.1f;
 
@@ -70,9 +92,21 @@ public class Manager_1_8 : MonoBehaviour
         if (minigame == null)
             return;
 
-        // Player 모드에서는 자동 작동하지 않음
+        // Player 모드: 화면 아무 곳 터치 → 감옥 작동
         if (!minigame.IsDemoMode)
+        {
+            if (tapAnywhere &&
+                !minigame.IsInputLocked &&
+                Input.GetMouseButtonDown(0))
+            {
+                if (judgeLog)
+                    Debug.Log($"[1-8 Judge] 터치 song={SongT:F3}");
+
+                ActivatePrison();
+            }
+
             return;
+        }
 
         if (prisonObj == null ||
             prisonController == null)
@@ -206,11 +240,31 @@ public class Manager_1_8 : MonoBehaviour
                 ? slowSpeed
                 : fastSpeed;
 
+        float travelTime = 0f;
+
+        if (useFixedTravelTime && prisonObj != null)
+        {
+            // 화면비에 따라 스폰 x가 달라져도 감옥 도착 시각은 항상 같게
+            travelTime = speedGroup == 0 ? slowTravelTime : fastTravelTime;
+            float distance = spawnX - prisonObj.transform.position.x;
+
+            if (travelTime > 0f && distance > 0f)
+                assignedSpeed = distance / travelTime;
+        }
+
         prisoner.Initialize(
             this,
             prisonObj,
             assignedSpeed
         );
+
+        if (judgeLog)
+        {
+            Debug.Log(
+                $"[1-8 Judge] 죄수#{spawnCount + 1} 출발 song={SongT:F3} " +
+                $"speed={assignedSpeed:F2} 도착예정 +{travelTime:F2}s"
+            );
+        }
 
         alivePrisoners.Add(prisoner);
 
@@ -230,6 +284,9 @@ public class Manager_1_8 : MonoBehaviour
 
         capturedCount++;
 
+        if (judgeLog)
+            Debug.Log($"[1-8 Judge] 포획 성공 ({capturedCount}) song={SongT:F3}");
+
         alivePrisoners.Remove(prisoner);
 
         demoTriggeredPrisoners.Remove(prisoner);
@@ -248,6 +305,9 @@ public class Manager_1_8 : MonoBehaviour
             return;
 
         escapedCount++;
+
+        if (judgeLog)
+            Debug.Log($"[1-8 Judge] 놓침 ({escapedCount}) song={SongT:F3}");
 
         alivePrisoners.Remove(prisoner);
 

@@ -1,32 +1,31 @@
-using System.Collections;
-using System.Collections.Generic;
+ï»¿using System.Collections;
 using UnityEngine;
-using static MiniGameBase;
 
 public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 15f;
-    protected override string MinigameTitle => "¹üÀÎ Ã£±â";
+    protected override string MinigameTitle => "ë²”ì¸ ì°¾ê¸°";
 
-    protected override string MinigameExplain => "ÁË¼ö°¡ ¼ø¼­´ë·Î ³ªÅ¸³ª Å¸ÀÌ¹ÖÀ» ¾Ë·ÁÁİ´Ï´Ù.";
+    protected override string MinigameExplain => "ì£„ìˆ˜ê°€ ìˆœì„œëŒ€ë¡œ ë‚˜íƒ€ë‚˜ íƒ€ì´ë°ì„ ì•Œë ¤ì¤ë‹ˆë‹¤.";
     protected override string[] AdditionalMinigameExplains => new string[]
     {
-        "¹è°æÀÌ ¾îµÎ¿öÁö¸é Å¸ÀÌ¹Ö¿¡ ¸Â°Ô ÁË¼ö¸¦ ÅÍÄ¡ÇØÁÖ¼¼¿ä."
+        "ë°°ê²½ì´ ì–´ë‘ì›Œì§€ë©´ íƒ€ì´ë°ì— ë§ê²Œ ì£„ìˆ˜ë¥¼ í„°ì¹˜í•´ì£¼ì„¸ìš”."
     };
 
-    // 1-1Àº CSVÀÇ InputÀ» ¾²Áö¸¸,
-    // RhythmManagerÀÇ Perfect/Good/Miss ÆÇÁ¤ Á¡¼ö´Â »ç¿ëÇÏÁö ¾Ê´Â´Ù.
+    // 1-1ì€ CSVì˜ Show/Input íƒ€ì´ë°ë§Œ ì“°ê³ ,
+    // ì ìˆ˜ëŠ” ReportManualSuccess/Failë¡œ ì§ì ‘ ë³´ê³ í•œë‹¤.
+    // (RhythmManagerì˜ CheckMiss ë¡œê·¸ëŠ” 1-1 ì ìˆ˜ì™€ ë¬´ê´€í•˜ë‹¤)
     protected override bool UseRhythmJudgementScore => false;
-
-    // ÃÑ ´ë»ó ¼ö´Â °íÁ¤ 12°¡ ¾Æ´Ï¶ó ½ÇÁ¦ Show ¼º°ø °³¼ö·Î Finalize ¶§ ¼¼ÆÃÇÑ´Ù.
     protected override int ManualTotalNodeCount => -1;
 
     private IRhythmManager rhythmManager;
 
     [Header("Debug")]
     [SerializeField] private bool debugLog = false;
+    [Tooltip("íŒì •ë§ˆë‹¤ diff(ms)ë¥¼ ì¶œë ¥í•œë‹¤. í™•ì¸ ëë‚˜ë©´ ë„ê¸°.")]
+    [SerializeField] private bool judgeLog = true;
 
-    [Header("Enemies (0~3 Á¤´ä ¼ø¼­)")]
+    [Header("Enemies (0~3 ì •ë‹µ ìˆœì„œ)")]
     public enemy_1_1_test[] enemies;
 
     [Header("Show Positions")]
@@ -36,43 +35,65 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
     public Transform targetScope;
     public GameObject Scope;
 
-    [Header("Auto Off Time")]
-    public float autoOffSeconds = 2.5f;
-
-    [Header("Input Window")]
-    [SerializeField] private float inputWindowSeconds = 1f;
+    [Header("Judge Window (seconds, Input ë…¸íŠ¸ ê¸°ì¤€)")]
+    [Tooltip("Input ë…¸íŠ¸ë³´ë‹¤ ì´ë§Œí¼ ë¨¼ì € ëˆŒëŸ¬ë„ ì„±ê³µ")]
+    [SerializeField] private float earlyWindowSeconds = 0.15f;
+    [Tooltip("Input ë…¸íŠ¸ë³´ë‹¤ ì´ë§Œí¼ ëŠ¦ê²Œ ëˆŒëŸ¬ë„ ì„±ê³µ. ì§€ë‚˜ë©´ ì‹¤íŒ¨")]
+    [SerializeField] private float lateWindowSeconds = 0.25f;
 
     private const int ENEMY_COUNT = 4;
     private const int TOTAL_ROUND = 3;
     private const int EXPECTED_TARGET_COUNT = ENEMY_COUNT * TOTAL_ROUND;
 
-    private int round;
-    private int showIndex;
-    private int inputIndex;
+    private enum TargetState { Hidden, Shown, Windowed, Resolved }
 
-    private bool canClick;
+    private int round;
+    private int showIndex;      // ì´ë²ˆ ë¼ìš´ë“œì—ì„œ ë‹¤ìŒì— Showë  ì 
+    private int inputCursor;    // ì´ë²ˆ ë¼ìš´ë“œì—ì„œ ë‹¤ìŒ Input ë…¸íŠ¸ê°€ ê°€ë¦¬í‚¬ ì 
+    private int resolvedCount;
+
     private bool ended;
     private bool roundsCompleted;
 
     private int shownTargetCount;
     private int localSuccessCount;
-    private int localAutoFailCount;
+    private int localFailCount;
 
     private int[] shuffledPosIndex;
-    private bool[] resolvedThisRound;
-    private Coroutine[] autoOffJobs;
+    private TargetState[] states;
+    private double[] windowOpenTime;   // Input ë…¸íŠ¸ê°€ ë°œìƒí•œ ì‹œê°(â‰ˆë…¸íŠ¸ ì‹œê°)
+    private Coroutine[] hideJobs;
+
+    // ë…¸íŠ¸ë³´ë‹¤ ì‚´ì§ ë¨¼ì € ëˆ„ë¥¸ ì…ë ¥ ë²„í¼
+    private int earlyClickIdx = -1;
+    private double earlyClickTime;
 
     private string lastRhythmAction = null;
-    private Coroutine inputWindowJob = null;
-    private readonly Queue<int> pendingInputs = new Queue<int>();
-
     private Camera cam;
-
     private bool isDemoMode = false;
+
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€ ì‹œê°„ â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // íŒì •ì€ RhythmManagerì™€ ê°™ì€ dsp ê¸°ë°˜ SongTimeìœ¼ë¡œ ì°ë‹¤.
+    private double Now
+    {
+        get
+        {
+            if (rhythmManager is RhythmManager rm && rm.IsRunning)
+                return rm.SongTime;
+
+            return Time.timeAsDouble;
+        }
+    }
 
     private void Log(string msg)
     {
         if (!debugLog) return;
+        Debug.Log(msg);
+    }
+
+    private void JudgeLog(string msg)
+    {
+        if (!judgeLog) return;
         Debug.Log(msg);
     }
 
@@ -83,9 +104,6 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
 
         cam = Camera.main;
 
-        // ±âÁ¸ Èå¸§ À¯Áö.
-        // UIManager°¡ StartGameÀ» µû·Î È£ÃâÇÏ´Â ±¸Á¶¶ó¸é Áßº¹ ÃÊ±âÈ­µÉ ¼ö ÀÖÁö¸¸,
-        // ÀÌ ÄÚµå´Â ±âÁ¸ 1-1 µ¿ÀÛÀ» ÃÖ´ëÇÑ À¯ÁöÇÏ±â À§ÇØ ±×´ë·Î µĞ´Ù.
         StartGame();
     }
 
@@ -95,27 +113,36 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
 
         ended = false;
         roundsCompleted = false;
-        canClick = false;
 
         round = 0;
-        showIndex = 0;
-        inputIndex = 0;
-
         shownTargetCount = 0;
         localSuccessCount = 0;
-        localAutoFailCount = 0;
+        localFailCount = 0;
 
-        resolvedThisRound = new bool[ENEMY_COUNT];
-        autoOffJobs = new Coroutine[ENEMY_COUNT];
+        states = new TargetState[ENEMY_COUNT];
+        windowOpenTime = new double[ENEMY_COUNT];
+
+        if (hideJobs != null)
+        {
+            for (int i = 0; i < hideJobs.Length; i++)
+                StopHideJob(i);
+        }
+        hideJobs = new Coroutine[ENEMY_COUNT];
 
         lastRhythmAction = null;
-        pendingInputs.Clear();
 
         if (Scope != null)
             Scope.SetActive(false);
 
-        PrepareShowPositions();
-        ResetRoundObjects();
+        BeginRound();
+
+        for (int i = 0; i < ENEMY_COUNT; i++)
+        {
+            if (!IsValidEnemyIndex(i) || enemies[i] == null) continue;
+
+            enemies[i].ResetEnemy();
+            EnemySetInactiveImmediate(enemies[i]);
+        }
 
         Log("[1-1] StartGame");
     }
@@ -140,12 +167,8 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
 
         action = action.Trim();
 
-        // End´Â ¶ó¿îµå ¿Ï·á ÀÌÈÄ¿¡µµ ¹Ş¾Æ¾ß ÇÑ´Ù.
         if (action == "End")
-        {
-            Log("[1-1] End event received");
             return;
-        }
 
         if (roundsCompleted)
             return;
@@ -173,11 +196,15 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
 
     void Update()
     {
-        if (ended) return;
-        if (roundsCompleted) return;
+        if (ended || roundsCompleted) return;
+
+        CheckExpiredWindows();
+
         if (isDemoMode) return;
         if (!Input.GetMouseButtonDown(0)) return;
         if (cam == null) return;
+
+        double t = Now;
 
         Vector3 w = cam.ScreenToWorldPoint(Input.mousePosition);
         w.z = 0;
@@ -185,51 +212,68 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
         if (targetScope != null)
             targetScope.position = w;
 
-        Collider2D col = Physics2D.OverlapPoint(w);
+        int clickedIdx = FindClickedEnemy(w);
 
-        if (col == null)
+        if (clickedIdx < 0)
         {
-            // ºó °÷ Å¬¸¯Àº ´ë»ó ÇÏ³ª¸¦ ³õÄ£ °Ô ¾Æ´Ï¶ó ¿ÀÀÔ·ÂÀÌ¹Ç·Î
-            // ReportManualFail()Àº È£ÃâÇÏÁö ¾Ê´Â´Ù.
+            JudgeLog($"[1-1 Judge] t={t:F3} ë¹ˆ ê³³/ì  ì•„ë‹˜ í´ë¦­ (ë¬´ì‹œ)");
             return;
         }
 
-        var clicked = col.GetComponent<enemy_1_1_test>();
+        TargetState s = states[clickedIdx];
 
-        if (clicked == null)
+        // 1) íŒì •ì°½ì´ ì—´ë¦° ì  â†’ diffë¡œ íŒì •
+        if (s == TargetState.Windowed)
         {
-            // ÀûÀÌ ¾Æ´Ñ °Í Å¬¸¯µµ ¿ÀÀÔ·Â.
+            double diff = t - windowOpenTime[clickedIdx];
+            JudgeLog($"[1-1 Judge] HIT enemy={clickedIdx} diff={diff * 1000:F0}ms (late í—ˆìš© {lateWindowSeconds * 1000:F0}ms)");
+            ResolveSuccess(clickedIdx);
             return;
         }
 
-        if (!canClick || pendingInputs.Count == 0)
+        // 2) ì•„ì§ Input ë…¸íŠ¸ ì „ì¸ë° ë‹¤ìŒ ì°¨ë¡€ ì ì„ ëˆ„ë¦„ â†’ early ë²„í¼
+        if (s == TargetState.Shown && clickedIdx == inputCursor)
         {
-            // ÀÔ·Â Ã¢ ¹Û Å¬¸¯µµ ¿ÀÀÔ·Â.
+            earlyClickIdx = clickedIdx;
+            earlyClickTime = t;
+            JudgeLog($"[1-1 Judge] EARLY ë²„í¼ enemy={clickedIdx} t={t:F3} (Input ë…¸íŠ¸ ëŒ€ê¸°)");
             return;
         }
 
-        int expected = pendingInputs.Peek();
+        JudgeLog($"[1-1 Judge] ë¬´ì‹œ enemy={clickedIdx} state={s} ë‹¤ìŒì°¨ë¡€={inputCursor} t={t:F3}");
+    }
 
-        if (!IsValidEnemyIndex(expected))
+    private int FindClickedEnemy(Vector2 worldPos)
+    {
+        // ì¡°ì¤€ê²½ ë“± ë‹¤ë¥¸ ì½œë¼ì´ë”ê°€ ê²¹ì³ë„ ì ì„ ì°¾ë„ë¡ ì „ë¶€ ê²€ì‚¬
+        Collider2D[] hits = Physics2D.OverlapPointAll(worldPos);
+
+        for (int h = 0; h < hits.Length; h++)
         {
-            pendingInputs.Dequeue();
-            return;
+            var e = hits[h].GetComponentInParent<enemy_1_1_test>();
+            if (e == null) continue;
+
+            for (int i = 0; i < ENEMY_COUNT; i++)
+            {
+                if (IsValidEnemyIndex(i) && enemies[i] == e)
+                    return i;
+            }
         }
 
-        if (clicked != enemies[expected])
-        {
-            // Æ²¸° Àû Å¬¸¯µµ ¿ÀÀÔ·Â.
-            // ½ÇÁ¦ ´ë»óÀº ¾ÆÁ÷ »ì¾ÆÀÖÀ¸¹Ç·Î AutoOff¿¡¼­ ½ÇÆĞ Ã³¸®µÈ´Ù.
-            return;
-        }
-
-        pendingInputs.Dequeue();
-        ResolveSuccess(expected);
+        return -1;
     }
 
     void HandleShow()
     {
-        if (showIndex >= ENEMY_COUNT) return;
+        // ì´ì „ ë¼ìš´ë“œê°€ ì•„ì§ ì•ˆ ëë‚¬ëŠ”ë° ë‹¤ìŒ Showê°€ ì˜¤ë©´ ë‚¨ì€ ëŒ€ìƒ ì‹¤íŒ¨ ì²˜ë¦¬ í›„ ë¼ìš´ë“œ ë„˜ê¹€
+        if (showIndex >= ENEMY_COUNT)
+        {
+            Debug.LogWarning($"[1-1] Showê°€ ì™”ì§€ë§Œ ë¼ìš´ë“œ {round} ë¯¸ì¢…ë£Œ â†’ ê°•ì œ ì¢…ë£Œ (resolved={resolvedCount})");
+            ForceFinishRound();
+
+            if (roundsCompleted) return;
+        }
+
         if (!IsValidEnemyIndex(showIndex)) return;
         if (showPositions == null || showPositions.Length < ENEMY_COUNT) return;
         if (shuffledPosIndex == null || shuffledPosIndex.Length < ENEMY_COUNT) return;
@@ -240,109 +284,182 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
         if (showPositions[posIdx] == null) return;
 
         var e = enemies[showIndex];
-        var p = showPositions[posIdx];
-
         if (e == null) return;
 
-        e.transform.position = p.position;
+        // ì´ì „ ë¼ìš´ë“œì—ì„œ ê°™ì€ ì ì˜ í˜ì´ë“œì•„ì›ƒì´ ë‚¨ì•„ ìˆìœ¼ë©´ ëŠëŠ”ë‹¤
+        StopHideJob(showIndex);
+        e.ResetEnemy();
 
+        e.transform.position = showPositions[posIdx].position;
         EnemySetActiveTrueThenShow(e);
 
-        // ½ÇÁ¦·Î Show¿¡ ¼º°øÇÑ ´ë»ó¸¸ ÃÑÁ¡ ÈÄº¸·Î ¼¾´Ù.
+        states[showIndex] = TargetState.Shown;
         shownTargetCount++;
 
-        StopAutoOff(showIndex);
-        autoOffJobs[showIndex] = StartCoroutine(AutoOffRoutine(showIndex));
-
-        Log($"[1-1] SHOW idx={showIndex}, shownTargetCount={shownTargetCount}");
+        Log($"[1-1] SHOW round={round} idx={showIndex} t={Now:F3}");
 
         showIndex++;
     }
 
     void HandleInput()
     {
-        if (canClick)
-            CloseInputWindow();
+        double t = Now;
 
-        pendingInputs.Clear();
-
-        for (int i = inputIndex; i < showIndex; i++)
+        if (inputCursor >= ENEMY_COUNT || inputCursor >= showIndex)
         {
-            if (IsValidEnemyIndex(i) && !resolvedThisRound[i] && enemies[i] != null)
-            {
-                pendingInputs.Enqueue(i);
-                break;
-            }
+            Debug.LogWarning($"[1-1] Input ë…¸íŠ¸ê°€ ì™”ì§€ë§Œ ëŒ€ìƒ ì—†ìŒ (cursor={inputCursor}, shown={showIndex}, round={round}) t={t:F3}");
+            return;
         }
 
-        if (pendingInputs.Count == 0)
-            return;
+        int idx = inputCursor;
+        inputCursor++;
 
-        canClick = true;
-
-        if (inputWindowJob != null)
-            StopCoroutine(inputWindowJob);
-
-        inputWindowJob = StartCoroutine(InputWindowRoutine());
-
-        Log($"[1-1] INPUT expected={pendingInputs.Peek()} inputIndex={inputIndex} showIndex={showIndex}");
-    }
-
-    IEnumerator InputWindowRoutine()
-    {
-        yield return new WaitForSeconds(inputWindowSeconds);
-
-        canClick = false;
-        inputWindowJob = null;
-    }
-
-    IEnumerator AutoOffRoutine(int idx)
-    {
-        yield return new WaitForSeconds(autoOffSeconds);
-
-        if (!IsValidEnemyIndex(idx)) yield break;
-        if (resolvedThisRound[idx]) yield break;
-
-        resolvedThisRound[idx] = true;
-
-        localAutoFailCount++;
-        ReportManualFail();
-
-        yield return EnemyHideThenSetActiveFalse(enemies[idx]);
-
-        Log($"[1-1] AUTO FAIL idx={idx}, localAutoFailCount={localAutoFailCount}");
-
-        if (idx == inputIndex)
+        if (states[idx] != TargetState.Shown)
         {
-            inputIndex++;
-            TryEndRound();
+            Log($"[1-1] Input target {idx} state={states[idx]} â†’ skip");
+            return;
+        }
+
+        states[idx] = TargetState.Windowed;
+        windowOpenTime[idx] = t;
+
+        JudgeLog($"[1-1 Judge] INPUT ë…¸íŠ¸ round={round} enemy={idx} t={t:F3}");
+
+        // early ë²„í¼ í™•ì¸
+        if (earlyClickIdx == idx)
+        {
+            double diff = earlyClickTime - t; // ìŒìˆ˜
+            earlyClickIdx = -1;
+
+            if (-diff <= earlyWindowSeconds)
+            {
+                JudgeLog($"[1-1 Judge] HIT(early) enemy={idx} diff={diff * 1000:F0}ms (early í—ˆìš© {earlyWindowSeconds * 1000:F0}ms)");
+                ResolveSuccess(idx);
+                return;
+            }
+
+            JudgeLog($"[1-1 Judge] early ë„ˆë¬´ ë¹ ë¦„ enemy={idx} diff={diff * 1000:F0}ms â†’ ë¬´íš¨, ì°½ì€ ìœ ì§€");
+        }
+    }
+
+    void CheckExpiredWindows()
+    {
+        if (states == null) return;
+
+        double t = Now;
+
+        for (int i = 0; i < ENEMY_COUNT; i++)
+        {
+            if (states[i] != TargetState.Windowed) continue;
+            if (t <= windowOpenTime[i] + lateWindowSeconds) continue;
+
+            JudgeLog($"[1-1 Judge] MISS(ì‹œê°„ì´ˆê³¼) enemy={i} ë…¸íŠ¸={windowOpenTime[i]:F3} now={t:F3}");
+            ResolveFail(i);
         }
     }
 
     void ResolveSuccess(int idx)
     {
         if (!IsValidEnemyIndex(idx)) return;
-        if (resolvedThisRound[idx]) return;
+        if (states[idx] == TargetState.Resolved) return;
 
-        StartCoroutine(ResolveSuccessRoutine(idx));
-    }
+        states[idx] = TargetState.Resolved;
 
-    IEnumerator ResolveSuccessRoutine(int idx)
-    {
-        resolvedThisRound[idx] = true;
+        if (earlyClickIdx == idx)
+            earlyClickIdx = -1;
 
         localSuccessCount++;
         ReportManualSuccess();
 
-        StopAutoOff(idx);
-        CloseInputWindow();
+        StopHideJob(idx);
+        hideJobs[idx] = StartCoroutine(EnemySuccessHideThenSetActiveFalse(enemies[idx]));
 
-        yield return EnemySuccessHideThenSetActiveFalse(enemies[idx]);
+        OnTargetResolved();
+    }
 
-        Log($"[1-1] SUCCESS idx={idx}, localSuccessCount={localSuccessCount}");
+    void ResolveFail(int idx)
+    {
+        if (!IsValidEnemyIndex(idx)) return;
+        if (states[idx] == TargetState.Resolved) return;
 
-        inputIndex++;
-        TryEndRound();
+        states[idx] = TargetState.Resolved;
+
+        if (earlyClickIdx == idx)
+            earlyClickIdx = -1;
+
+        localFailCount++;
+        ReportManualFail();
+
+        StopHideJob(idx);
+        hideJobs[idx] = StartCoroutine(EnemyHideThenSetActiveFalse(enemies[idx]));
+
+        OnTargetResolved();
+    }
+
+    void OnTargetResolved()
+    {
+        resolvedCount++;
+
+        if (resolvedCount < ENEMY_COUNT) return;
+
+        // ë¼ìš´ë“œ ì¢…ë£ŒëŠ” í˜ì´ë“œë¥¼ ê¸°ë‹¤ë¦¬ì§€ ì•Šê³  ì¦‰ì‹œ (ë‹¤ìŒ Showë¥¼ ë†“ì¹˜ì§€ ì•Šë„ë¡)
+        EndRound();
+    }
+
+    void ForceFinishRound()
+    {
+        for (int i = 0; i < ENEMY_COUNT; i++)
+        {
+            if (states[i] == TargetState.Shown || states[i] == TargetState.Windowed)
+                ResolveFail(i);
+        }
+
+        // ì•„ì˜ˆ Showë˜ì§€ ì•Šì€ ëŒ€ìƒì´ ìˆìœ¼ë©´ resolvedCountê°€ ì•ˆ ì°¨ë¯€ë¡œ ì§ì ‘ ì¢…ë£Œ
+        if (!roundsCompleted && showIndex >= ENEMY_COUNT && resolvedCount < ENEMY_COUNT)
+            EndRound();
+    }
+
+    void EndRound()
+    {
+        round++;
+
+        Log($"[1-1] ROUND END â†’ round={round} success={localSuccessCount} fail={localFailCount}");
+
+        if (Scope != null)
+            Scope.SetActive(false);
+
+        if (targetScope != null)
+            targetScope.position = Vector2.zero;
+
+        if (round >= TOTAL_ROUND)
+        {
+            roundsCompleted = true;
+
+            Log(
+                $"[1-1] ROUNDS COMPLETED " +
+                $"shown={shownTargetCount}, success={localSuccessCount}, fail={localFailCount}"
+            );
+
+            return;
+        }
+
+        BeginRound();
+    }
+
+    void BeginRound()
+    {
+        showIndex = 0;
+        inputCursor = 0;
+        resolvedCount = 0;
+        earlyClickIdx = -1;
+
+        for (int i = 0; i < ENEMY_COUNT; i++)
+        {
+            states[i] = TargetState.Hidden;
+            windowOpenTime[i] = 0;
+        }
+
+        PrepareShowPositions();
     }
 
     IEnumerator EnemySuccessHideThenSetActiveFalse(enemy_1_1_test e)
@@ -360,96 +477,31 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
         e.gameObject.SetActive(false);
     }
 
-    void CloseInputWindow()
+    IEnumerator EnemyHideThenSetActiveFalse(enemy_1_1_test e)
     {
-        canClick = false;
-        pendingInputs.Clear();
+        if (e == null) yield break;
 
-        if (inputWindowJob != null)
+        FadeActiveToggle fade = e.TryGetFade();
+
+        if (fade != null)
         {
-            StopCoroutine(inputWindowJob);
-            inputWindowJob = null;
-        }
-    }
-
-    void TryEndRound()
-    {
-        if (inputIndex < ENEMY_COUNT) return;
-
-        EndRound();
-
-        if (Scope != null)
-            Scope.SetActive(false);
-
-        if (targetScope != null)
-            targetScope.position = Vector2.zero;
-    }
-
-    void EndRound()
-    {
-        round++;
-
-        canClick = false;
-        showIndex = 0;
-        inputIndex = 0;
-        pendingInputs.Clear();
-
-        if (inputWindowJob != null)
-        {
-            StopCoroutine(inputWindowJob);
-            inputWindowJob = null;
+            fade.FadeOut();
+            yield return new WaitForSeconds(fade.GetFadeTime());
         }
 
-        if (round >= TOTAL_ROUND)
-        {
-            roundsCompleted = true;
-
-            if (Scope != null)
-                Scope.SetActive(false);
-
-            Log(
-                $"[1-1] ROUNDS COMPLETED " +
-                $"shown={shownTargetCount}, success={localSuccessCount}, autoFail={localAutoFailCount}"
-            );
-
-            return;
-        }
-
-        PrepareShowPositions();
-        ResetRoundObjects();
+        e.ResetEnemy();
+        e.gameObject.SetActive(false);
     }
 
-    void ResetRoundObjects()
+    void StopHideJob(int idx)
     {
-        if (resolvedThisRound == null || resolvedThisRound.Length < ENEMY_COUNT)
-            resolvedThisRound = new bool[ENEMY_COUNT];
+        if (hideJobs == null) return;
+        if (idx < 0 || idx >= hideJobs.Length) return;
 
-        if (autoOffJobs == null || autoOffJobs.Length < ENEMY_COUNT)
-            autoOffJobs = new Coroutine[ENEMY_COUNT];
-
-        for (int i = 0; i < ENEMY_COUNT; i++)
+        if (hideJobs[idx] != null)
         {
-            resolvedThisRound[i] = false;
-
-            StopAutoOff(i);
-
-            if (!IsValidEnemyIndex(i)) continue;
-            if (enemies[i] == null) continue;
-
-            enemies[i].ResetEnemy();
-            EnemySetInactiveImmediate(enemies[i]);
-        }
-    }
-
-    void StopAutoOff(int idx)
-    {
-        if (autoOffJobs == null) return;
-        if (idx < 0 || idx >= autoOffJobs.Length) return;
-
-        if (autoOffJobs[idx] != null)
-        {
-            StopCoroutine(autoOffJobs[idx]);
-            autoOffJobs[idx] = null;
+            StopCoroutine(hideJobs[idx]);
+            hideJobs[idx] = null;
         }
     }
 
@@ -469,7 +521,7 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
 
     public override ScoreResult FinalizeScoreSession()
     {
-        int processedCount = localSuccessCount + localAutoFailCount;
+        int processedCount = localSuccessCount + localFailCount;
         int runtimeTotal = Mathf.Max(shownTargetCount, processedCount);
 
         SetRuntimeTotalNodeCount(runtimeTotal);
@@ -482,13 +534,14 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
             );
         }
 
+        JudgeLog($"[1-1 Judge] ê²°ê³¼ success={localSuccessCount} fail={localFailCount} shown={shownTargetCount}");
+
         return base.FinalizeScoreSession();
     }
 
     public override void OnJudgement(JudgementResult judgement)
     {
-        // 1-1Àº RhythmManagerÀÇ Perfect/Good/Miss ÆÇÁ¤ Á¡¼ö¸¦ »ç¿ëÇÏÁö ¾Ê´Â´Ù.
-        // CSV InputÀº Å¬¸¯ °¡´É Ã¢À» ¿©´Â Æ®¸®°Å·Î¸¸ »ç¿ëÇÑ´Ù.
+        // 1-1ì€ RhythmManager íŒì •ì„ ì“°ì§€ ì•ŠëŠ”ë‹¤.
     }
 
     public void Succeed()
@@ -511,8 +564,7 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
     {
         if (e == null) return;
 
-        GameObject go = e.gameObject;
-        go.SetActive(true);
+        e.gameObject.SetActive(true);
 
         FadeActiveToggle fade = e.TryGetFade();
 
@@ -521,22 +573,6 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
             fade.SetAlphaImmediate(fade.inactiveAlpha);
             fade.FadeIn();
         }
-    }
-
-    IEnumerator EnemyHideThenSetActiveFalse(enemy_1_1_test e)
-    {
-        if (e == null) yield break;
-
-        FadeActiveToggle fade = e.TryGetFade();
-
-        if (fade != null)
-        {
-            fade.FadeOut();
-            yield return new WaitForSeconds(fade.GetFadeTime());
-        }
-
-        e.ResetEnemy();
-        e.gameObject.SetActive(false);
     }
 
     void EnemySetInactiveImmediate(enemy_1_1_test e)
@@ -556,100 +592,40 @@ public class minigame_1_1_remake_DEBUG : MiniGameBase, IPracticeDemoInput
         return enemies != null && idx >= 0 && idx < enemies.Length && idx < ENEMY_COUNT;
     }
 
-    public override void ExecutePracticeAction(
-    int actionIndex,
-    string actionType)
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
     {
-        if (ended ||
-            roundsCompleted)
+        if (ended || roundsCompleted) return;
+
+        if (!string.Equals(actionType, "Input", System.StringComparison.OrdinalIgnoreCase))
+            return;
+
+        // OnRhythmEvent("Input")ê°€ ë¨¼ì € ì‹¤í–‰ë˜ì–´ ë°©ê¸ˆ ë…¸íŠ¸ì˜ ëŒ€ìƒì´ Windowed ìƒíƒœë‹¤.
+        int idx = inputCursor - 1;
+
+        if (!IsValidEnemyIndex(idx) || states[idx] != TargetState.Windowed)
         {
+            Log($"[1-1 Demo] ì‹¤í–‰í•  ëŒ€ìƒ ì—†ìŒ actionIndex={actionIndex}");
             return;
         }
 
-        /*
-         * 1-1¿¡¼­ ÇÃ·¹ÀÌ¾î Çàµ¿Àº
-         * CSVÀÇ Input ½ÃÁ¡¿¡¸¸ ¹ß»ıÇÑ´Ù.
-         */
-        if (!string.Equals(
-                actionType,
-                "Input",
-                System.StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
+        enemy_1_1_test target = enemies[idx];
+        if (target == null) return;
 
-        /*
-         * OnRhythmEvent("Input")¿¡¼­
-         * HandleInput()ÀÌ ¸ÕÀú ½ÇÇàµÇ¾î
-         * pendingInputs¿¡ ÇöÀç Á¤´äÀÌ µé¾î°£´Ù.
-         */
-        if (!canClick ||
-            pendingInputs.Count == 0)
-        {
-            Log(
-                $"[1-1 Demo] ½ÇÇàÇÒ ´ë»ó ¾øÀ½ " +
-                $"actionIndex={actionIndex}"
-            );
-
-            return;
-        }
-
-        int expected =
-            pendingInputs.Peek();
-
-        if (!IsValidEnemyIndex(expected))
-        {
-            pendingInputs.Dequeue();
-            return;
-        }
-
-        enemy_1_1_test target =
-            enemies[expected];
-
-        if (target == null)
-            return;
-
-        /*
-         * ½ÇÁ¦ ÇÃ·¹ÀÌ¾î°¡ Å¬¸¯ÇÏ¸é
-         * targetScope°¡ Å¬¸¯ À§Ä¡·Î ¿òÁ÷ÀÌ¹Ç·Î
-         * ¿¹½Ãº¸±â¿¡¼­µµ °°Àº ½Ã°¢Àû ¹İÀÀÀ» ÁØ´Ù.
-         */
         if (targetScope != null)
-        {
-            targetScope.position =
-                target.transform.position;
-        }
+            targetScope.position = target.transform.position;
 
-        /*
-         * ½ÇÁ¦ Å¬¸¯ ¼º°ø°ú µ¿ÀÏÇÏ°Ô
-         * ÇöÀç Á¤´ä ÀÔ·ÂÀ» ¼ÒºñÇÑ´Ù.
-         */
-        pendingInputs.Dequeue();
+        ResolveSuccess(idx);
 
-        ResolveSuccess(expected);
-
-        Log(
-            $"[1-1 Demo] ÀÚµ¿ ÀÔ·Â ¼º°ø " +
-            $"actionIndex={actionIndex}, " +
-            $"enemy={expected}"
-        );
+        Log($"[1-1 Demo] ìë™ ì…ë ¥ ì„±ê³µ actionIndex={actionIndex}, enemy={idx}");
     }
 
     public void SetDemoMode(bool isDemo)
     {
         isDemoMode = isDemo;
 
-        // ½Ã¹ü ¸ğµå°¡ µÇ¸é ÇÃ·¹ÀÌ¾î ÀÔ·Â °ü·Ã »óÅÂ ÃÊ±âÈ­
         if (isDemoMode)
         {
-            canClick = false;
-            pendingInputs.Clear();
-
-            if (inputWindowJob != null)
-            {
-                StopCoroutine(inputWindowJob);
-                inputWindowJob = null;
-            }
+            earlyClickIdx = -1;
 
             if (Scope != null)
                 Scope.SetActive(false);

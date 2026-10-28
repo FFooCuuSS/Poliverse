@@ -31,6 +31,19 @@ public class Minigame_1_7 : MiniGameBase, IPracticeDemoInput
     private bool transitionRunning = false;
     private bool pendingShow = false;
 
+    // 이번 라운드에서 판정 UI를 띄운 횟수 (Show 노트 수)
+    private int shownCount = 0;
+
+    [Header("Debug")]
+    [SerializeField] private bool judgeLog = true;
+
+    private double SongT => (rhythmManager as RhythmManager)?.SongTime ?? -1;
+
+    private void JudgeLog(string msg)
+    {
+        if (judgeLog) Debug.Log(msg);
+    }
+
     private bool isDemoMode = false;
     public bool IsDemoMode => isDemoMode;
 
@@ -67,6 +80,7 @@ public class Minigame_1_7 : MiniGameBase, IPracticeDemoInput
         gameEnded = false;
         transitionRunning = false;
         pendingShow = false;
+        shownCount = 0;
 
         if (holdJudge != null)
         {
@@ -128,6 +142,9 @@ public class Minigame_1_7 : MiniGameBase, IPracticeDemoInput
         pendingShow = false;
         awaitingJudge = false;
 
+        shownCount++;
+        JudgeLog($"[1-7 Judge] SHOW #{shownCount} song={SongT:F3}");
+
         holdJudge?.ShowPreviewUI(inputIndex, prisoner.transform);
     }
 
@@ -140,8 +157,16 @@ public class Minigame_1_7 : MiniGameBase, IPracticeDemoInput
 
     public override void OnPlayerInput(string action = null)
     {
+        // 실제 플레이어 입력은 시범 중에 막는다
         if (IsDemoMode) return;
 
+        SubmitInput(action);
+    }
+
+    // 플레이어/시범 공통 입력 처리
+    // (기존엔 시범의 ExecutePracticeAction도 OnPlayerInput을 거쳐서 IsDemoMode에 막혔음)
+    private void SubmitInput(string action)
+    {
         if (IsInputLocked) return;
         if (!roundActive) return;
         if (transitionRunning) return;
@@ -157,7 +182,16 @@ public class Minigame_1_7 : MiniGameBase, IPracticeDemoInput
         }
 
 
+        JudgeLog($"[1-7 Judge] 터치 song={SongT:F3}");
+
         base.OnPlayerInput(action ?? "Input");
+
+        // 판정 범위 안에 노트가 없으면 판정이 오지 않는다 → 잠금 풀기
+        if (awaitingJudge)
+        {
+            awaitingJudge = false;
+            JudgeLog($"[1-7 Judge] 노트 범위 밖 터치 → 무시 song={SongT:F3}");
+        }
     }
 
     public void OnHoldButtonPressed()
@@ -169,14 +203,24 @@ public class Minigame_1_7 : MiniGameBase, IPracticeDemoInput
 
     public override void OnJudgement(JudgementResult judgement)
     {
+        // 점수 집계(Perfect/Good 카운트)는 Base가 한다. 이게 빠져 있어서 점수가 항상 0이었음.
+        base.OnJudgement(judgement);
+
         if (!roundActive) return;
         if (prisoner == null) return;
 
-        Debug.Log($"OnJudgement : {judgement}");
-
+        bool fromPlayer = awaitingJudge;
         awaitingJudge = false;
 
-        holdJudge?.PlayJudgeFeedback(judgement);
+        // 시간초과 Miss는 노트 시각 + hitWindow 뒤에 늦게 도착한다.
+        // 그 사이 다음 Show로 새 UI가 떠 있으면, 그 새 UI를 지우면 안 된다.
+        bool newerUiShown = shownCount > inputIndex + 1;
+
+        JudgeLog($"[1-7 Judge] 판정 {judgement} ({(fromPlayer ? "터치" : "시간초과")}) 노트#{inputIndex + 1} song={SongT:F3}" +
+                 (!fromPlayer && newerUiShown ? " → 다음 UI 유지" : ""));
+
+        if (fromPlayer || !newerUiShown)
+            holdJudge?.PlayJudgeFeedback(judgement);
 
         if (judgement == JudgementResult.Perfect || judgement == JudgementResult.Good)
             totalSuccess++;
@@ -261,6 +305,7 @@ public class Minigame_1_7 : MiniGameBase, IPracticeDemoInput
         awaitingJudge = false;
         inputIndex = 0;
         pendingShow = false;
+        shownCount = 0;
 
         holdJudge?.ResetAll();
 
@@ -279,6 +324,8 @@ public class Minigame_1_7 : MiniGameBase, IPracticeDemoInput
         if (pendingShow && inputIndex < inputPerRound)
         {
             pendingShow = false;
+            shownCount++;
+            JudgeLog($"[1-7 Judge] SHOW #{shownCount} (도착 후 지연 표시) song={SongT:F3}");
             holdJudge?.ShowPreviewUI(inputIndex, prisoner.transform);
         }
     }
@@ -301,7 +348,7 @@ public class Minigame_1_7 : MiniGameBase, IPracticeDemoInput
 
         Debug.Log($"[1-7 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}, inputIndex={inputIndex}");
 
-        // 데모 모드에서는 실제 유저가 성공적으로 버튼을 누른 것처럼 OnPlayerInput을 호출하여 정답 처리 수행
-        OnPlayerInput("Input");
+        // 시범: 실제 유저가 누른 것처럼 판정까지 보낸다
+        SubmitInput("Input");
     }
 }

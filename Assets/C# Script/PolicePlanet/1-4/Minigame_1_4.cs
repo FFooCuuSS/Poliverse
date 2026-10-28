@@ -24,12 +24,17 @@ public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
 
     [Header("Refs")]
     [SerializeField] private SpawnManager spawnManager;
+    [Tooltip("비우면 자식에서 자동 탐색")]
+    [SerializeField] private AccessoryBlinkManager blinkManager;
+
+    [Header("Debug")]
+    [SerializeField] private bool judgeLog = true;
 
     private int currentRound;
     private int swipeCountInRound;
+    private int showCountInRound;
     private int totalSuccess;
 
-    private bool inputOpen;
     private bool awaitingJudge;
     private bool roundEnding;
     private bool ended;
@@ -38,6 +43,31 @@ public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
 
     private bool isDemoMode;
     public bool IsDemoMode => isDemoMode;
+
+    // 입력은 들어왔지만 아직 판정 전인 악세사리
+    private Accessory pendingAccessory;
+
+    private readonly Accessory.AccessoryType[] requiredOrder =
+    {
+        Accessory.AccessoryType.Hat,
+        Accessory.AccessoryType.Glasses,
+        Accessory.AccessoryType.Mustache
+    };
+
+    private double SongT => (rhythmManager as RhythmManager)?.SongTime ?? -1;
+
+    private void JudgeLog(string msg)
+    {
+        if (judgeLog) Debug.Log(msg);
+    }
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        if (blinkManager == null)
+            blinkManager = GetComponentInChildren<AccessoryBlinkManager>(true);
+    }
 
     public void SetDemoMode(bool value)
     {
@@ -52,30 +82,15 @@ public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
         Debug.Log($"[1-4 Demo] 데모 모드: {isDemoMode}");
     }
 
-    // 입력은 들어왔지만 아직 판정 전인 악세사리
-    private Accessory pendingAccessory;
-
-    private readonly Accessory.AccessoryType[] requiredOrder =
-    {
-        Accessory.AccessoryType.Hat,
-        Accessory.AccessoryType.Glasses,
-        Accessory.AccessoryType.Mustache
-    };
-
-    private void Start()
-    {
-        //StartGame();
-    }
-
     public override void StartGame()
     {
         base.StartGame();
 
         currentRound = 0;
         swipeCountInRound = 0;
+        showCountInRound = 0;
         totalSuccess = 0;
 
-        inputOpen = false;
         awaitingJudge = false;
         roundEnding = false;
         ended = false;
@@ -113,28 +128,39 @@ public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
         Debug.Log($"[1-4] StartRound : {currentRound + 1}");
 
         swipeCountInRound = 0;
-        inputOpen = false;
+        showCountInRound = 0;
         awaitingJudge = false;
         roundEnding = false;
         pendingAccessory = null;
 
-        LockAllAccessories();
+        // 노트 전에도 미리 잡을 수 있게 현재 순서 악세사리는 바로 열어둔다.
+        // 판정 범위 밖에서 놓으면 RhythmManager가 무시하므로 손해 없음.
+        if (isDemoMode)
+            LockAllAccessories();
+        else
+            EnableOnlyCurrentAccessory();
     }
 
     public override void OnRhythmEvent(string action)
     {
-        if (ended || roundEnding) return;
+        if (ended) return;
 
         action = action?.Trim();
-        if (action != "Swipe") return;
 
-        if (awaitingJudge) return;
-        if (swipeCountInRound >= accessoryPerRound) return;
+        if (action == "Show")
+        {
+            if (blinkManager != null && blinkManager.UseRhythmShow)
+            {
+                JudgeLog($"[1-4 Judge] SHOW 힌트 {showCountInRound} song={SongT:F3}");
+                blinkManager.BlinkAt(showCountInRound);
+            }
 
-        inputOpen = true;
-        EnableOnlyCurrentAccessory();
+            showCountInRound++;
+            return;
+        }
 
-        Debug.Log($"[1-4] Swipe window OPEN / target = {GetCurrentRequiredType()}");
+        if (action == "Swipe")
+            JudgeLog($"[1-4 Judge] SWIPE 노트 song={SongT:F3} 현재 순서={GetCurrentRequiredType()}");
     }
 
     public void TryAccessoryInput(Accessory clickedAccessory)
@@ -143,23 +169,36 @@ public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
         if (clickedAccessory == null) return;
         if (IsInputLocked) return;
         if (ended || roundEnding) return;
-        if (!inputOpen || awaitingJudge) return;
+        if (awaitingJudge) return;
 
         var requiredType = GetCurrentRequiredType();
         if (clickedAccessory.Type != requiredType)
         {
-            Debug.Log($"[1-4] Wrong accessory clicked: {clickedAccessory.Type}, required: {requiredType}");
+            JudgeLog($"[1-4 Judge] 순서 틀림 {clickedAccessory.Type} (필요: {requiredType}) song={SongT:F3}");
             return;
         }
 
+        JudgeLog($"[1-4 Judge] 입력 {clickedAccessory.Type} song={SongT:F3}");
+
         awaitingJudge = true;
-        inputOpen = false;
         pendingAccessory = clickedAccessory;
 
         LockAllAccessories();
 
-        // 제거는 여기서 하지 말고, 판정 성공 후에 한다.
+        // ReceivePlayerInput는 판정 시 OnJudgement를 동기로 호출한다.
         base.OnPlayerInput("Swipe");
+
+        // 판정 범위(hitWindow) 안에 노트가 없으면 아무 판정도 안 온다 → 입력 무효, 다시 열어줌
+        if (awaitingJudge)
+        {
+            JudgeLog($"[1-4 Judge] 노트 범위 밖 입력 → 무시 song={SongT:F3}");
+
+            awaitingJudge = false;
+            pendingAccessory = null;
+
+            if (!ended && !roundEnding)
+                EnableOnlyCurrentAccessory();
+        }
     }
 
     public override void OnJudgement(JudgementResult judgement)
@@ -167,11 +206,16 @@ public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
         if (ended || roundEnding) return;
 
         base.OnJudgement(judgement);
+
+        // 내 입력 판정이 아니면서 Miss도 아니면 무시
         if (!awaitingJudge && judgement != JudgementResult.Miss) return;
 
+        bool fromPlayer = awaitingJudge;
+
         awaitingJudge = false;
-        inputOpen = false;
         LockAllAccessories();
+
+        JudgeLog($"[1-4 Judge] 판정 {judgement} ({(fromPlayer ? "입력" : "시간초과")}) 순서={GetCurrentRequiredType()} song={SongT:F3}");
 
         switch (judgement)
         {
@@ -180,11 +224,10 @@ public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
                 totalSuccess++;
 
                 if (pendingAccessory != null)
-                    pendingAccessory.RemoveWithDelay(0f); // 성공 시 즉시 페이드 제거
+                    pendingAccessory.RemoveWithDelay(0f);
                 break;
 
             case JudgementResult.Miss:
-                // Miss면 제거하지 않음
                 break;
         }
 
@@ -192,6 +235,11 @@ public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
 
         // 순서는 성공 여부와 무관하게 라운드 진행 기준으로 넘긴다.
         swipeCountInRound++;
+
+        // 시범 모드에서는 악세사리를 열지 않는다 (자동 입력만)
+        if (!isDemoMode && swipeCountInRound < accessoryPerRound)
+            EnableOnlyCurrentAccessory();
+
         CheckRoundEnd();
     }
 
@@ -228,7 +276,6 @@ public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
         if (ended) return;
 
         ended = true;
-        inputOpen = false;
         awaitingJudge = false;
         roundEnding = true;
         pendingAccessory = null;
@@ -256,8 +303,7 @@ public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
                 continue;
             }
 
-            bool canInput = acc.Type == requiredType;
-            acc.SetInteractableNow(canInput);
+            acc.SetInteractableNow(acc.Type == requiredType);
         }
     }
 
@@ -277,20 +323,15 @@ public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
 
         Debug.Log($"[1-4 Demo] Action Index: {actionIndex}");
 
-        // 전체 actionIndex를 바탕으로 현재 라운드와 라운드 내 인덱스를 계산합니다.
-        // 한 라운드당 3개씩 진행된다고 가정 (accessoryPerRound = 3)
         int targetRound = actionIndex / accessoryPerRound;
         int roundLocalIndex = actionIndex % accessoryPerRound;
 
-        // 만약 데모 도중 라운드가 바뀌어야 하는 시점이라면 라운드 상태 동기화 처리
         if (currentRound != targetRound)
         {
             currentRound = targetRound;
-            // 필요하다면 여기서 라운드 시작 로그나 추가 처리를 할 수 있습니다.
             Debug.Log($"[1-4 Demo] 데모 라운드 전환: {currentRound + 1}");
         }
 
-        // 라운드 내 순서 동기화
         swipeCountInRound = roundLocalIndex;
 
         switch (roundLocalIndex)
@@ -312,12 +353,10 @@ public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
                 break;
         }
 
-        // 행동이 끝났으므로 라운드 내 카운터를 1증가시키고 라운드 종료 체크
         swipeCountInRound++;
         CheckRoundEnd();
     }
 
-    // 특정 타입의 액세서리를 찾아 강제로 제거하는 헬퍼 메서드
     private void RemoveAccessoryByType(Accessory.AccessoryType type)
     {
         var targetAcc = orderedAccessories.Find(acc => acc != null && acc.Type == type && !acc.IsRemoved);

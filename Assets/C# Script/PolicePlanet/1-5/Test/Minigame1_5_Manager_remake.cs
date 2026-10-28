@@ -1,11 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
 public class Minigame1_5_Manager_remake : MiniGameBase
 {
-    private float prevHandX;
     [System.Serializable]
     public class CaseMoveData
     {
@@ -38,7 +36,13 @@ public class Minigame1_5_Manager_remake : MiniGameBase
 
     [Header("Timing")]
     [SerializeField] private float roundCycleTime = 4f;
-    [SerializeField] private float successRangeX = 0.5f;
+    [Tooltip("(구버전) 거리 기준 판정 범위. 지금은 judgeWindowSeconds를 사용")]
+    [SerializeField] private float successRangeX = 0.6f;
+    [Tooltip("줄이 죄수 위를 지나는 순간 기준 ±이 시간 안에 터치하면 성공")]
+    [SerializeField] private float judgeWindowSeconds = 0.15f;
+
+    [Header("Debug")]
+    [SerializeField] private bool judgeLog = true;
 
     private readonly int[] roundCaseOrder = { 1, 2, 1, 2 };
 
@@ -48,21 +52,41 @@ public class Minigame1_5_Manager_remake : MiniGameBase
     private int currentRoundIndex = -1;
     private int currentCaseNum = 0;
 
-    private bool acceptInput = false;
+    private bool running = false;
     private bool gameEnded = false;
-    private bool gameLoopStarted = false;
+    private double localStartTime;
 
-    private HashSet<int> currentRoundHitIndices = new HashSet<int>();
+    private readonly HashSet<int> currentRoundHitIndices = new HashSet<int>();
 
     public int totalSuccessCount { get; private set; }
 
-    private int[] roundSuccessCounts = new int[4];
-    private Coroutine roundLoopCoroutine;
+    private readonly int[] roundSuccessCounts = new int[4];
+
+    // 데모 자동 입력용
+    private int autoRoundIndex = -1;
+    private float prevHandX;
 
     protected override float TimerDuration => 16f;
 
     protected override string MinigameTitle => "숨은 범인을 찾아라";
     protected override string MinigameExplain => "오른쪽에서 줄이 죄수위로 지나갈때 화면을 터치해주세요.";
+
+    // ───────── 시간: 노래 시간 기준 (없으면 로컬 시간) ─────────
+    private double Now
+    {
+        get
+        {
+            if (rhythmManager is RhythmManager rm && rm.IsRunning)
+                return rm.SongTime;
+
+            return Time.timeAsDouble - localStartTime;
+        }
+    }
+
+    private void JudgeLog(string msg)
+    {
+        if (judgeLog) Debug.Log(msg);
+    }
 
     public override void StartGame()
     {
@@ -72,41 +96,148 @@ public class Minigame1_5_Manager_remake : MiniGameBase
         CacheTargets();
         ResetState();
 
-        if (roundLoopCoroutine != null)
-        {
-            StopCoroutine(roundLoopCoroutine);
-            roundLoopCoroutine = null;
-        }
+        localStartTime = Time.timeAsDouble;
+        running = true;
+    }
 
-        if (!gameLoopStarted)
-        {
-            gameLoopStarted = true;
-            roundLoopCoroutine = StartCoroutine(RoundLoop());
-        }
+    private void ResetState()
+    {
+        totalSuccessCount = 0;
+        currentRoundIndex = -1;
+        currentCaseNum = 0;
+        autoRoundIndex = -1;
+        gameEnded = false;
+        running = false;
+        currentRoundHitIndices.Clear();
+
+        for (int i = 0; i < roundSuccessCounts.Length; i++)
+            roundSuccessCounts[i] = 0;
+
+        ResetPrisonerArray(case1Prisoners);
+        ResetPrisonerArray(case2Prisoners);
+
+        if (case1_Obj != null) case1_Obj.SetActive(false);
+        if (case2_Obj != null) case2_Obj.SetActive(false);
+
+        if (hand != null)
+            hand.position = Vector3.zero;
     }
 
     private void Update()
     {
-        if (gameEnded) return;
+        if (!running || gameEnded) return;
+        if (hand == null) return;
+
+        double t = Now;
+        if (t < 0) return;
+
+        int round = (int)(t / roundCycleTime);
+
+        if (round >= roundCaseOrder.Length)
+        {
+            EndByRule();
+            return;
+        }
+
+        if (round != currentRoundIndex)
+            EnterRound(round, t);
+
+        CaseMoveData move = GetCurrentMoveData();
+        if (move == null) return;
+
+        float local = (float)(t - round * roundCycleTime);
+
+        // 손 위치를 노래 시간으로 직접 계산 → 프레임/로딩 지연이 누적되지 않음
+        float progress = move.moveTime > 0f
+            ? Mathf.Clamp01((local - move.waitTime) / move.moveTime)
+            : 1f;
+
+        hand.position = Vector2.Lerp(move.startPos, move.endPos, progress);
+
+        bool acceptInput = local <= move.waitTime + move.moveTime + judgeWindowSeconds;
         if (!acceptInput) return;
+
         if (IsDemoMode)
         {
             AutoPlayTick();
-            return; // 시범 중엔 실제 클릭 무시
+            return;
         }
+
         if (Input.GetMouseButtonDown(0))
-        {
-            HandleClick();
-        }
+            HandleClick(local, move);
     }
-    private int autoRoundIndex = -1;
+
+    private void EnterRound(int round, double t)
+    {
+        currentRoundIndex = round;
+        currentCaseNum = roundCaseOrder[round];
+        currentRoundHitIndices.Clear();
+
+        SetCaseVisible(currentCaseNum);
+        ResetPrisonerArray(GetCurrentPrisoners());
+
+        CaseMoveData move = GetCurrentMoveData();
+        if (move != null)
+            hand.position = move.startPos;
+
+        JudgeLog($"[1-5 Judge] ROUND {round + 1} 시작 Case={currentCaseNum} song={t:F3}");
+        DebugCurrentCaseTargetPositions();
+    }
+
+    // 줄이 targetX를 지나는 라운드 내 시각
+    private float GetPassTime(CaseMoveData move, float targetX)
+    {
+        float dx = move.startPos.x - move.endPos.x;
+        if (Mathf.Approximately(dx, 0f)) return move.waitTime;
+
+        float ratio = (move.startPos.x - targetX) / dx;
+        return move.waitTime + move.moveTime * ratio;
+    }
+
+    private void HandleClick(float local, CaseMoveData move)
+    {
+        Transform[] targets = GetCurrentTargets();
+
+        int best = -1;
+        float bestAbs = float.MaxValue;
+        float bestDiff = 0f;
+
+        if (targets != null)
+        {
+            for (int i = 0; i < targets.Length; i++)
+            {
+                if (targets[i] == null || !targets[i].gameObject.activeInHierarchy) continue;
+                if (currentRoundHitIndices.Contains(i)) continue;
+
+                float diff = local - GetPassTime(move, targets[i].position.x);
+                float abs = Mathf.Abs(diff);
+
+                if (abs < bestAbs)
+                {
+                    bestAbs = abs;
+                    bestDiff = diff;
+                    best = i;
+                }
+            }
+        }
+
+        if (best >= 0 && bestAbs <= judgeWindowSeconds)
+        {
+            JudgeLog($"[1-5 Judge] HIT R={currentRoundIndex + 1} idx={best} diff={bestDiff * 1000:F0}ms");
+            TryHitTarget(best);
+        }
+        else if (best >= 0)
+        {
+            JudgeLog($"[1-5 Judge] MISS 클릭 R={currentRoundIndex + 1} 가장 가까운 idx={best} diff={bestDiff * 1000:F0}ms (허용 ±{judgeWindowSeconds * 1000:F0}ms)");
+        }
+
+        SpawnClickEffect(new Vector3(hand.position.x, -1.5f, 0f));
+    }
+
     private void AutoPlayTick()
     {
-        if (hand == null) return;
-
         float handX = hand.position.x;
 
-        // 라운드가 바뀐 첫 프레임은 위치만 기록하고 판정 안 함
         if (autoRoundIndex != currentRoundIndex)
         {
             autoRoundIndex = currentRoundIndex;
@@ -114,7 +245,6 @@ public class Minigame1_5_Manager_remake : MiniGameBase
             return;
         }
 
-        // 손이 안 움직였으면(대기 시간) 판정 안 함
         if (Mathf.Approximately(prevHandX, handX)) return;
 
         Transform[] targets = GetCurrentTargets();
@@ -139,44 +269,40 @@ public class Minigame1_5_Manager_remake : MiniGameBase
 
         prevHandX = handX;
     }
-    private void ResetState()
+
+    private bool TryHitTarget(int i)
     {
-        totalSuccessCount = 0;
-        currentRoundIndex = -1;
-        currentCaseNum = 0;
-        autoRoundIndex = -1;
-        acceptInput = false;
-        gameEnded = false;
-        gameLoopStarted = false;
-        currentRoundHitIndices.Clear();
+        Transform[] targets = GetCurrentTargets();
+        PrisonerVisual[] prisoners = GetCurrentPrisoners();
 
-        for (int i = 0; i < roundSuccessCounts.Length; i++)
-            roundSuccessCounts[i] = 0;
+        if (targets == null || i < 0 || i >= targets.Length) return false;
+        if (currentRoundHitIndices.Contains(i)) return false;
 
-        ResetAllCaseVisuals();
+        currentRoundHitIndices.Add(i);
+        totalSuccessCount++;
 
-        if (case1_Obj != null) case1_Obj.SetActive(false);
-        if (case2_Obj != null) case2_Obj.SetActive(false);
+        if (currentRoundIndex >= 0 && currentRoundIndex < roundSuccessCounts.Length)
+            roundSuccessCounts[currentRoundIndex]++;
 
-        if (hand != null)
-            hand.position = Vector3.zero;
+        ReportManualSuccess();
+
+        if (prisoners != null && i < prisoners.Length && prisoners[i] != null)
+            prisoners[i].PlayHit();
+
+        if (hitSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            GameRoot.Instance.Audio.PlaySfx(hitSound);
+
+        return true;
     }
 
-    private void ResetAllCaseVisuals()
+    private void SpawnClickEffect(Vector3 pos)
     {
-        ResetPrisonerArray(case1Prisoners);
-        ResetPrisonerArray(case2Prisoners);
-    }
+        if (clickEffectPrefab == null) return;
 
-    private void ResetPrisonerArray(PrisonerVisual[] prisoners)
-    {
-        if (prisoners == null) return;
-
-        for (int i = 0; i < prisoners.Length; i++)
-        {
-            if (prisoners[i] != null)
-                prisoners[i].ResetVisual();
-        }
+        if (mainParent != null)
+            Instantiate(clickEffectPrefab, pos, Quaternion.identity, mainParent);
+        else
+            Instantiate(clickEffectPrefab, pos, Quaternion.identity);
     }
 
     private void CacheTargets()
@@ -198,64 +324,8 @@ public class Minigame1_5_Manager_remake : MiniGameBase
         return result;
     }
 
-    private Transform[] GetChildren(Transform root)
+    private void ResetPrisonerArray(PrisonerVisual[] prisoners)
     {
-        if (root == null) return new Transform[0];
-
-        List<Transform> list = new List<Transform>();
-        for (int i = 0; i < root.childCount; i++)
-        {
-            list.Add(root.GetChild(i));
-        }
-        return list.ToArray();
-    }
-
-    private IEnumerator RoundLoop()
-    {
-        for (int i = 0; i < roundCaseOrder.Length; i++)
-        {
-            currentRoundIndex = i;
-            currentCaseNum = roundCaseOrder[i];
-            currentRoundHitIndices.Clear();
-
-            SetCaseVisible(currentCaseNum);
-            ResetCurrentCaseVisuals();
-
-            CaseMoveData moveData = GetCurrentMoveData();
-            if (moveData == null)
-            {
-                Debug.LogError("[Minigame1_5] moveData가 없음");
-                roundLoopCoroutine = null;
-                yield break;
-            }
-
-            hand.position = moveData.startPos;
-
-            //Debug.Log($"[Minigame1_5] Round {i + 1} START / Case {currentCaseNum}");
-            DebugCurrentCaseTargetPositions();
-
-            acceptInput = true;
-            yield return new WaitForSeconds(moveData.waitTime);
-
-            yield return StartCoroutine(MoveHand(moveData.startPos, moveData.endPos, moveData.moveTime));
-
-            acceptInput = false;
-
-            float remain = Mathf.Max(0f, roundCycleTime - moveData.waitTime - moveData.moveTime);
-            if (remain > 0f)
-                yield return new WaitForSeconds(remain);
-
-            //Debug.Log($"[Minigame1_5] Round {i + 1} END / RoundSuccess = {roundSuccessCounts[i]} / TotalSuccess = {totalSuccessCount}");
-        }
-
-        EndByRule();
-        roundLoopCoroutine = null;
-    }
-
-    private void ResetCurrentCaseVisuals()
-    {
-        PrisonerVisual[] prisoners = GetCurrentPrisoners();
-
         if (prisoners == null) return;
 
         for (int i = 0; i < prisoners.Length; i++)
@@ -274,180 +344,27 @@ public class Minigame1_5_Manager_remake : MiniGameBase
             default: return null;
         }
     }
-    private IEnumerator MoveHand(Vector2 startPos, Vector2 endPos, float moveTime)
-    {
-        float elapsed = 0f;
-        hand.position = startPos;
-
-        while (elapsed < moveTime)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / moveTime);
-            hand.position = Vector2.Lerp(startPos, endPos, t);
-            yield return null;
-        }
-
-        hand.position = endPos;
-    }
-    private bool TryHitTarget(int i)
-    {
-        Transform[] targets = GetCurrentTargets();
-        PrisonerVisual[] prisoners = GetCurrentPrisoners();
-
-        if (targets == null || i < 0 || i >= targets.Length) return false;
-        if (currentRoundHitIndices.Contains(i)) return false;
-
-        currentRoundHitIndices.Add(i);
-        totalSuccessCount++;
-        roundSuccessCounts[currentRoundIndex]++;
-        ReportManualSuccess();
-
-        if (prisoners != null && i < prisoners.Length && prisoners[i] != null)
-            prisoners[i].PlayHit();
-
-        if (hitSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
-        {
-            GameRoot.Instance.Audio.PlaySfx(hitSound);
-        }
-
-        Debug.Log($"[1-5] HIT R={currentRoundIndex} Case={currentCaseNum} Idx={i} " +
-                  $"HandX={hand.position.x:F2} TargetX={targets[i].position.x:F2}");
-        return true;
-    }
-
-    private void HandleClick()
-    {
-        if (hand == null) return;
-
-        float handX = hand.position.x;
-        Transform[] targets = GetCurrentTargets();
-
-        // 범위 안에서 "가장 가까운" 죄수를 친다
-        int best = -1;
-        float bestDiff = successRangeX;
-
-        if (targets != null)
-        {
-            for (int i = 0; i < targets.Length; i++)
-            {
-                if (targets[i] == null || !targets[i].gameObject.activeInHierarchy) continue;
-                if (currentRoundHitIndices.Contains(i)) continue;
-
-                float diff = Mathf.Abs(handX - targets[i].position.x);
-                if (diff <= bestDiff)
-                {
-                    bestDiff = diff;
-                    best = i;
-                }
-            }
-        }
-
-        if (best >= 0) TryHitTarget(best);
-
-        SpawnClickEffect(new Vector3(handX, -1.5f, 0f));
-    }
-
-    private void SpawnClickEffect(Vector3 pos)
-    {
-        if (clickEffectPrefab == null) return;
-
-        if (mainParent != null)
-            Instantiate(clickEffectPrefab, pos, Quaternion.identity, mainParent);
-        else
-            Instantiate(clickEffectPrefab, pos, Quaternion.identity);
-    }
-
-    private void CheckCase1Success(float handX)
-    {
-        if (case1Targets == null || case1Targets.Length < 4)
-        {
-            Debug.LogWarning("[Minigame1_5] case1 target 부족");
-            return;
-        }
-
-        for (int i = 0; i < case1Prisoners.Length; i++)
-        {
-            if (currentRoundHitIndices.Contains(i))
-                continue;
-
-            float targetX = case1Targets[i].position.x;
-            float diff = Mathf.Abs(handX - targetX);
-
-            if (diff <= successRangeX)
-            {
-                currentRoundHitIndices.Add(i);
-                totalSuccessCount++;
-                roundSuccessCounts[currentRoundIndex]++;
-
-                ReportManualSuccess();
-
-                if (case1Prisoners != null && i < case1Prisoners.Length && case1Prisoners[i] != null)
-                {
-                    case1Prisoners[i].PlayHit();
-                }
-
-                //Debug.Log($"[Minigame1_5] CASE1 SUCCESS | TargetIndex={i}, HandX={handX:F2}, TargetX={targetX:F2}, Diff={diff:F2}, TotalSuccess={totalSuccessCount}");
-                return;
-            }
-        }
-
-        //Debug.Log($"[Minigame1_5] CASE1 MISS | HandX={handX:F2}");
-    }
-
-    private void CheckCase2Success(float handX)
-    {
-        if (case2Targets == null || case2Targets.Length < 7)
-        {
-            Debug.LogWarning("[Minigame1_5] case2 target 부족");
-            return;
-        }
-
-        for (int i = 0; i < case2Prisoners.Length; i++)
-        {
-            if (currentRoundHitIndices.Contains(i))
-                continue;
-
-            float targetX = case2Targets[i].position.x;
-            float diff = Mathf.Abs(handX - targetX);
-
-            if (diff <= successRangeX)
-            {
-                currentRoundHitIndices.Add(i);
-                totalSuccessCount++;
-                roundSuccessCounts[currentRoundIndex]++;
-
-                ReportManualSuccess();
-
-                if (case2Prisoners != null && i < case2Prisoners.Length && case2Prisoners[i] != null)
-                    case2Prisoners[i].PlayHit();
-
-                //Debug.Log($"[Minigame1_5] CASE2 SUCCESS | TargetIndex={i}, HandX={handX:F2}, TargetX={targetX:F2}, Diff={diff:F2}, TotalSuccess={totalSuccessCount}");
-                return;
-            }
-        }
-
-        //Debug.Log($"[Minigame1_5] CASE2 MISS | HandX={handX:F2}");
-    }
 
     private void DebugCurrentCaseTargetPositions()
     {
-        Transform[] targets = GetCurrentTargets();
+        if (!judgeLog) return;
 
-        if (targets == null || targets.Length == 0)
+        Transform[] targets = GetCurrentTargets();
+        CaseMoveData move = GetCurrentMoveData();
+
+        if (targets == null || targets.Length == 0 || move == null)
         {
             Debug.LogWarning($"[Minigame1_5] Case {currentCaseNum} target 없음");
             return;
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.Append($"[Minigame1_5] Case {currentCaseNum} target x positions: ");
+        sb.Append($"[1-5 Judge] Case {currentCaseNum} 통과 시각(라운드 기준): ");
 
         for (int i = 0; i < targets.Length; i++)
         {
-            sb.Append($"[{i}] {targets[i].position.x:F2}");
-
-            if (i < targets.Length - 1)
-                sb.Append(" / ");
+            if (targets[i] == null) continue;
+            sb.Append($"[{i}] x={targets[i].position.x:F2} t={GetPassTime(move, targets[i].position.x):F3}  ");
         }
 
         Debug.Log(sb.ToString());
@@ -483,11 +400,11 @@ public class Minigame1_5_Manager_remake : MiniGameBase
     {
         if (gameEnded) return;
         gameEnded = true;
+        running = false;
 
         Debug.Log($"[Minigame1_5] GAME END | TotalSuccess={totalSuccessCount}");
-
-        DebugCurrentCaseTargetPositions();
     }
+}
 
     //public override void ExecutePracticeAction(int actionIndex, string actionType)
     //{
@@ -558,4 +475,3 @@ public class Minigame1_5_Manager_remake : MiniGameBase
     //        }
     //    }
     //}
-}
