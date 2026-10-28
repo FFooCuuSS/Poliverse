@@ -165,6 +165,9 @@ public class HandcuffSequenceController : MonoBehaviour
             }
         }
 
+        // 지난 라운드에서 늦게 바뀐 연출 토글(스냅/자동장착)을 원래대로
+        ResetRoundVisuals();
+
         SetWholeAlpha(1f);
     }
 
@@ -226,7 +229,10 @@ public class HandcuffSequenceController : MonoBehaviour
         rightHand.ForceFinish();
 
         if (rightHandCollider != null)
+        {
             rightHandCollider.enabled = true;
+            Debug.Log($"[1-2] RIGHT COLLIDER ON t={Time.time:F3}");
+        }
 
         curState = State.PlayerDrag;
         seqJob = null;

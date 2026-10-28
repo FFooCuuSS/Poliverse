@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
 {
+    private double SongT => (rhythmManager as RhythmManager)?.SongTime ?? -1;
     public override float perfectWindowOverride => 0.15f;
     public override float goodWindowOverride => 0.5f;
     public override float hitWindowOverride => 1f;
@@ -86,6 +87,7 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
 
     public override void OnRhythmEvent(string action)
     {
+        Debug.Log($"[1-2] EVENT {action} song={SongT:F3} round={roundIndex}");
         if (string.IsNullOrEmpty(action))
             return;
 
@@ -143,8 +145,21 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
     }
 
 
+    // 이번 라운드에서 수갑을 채울 수 있는 상태인지 (입력창이 닫히면 false)
+    private bool roundAccepting;
+
+    // 오른손 콜라이더가 켜진(PlayerDrag) 뒤부터, 입력창이 닫히기 전까지만 스냅 허용.
+    // 창이 닫힌 뒤 늦게 붙이면 다음 라운드 연출/위치가 꼬이던 문제 방지.
+    public bool CanAcceptSnap =>
+        !isDemoMode &&
+        roundAccepting &&
+        sequence != null &&
+        sequence.curState == HandcuffSequenceController.State.PlayerDrag;
+
     private void StartRoundNow()
     {
+        roundAccepting = true;
+
         Debug.Log(
             $"[1-2] StartRoundNow() Round={roundIndex}, IsDemo={isDemoMode}"
         );
@@ -169,8 +184,11 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
             inputWindowSeconds
         );
 
+        roundAccepting = false;
+
         if (sequence != null)
         {
+            Debug.Log($"[1-2] WINDOW CLOSE song={SongT:F3} round={roundIndex}");
             sequence.DespawnRound(
                 despawnFadeSeconds
             );
@@ -189,12 +207,22 @@ public class Minigame_1_2 : MiniGameBase, IPracticeDemoInput
 
     public void TryResolveRound()
     {
+        Debug.Log($"[1-2] SNAP song={SongT:F3} round={roundIndex} state={sequence?.curState}");
         // 규칙: 실제 입력을 막는 방어 코드 추가
         if (isDemoMode)
         {
             Debug.Log("[1-2] 시범 모드 중이므로 플레이어 입력 무시");
             return;
         }
+
+        if (!roundAccepting)
+        {
+            Debug.Log("[1-2] 입력창이 닫힌 뒤의 스냅 → 무시");
+            return;
+        }
+
+        // 한 라운드에 한 번만
+        roundAccepting = false;
 
         ResolveRound(true);
     }

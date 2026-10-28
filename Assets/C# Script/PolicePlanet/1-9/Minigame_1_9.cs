@@ -26,6 +26,18 @@ public class Minigame_1_9 : MiniGameBase, IPracticeDemoInput
 
     protected override float TimerDuration => 10f;
 
+    // 노트 간격이 1초라 hitWindow 1초면 힌트(Show) 구간 터치가 다음 Input 노트를 Miss로 먹어버린다.
+    // 판정 범위를 노트 간격 절반 이하로 줄인다.
+    public override float perfectWindowOverride => 0.15f;
+    public override float goodWindowOverride => 0.3f;
+    public override float hitWindowOverride => 0.45f;
+
+    [Header("Debug")]
+    [SerializeField] private bool judgeLog = true;
+
+    private double SongT => (rhythmManager as RhythmManager)?.SongTime ?? -1;
+    private int lastSubmitFrame = -1;
+
     protected override string MinigameTitle => "발전기 작동시키기";
 
     protected override string MinigameExplain => " 불이 2번씩 켜지며 타이밍을 알려줍니다.";
@@ -139,27 +151,57 @@ public class Minigame_1_9 : MiniGameBase, IPracticeDemoInput
         }
     }
 
+    // 플레이어 터치 (Update / BackgroundTouchHandler / DragDistanceJudge에서 호출)
     public void SubmitPlayerInput(string action = "Input")
     {
+        // 시범 중에는 실제 터치를 막는다 (BackgroundTouchHandler는 데모 체크가 없었음)
+        if (IsDemoMode) return;
+
+        SubmitInput(action);
+    }
+
+    // 플레이어/시범 공통
+    private void SubmitInput(string action)
+    {
         if (ended) return;
-        if (!inputOpen) return;
         if (awaitingJudge) return;
 
+        // 같은 프레임에 Update와 BackgroundTouchHandler가 둘 다 호출하는 중복 방지
+        if (lastSubmitFrame == Time.frameCount) return;
+        lastSubmitFrame = Time.frameCount;
+
+        // 기존엔 판정 한 번 후 다음 리듬 이벤트까지 입력을 닫아서(inputOpen)
+        // 박자보다 살짝 먼저 누르면 무시됐다. 이제 판정 범위는 RhythmManager가 결정한다.
         handleMover?.PlayStretch();
+
+        if (judgeLog)
+            Debug.Log($"[1-9 Judge] 터치 song={SongT:F3}");
 
         awaitingJudge = true;
         OnPlayerInput(action);
+
+        // 범위 안에 노트가 없으면 판정이 안 온다 → 잠금 해제
+        if (awaitingJudge)
+        {
+            awaitingJudge = false;
+
+            if (judgeLog)
+                Debug.Log($"[1-9 Judge] 노트 범위 밖 터치 → 무시 song={SongT:F3}");
+        }
     }
 
     public override void OnJudgement(JudgementResult judgement)
     {
         if (ended) return;
-        
+
         base.OnJudgement(judgement);
         awaitingJudge = false;
         inputOpen = false;
 
         judgedCount++;
+
+        if (judgeLog)
+            Debug.Log($"[1-9 Judge] 판정 {judgement} song={SongT:F3}");
 
         switch (judgement)
         {
@@ -283,7 +325,7 @@ public class Minigame_1_9 : MiniGameBase, IPracticeDemoInput
 
         Debug.Log($"[1-9 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
 
-        // 데모 모드에서는 플레이어가 직접 터치한 것과 동일하게 SubmitPlayerInput 함수를 호출하여 완벽한 판정 실행
-        SubmitPlayerInput("Input");
+        // 시범: 플레이어가 누른 것과 동일하게 판정까지 보낸다
+        SubmitInput("Input");
     }
 }

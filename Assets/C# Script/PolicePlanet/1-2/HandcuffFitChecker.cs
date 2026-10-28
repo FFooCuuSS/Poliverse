@@ -45,6 +45,11 @@ public class HandcuffFitChecker : MonoBehaviour
 
         isSnapped = false;
         snappedHand = null;
+        prevAccept = false;
+        preplaced = false;
+
+        // 이전 라운드에서 손을 떼지 않고 들고 있던 드래그 상태 해제
+        StopDragging();
 
         transform.position = startPos;
 
@@ -73,8 +78,18 @@ public class HandcuffFitChecker : MonoBehaviour
         if (cuffCollider != null)
             cuffCollider.enabled = false;
 
+        StopDragging();
+
         MoveOffscreen();
         despawnJob = null;
+    }
+
+    private void StopDragging()
+    {
+        DragAndDrop drag = GetComponent<DragAndDrop>();
+
+        if (drag != null)
+            drag.isDragging = false;
     }
 
     private void Update()
@@ -89,12 +104,59 @@ public class HandcuffFitChecker : MonoBehaviour
         CheckAndSnap();
     }
 
+    // 입력창이 열린 순간 이미 손 위에 올려둔 상태였는지
+    // (미리 올려두고 기다리면 콜라이더가 켜지는 순간 자동으로 Perfect가 나던 문제)
+    private bool prevAccept;
+    private bool preplaced;
+
     private void CheckAndSnap()
     {
         if (cuffCollider == null) return;
+        if (minigame == null) return;
 
-        if (minigame != null && minigame.IsDemoMode)
+        // 입력창 밖(손 이동 중 / 창 닫힌 뒤)에는 스냅하지 않는다
+        if (!minigame.CanAcceptSnap)
+        {
+            prevAccept = false;
+            preplaced = false;
             return;
+        }
+
+        bool overlapping = TryFindOverlap(out CircleCollider2D hand);
+
+        // 창이 열린 첫 프레임에 이미 겹쳐 있으면 "미리 올려둔 것"으로 표시
+        if (!prevAccept)
+        {
+            prevAccept = true;
+            preplaced = overlapping;
+        }
+
+        // 한 번 손에서 벗어나면 다시 정상 판정
+        if (!overlapping)
+            preplaced = false;
+
+        // 새로 손에 닿았을 때만 스냅 (미리 올려둔 채로는 X → 놓거나 다시 갖다 대야 함)
+        if (overlapping && !preplaced)
+            Snap(hand);
+    }
+
+    // 드래그를 놓는 순간도 입력으로 인정 (미리 올려뒀다가 박자에 맞춰 놓기)
+    private void OnMouseUp()
+    {
+        if (isSnapped) return;
+        if (minigame == null || minigame.IsDemoMode) return;
+        if (!minigame.CanAcceptSnap) return;
+
+        if (TryFindOverlap(out CircleCollider2D hand))
+            Snap(hand);
+    }
+
+    private bool TryFindOverlap(out CircleCollider2D hand)
+    {
+        hand = null;
+
+        if (cuffCollider == null || !cuffCollider.enabled || handColliders == null)
+            return false;
 
         foreach (var handcol in handColliders)
         {
@@ -102,20 +164,32 @@ public class HandcuffFitChecker : MonoBehaviour
 
             if (cuffCollider.bounds.Intersects(handcol.bounds))
             {
-                transform.position = handcol.bounds.center;
-                isSnapped = true;
-                snappedHand = handcol;
-
-                if (cuffCollider != null)
-                    cuffCollider.enabled = false;
-
-                if (HandcuffSequenceController.Instance != null)
-                    HandcuffSequenceController.Instance.ApplyPlayerSnapVisual();
-
-                minigame.TryResolveRound();
-                break;
+                hand = handcol;
+                return true;
             }
         }
+
+        return false;
+    }
+
+    private void Snap(CircleCollider2D handcol)
+    {
+        if (handcol == null || isSnapped) return;
+
+        transform.position = handcol.bounds.center;
+        isSnapped = true;
+        snappedHand = handcol;
+        preplaced = false;
+
+        StopDragging();
+
+        if (cuffCollider != null)
+            cuffCollider.enabled = false;
+
+        if (HandcuffSequenceController.Instance != null)
+            HandcuffSequenceController.Instance.ApplyPlayerSnapVisual();
+
+        minigame.TryResolveRound();
     }
 
     private void MoveOffscreen()

@@ -21,6 +21,12 @@ public class MinigameRemake_1_10 : MiniGameBase, IPracticeDemoInput
     [Header("Refs")]
     [SerializeField] private Manager_1_10 manager;
 
+    [Header("Debug")]
+    [SerializeField] private bool judgeLog = true;
+
+    public double SongT => (rhythmManager as RhythmManager)?.SongTime ?? -1;
+    public bool JudgeLogEnabled => judgeLog;
+
     private bool ended;
     private bool inputOpen;
     private bool awaitingJudge;
@@ -76,15 +82,24 @@ public class MinigameRemake_1_10 : MiniGameBase, IPracticeDemoInput
         }
     }
 
+    // 플레이어 터치 (Manager_1_10.RequestMoveFromPlatform에서 호출)
+    // 기존엔 Input 이벤트가 와야 열리고(inputOpen) 판정 후 닫혀서, 박자 직전 터치가 무시됐다.
+    // 이제 판정 범위는 RhythmManager(hitWindow 0.5초)가 결정한다.
     public void SubmitPlayerInput(string action = "Input")
     {
         if (IsDemoMode) return;
 
-        if (ended) return;
-        if (!inputOpen) return;
-        if (awaitingJudge) return;
+        SubmitInput(action);
+    }
 
-        awaitingJudge = true;
+    // 플레이어/시범 공통
+    public void SubmitInput(string action = "Input")
+    {
+        if (ended) return;
+
+        if (judgeLog)
+            Debug.Log($"[1-10 Judge] 터치 song={SongT:F3}");
+
         OnPlayerInput(action);
     }
 
@@ -92,8 +107,25 @@ public class MinigameRemake_1_10 : MiniGameBase, IPracticeDemoInput
     {
         if (ended) return;
 
-        base.OnJudgement(judgement);
+        // 타이밍은 맞았어도 방향(경찰=오른쪽/죄수=왼쪽)이 틀리면 점수는 Miss로 센다.
+        // (기존엔 방향이 틀려도 Perfect/Good으로 집계됨)
+        JudgementResult scoreJudgement = judgement;
+
+        if (judgement != JudgementResult.Miss &&
+            manager != null &&
+            manager.IsPendingWrongDirection)
+        {
+            scoreJudgement = JudgementResult.Miss;
+        }
+
+        base.OnJudgement(scoreJudgement);
         awaitingJudge = false;
+
+        if (judgeLog)
+        {
+            string dir = scoreJudgement != judgement ? " (방향 틀림 → Miss)" : "";
+            Debug.Log($"[1-10 Judge] 판정 {judgement}{dir} song={SongT:F3}");
+        }
 
         switch (judgement)
         {

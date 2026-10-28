@@ -10,6 +10,7 @@ public class PlayerReachChecker : MonoBehaviour
 
     private CapsuleCollider2D playerCollider;
     private DragAndDrop dragAndDrop;
+    private PlayerSwipe swipe;
 
     private SpriteRenderer sr;
 
@@ -58,6 +59,7 @@ public class PlayerReachChecker : MonoBehaviour
         minigame_1_3 = stage_1_3.GetComponent<Minigame_1_3>();
         playerCollider = GetComponent<CapsuleCollider2D>();
         dragAndDrop = GetComponent<DragAndDrop>();
+        swipe = GetComponent<PlayerSwipe>();
         minigameBase = GetComponentInParent<MiniGameBase>();
 
         Vector3 pos = transform.position;
@@ -102,6 +104,9 @@ public class PlayerReachChecker : MonoBehaviour
 
     private void OnFail()
     {
+        var rm = FindObjectOfType<RhythmManager>();
+        Debug.Log($"[1-3] FAIL song={(rm != null ? rm.SongTime : -1):F3} playerY={transform.position.y:F2}");
+
         if (isRespawning) return;
         minigame_1_3.ReportManualFail();
 
@@ -126,6 +131,7 @@ public class PlayerReachChecker : MonoBehaviour
     private IEnumerator RespawnRoutine()
     {
         isRespawning = true;
+        if (swipe != null) swipe.inputBlocked = true;
         if (dragAndDrop != null) dragAndDrop.enabled = false;
 
         yield return PlayFailAnimationAndWait();
@@ -144,6 +150,9 @@ public class PlayerReachChecker : MonoBehaviour
 
         // (중요) 위치 세팅도 여기서
         transform.position = respawnStartPos;
+
+        // 리스폰은 항상 아래 레인 → 스와이프 레인 상태도 맞춰준다
+        if (swipe != null) swipe.SyncLaneToY(respawnStartPos.y);
 
         if (originalSprite != null) sr.sprite = originalSprite;
 
@@ -164,6 +173,7 @@ public class PlayerReachChecker : MonoBehaviour
         if (dragAndDrop != null) dragAndDrop.enabled = true;
 
         isRespawning = false;
+        if (swipe != null) swipe.inputBlocked = false;
     }
 
     // =========================

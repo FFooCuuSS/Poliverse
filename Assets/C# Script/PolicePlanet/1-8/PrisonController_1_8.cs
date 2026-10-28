@@ -8,10 +8,10 @@ public class PrisonController_1_8 : MonoBehaviour
     [Header("효과음")]
     [SerializeField] private AudioClip prisonSound;
     [Header("Delta Move")]
-    public float downDeltaY = 3f;      
-    public float downDuration = 0.12f; 
-    public float staySeconds = 0.15f;  
-    public float upDuration = 0.25f;   
+    public float downDeltaY = 3f;
+    public float downDuration = 0.12f;
+    public float staySeconds = 0.15f;
+    public float upDuration = 0.25f;
 
     [Header("Tweens")]
     public float slamOvershoot = 0.25f;
@@ -25,9 +25,19 @@ public class PrisonController_1_8 : MonoBehaviour
 
     private Tween moveTween;
 
+    // 같은 오브젝트의 박자 흔들기(RhythmAnimation)와 위치가 섞이지 않게 내려찍는 동안 멈춘다.
+    private RhythmAnimation bob;
+
     public void ActivatePrison()
     {
         if (isMoving) return;
+
+        if (bob == null)
+            bob = GetComponent<RhythmAnimation>();
+
+        // OnDisable에서 원래 위치/스케일로 되돌려 준다
+        if (bob != null && bob.enabled)
+            bob.enabled = false;
 
         if (!basePosCaptured)
         {
@@ -89,6 +99,9 @@ public class PrisonController_1_8 : MonoBehaviour
             {
                 isMoving = false;
                 transform.position = basePos;
+
+                if (bob != null)
+                    bob.enabled = true;
             });
     }
 

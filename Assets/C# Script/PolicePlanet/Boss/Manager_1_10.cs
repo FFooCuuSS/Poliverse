@@ -66,6 +66,9 @@ public class Manager_1_10 : MonoBehaviour
     private int sentCountUp = 0;
     private int sentCountDown = 0;
 
+    // 플레이어 입력이 판정 대기 중이고 방향이 틀렸는지 (점수 Miss 처리용)
+    public bool IsPendingWrongDirection => awaitingJudge && current.HasValue && !pendingCorrect;
+
     public enum PlatformType { Up, Down }
 
     public void OnMinigameStart(MinigameRemake_1_10 mg)
@@ -206,19 +209,58 @@ public class Manager_1_10 : MonoBehaviour
     // =========================
     public void RequestMoveFromPlatform(bool goUp)
     {
-        if (!inputOpen) return;
-        if (awaitingJudge) return;
         if (minigame == null) return;
+        if (minigame.IsDemoMode) return;
+
+        SubmitMove(goUp, false);
+    }
+
+    private void SubmitMove(bool goUp, bool demo)
+    {
+        if (awaitingJudge) return;
         if (moveEventRunning) return;
 
-        if (!TryDequeueAlive(out var entry)) return;
+        // 판정이 올 때까지 대기열에서 빼지 않는다 (범위 밖 터치로 사람이 사라지는 문제 방지)
+        if (!TryPeekAlive(out var entry)) return;
 
         pendingGoUp = goUp;
         current = entry;
         pendingCorrect = (goUp && !entry.isSinner) || (!goUp && entry.isSinner);
 
         awaitingJudge = true;
-        minigame.SubmitPlayerInput("Input");
+
+        if (demo)
+            minigame.SubmitInput("Input");
+        else
+            minigame.SubmitPlayerInput("Input");
+
+        // 판정 범위 밖이면 판정이 안 온다 → 원상복구
+        if (awaitingJudge)
+        {
+            awaitingJudge = false;
+            current = null;
+
+            if (minigame.JudgeLogEnabled)
+                Debug.Log($"[1-10 Judge] 노트 범위 밖 터치 → 무시 song={minigame.SongT:F3}");
+        }
+    }
+
+    private bool TryPeekAlive(out PersonEntry entry)
+    {
+        while (waitingQueue.Count > 0)
+        {
+            var e = waitingQueue.Peek();
+            if (e.go != null)
+            {
+                entry = e;
+                return true;
+            }
+
+            waitingQueue.Dequeue();
+        }
+
+        entry = default;
+        return false;
     }
 
     private bool TryDequeueAlive(out PersonEntry entry)
@@ -247,6 +289,10 @@ public class Manager_1_10 : MonoBehaviour
         awaitingJudge = false;
         inputOpen = false;
 
+        // 판정이 확정됐으니 이제 대기열에서 뺀다
+        if (TryPeekAlive(out var head) && current.HasValue && head.go == current.Value.go)
+            waitingQueue.Dequeue();
+
         MoveCurrentToLane(pendingGoUp);
 
         if (pendingCorrect)
@@ -262,6 +308,9 @@ public class Manager_1_10 : MonoBehaviour
 
         if (current.HasValue && current.Value.go != null)
         {
+            if (TryPeekAlive(out var head) && head.go == current.Value.go)
+                waitingQueue.Dequeue();
+
             StartCoroutine(FadeOutAndDestroyOne(current.Value.go));
             current = null;
             return;
@@ -435,33 +484,11 @@ public class Manager_1_10 : MonoBehaviour
     {
         if (minigame == null) return;
 
-        // 1. 대기열에서 살아있는 다음 사람을 가져옴 (없으면 현재 current 확인)
-        PersonEntry targetEntry;
-        if (current.HasValue && current.Value.go != null)
-        {
-            targetEntry = current.Value;
-            current = null;
-        }
-        else if (TryDequeueAlive(out var entry))
-        {
-            targetEntry = entry;
-        }
-        else
-        {
+        // 대기열 맨 앞 사람의 정답 방향으로 플레이어와 같은 경로를 탄다
+        // (죄수 → 아래/왼쪽, 경찰 → 위/오른쪽)
+        if (!TryPeekAlive(out var entry))
             return;
-        }
 
-        // 2. 죄수(isSinner == true)면 아래/왼쪽(false), 경찰이면 위/오른쪽(true)이 정답
-        bool correctGoUp = !targetEntry.isSinner;
-
-        pendingGoUp = correctGoUp;
-        current = targetEntry;
-        pendingCorrect = (correctGoUp && !targetEntry.isSinner) || (!correctGoUp && targetEntry.isSinner);
-
-        // 3. 입력 상태를 강제로 열고 퍼펙트 판정 처리 호출
-        inputOpen = true;
-        awaitingJudge = true;
-
-        minigame.OnPlayerInput("Input");
+        SubmitMove(!entry.isSinner, true);
     }
 }

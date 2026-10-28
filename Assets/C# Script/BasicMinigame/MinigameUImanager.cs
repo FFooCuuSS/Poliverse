@@ -124,6 +124,13 @@ public class MinigameUIManager : MonoBehaviour
     private bool bgmActuallyStarted = false;
     private double gameplayStartDspTime;
     private const double BgmStartDelay = 0.1f;
+
+    // ===== Debug Jump (에디터/개발 빌드 전용) =====
+    [Header("Debug Jump (에디터/개발 빌드 전용)")]
+    [Tooltip("점프 시작 시 미니게임 시작 몇 초 전부터 BGM을 틀지")]
+    [SerializeField] private float debugJumpLeadIn = 2f;
+    private int debugStartIndex = 0;
+    private bool IsDebugJump => debugStartIndex > 0;
     //private int life = 4;
 
     // 사운드 및 폴리싱
@@ -229,6 +236,8 @@ public class MinigameUIManager : MonoBehaviour
 
         ValidateTimeline();
 
+        ApplyDebugJump();
+
         PlayStageBGM();
         timelineCoroutine = StartCoroutine(TimelineRoutine());
 
@@ -265,6 +274,15 @@ public class MinigameUIManager : MonoBehaviour
 
     void Update()
     {
+        // F5: 같은 지점부터 다시 (에디터/개발 빌드 전용)
+        if ((Application.isEditor || Debug.isDebugBuild) &&
+            Input.GetKeyDown(KeyCode.F5))
+        {
+            DebugJump.Request(debugStartIndex > 0 ? debugStartIndex : 0);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            return;
+        }
+
         if (isTimerActive)
         {
             timerElapsed += Time.deltaTime;
@@ -303,9 +321,52 @@ public class MinigameUIManager : MonoBehaviour
         audioSource.clip = clip;
         audioSource.loop = loopBGM;
 
-        bgmStartDspTime = AudioSettings.dspTime + BgmStartDelay;
-        audioSource.PlayScheduled(bgmStartDspTime);
+        double playAt = AudioSettings.dspTime + BgmStartDelay;
+        double seek = 0.0;
+
+        if (IsDebugJump)
+        {
+            seek = Mathf.Max(
+                0f,
+                GetTimelineStartTime(debugStartIndex) - preEndGap - debugJumpLeadIn
+            );
+
+            audioSource.time = (float)seek;
+        }
+
+        // 타임라인 기준점은 "노래 0초가 재생됐을 dsp 시각"으로 맞춘다.
+        // 점프하면 그만큼 과거로 당겨서, 이후 모든 판정 계산이 처음부터 플레이한 것과 동일해진다.
+        bgmStartDspTime = playAt - seek;
+        audioSource.PlayScheduled(playAt);
         bgmScheduled = true;
+    }
+
+    private void ApplyDebugJump()
+    {
+        debugStartIndex = 0;
+
+        if (!(Application.isEditor || Debug.isDebugBuild))
+        {
+            DebugJump.Clear();
+            return;
+        }
+
+        int requested = DebugJump.ConsumeStartIndex();
+
+        if (requested <= 0)
+            return;
+
+        int maxIndex = Mathf.Max(0, plannedMinigameCount - 1);
+        debugStartIndex = Mathf.Clamp(requested, 0, maxIndex);
+
+        for (int i = 0; i < debugStartIndex && minigameQueue.Count > 0; i++)
+            minigameQueue.Dequeue();
+
+        Debug.LogWarning(
+            $"[DebugJump] {selectedPlanet}-{debugStartIndex + 1}부터 시작 " +
+            $"(BGM {GetTimelineStartTime(debugStartIndex):0.###}초 지점). " +
+            $"이번 플레이 결과는 저장하지 않습니다."
+        );
     }
 
     private double GetBGMElapsedTime()
@@ -483,7 +544,8 @@ public class MinigameUIManager : MonoBehaviour
 
     private IEnumerator TimelineRoutine()
     {
-        int gameCount = minigameQueue.Count;
+        // 디버그 점프로 앞쪽 미니게임을 큐에서 뺐어도 전체 개수/인덱스는 원래 기준으로 센다.
+        int gameCount = minigameQueue.Count + debugStartIndex;
 
         // BGM이 실제로 시작될 때까지 대기
         while (GetBGMElapsedTime() <= 0.0)
@@ -503,7 +565,7 @@ public class MinigameUIManager : MonoBehaviour
         }
 
         // 미니게임 순차 실행
-        for (int i = 0; i < gameCount; i++)
+        for (int i = debugStartIndex; i < gameCount; i++)
         {
             float startT = GetTimelineStartTime(i);
             pendingStartT = startT;
@@ -774,7 +836,11 @@ public class MinigameUIManager : MonoBehaviour
                 FindObjectOfType<GameSaveManager>();
         }
 
-        if (saveManager != null)
+        if (IsDebugJump)
+        {
+            Debug.LogWarning("[DebugJump] 점프 플레이라 결과 저장을 건너뜁니다.");
+        }
+        else if (saveManager != null)
         {
             saveManager.RecordFullRunResult(
                 FinalRunResult
