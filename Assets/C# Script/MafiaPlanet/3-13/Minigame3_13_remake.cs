@@ -7,10 +7,10 @@ public class Minigame3_13_remake : MiniGameBase, IPracticeDemoInput
     protected override float TimerDuration => 10f;
     protected override string MinigameTitle => "무기 정리";
 
-    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
+    protected override string MinigameExplain => "무기가 각 방향에서 날아옵니다.";
     protected override string[] AdditionalMinigameExplains => new string[]
     {
-        "장애물을 피해 좌우로 움직이세요."
+        "각 무기의 모양대로 화면을 터치해 수납하세요."
     };
 
     public override float perfectWindowOverride => 0.1f;

@@ -15,10 +15,10 @@ public class Minigame_3_5_remake : MiniGameBase, IPracticeDemoInput
 
     protected override string MinigameTitle => "도청기 설치";
 
-    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
+    protected override string MinigameExplain => "스코프가 위에서 아래로 움직입니다.";
     protected override string[] AdditionalMinigameExplains => new string[]
     {
-        "장애물을 피해 좌우로 움직이세요."
+        "타이밍에 맞춰 화면을 터치하세요."
     };
 
     [Header("데모")]

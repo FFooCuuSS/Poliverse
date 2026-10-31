@@ -7,10 +7,10 @@ public class Minigame_3_6 : MiniGameBase, IPracticeDemoInput
     protected override float TimerDuration => 10f;
     protected override string MinigameTitle => "통화 내용 감청";
 
-    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
+    protected override string MinigameExplain => "초록 노랑 빨강 순서로 불이 켜집니다.";
     protected override string[] AdditionalMinigameExplains => new string[]
     {
-        "장애물을 피해 좌우로 움직이세요."
+        "앞선 박자에 맞춰 빨간불에 마이크를 터치하세요."
     };
 
     // 이 미니게임은 RhythmManager의 입력 타이밍 판정을 쓰지 않는다.

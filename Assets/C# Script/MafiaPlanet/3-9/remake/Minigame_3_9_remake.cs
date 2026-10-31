@@ -8,10 +8,10 @@ public class Minigame_3_9_remake : MiniGameBase, IPracticeDemoInput
 
     protected override string MinigameTitle => "암호 맞추기";
 
-    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
+    protected override string MinigameExplain => "표시된 순서대로 암호가 빨간색으로 변하면 입력하세요.";
     protected override string[] AdditionalMinigameExplains => new string[]
     {
-        "장애물을 피해 좌우로 움직이세요."
+        "각 암호를 표시된 순서대로 입력하세요."
     };
 
 

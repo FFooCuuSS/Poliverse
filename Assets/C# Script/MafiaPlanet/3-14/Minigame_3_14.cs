@@ -4,10 +4,10 @@ public class Minigame_3_14 : MiniGameBase, IPracticeDemoInput
 {
     protected override float TimerDuration => 14f;
     protected override string MinigameTitle => "벽타기";
-    protected override string MinigameExplain => "죄수가 순서대로 나타나 타이밍을 알려줍니다.";
+    protected override string MinigameExplain => "박자에 맞춰 다음 창문으로 넘어가세요.";
     protected override string[] AdditionalMinigameExplains => new string[]
     {
-        "배경이 어두워지면 타이밍에 맞게 죄수를 터치해주세요."
+        "창문 불이 꺼지면 타이밍에 맞춰 버튼을 터치하세요."
     };
 
     public override float perfectWindowOverride => 0.1f;

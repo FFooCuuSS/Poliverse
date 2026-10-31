@@ -8,10 +8,10 @@ public class Minigame_3_15 : MiniGameBase, IPracticeDemoInput
     protected override float TimerDuration => 70f;
     protected override string MinigameTitle => "마법중년 마피아";
 
-    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
+    protected override string MinigameExplain => "마법중년 빔을 피해 움직이세요";
     protected override string[] AdditionalMinigameExplains => new string[]
     {
-        "장애물을 피해 좌우로 움직이세요."
+        "플레이어를 잡은 채로 움직이세요. 거울은 빔을 반사해 막아줍니다."
     };
 
     // 타이밍 판정이 아니라 맞음/틀림 판정 → Manual Score

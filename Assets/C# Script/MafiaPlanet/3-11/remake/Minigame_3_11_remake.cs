@@ -7,12 +7,12 @@ public class Minigame_3_11_remake : MiniGameBase, IPracticeDemoInput
 {
     // ===== 미니게임 기본 정보 =====
     protected override float TimerDuration => 10f;
-    protected override string MinigameTitle => "후르츠 닌자";
+    protected override string MinigameTitle => "서류 담기";
 
-    protected override string MinigameExplain => "바움쿠헨이 계속 굴러갑니다.";
+    protected override string MinigameExplain => "서류 혹은 폭탄이 날아옵니다.";
     protected override string[] AdditionalMinigameExplains => new string[]
     {
-        "장애물을 피해 좌우로 움직이세요."
+        "폭탄은 피하고, 서류가 박스에 도착하면 화면을 터치하세요."
     };
 
     public override float perfectWindowOverride => 0.1f;

@@ -9,7 +9,7 @@ public class Minigame_3_1 : MiniGameBase, IPracticeDemoActionInput
     protected override float TimerDuration => 20f;
 
     protected override string MinigameTitle => "결투 신청";
-    protected override string MinigameExplain => "상대의 움직임을 보고 화면을 드래그하세요.";
+    protected override string MinigameExplain => "상대의 움직임을 보고 드래그해 버클을 풀고 총을 꺼내세요.";
 
     [Header("데모 연출용 참조")]
     [SerializeField] private PistolDrag pistolDrag;
