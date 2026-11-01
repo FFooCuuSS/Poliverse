@@ -1,28 +1,41 @@
 using UnityEngine;
 
 /// <summary>
-/// Minigame 3-4 Remake (판정 전용)
-/// - StartGame: 초기화 + (선택) handMover.start = true
-/// - SubmitInput: 클릭 순간 호출 -> OnPlayerInput("Input") 전달
-/// - OnJudgement: RhythmManagerTest가 계산한 Good/Perfect/Miss 카운트만 누적
-/// - FinalJudge: handStopX 도달 시 Success/Fail 결정 (Success/Fail 미사용)
+/// Minigame 3-4 밑장 빼기
+/// 0 ~ 6초 : 카드 5장을 1.2초 간격으로 돌린다. 함정 카드가 나올 때 상대 표정이 바뀐다.
+/// 6.6초~  : 손이 1.2초마다 카드 한 장씩 위로 이동 (7.2 / 8.4 / 9.6 / 10.8 / 12.0초에 카드 위)
+/// 플레이어는 손이 '함정 카드' 위에 왔을 때만 터치해야 한다.
+///
+/// 판정(직접): 함정 카드 박자 ±goodWindow 안에 터치 + 다른 카드에서 터치 안 함 → 성공 (대상 1개)
+/// 모든 시간은 노래 시간(RhythmManager.SongTime) 기준.
+/// CSV 3-4 노트는 판정에 쓰지 않는다 (타입 Beat = 카드 박자 표시용).
 /// </summary>
 public class Minigame_3_4_Remake : MiniGameBase, IPracticeDemoInput
 {
     [Header("Refs")]
-    [SerializeField] private Transform handTransform;     // hand 트랜스폼(최종 판정 트리거용)
-    [SerializeField] private HandMover handMover;          // 있으면 start on/off로 hand 제어
+    [SerializeField] private Transform handTransform;
+    [SerializeField] private HandMover handMover;          // 구버전 클릭 처리 (이제 사용 안 함)
+    [SerializeField] private DrawCard3_4remake drawCard;   // 비우면 자동 탐색
 
-    [Header("Finish Condition")]
-    [SerializeField] private float handStopX = 6f;         // hand x가 이 값 이상이면 최종판정
+    [Header("(구버전) Finish Condition")]
+    [SerializeField] private float handStopX = 6f;
 
-    [Header("Judge Rule")]
-    [Tooltip("CSV에 Input이 총 몇 번 있는지(예: 5). 체크를 원치 않으면 0으로 두기.")]
+    [Header("(구버전) Judge Rule")]
     [SerializeField] private int expectedInputCount = 5;
-
-    [Tooltip("성공으로 인정할 Good/Perfect 횟수. (예: 트랩 1번만 맞추는 게임이면 1)")]
     [SerializeField] private int requiredGoodOrPerfectCount = 1;
 
+    [Header("카드 박자 (노래 시간, 초)")]
+    [Tooltip("손이 첫 번째 카드 위에 오는 시각")]
+    [SerializeField] private float firstCardTime = 7.2f;
+    [SerializeField] private float cardInterval = 1.2f;
+    [SerializeField] private int cardCount = 5;
+
+    [Header("판정 범위 (초)")]
+    [SerializeField] private float perfectWindow = 0.1f;
+    [SerializeField] private float goodWindow = 0.3f;
+
+    [Header("Debug")]
+    [SerializeField] private bool judgeLog = true;
 
     protected override string MinigameTitle => "밑장 빼기";
     protected override string MinigameExplain => "화살표가 왼쪽에서 오른쪽으로 이동합니다.";
@@ -31,124 +44,174 @@ public class Minigame_3_4_Remake : MiniGameBase, IPracticeDemoInput
         "타이밍에 맞춰 화면을 터치하세요."
     };
 
-    private bool isDemoMode = false;
-    public bool IsDemoMode => isDemoMode;
+    // 수동 판정 (대상 1개: 밑장 잡기)
+    protected override bool UseRhythmJudgementScore => false;
+    protected override int ManualTotalNodeCount => 1;
 
-    public void SetDemoMode(bool isDemo)
+    public GameObject arrow;
+
+    private bool isDemoMode = false;
+    public new bool IsDemoMode => isDemoMode;
+
+    private bool ended;
+    private bool trapHit;
+    private bool wrongClick;
+    private readonly bool[] slotUsed = new bool[16];
+
+    private float localTime;
+
+    // 노래 시간 (없으면 로컬 시간)
+    public float SongTime
     {
+        get
+        {
+            if (rhythmManager is RhythmManager rm)
+            {
+                // 노래 시작 전(프리팹 준비 중)에는 아무것도 진행하지 않는다
+                return rm.IsRunning ? (float)rm.SongTime : -1f;
+            }
+
+            // 리듬매니저 없이 단독 테스트할 때
+            return localTime;
+        }
+    }
+
+    private void JudgeLog(string msg)
+    {
+        if (judgeLog) Debug.Log(msg);
+    }
+
+    public override void SetDemoMode(bool isDemo)
+    {
+        base.SetDemoMode(isDemo);
         isDemoMode = isDemo;
         Debug.Log($"[3-4] SetDemoMode = {isDemoMode}");
     }
 
-
-    public override void ExecutePracticeAction(int actionIndex, string actionType)
-    {
-        if (string.IsNullOrEmpty(actionType))
-            return;
-
-        actionType = actionType.Trim();
-
-        if (string.Equals(actionType, "Input", System.StringComparison.OrdinalIgnoreCase))
-        {
-            if (ended || IsInputLocked)
-                return;
-
-            Debug.Log($"[3-4 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
-            SubmitInput();
-        }
-    }
-
-
-    public GameObject arrow;
-    // ===== 상태 =====
-    private bool ended;
-
-    // ===== 판정 카운트 =====
-    private int perfectCnt;
-    private int goodCnt;
-    private int missCnt;
-
-    // 클릭(입력) 시도 횟수
-    private int submittedInputCnt;
-
     public override void StartGame()
     {
-        Debug.Log("[3-4] StartGame called");
+        base.StartGame();
+
         if (arrow != null) arrow.SetActive(true);
+
         ended = false;
+        trapHit = false;
+        wrongClick = false;
+        localTime = 0f;
 
-        perfectCnt = 0;
-        goodCnt = 0;
-        missCnt = 0;
-        submittedInputCnt = 0;
+        for (int i = 0; i < slotUsed.Length; i++)
+            slotUsed[i] = false;
 
-        if (handMover != null) handMover.start = true;
+        if (drawCard == null)
+            drawCard = GetComponentInChildren<DrawCard3_4remake>(true);
+
+        // 클릭은 이 스크립트가 직접 받는다 (HandMover 중복 입력 방지)
+        if (handMover != null)
+            handMover.start = false;
     }
 
     private void Update()
     {
+        localTime += Time.deltaTime;
+
         if (ended) return;
 
-        if (handTransform != null && handTransform.position.x >= handStopX)
+        float t = SongTime;
+
+        // 마지막 카드 판정 범위가 지나면 종료
+        float lastCard = firstCardTime + cardInterval * (cardCount - 1);
+        if (t > lastCard + goodWindow)
         {
-            FinalJudge();
+            Finish();
+            return;
         }
+
+        if (isDemoMode)
+        {
+            // 시범: 함정 카드 박자가 되면 직접 터치 (차트 노트 불필요)
+            int trap = drawCard != null ? drawCard.TrapIndex : -1;
+            if (trap >= 0 && !trapHit && t >= firstCardTime + cardInterval * trap)
+                SubmitInput();
+            return;
+        }
+
+        if (IsInputLocked) return;
+
+        if (Input.GetMouseButtonDown(0))
+            SubmitInput();
     }
 
-    /// <summary>
-    /// 클릭 순간 호출 -> RhythmManagerTest에 "Input" 전달
-    /// </summary>
+    // 클릭 1회 처리 (플레이어/시범 공통)
     public void SubmitInput()
     {
         if (ended) return;
-        if (IsInputLocked) return;
 
-        submittedInputCnt++;
-        OnPlayerInput("Input");
-    }
+        float t = SongTime;
 
-    /// <summary>
-    /// 판정 결과 누적
-    /// </summary>
-    public override void OnJudgement(JudgementResult judgement)
-    {
-        if (ended) return;
-
-        switch (judgement)
+        // 손이 움직이기 전(카드 돌리는 중)의 클릭은 무시
+        if (t < firstCardTime - cardInterval * 0.5f)
         {
-            case JudgementResult.Perfect:
-                perfectCnt++;
-                break;
-            case JudgementResult.Good:
-                goodCnt++;
-                break;
-            case JudgementResult.Miss:
-                missCnt++;
-                break;
+            JudgeLog($"[3-4 Judge] 카드 돌리는 중 클릭 무시 song={t:F3}");
+            return;
+        }
+
+        int slot = Mathf.Clamp(
+            Mathf.RoundToInt((t - firstCardTime) / cardInterval),
+            0, cardCount - 1);
+
+        float diff = t - (firstCardTime + cardInterval * slot);
+        float abs = Mathf.Abs(diff);
+
+        if (abs > goodWindow)
+        {
+            JudgeLog($"[3-4 Judge] 카드 사이 클릭 무시 (카드{slot} diff={diff * 1000:F0}ms)");
+            return;
+        }
+
+        if (slotUsed[slot]) return;
+        slotUsed[slot] = true;
+
+        int trapIndex = drawCard != null ? drawCard.TrapIndex : -1;
+        string grade = abs <= perfectWindow ? "Perfect" : "Good";
+
+        if (slot == trapIndex)
+        {
+            trapHit = true;
+            JudgeLog($"[3-4 Judge] 함정 카드{slot} 터치 diff={diff * 1000:F0}ms → {grade}");
+        }
+        else
+        {
+            wrongClick = true;
+            JudgeLog($"[3-4 Judge] 일반 카드{slot} 터치 → 실패 (함정은 카드{trapIndex})");
         }
     }
 
-    /// <summary>
-    /// handStopX 도달 시 최종 판정
-    /// </summary>
-    public void FinalJudge()
+    private void Finish()
     {
         if (ended) return;
         ended = true;
 
-        if (handMover != null) handMover.start = false;
+        bool success = trapHit && !wrongClick;
 
-        int goodOrPerfect = goodCnt + perfectCnt;
-        Debug.Log($"[3-4] FinalJudge: P={perfectCnt}, G={goodCnt}, M={missCnt}, GP={goodOrPerfect}, Submit={submittedInputCnt}");
+        if (success) ReportManualSuccess();
+        else ReportManualFail();
 
-        // Success와 Fail 함수를 호출하지 않고 로그로만 처리
-        if (handMover != null && goodOrPerfect == requiredGoodOrPerfectCount && handMover.suspiciousClickCount == 1)
-        {
-            Debug.Log("[3-4] 조건 충족 완료 (Success 미사용)");
-        }
-        else
-        {
-            Debug.Log("[3-4] 조건 미달 (Fail 미사용)");
-        }
+        JudgeLog($"[3-4 Judge] 결과 {(success ? "성공" : "실패")} (함정 터치={trapHit}, 오터치={wrongClick})");
+    }
+
+    public override void OnJudgement(JudgementResult judgement)
+    {
+        // RhythmManager 판정은 쓰지 않는다 (수동 판정)
+    }
+
+    // 시범은 Update에서 카드 박자로 직접 처리한다 (차트 노트 사용 안 함)
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
+    }
+
+    // 구버전 호환
+    public void FinalJudge()
+    {
+        Finish();
     }
 }

@@ -499,6 +499,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   loadingOverlay: {fileID: 143293244}
   minimumLoadingDuration: 3
+  practiceDemoManager: {fileID: 0}
 --- !u!1 &232758462
 GameObject:
   m_ObjectHideFlags: 0
@@ -630,6 +631,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firstSceneName: MainScene
+  debugJumpEnabled: 1
+  debugPlanetId: 3
+  debugMinigameNumber: 7
+  minigameSceneName: MinigameLoad
+  returnSceneName: LobbyScene
+  debugStartingLife: 4
 --- !u!114 &236419110
 MonoBehaviour:
   m_ObjectHideFlags: 0

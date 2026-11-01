@@ -130,6 +130,7 @@ public class MinigameUIManager : MonoBehaviour
     [Tooltip("점프 시작 시 미니게임 시작 몇 초 전부터 BGM을 틀지")]
     [SerializeField] private float debugJumpLeadIn = 2f;
     private int debugStartIndex = 0;
+    private int currentTimelineIndex = 0;
     private bool IsDebugJump => debugStartIndex > 0;
     //private int life = 4;
 
@@ -274,13 +275,29 @@ public class MinigameUIManager : MonoBehaviour
 
     void Update()
     {
-        // F5: 같은 지점부터 다시 (에디터/개발 빌드 전용)
-        if ((Application.isEditor || Debug.isDebugBuild) &&
-            Input.GetKeyDown(KeyCode.F5))
+        // 에디터/개발 빌드 전용 재시작 단축키 (Game 뷰를 한 번 클릭해 포커스를 줘야 키가 들어온다)
+        // F5: 점프했던 지점부터 다시
+        // F6: 지금 플레이 중인 미니게임부터 다시
+        if (Application.isEditor || Debug.isDebugBuild)
         {
-            DebugJump.Request(debugStartIndex > 0 ? debugStartIndex : 0);
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            return;
+            int restartIndex = -1;
+
+            if (Input.GetKeyDown(KeyCode.F5))
+                restartIndex = debugStartIndex;
+            else if (Input.GetKeyDown(KeyCode.F6))
+                restartIndex = currentTimelineIndex;
+
+            if (restartIndex >= 0)
+            {
+                Debug.LogWarning(
+                    $"[DebugJump] 재시작 → {selectedPlanet}-{restartIndex + 1}"
+                );
+
+                DOTween.KillAll();
+                DebugJump.Request(restartIndex);
+                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                return;
+            }
         }
 
         if (isTimerActive)
@@ -567,6 +584,8 @@ public class MinigameUIManager : MonoBehaviour
         // 미니게임 순차 실행
         for (int i = debugStartIndex; i < gameCount; i++)
         {
+            currentTimelineIndex = i;
+
             float startT = GetTimelineStartTime(i);
             pendingStartT = startT;
             float preEndT = Mathf.Max(0f, startT - preEndGap);

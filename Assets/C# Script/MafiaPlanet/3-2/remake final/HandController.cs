@@ -6,13 +6,11 @@ public class HandController : MonoBehaviour
     [Header("효과음")]
     [SerializeField] private AudioClip clickSound;
 
-
     [Header("효과음")]
     [SerializeField] private AudioClip grabSound;
 
     [Header("미니게임")]
     [SerializeField] private Minigame3_2remake minigame;
-
 
     [Header("오브젝트")]
     [SerializeField] private GameObject hand;
@@ -21,17 +19,25 @@ public class HandController : MonoBehaviour
     // Grab의 자식 Target
     [SerializeField] private Transform target;
 
-
     [Header("가로 이동 설정")]
     [SerializeField] private float startX = 12f;
     [SerializeField] private float moveY = 7f;
 
+    [Tooltip("검은 가방 위치. 노래 시간 horizontalMoveTime에 여기 도착 = CSV Input 노트 시각")]
     [SerializeField] private float firstTargetX = -7f;
     [SerializeField] private float endX = -12f;
 
-    // 12 -> -7까지 걸리는 시간
+    // 12 -> -7까지 걸리는 시간 (노래 0초 출발 → 이 시각에 가방 위 도착)
     [SerializeField] private float horizontalMoveTime = 2.4f;
 
+    [Header("랜덤 가방")]
+    [Tooltip("켜면 검은 가방(Tag=Bag)을 4자리 중 랜덤 위치로 바꾼다. 손은 어느 자리든 같은 박자(horizontalMoveTime)에 그 가방 위에 온다.")]
+    [SerializeField] private bool randomizeBag = true;
+    [Tooltip("가방 오브젝트 이름에 포함된 문자열 (자리 후보 찾기용)")]
+    [SerializeField] private string bagNameKey = "3_2_bag";
+
+    // 이번 판에서 잡아야 하는 가방의 x
+    private float targetBagX;
 
     [Header("세로 이동 설정")]
     [SerializeField] private float downY = 4.4f;
@@ -40,6 +46,9 @@ public class HandController : MonoBehaviour
     // 내려가는 시간 / 올라가는 시간
     [SerializeField] private float verticalMoveTime = 1.2f;
 
+    [Header("(구버전) 데모 좌표 트리거 - 지금은 CSV Input 박자로 동작")]
+    [SerializeField] private float demoSuccessX = -7f;
+    [SerializeField] private float demoPositionTolerance = 0.05f;
 
     // 현재 Hand와 충돌하고 있는 Bag
     private GameObject currentBag;
@@ -53,360 +62,229 @@ public class HandController : MonoBehaviour
     // Bag을 실제로 잡았는지
     private bool hasBag = false;
 
-    // 현재 실행 중인 가로 이동 Tween
-    private Tween horizontalTween;
-
-    // 데모 모드
-    [Header("데모 자동 동작")]
-    [SerializeField] private float demoSuccessX = -7f;
-    [SerializeField] private float demoPositionTolerance = 0.05f;
+    // 판정 결과 (내려간 뒤 잡을지 결정)
+    private bool judgedSuccess = false;
+    private bool reachedBottom = false;
 
     private bool isDemoMode = false;
-    private bool hasTriggeredDemo = false;
+
+    // 노래 시간 없을 때(테스트 씬 등) 대비 로컬 시간
+    private float localTime;
 
     public void SetDemoMode(bool isDemo)
     {
         isDemoMode = isDemo;
-        hasTriggeredDemo = false;
-
         Debug.Log("[Hand] 데모 모드: " + isDemoMode);
     }
 
-
     private void Start()
     {
-        // 시작 상태
         hand.SetActive(true);
         grab.SetActive(false);
 
+        hand.transform.position = new Vector3(startX, moveY, hand.transform.position.z);
 
-        // Hand 시작 위치
-        hand.transform.position =
-            new Vector3(
-                startX,
-                moveY,
-                hand.transform.position.z
-            );
+        targetBagX = firstTargetX;
 
-
-        // 가로 이동 시작
-        StartHorizontalMove();
+        if (randomizeBag)
+            ArrangeRandomBag();
     }
 
-
-    private void Update()
+    // 검은 가방을 4자리 중 랜덤 자리로 옮긴다 (그 자리의 일반 가방과 위치 교환)
+    private void ArrangeRandomBag()
     {
-        // 데모 중 설정한 X좌표에 도착했는지 확인
-        if (isDemoMode &&
-            !hasTriggeredDemo &&
-            !isActionStarted &&
-            hand.activeInHierarchy)
+        Transform root = minigame != null ? minigame.transform : transform.root;
+
+        GameObject black = null;
+        var slots = new System.Collections.Generic.List<Transform>();
+
+        foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
         {
-            float currentX = hand.transform.position.x;
+            if (t.parent == null || !t.name.Contains(bagNameKey)) continue;
+            if (t.parent.name.Contains(bagNameKey)) continue; // 가방 자식 제외
 
-            if (Mathf.Abs(currentX - demoSuccessX)
-                <= demoPositionTolerance)
-            {
-                hasTriggeredDemo = true;
-
-                Debug.Log(
-                    "[Hand] 데모 성공 좌표 도착: " + currentX
-                );
-
-                StartGrabAction();
-            }
+            slots.Add(t);
+            if (t.CompareTag("Bag")) black = t.gameObject;
         }
 
-        // Bag을 잡은 상태라면
-        // Grab의 자식 Target 위치를 계속 따라간다.
-        if (hasBag &&
-            grabbedBag != null &&
-            target != null)
+        if (black == null || slots.Count == 0)
         {
-            grabbedBag.transform.position =
-                target.position;
-        }
-    }
-
-
-    /// <summary>
-    /// Hand 가로 이동
-    ///
-    /// 12 -> -7 : 2.4초
-    /// -7 -> -12 : 동일한 속도
-    /// </summary>
-    private void StartHorizontalMove()
-    {
-        // 12 -> -7 거리
-        float firstDistance =
-            Mathf.Abs(startX - firstTargetX);
-
-
-        // 이동 속도 계산
-        float speed =
-            firstDistance / horizontalMoveTime;
-
-
-        // -7 -> -12 거리
-        float secondDistance =
-            Mathf.Abs(firstTargetX - endX);
-
-
-        // 동일 속도로 이동하기 위한 시간
-        float secondMoveTime =
-            secondDistance / speed;
-
-
-        Sequence sequence =
-            DOTween.Sequence();
-
-
-        // 12 -> -7
-        sequence.Append(
-            hand.transform
-                .DOMoveX(
-                    firstTargetX,
-                    horizontalMoveTime
-                )
-                .SetEase(Ease.Linear)
-        );
-
-
-        // -7 -> -12
-        sequence.Append(
-            hand.transform
-                .DOMoveX(
-                    endX,
-                    secondMoveTime
-                )
-                .SetEase(Ease.Linear)
-        );
-
-
-        // 클릭하지 않고 -12까지 도착
-        sequence.OnComplete(() =>
-        {
-            // 안전장치
-            if (isActionStarted)
-            {
-                return;
-            }
-
-            if (isDemoMode)
-            {
-                // 데모에서 성공 좌표에 도착하지 못했다면
-                // 기존 이동 종료 시 자동 동작을 실행하지 않는다.
-                Debug.Log("[Hand] 이동 종료. 데모 좌표 확인: "
-                          + hand.transform.position.x);
-                return;
-            }
-
-
-            Debug.Log(
-                "[Hand] x = -12 도착"
-            );
-
-
-            // 미니게임에 Fail 전달
-            if (minigame != null)
-            {
-                minigame.ReportHandTimeoutFail();
-            }
-        });
-
-
-        horizontalTween = sequence;
-    }
-
-
-    /// <summary>
-    /// 좌클릭했을 때 호출
-    /// </summary>
-    public void StartGrabAction()
-    {
-        // 이미 클릭했다면 중복 실행 방지
-        if (isActionStarted)
-        {
+            Debug.LogWarning("[Hand] 랜덤 가방: 검은 가방(Tag=Bag) 또는 자리 후보를 못 찾음");
             return;
         }
 
-        if (clickSound != null)
+        Transform pick = slots[Random.Range(0, slots.Count)];
+
+        if (pick.gameObject != black)
         {
-            if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
-            {
-                GameRoot.Instance.Audio.PlaySfx(clickSound);
-            }
+            Vector3 a = black.transform.position;
+            black.transform.position = pick.position;
+            pick.position = a;
         }
 
+        targetBagX = black.transform.position.x;
+
+        Debug.Log($"[Hand] 이번 판 검은 가방 x={targetBagX:F2} (후보 {slots.Count}개)");
+    }
+
+    // 클릭 순간 손이 검은 가방 위에서 몇 초 어긋났는지 (+면 늦음)
+    public float GetTimingDiffSeconds()
+    {
+        float speed = (startX - firstTargetX) / Mathf.Max(0.01f, horizontalMoveTime);
+        return (targetBagX - hand.transform.position.x) / Mathf.Max(0.01f, speed);
+    }
+
+    public bool IsHandPastEnd => !isActionStarted && hand.transform.position.x <= endX + 0.001f;
+
+    // 속도는 고정 (startX→firstTargetX를 horizontalMoveTime에 가는 속도).
+    // 어느 자리든 노래 horizontalMoveTime(=Input 노트)에 검은 가방 위에 오도록 출발 시각만 달라진다.
+    // 가까운 자리면 늦게 출발한다.
+    private float GetHandX(float t)
+    {
+        float speed = (startX - firstTargetX) / Mathf.Max(0.01f, horizontalMoveTime);
+        float x = targetBagX + speed * (horizontalMoveTime - t);
+        return Mathf.Clamp(x, endX, startX);
+    }
+
+    private void Update()
+    {
+        if (!isActionStarted && hand.activeInHierarchy)
+        {
+            float t;
+            double song = minigame != null ? minigame.SongTime : -1;
+
+            if (song >= 0)
+            {
+                t = (float)song;
+            }
+            else
+            {
+                localTime += Time.deltaTime;
+                t = localTime;
+            }
+
+            Vector3 p = hand.transform.position;
+            p.x = GetHandX(t);
+            hand.transform.position = p;
+        }
+
+        // Bag을 잡은 상태라면 Grab의 자식 Target 위치를 계속 따라간다.
+        if (hasBag && grabbedBag != null && target != null)
+            grabbedBag.transform.position = target.position;
+    }
+
+    /// <summary>
+    /// 클릭(또는 시범)했을 때 호출. 손을 멈추고 내려간다.
+    /// </summary>
+    public void StartGrabAction()
+    {
+        if (isActionStarted) return;
+
+        if (clickSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            GameRoot.Instance.Audio.PlaySfx(clickSound);
+
         isActionStarted = true;
+        reachedBottom = false;
 
+        Debug.Log($"[Hand] 클릭 - 하강 시작 x={hand.transform.position.x:F2}");
 
-        Debug.Log(
-            "[Hand] 클릭 - 하강 시작"
-        );
-
-
-        // 가로 이동 정지
-        horizontalTween?.Kill();
-
-
-        // 클릭 순간의 X 좌표
-        float fixedX =
-            hand.transform.position.x;
-
-
-        // X 위치 고정
-        hand.transform.position =
-            new Vector3(
-                fixedX,
-                hand.transform.position.y,
-                hand.transform.position.z
-            );
-
-
-        // 현재 X를 유지하면서
-        // y = 4.4까지 1.2초 동안 이동
         hand.transform
-            .DOMoveY(
-                downY,
-                verticalMoveTime
-            )
+            .DOMoveY(downY, verticalMoveTime)
             .SetEase(Ease.Linear)
             .OnComplete(OnReachedBottom);
     }
 
-
     /// <summary>
-    /// Hand가 y = 4.4까지 내려왔을 때 호출
+    /// 미니게임이 판정 결과를 알려준다. (손이 내려가는 중에 온다)
     /// </summary>
+    public void SetJudgeResult(bool success)
+    {
+        judgedSuccess = success;
+
+        // 이미 바닥이면 바로 반영
+        if (reachedBottom && success && !hasBag)
+            GrabBag(FindBlackBag());
+    }
+
     private void OnReachedBottom()
     {
-        Debug.Log(
-            "[Hand] y = 4.4 도착"
-        );
+        reachedBottom = true;
 
-
-        // Bag과 충돌 중이면 무조건 잡는다.
-        if (currentBag != null)
+        // 판정 성공이면 잡는다 (타이밍 판정과 화면 결과를 일치시킴)
+        if (judgedSuccess)
         {
-            GrabBag(currentBag);
+            GrabBag(currentBag != null ? currentBag : FindBlackBag());
         }
         else
         {
-            // Bag이 없으면 빈손으로 올라간다.
             MoveHandUp();
         }
     }
 
+    private GameObject FindBlackBag()
+    {
+        if (currentBag != null) return currentBag;
 
-    /// <summary>
-    /// Bag을 잡는다.
-    /// </summary>
+        Transform root = minigame != null ? minigame.transform : transform.root;
+
+        foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
+        {
+            if (t.CompareTag("Bag"))
+                return t.gameObject;
+        }
+
+        return null;
+    }
+
     private void GrabBag(GameObject bag)
     {
-        if (clickSound!=null&& GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+        if (bag == null)
         {
-            GameRoot.Instance.Audio.PlaySfx(clickSound);
-        }
-        hasBag = true;
-        grabbedBag = bag;
-
-
-        // Hand가 내려온 위치 저장
-        Vector3 handPosition =
-            hand.transform.position;
-
-
-        // 기존 Hand 끄기
-        hand.SetActive(false);
-
-
-        // Grab 켜기
-        grab.SetActive(true);
-
-
-        // Grab을 Hand가 있던 위치에 배치
-        grab.transform.position =
-            handPosition;
-
-
-        // Bag을 Grab의 Target 위치로 이동
-        if (target != null)
-        {
-            grabbedBag.transform.position =
-                target.position;
-        }
-
-
-        // Grab을 y = 9.5까지
-        // 1.2초 동안 올린다.
-        grab.transform
-            .DOMoveY(
-                upY,
-                verticalMoveTime
-            )
-            .SetEase(Ease.Linear)
-            .OnComplete(() =>
-            {
-                Debug.Log(
-                    "[Hand] Bag 잡기 완료"
-                );
-            });
-    }
-
-
-    /// <summary>
-    /// Bag을 잡지 못한 경우
-    /// Hand만 올라간다.
-    /// </summary>
-    private void MoveHandUp()
-    {
-        hand.transform
-            .DOMoveY(
-                upY,
-                verticalMoveTime
-            )
-            .SetEase(Ease.Linear)
-            .OnComplete(() =>
-            {
-                Debug.Log(
-                    "[Hand] 빈손 복귀 완료"
-                );
-            });
-    }
-
-
-    /// <summary>
-    /// Hand가 Bag과 충돌했을 때 호출
-    /// </summary>
-    public void EnterBag(GameObject bag)
-    {
-        if (bag == null) return;
-
-        currentBag = bag;
-
-        Debug.Log(
-            "[Hand] Bag 충돌 시작 : " +
-            bag.name
-        );
-    }
-
-
-    /// <summary>
-    /// Hand가 Bag에서 빠져나왔을 때 호출
-    /// </summary>
-    public void ExitBag(GameObject bag)
-    {
-        if (currentBag != bag)
-        {
+            MoveHandUp();
             return;
         }
 
-        currentBag = null;
+        AudioClip sfx = grabSound != null ? grabSound : clickSound;
+        if (sfx != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            GameRoot.Instance.Audio.PlaySfx(sfx);
 
-        Debug.Log(
-            "[Hand] Bag 충돌 종료 : " +
-            bag.name
-        );
+        hasBag = true;
+        grabbedBag = bag;
+
+        Vector3 handPosition = hand.transform.position;
+
+        hand.transform.DOKill();
+        hand.SetActive(false);
+
+        grab.SetActive(true);
+        grab.transform.position = handPosition;
+
+        if (target != null)
+            grabbedBag.transform.position = target.position;
+
+        grab.transform
+            .DOMoveY(upY, verticalMoveTime)
+            .SetEase(Ease.Linear)
+            .OnComplete(() => Debug.Log("[Hand] Bag 잡기 완료"));
+    }
+
+    private void MoveHandUp()
+    {
+        hand.transform
+            .DOMoveY(upY, verticalMoveTime)
+            .SetEase(Ease.Linear)
+            .OnComplete(() => Debug.Log("[Hand] 빈손 복귀 완료"));
+    }
+
+    public void EnterBag(GameObject bag)
+    {
+        if (bag == null) return;
+        currentBag = bag;
+    }
+
+    public void ExitBag(GameObject bag)
+    {
+        if (currentBag != bag) return;
+        currentBag = null;
     }
 }
