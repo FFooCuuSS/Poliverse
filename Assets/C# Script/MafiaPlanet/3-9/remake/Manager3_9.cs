@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,9 +12,17 @@ public class PatternSlot3_9
     public GameObject pattern;
 }
 
+// 3-9 진행 (모든 시각은 노래 시간 기준)
+//  1) 표시: startDelay부터 (on+off) 간격으로 정답 칸이 하나씩 켜짐
+//  2) 입력: 입력 시작부터 inputInterval 간격으로 6박. 박마다 모든 칸이 빨갛게 켜짐(신호)
+//           → 그 박에 '이번 순서의 칸'을 누른다.
+// 판정(박마다 1개, 총 6개):
+//  - 박 ±goodWindow 안에 맞는 칸 → 성공 (±perfectWindow면 Perfect)
+//  - 박 ±goodWindow 안에 틀린 칸 → 실패
+//  - 박 + goodWindow까지 안 누름 → 실패
+//  - 박 범위 밖 클릭은 무시
 public class Manager3_9 : MonoBehaviour
 {
-
     [Header("효과음")]
     [SerializeField] private AudioClip clickSound;
     [Header("효과음")]
@@ -29,8 +36,7 @@ public class Manager3_9 : MonoBehaviour
     [Header("미니게임 판정")]
     public Minigame_3_9_remake minigame;
 
-
-    [Header("게임 시작 대기 시간")]
+    [Header("게임 시작 대기 시간 (첫 패턴 표시 시각)")]
     public float startDelay = 1.8f;
 
     [Header("패턴 ON 시간")]
@@ -42,306 +48,171 @@ public class Manager3_9 : MonoBehaviour
     [Header("패턴 표시 후 입력까지 대기 시간")]
     public float inputStartDelay = 1.8f;
 
-    [Header("데모 설정")]
-    [SerializeField] private float autoInputInterval = 0.6f;
+    [Header("입력 박자")]
+    [Tooltip("입력 박 간격 (초)")]
+    [SerializeField] private float inputInterval = 1.2f;
+    [Tooltip("박마다 모든 칸이 빨갛게 켜져 있는 시간 (초)")]
+    [SerializeField] private float cueOnTime = 0.6f;
 
-    // 랜덤으로 만들어진 정답 순서
-    // 예:
-    // 3, 0, 5, 2, 4, 1
-    //
-    // 실제 번호:
-    // 4 -> 1 -> 6 -> 3 -> 5 -> 2
-    private List<int> answerPattern =
-        new List<int>();
+    [Header("판정 범위 (초)")]
+    [SerializeField] private float perfectWindow = 0.1f;
+    [SerializeField] private float goodWindow = 0.3f;
 
+    // 랜덤 정답 순서 (slot index 0~5)
+    private readonly List<int> answerPattern = new List<int>();
 
-    // 현재 몇 번째 입력을 받고 있는지
+    // 현재 몇 번째 박인지
     private int inputIndex = 0;
 
-
-    // 현재 플레이어 입력 가능 여부
+    // 입력 단계 여부
     private bool canInput = false;
 
     private bool isDemoMode;
-    private bool gameRoutineStarted;
+
+    private bool patternMade;
+    private int shownIndex = -1;
+    private bool inputStarted;
+    private bool cueOn;
+    private bool finished;
+
+    private float InputStartTime =>
+        startDelay + slots.Length * (patternOnTime + patternOffTime) + inputStartDelay;
+
+    private float BeatTime(int k) => InputStartTime + inputInterval * k;
+
+    // 미니게임이 중간에 끝날 때: 남은 입력 수
+    public int RemainingInputs => Mathf.Max(0, slots.Length - inputIndex);
 
     private void Start()
     {
-        // 시작할 때 모든 onBox를 끈다.
         SetAllOnBoxes(false);
-
-        // 데모
-        if (minigame != null)
-            isDemoMode = minigame.IsDemoMode;
-
-        // 게임 진행 시작
-        StartCoroutine(GameRoutine());
     }
 
-
-    /// <summary>
-    /// 전체 3-9 게임 진행
-    /// </summary>
-    private IEnumerator GameRoutine()
+    private void Update()
     {
-        if (gameRoutineStarted) yield break;
-        gameRoutineStarted = true;
+        if (finished || minigame == null) return;
 
-        Debug.Log("[3-9] 게임 시작");
+        float t = minigame.SongTime;
+        if (t < 0f) return;
 
-        // 게임 시작 후 2초 대기
-        yield return new WaitForSeconds(
-            startDelay
-        );
-
-
-        // =========================
-        // 랜덤 패턴 생성
-        // =========================
-
-        CreateRandomPattern();
-
-
-        // =========================
-        // 정답 패턴 보여주기
-        // =========================
-
-        yield return StartCoroutine(
-            ShowPattern()
-        );
-
-
-        // =========================
-        // 패턴 표시 후 2초 대기
-        // =========================
-
-        yield return new WaitForSeconds(
-            inputStartDelay
-        );
-
-
-        // =========================
-        // 입력 시작
-        // =========================
-
-        // 시범 모드가 설정된 값을 입력 시작 직전에 다시 확인
-        if (minigame != null)
-            isDemoMode = minigame.IsDemoMode;
-
-        StartInput();
-
-        if (isDemoMode)
+        if (!patternMade)
         {
-            // 데모에서는 정답 순서대로 자동 입력
-            yield return StartCoroutine(AutoInputRoutine());
+            patternMade = true;
+            Debug.Log("[3-9] 게임 시작");
+            CreateRandomPattern();
         }
-        else
+
+        // ===== 1) 표시 =====
+        if (!inputStarted)
         {
-            // 일반 모드에서는 플레이어 입력 대기
-            while (canInput)
-                yield return null;
+            UpdateShowPattern(t);
+
+            if (t >= InputStartTime)
+            {
+                isDemoMode = minigame.IsDemoMode;
+                inputStarted = true;
+                canInput = true;
+                inputIndex = 0;
+                SetAllOnBoxes(false);
+                Debug.Log($"[3-9 Judge] 입력 시작 song={t:F3}");
+            }
+            else
+            {
+                return;
+            }
         }
-        Debug.Log("[3-9] 모든 입력 완료");
 
-        // =========================
-        // 최종 결과 판정
-        // =========================
+        // ===== 2) 입력 =====
+        UpdateCue(t);
 
-        if (minigame != null)
+        if (canInput)
         {
+            // 시범: 박 시각에 정답 칸 자동 입력
+            if (isDemoMode && t >= BeatTime(inputIndex))
+                JudgeClick(answerPattern[inputIndex], t);
+
+            // 안 누르고 지나간 박
+            while (canInput && t > BeatTime(inputIndex) + goodWindow)
+                Resolve(false, $"{inputIndex + 1}번째 박 안 누름");
+        }
+
+        if (!canInput)
+        {
+            finished = true;
+            SetAllOnBoxes(false);
+            Debug.Log("[3-9] 모든 입력 완료");
             minigame.FinishGame();
         }
-        else
-        {
-            Debug.LogError(
-                "[3-9] Minigame_3_9_remake가 연결되지 않음"
-            );
-        }
     }
 
-
-    /// <summary>
-    /// 1~6을 중복 없이 랜덤 순서로 만든다.
-    /// </summary>
-    private void CreateRandomPattern()
+    private void UpdateShowPattern(float t)
     {
-        answerPattern.Clear();
+        float step = patternOnTime + patternOffTime;
+        float since = t - startDelay;
 
-
-        // 0~5 준비
-        List<int> availableIndexes =
-            new List<int>();
-
-
-        for (int i = 0;
-             i < slots.Length;
-             i++)
+        int idx = -1;
+        if (since >= 0f && step > 0f)
         {
-            availableIndexes.Add(i);
+            int i = Mathf.FloorToInt(since / step);
+            if (i < answerPattern.Count && since - i * step < patternOnTime)
+                idx = i;
         }
 
+        if (idx == shownIndex) return;
 
-        // 6개 전부 랜덤하게 뽑는다.
-        while (availableIndexes.Count > 0)
+        if (shownIndex >= 0 && slots[answerPattern[shownIndex]].onBox != null)
+            slots[answerPattern[shownIndex]].onBox.SetActive(false);
+
+        shownIndex = idx;
+
+        if (idx >= 0)
         {
-            int randomIndex =
-                UnityEngine.Random.Range(
-                    0,
-                    availableIndexes.Count
-                );
+            int slotIndex = answerPattern[idx];
 
+            PlaySfx(showSound);
 
-            int selectedSlot =
-                availableIndexes[randomIndex];
-
-
-            answerPattern.Add(
-                selectedSlot
-            );
-
-
-            // 이미 뽑은 번호 제거
-            availableIndexes.RemoveAt(
-                randomIndex
-            );
-        }
-
-
-        // 정답 확인용 로그
-        string debugPattern = "";
-
-
-        for (int i = 0;
-             i < answerPattern.Count;
-             i++)
-        {
-            debugPattern +=
-                (answerPattern[i] + 1);
-
-
-            if (i <
-                answerPattern.Count - 1)
-            {
-                debugPattern += " -> ";
-            }
-        }
-
-
-        Debug.Log(
-            "[3-9] 정답 패턴 : " +
-            debugPattern
-        );
-    }
-
-
-    /// <summary>
-    /// 생성된 6개의 패턴을 순서대로 보여준다.
-    /// </summary>
-    private IEnumerator ShowPattern()
-    {
-        // 패턴 표시 중에는 클릭 불가능
-        canInput = false;
-
-
-        for (int i = 0;
-             i < answerPattern.Count;
-             i++)
-        {
-            int slotIndex =
-                answerPattern[i];
-
-
-            // 해당 위치 켜기
             if (slots[slotIndex].onBox != null)
-            {
-                if (showSound != null)
-                {
-                    if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
-                    {
-                        GameRoot.Instance.Audio.PlaySfx(showSound);
-                    }
-                }
+                slots[slotIndex].onBox.SetActive(true);
 
-                slots[slotIndex]
-                    .onBox
-                    .SetActive(true);
-            }
+            Debug.Log($"[3-9 Judge] 패턴 {idx + 1}번째 표시 (칸 {slotIndex + 1}) song={t:F3}");
+        }
+    }
 
+    // 박마다 모든 칸 빨갛게 (신호)
+    private void UpdateCue(float t)
+    {
+        bool on = false;
+        float since = t - InputStartTime;
 
-            // ON 유지
-            yield return new WaitForSeconds(
-                patternOnTime
-            );
-
-
-            // 해당 위치 끄기
-            if (slots[slotIndex].onBox != null)
-            {
-                slots[slotIndex]
-                    .onBox
-                    .SetActive(false);
-            }
-
-
-            // 다음 패턴까지 대기
-            yield return new WaitForSeconds(
-                patternOffTime
-            );
+        if (since >= 0f && inputInterval > 0f)
+        {
+            int k = Mathf.FloorToInt(since / inputInterval);
+            on = k < slots.Length && since - k * inputInterval < cueOnTime;
         }
 
-
-        Debug.Log(
-            "[3-9] 패턴 표시 완료"
-        );
+        if (on == cueOn) return;
+        cueOn = on;
+        SetAllOnBoxes(on);
     }
 
-
-    /// <summary>
-    /// 플레이어 입력 단계 시작
-    /// </summary>
-    private void StartInput()
-    {
-        // 첫 번째 입력부터 시작
-        inputIndex = 0;
-
-
-        // 입력 시작하면
-        // onBox 1~6 전부 켜기
-        SetAllOnBoxes(true);
-
-
-        // 입력 허용
-        canInput = true;
-
-
-        Debug.Log(
-            "[3-9] 입력 시작"
-        );
-    }
-
-    /// <summary>
-    /// PatternButton3_9에서 호출
-    /// </summary>
+    /// <summary>PatternButton3_9에서 호출</summary>
     public void OnPatternClicked(int slotIndex)
     {
-        // 데모 중에는 플레이어가 직접 누를 수 없다.
         if (isDemoMode)
         {
             Debug.Log("[3-9] 데모 중 플레이어 입력 무시");
             return;
         }
 
-        HandlePatternInput(slotIndex);
+        if (minigame == null) return;
+        JudgeClick(slotIndex, minigame.SongTime);
     }
 
-    /// <summary>
-    /// 일반 입력과 데모 자동 입력이 공통으로 사용하는 입력 처리
-    /// </summary>
-    private void HandlePatternInput(int slotIndex)
+    private void JudgeClick(int slotIndex, float t)
     {
         if (!canInput)
         {
-            Debug.Log("[3-9] 클릭했지만 현재 입력 불가");
+            Debug.Log($"[3-9 Judge] 클릭 무시 (입력 단계 아님) song={t:F3}");
             return;
         }
 
@@ -351,119 +222,82 @@ public class Manager3_9 : MonoBehaviour
             return;
         }
 
-        if (inputIndex >= answerPattern.Count)
+        float diff = t - BeatTime(inputIndex);
+
+        if (diff < -goodWindow)
         {
-            Debug.Log("[3-9] 이미 입력 완료");
+            Debug.Log($"[3-9 Judge] 클릭 무시 (너무 일찍 {diff * 1000:F0}ms) song={t:F3}");
             return;
         }
 
-        // 클릭한 위치의 onBox 끄기
-        GameObject clickedOnBox = slots[slotIndex] != null
-            ? slots[slotIndex].onBox
-            : null;
-
-        if (clickedOnBox == null)
-        {
-            Debug.LogError(
-                "[3-9] slot " + (slotIndex + 1) +
-                "의 onBox가 Inspector에 연결되지 않음");
-        }
-        else
-        {
-            clickedOnBox.SetActive(false);
-        }
-
         int correctIndex = answerPattern[inputIndex];
+        string grade = Mathf.Abs(diff) <= perfectWindow ? "Perfect" : "Good";
 
         if (slotIndex == correctIndex)
+            Resolve(true, $"{inputIndex + 1}번째 칸 {slotIndex + 1} 정답 diff={diff * 1000:F0}ms → {grade}");
+        else
+            Resolve(false, $"{inputIndex + 1}번째 틀린 칸 클릭 {slotIndex + 1} (정답 {correctIndex + 1})");
+    }
+
+    private void Resolve(bool success, string reason)
+    {
+        if (success)
         {
-            if (clickSound != null &&
-                GameRoot.Instance != null &&
-                GameRoot.Instance.Audio != null)
-            {
-                GameRoot.Instance.Audio.PlaySfx(clickSound);
-            }
-
-            Debug.Log(
-                "[3-9] " + (inputIndex + 1) +
-                "번째 입력 성공 : " + (slotIndex + 1));
-
-            if (minigame != null)
-                minigame.ReportPatternSuccess();
+            PlaySfx(clickSound);
+            minigame?.ReportPatternSuccess();
         }
         else
         {
-            if (wrongSound != null &&
-                GameRoot.Instance != null &&
-                GameRoot.Instance.Audio != null)
-            {
-                GameRoot.Instance.Audio.PlaySfx(wrongSound);
-            }
-
-            Debug.Log(
-                "[3-9] " + (inputIndex + 1) +
-                "번째 입력 실패 / 클릭 = " + (slotIndex + 1) +
-                " / 정답 = " + (correctIndex + 1));
-
-            if (minigame != null)
-                minigame.ReportPatternFail();
+            PlaySfx(wrongSound);
+            minigame?.ReportPatternFail();
         }
+
+        Debug.Log($"[3-9 Judge] {(success ? "성공" : "실패")} ({reason})");
 
         inputIndex++;
 
         if (inputIndex >= answerPattern.Count)
-        {
-            Debug.Log("[3-9] 6개 입력 완료");
-            SetAllOnBoxes(false);
             canInput = false;
+    }
+
+    /// <summary>1~6을 중복 없이 랜덤 순서로 만든다.</summary>
+    private void CreateRandomPattern()
+    {
+        answerPattern.Clear();
+
+        List<int> available = new List<int>();
+        for (int i = 0; i < slots.Length; i++)
+            available.Add(i);
+
+        while (available.Count > 0)
+        {
+            int r = UnityEngine.Random.Range(0, available.Count);
+            answerPattern.Add(available[r]);
+            available.RemoveAt(r);
+        }
+
+        string debugPattern = "";
+        for (int i = 0; i < answerPattern.Count; i++)
+        {
+            debugPattern += (answerPattern[i] + 1);
+            if (i < answerPattern.Count - 1) debugPattern += " -> ";
+        }
+
+        Debug.Log("[3-9] 정답 패턴 : " + debugPattern);
+    }
+
+    private void SetAllOnBoxes(bool active)
+    {
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (slots[i] != null && slots[i].onBox != null)
+                slots[i].onBox.SetActive(active);
         }
     }
 
-    /// <summary>
-    /// 모든 onBox 켜기 / 끄기
-    /// </summary>
-    private void SetAllOnBoxes(
-        bool active
-    )
+    private void PlaySfx(AudioClip clip)
     {
-        for (int i = 0;
-             i < slots.Length;
-             i++)
-        {
-            if (slots[i] == null)
-            {
-                continue;
-            }
-
-
-            if (slots[i].onBox != null)
-            {
-                slots[i]
-                    .onBox
-                    .SetActive(active);
-            }
-        }
-    }
-
-    private IEnumerator AutoInputRoutine()
-    {
-        Debug.Log("[3-9] 데모 자동 입력 시작");
-
-        while (canInput && inputIndex < answerPattern.Count)
-        {
-            int correctIndex = answerPattern[inputIndex];
-
-            // 정답 패턴을 자동 입력
-            HandlePatternInput(correctIndex);
-
-            if (canInput)
-            {
-                yield return new WaitForSeconds(
-                    Mathf.Max(0.05f, autoInputInterval)
-                );
-            }
-        }
-
-        Debug.Log("[3-9] 데모 자동 입력 완료");
+        if (clip != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            GameRoot.Instance.Audio.PlaySfx(clip);
     }
 }

@@ -1,7 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+// 3-5 스코프 이동. 시간(초)을 넣으면 그 시점 위치를 계산한다 (노래 시간 기준으로 미니게임이 호출).
+// movePoints[i]에 elapsed = moveTimePerStep * (i + 1) 순간 도착.
 public class ScopeMover : MonoBehaviour
 {
     [Header("이동할 좌표들 순서대로 입력")]
@@ -10,69 +10,54 @@ public class ScopeMover : MonoBehaviour
     [Header("한 구간당 걸리는 시간")]
     public float moveTimePerStep = 0.6f;
 
-    [Header("시작할 때 바로 실행할지")]
+    [Header("(구버전)")]
     public bool playOnStart;
-
-    [Header("마지막 점까지 간 뒤 반복할지")]
     public bool loop = false;
-
-    private bool isMoving = false;
     public CameraFollow3_5 cameraFollow;
 
+    private Vector3 startPos;
+    private bool startCaptured;
 
-    // 외부에서 호출해서 이동 시작할 때 사용
-    public void StartMove()
+    private void Awake()
     {
-        if (isMoving) return;
-        StartCoroutine(MoveRoutine());
+        startPos = transform.position;
+        startCaptured = true;
     }
 
-    IEnumerator MoveRoutine()
+    // movePoints[i] 도착 시각 (이동 시작 기준 경과 시간)
+    public float ArrivalTime(int i)
     {
-        if (movePoints == null || movePoints.Length == 0)
-            yield break;
+        return moveTimePerStep * (i + 1);
+    }
 
-        isMoving = true;
+    public void SetByElapsed(float elapsed)
+    {
+        if (movePoints == null || movePoints.Length == 0) return;
+        if (!startCaptured) { startPos = transform.position; startCaptured = true; }
 
-        do
+        if (elapsed <= 0f)
         {
-            for (int i = 0; i < movePoints.Length; i++)
-            {
-                Vector3 startPos = transform.position;
-                Vector3 targetPos = movePoints[i];
+            transform.position = startPos;
+            return;
+        }
 
-                float elapsed = 0f;
+        int seg = Mathf.FloorToInt(elapsed / moveTimePerStep);
 
-                while (elapsed < moveTimePerStep)
-                {
-                    elapsed += Time.deltaTime;
+        if (seg >= movePoints.Length)
+        {
+            transform.position = movePoints[movePoints.Length - 1];
+            return;
+        }
 
-                    float t = elapsed / moveTimePerStep;
-                    if (t > 1f) t = 1f;
+        Vector3 from = seg == 0 ? startPos : movePoints[seg - 1];
+        Vector3 to = movePoints[seg];
+        float k = (elapsed - seg * moveTimePerStep) / moveTimePerStep;
 
-                    transform.position = Vector3.Lerp(startPos, targetPos, t);
+        transform.position = Vector3.Lerp(from, to, k);
+    }
 
-                    yield return null;
-                }
-
-                transform.position = targetPos;
-
-                //  마지막 점 도달 체크
-                if (i == movePoints.Length - 1)
-                {
-                    if (cameraFollow != null)
-                    {
-                        Debug.Log("Releasing camera follow");
-                        cameraFollow.ReleaseCamera();
-                    }
-
-                    isMoving = false;
-                    yield break; // 루프 완전 종료
-                }
-            }
-
-        } while (loop);
-
-        isMoving = false;
+    // 구버전 호환 (미니게임이 SetByElapsed로 직접 움직이므로 아무것도 안 함)
+    public void StartMove()
+    {
     }
 }

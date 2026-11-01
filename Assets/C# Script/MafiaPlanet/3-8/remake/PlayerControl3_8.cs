@@ -34,17 +34,9 @@ public class PlayerControl3_8 : MonoBehaviour
     }
 
 
-    private void Update()
-    {
-        if (game != null && !game.IsDemoMode && Input.GetMouseButtonDown(0))
-        {
-            Debug.Log("Mouse Clicked!");
-            PlayWatchRoutine();
-        }
-    }
+    // 클릭 처리는 Minigame3_8remake가 한다 (타이밍 맞을 때만 PlayWatchRoutine 호출)
 
-
-    // 클릭했을 때 호출
+    // 타이밍 맞게 클릭했을 때 Minigame3_8remake가 호출 (박스 뒤에 숨음)
     public void PlayWatchRoutine()
     {
         // 이미 실행 중인 코루틴이 있다면 중지

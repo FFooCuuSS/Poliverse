@@ -22,6 +22,21 @@ public class Manager_3_3 : MonoBehaviour
     [Header("Round")]
     [SerializeField] private float nextRoundDelay = 0.3f;
 
+    [Header("판정 범위 (초) - 구멍이 일직선(0도)이 되는 순간 기준")]
+    [SerializeField] private float perfectWindow = 0.1f;
+    [SerializeField] private float goodWindow = 0.3f;
+    [Tooltip("현재 고리 정렬 시각보다 이만큼 이상 빨리 누르면 무시 (다음 고리를 잡아먹지 않게)")]
+    [SerializeField] private float ignoreEarlySeconds = 0.5f;
+
+    [Header("Debug")]
+    [SerializeField] private bool judgeLog = true;
+
+    // 이번 라운드의 기준 시각 (노래 시간). Show 노트 시각 + fadeDuration
+    private float roundStartSong;
+    private float pendingShowSong;
+
+    public int TotalTargets => (holes != null ? holes.Count : 0) * totalRounds;
+
     private Rigidbody2D keyRb;
 
     private int clickCount;
@@ -52,9 +67,21 @@ public class Manager_3_3 : MonoBehaviour
         }
     }
 
+    private float Now()
+    {
+        if (minigame != null)
+        {
+            double s = minigame.SongTime;
+            if (s >= 0) return (float)s;
+        }
+
+        return Time.time;
+    }
+
+    // 라운드 시작 후 경과 시간 (노래 시간 기준)
     public float GetRoundTime()
     {
-        return Time.time - roundStartTime;
+        return Now() - roundStartSong;
     }
 
     public void OnMinigameStart(Minigame_3_3_Remake mg)
@@ -85,6 +112,9 @@ public class Manager_3_3 : MonoBehaviour
         if (roundChanging) return;
         if (autoInsertRunning) return;
         if (roundIndex >= totalRounds) return;
+
+        // Show 노트가 온 순간을 기준으로 잡는다 (페이드 대기는 연출일 뿐)
+        pendingShowSong = Now();
 
         StartCoroutine(RoundFlow());
     }
@@ -127,8 +157,18 @@ public class Manager_3_3 : MonoBehaviour
 
         bool clockwise = (roundIndex % 2 == 0);
 
+        // 기존 체감 유지: Show + fadeDuration 이 라운드 0초 (WaitForSeconds 지연은 제외)
+        roundStartSong = pendingShowSong + fadeDuration;
         roundStartTime = Time.time;
         SetupRound(clockwise);
+
+        if (judgeLog)
+        {
+            string times = "";
+            for (int i = 0; i < holes.Count && i < targetTimes.Length; i++)
+                times += $"{roundStartSong + targetTimes[i]:F2} ";
+            Debug.Log($"[3-3 Judge] ROUND {roundIndex + 1} 정렬 시각(song): {times}");
+        }
 
         if (holes != null)
         {
@@ -203,6 +243,46 @@ public class Manager_3_3 : MonoBehaviour
     // =========================
     // INPUT
     // =========================
+    private float TargetOf(int i)
+    {
+        return (targetTimes != null && i < targetTimes.Length) ? targetTimes[i] : i + 1f;
+    }
+
+    // 놓친 고리는 시간이 지나면 자동 실패 처리하고 다음 고리로 넘긴다
+    // (예전엔 못 누른 고리가 계속 '다음 차례'로 남아서, 이후 클릭이 전부 한 칸씩 밀렸다)
+    private void Update()
+    {
+        if (inputClosed || roundChanging || autoInsertRunning) return;
+        if (isDemoMode) return;
+        if (holes == null || clickCount >= holes.Count) return;
+
+        float t = GetRoundTime();
+
+        while (clickCount < holes.Count && t > TargetOf(clickCount) + goodWindow)
+        {
+            if (judgeLog)
+                Debug.Log($"[3-3 Judge] 구멍{clickCount} 시간 초과 → Miss");
+
+            if (holes[clickCount] != null)
+                holes[clickCount].LockWithResult(false);
+
+            minigame?.ReportManualFail();
+            clickCount++;
+        }
+
+        if (clickCount >= holes.Count)
+            FinishRoundInput();
+    }
+
+    private void FinishRoundInput()
+    {
+        if (inputClosed) return;
+
+        inputClosed = true;
+        minigame?.ForceCloseInput();
+        StartCoroutine(AutoInsertKey());
+    }
+
     public void OnPlayerClick()
     {
         if (inputClosed) return;
@@ -211,7 +291,16 @@ public class Manager_3_3 : MonoBehaviour
         if (holes == null || holes.Count == 0) return;
         if (clickCount >= holes.Count) return;
 
-        holes[clickCount].Lock();
+        // 너무 이른 클릭은 무시 (차례를 소모하지 않음)
+        float diff = GetRoundTime() - TargetOf(clickCount);
+        if (diff < -ignoreEarlySeconds)
+        {
+            if (judgeLog)
+                Debug.Log($"[3-3 Judge] 너무 이른 클릭 무시 (구멍{clickCount} diff={diff * 1000:F0}ms)");
+            return;
+        }
+
+        JudgeAndLock(clickCount);
         clickCount++;
         if (clickSound != null)
         {
@@ -223,11 +312,7 @@ public class Manager_3_3 : MonoBehaviour
 
 
         if (clickCount == holes.Count)
-        {
-            inputClosed = true;
-            minigame?.ForceCloseInput();
-            StartCoroutine(AutoInsertKey());
-        }
+            FinishRoundInput();
     }
 
     // =========================
@@ -271,6 +356,28 @@ public class Manager_3_3 : MonoBehaviour
         }
     }
 
+    // 클릭 순간이 구멍 i의 정렬 시각에서 얼마나 어긋났는지로 판정
+    private void JudgeAndLock(int i)
+    {
+        if (holes == null || i < 0 || i >= holes.Count || holes[i] == null) return;
+        if (holes[i].IsLocked) return;
+
+        float target = (targetTimes != null && i < targetTimes.Length) ? targetTimes[i] : i + 1f;
+        float diff = GetRoundTime() - target;
+        float abs = Mathf.Abs(diff);
+
+        bool success = abs <= goodWindow;
+        string grade = abs <= perfectWindow ? "Perfect" : success ? "Good" : "Miss";
+
+        holes[i].LockWithResult(success);
+
+        if (success) minigame?.ReportManualSuccess();
+        else minigame?.ReportManualFail();
+
+        if (judgeLog)
+            Debug.Log($"[3-3 Judge] 구멍{i} diff={diff * 1000:F0}ms → {grade}");
+    }
+
     private void ResetKeyPhysics()
     {
         if (keyRb == null) return;
@@ -298,7 +405,7 @@ public class Manager_3_3 : MonoBehaviour
 
             if (holes[i] != null)
             {
-                holes[i].Lock();
+                JudgeAndLock(i);
 
                 Debug.Log(
                     $"[3-3 Demo] Hole {i} 자동 잠금, 시간: {targetTime}"

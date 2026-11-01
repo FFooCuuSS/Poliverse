@@ -8,6 +8,21 @@ public class Minigame_3_3_Remake : MiniGameBase, IPracticeDemoInput
 
     protected override string MinigameExplain => "바깥쪽 고리부터 차례대로 터치해 각 고리의 구멍을 일직선으로 맞추세요.";
 
+    // 구멍마다 직접 판정 (Manager_3_3.JudgeAndLock). 못 누른 구멍은 종료 시 자동 Miss.
+    protected override bool UseRhythmJudgementScore => false;
+    protected override int ManualTotalNodeCount => manager != null ? manager.TotalTargets : 9;
+
+    public double SongTime
+    {
+        get
+        {
+            if (rhythmManager is RhythmManager rm && rm.IsRunning)
+                return rm.SongTime;
+
+            return -1;
+        }
+    }
+
     [Header("Manager")]
     [SerializeField] private Manager_3_3 manager;
 
@@ -16,8 +31,9 @@ public class Minigame_3_3_Remake : MiniGameBase, IPracticeDemoInput
 
     private bool isDemoMode;
 
-    public void SetDemoMode(bool isDemo)
+    public override void SetDemoMode(bool isDemo)
     {
+        base.SetDemoMode(isDemo);
         isDemoMode = isDemo;
 
         if (manager != null)

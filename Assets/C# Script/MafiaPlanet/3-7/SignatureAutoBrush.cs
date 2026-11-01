@@ -36,6 +36,8 @@ public class SignatureAutoBrush : MonoBehaviour
     [SerializeField] private bool prewarmOnReset = true;
     [SerializeField] private int extraPrewarmCount = 16;
 
+    public float DrawDuration => drawDuration;
+
     private readonly List<List<Vector2>> strokePaths = new List<List<Vector2>>();
     private readonly List<GameObject> brushPool = new List<GameObject>();
 
@@ -190,8 +192,12 @@ public class SignatureAutoBrush : MonoBehaviour
             // 핵심:
             // 펜 이동은 자동.
             // 흔적 생성은 오직 hold 중일 때만.
-            bool isDemo = (minigame != null && minigame.IsDemoMode);
-            if (isDemo || (holdInput != null && holdInput.IsHolding))
+            // 미니게임이 있으면 '이번 라운드에 맞게 눌러서 유지 중'일 때만 (시범 포함)
+            bool canInk = minigame != null
+                ? minigame.InkAllowed
+                : (holdInput != null && holdInput.IsHolding);
+
+            if (canInk)
             {
                 SpawnBrushesAlongSegment(oldPos, currentPosition);
             }

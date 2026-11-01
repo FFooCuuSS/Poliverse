@@ -1,5 +1,7 @@
 using UnityEngine;
 
+// 3-4: 클릭/판정은 Minigame_3_4_Remake가 직접 처리한다.
+// 이 스크립트는 프리팹 연결 유지용으로만 남겨둠 (매 프레임 로그 제거).
 public class HandMover : MonoBehaviour
 {
     [SerializeField] private Minigame_3_4_Remake game;
@@ -8,44 +10,11 @@ public class HandMover : MonoBehaviour
     public int clickCount = 0;
     public int suspiciousClickCount = 0;
 
-    private void Update()
-    {
-        if (!start) return;
-
-        if (Input.GetMouseButtonDown(0) && clickCount < 5)
-        {
-            if (game != null)
-            {
-                game.SubmitInput();
-            }
-            Debug.Log("CLICK DETECTED");
-            clickCount++;
-            if (checkIsSuspicious)
-            {
-                suspiciousClickCount++;
-            }
-        }
-    }
-
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.GetComponent<CardColor>() != null)
-        {
-            CardColor checkCardSuspicious = collision.GetComponent<CardColor>();
-            Debug.Log("STAYING ON CARD: " + collision.gameObject.name);
+        CardColor card = collision.GetComponent<CardColor>();
 
-            if (checkCardSuspicious != null)
-            {
-                if (checkCardSuspicious.isTrapCard)
-                {
-                    Debug.Log("IS THIS A TRAP CARD? " + checkCardSuspicious.isTrapCard);
-                    checkIsSuspicious = true;
-                }
-                else
-                {
-                    checkIsSuspicious = false;
-                }
-            }
-        }
+        if (card != null)
+            checkIsSuspicious = card.isTrapCard;
     }
 }

@@ -1,7 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// 3-4 카드 돌리기. 노래 시간으로 직접 계산한다.
+// 카드 k: 1.2k초에 확대(0.6초) → 1.2k+0.6초부터 0.6초 동안 자리로 이동 (x = -4 + 2k)
+// 함정 카드가 이동하는 동안 상대 표정이 바뀐다.
 public class DrawCard3_4remake : MonoBehaviour
 {
     [Header("효과음")]
@@ -9,247 +11,145 @@ public class DrawCard3_4remake : MonoBehaviour
     public Minigame_3_4_Remake minigame3_4;
 
     public GameObject cardPrefab;
-
-    // 생성된 카드들의 부모가 될 오브젝트
     public GameObject cardParent;
-
     public Transform[] cardPosition;
-
-    // 생성된 카드들을 저장하는 리스트
-    List<GameObject> spawnedCards = new List<GameObject>();
 
     public GameObject suspiciousFace;
     public GameObject normalFace;
 
-    bool isCardSet = false;
-    bool isCardMoving = false;
+    [Header("타이밍 (노래 시간, 초)")]
+    [SerializeField] private float firstCardTime = 0f;
+    [SerializeField] private float cardInterval = 1.2f;
+    [SerializeField] private float popDuration = 0.6f;
+    [SerializeField] private float moveDuration = 0.6f;
 
-    int moveCardTurn = 0;
-    int cardPosX = -4;
+    [Header("배치")]
+    [SerializeField] private Vector3 deckPos = new Vector3(7f, -1.8f, 0f);
+    [SerializeField] private float firstCardX = -4f;
+    [SerializeField] private float cardStepX = 2f;
+    [SerializeField] private float cardY = -1.5f;
+    [SerializeField] private float cardPopSize = 1.2f;
 
-    // 카드 이동 시간 (1박 = 0.6초)
-    float moveDuration = 0.6f;
-    float moveStartTime;
+    private readonly List<GameObject> spawnedCards = new List<GameObject>();
+    private readonly List<Vector3> baseScales = new List<Vector3>();
+    private readonly List<int> sfxPlayed = new List<int>();
 
-    Vector3 startPos;
-    Vector3 targetPos;
+    public int TrapIndex { get; private set; } = -1;
 
-    // 카드가 확대될 크기
-    float cardPopSize = 1.2f;
-
-    bool isPoped = false;
-    bool moveCard = false;
-    bool minigame3_4_started = false;
-
-    void Start()
+    private void Start()
     {
-        // Null 예외 방지용 안전 장치
-        if (normalFace != null)
-        {
-            var sr = normalFace.GetComponent<SpriteRenderer>();
-            if (sr != null) sr.enabled = true;
-        }
-
-        // 미니게임 참조 자동 찾기 (인스펙터 연결 안 되어있을 때 대비)
         if (minigame3_4 == null)
-        {
-            minigame3_4 = FindObjectOfType<Minigame_3_4_Remake>();
-        }
+            minigame3_4 = GetComponentInParent<Minigame_3_4_Remake>();
 
-        // 카드 생성
+        SetFace(false);
         SpawnCard();
     }
 
-    void Update()
+    private void SpawnCard()
     {
-        // 아직 움직여야 할 카드가 남아있는 경우
-        if (isCardSet && moveCardTurn < spawnedCards.Count)
-        {
-            // 확대 연출이 끝났으면 카드 이동
-            if (moveCard)
-            {
-                MoveCard(moveCardTurn);
-            }
-            // 아직 확대 연출을 하지 않았다면 확대
-            else if (!isPoped)
-            {
-                PopCard();
-            }
-        }
-        else if (!minigame3_4_started)
-        {
-            minigame3_4_started = true;
-
-            if (minigame3_4 != null)
-            {
-                minigame3_4.StartGame();
-            }
-            else
-            {
-                Debug.LogError("[DrawCard3_4remake] minigame3_4 참조가 누락되었습니다!");
-            }
-        }
-    }
-
-    void PopCard()
-    {
-        isPoped = true;
-
-        if (moveCardTurn < spawnedCards.Count && spawnedCards[moveCardTurn] != null)
-        {
-            GameObject card = spawnedCards[moveCardTurn];
-            StartCoroutine(cardReload(card));
-        }
-    }
-
-    void SpawnCard()
-    {
-        Debug.Log("SpawnCards() 시작");
-
-        foreach (var card in spawnedCards)
-        {
-            if (card != null) Destroy(card);
-        }
+        foreach (var c in spawnedCards)
+            if (c != null) Destroy(c);
 
         spawnedCards.Clear();
+        baseScales.Clear();
+        sfxPlayed.Clear();
 
-        Vector3 pos = transform.position;
-        pos.x = 7f;
-        pos.y = -1.8f;
-
-        int trapIndex = Random.Range(0, 5);
+        TrapIndex = Random.Range(0, 5);
 
         for (int i = 0; i < 5; i++)
         {
             GameObject card = Instantiate(
                 cardPrefab,
-                pos,
+                deckPos,
                 Quaternion.identity,
                 cardParent != null ? cardParent.transform : null
             );
 
-            CardColor cardComponent = card.GetComponent<CardColor>();
+            CardColor cc = card.GetComponent<CardColor>();
 
-            if (cardComponent == null)
+            if (cc != null)
             {
-                Debug.LogError("Card 프리팹에 CardColor 스크립트가 없습니다!");
-                continue;
-            }
-
-            if (i == trapIndex)
-            {
-                cardComponent.IsSetTrap();
-            }
-            else
-            {
-                cardComponent.IsNotTrap();
+                if (i == TrapIndex) cc.IsSetTrap();
+                else cc.IsNotTrap();
             }
 
             spawnedCards.Add(card);
+            baseScales.Add(card.transform.localScale);
         }
 
-        isCardSet = true;
+        Debug.Log($"[3-4] 함정 카드 = {TrapIndex}번째");
     }
 
-    void MoveCard(int cardNum)
+    private void Update()
     {
-        if (cardNum >= spawnedCards.Count || spawnedCards[cardNum] == null) return;
+        if (minigame3_4 == null) return;
 
-        GameObject card = spawnedCards[cardNum];
+        float t = minigame3_4.SongTime;
+        bool suspicious = false;
 
-        if (!isCardMoving)
+        for (int i = 0; i < spawnedCards.Count; i++)
         {
-            // 오디오 매니저 예외 방지 처리
-            if (clickSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            GameObject card = spawnedCards[i];
+            if (card == null) continue;
+
+            float popStart = firstCardTime + cardInterval * i;
+            float moveStart = popStart + popDuration;
+            float moveEnd = moveStart + moveDuration;
+
+            Vector3 target = new Vector3(firstCardX + cardStepX * i, cardY, 0f);
+
+            if (t < popStart)
             {
-                if (GameRoot.Instance != null && GameRoot.Instance.Audio != null)
-                {
-                    GameRoot.Instance.Audio.PlaySfx(clickSound);
-                }
+                card.transform.position = deckPos;
+                card.transform.localScale = baseScales[i];
             }
-
-            isCardMoving = true;
-            startPos = card.transform.position;
-            targetPos = new Vector3(cardPosX, -1.5f, 0f);
-            moveStartTime = Time.time;
-
-            CardColor colorComp = card.GetComponent<CardColor>();
-            if (colorComp != null && colorComp.isTrapCard)
+            else if (t < moveStart)
             {
-                ChangeSuspicious();
+                // 확대
+                card.transform.position = deckPos;
+                card.transform.localScale = new Vector3(
+                    baseScales[i].x * cardPopSize,
+                    baseScales[i].y * cardPopSize,
+                    baseScales[i].z);
+            }
+            else if (t < moveEnd)
+            {
+                // 자리로 이동
+                if (!sfxPlayed.Contains(i))
+                {
+                    sfxPlayed.Add(i);
+                    if (clickSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+                        GameRoot.Instance.Audio.PlaySfx(clickSound);
+                }
+
+                card.transform.localScale = baseScales[i];
+                float k = (t - moveStart) / moveDuration;
+                card.transform.position = Vector3.Lerp(deckPos, target, k);
+
+                if (i == TrapIndex) suspicious = true;
             }
             else
             {
-                isNotSuspicious();
+                card.transform.localScale = baseScales[i];
+                card.transform.position = target;
             }
         }
 
-        float t = (Time.time - moveStartTime) / moveDuration;
-        card.transform.position = Vector3.Lerp(startPos, targetPos, t);
-
-        if (t >= 1f)
-        {
-            card.transform.position = targetPos;
-            isCardMoving = false;
-            moveCard = false;
-
-            cardPosX += 2;
-            moveCardTurn++;
-
-            isNotSuspicious();
-            isPoped = false;
-        }
+        SetFace(suspicious);
     }
 
-    IEnumerator cardReload(GameObject card)
-    {
-        if (card == null) yield break;
-
-        Vector3 originalScale = card.transform.localScale;
-        Vector3 scale = originalScale;
-
-        scale.x *= cardPopSize;
-        scale.y *= cardPopSize;
-
-        card.transform.localScale = scale;
-
-        yield return new WaitForSeconds(0.6f);
-
-        if (card != null)
-        {
-            card.transform.localScale = originalScale;
-        }
-
-        moveCard = true;
-    }
-
-    void isNotSuspicious()
+    private void SetFace(bool suspicious)
     {
         if (suspiciousFace != null)
         {
             var sr = suspiciousFace.GetComponent<SpriteRenderer>();
-            if (sr != null) sr.enabled = false;
+            if (sr != null) sr.enabled = suspicious;
         }
 
         if (normalFace != null)
         {
             var sr = normalFace.GetComponent<SpriteRenderer>();
-            if (sr != null) sr.enabled = true;
-        }
-    }
-
-    void ChangeSuspicious()
-    {
-        if (suspiciousFace != null)
-        {
-            var sr = suspiciousFace.GetComponent<SpriteRenderer>();
-            if (sr != null) sr.enabled = true;
-        }
-
-        if (normalFace != null)
-        {
-            var sr = normalFace.GetComponent<SpriteRenderer>();
-            if (sr != null) sr.enabled = false;
+            if (sr != null) sr.enabled = !suspicious;
         }
     }
 }
