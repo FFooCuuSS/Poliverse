@@ -1,6 +1,6 @@
-using System.Reflection;
 using UnityEngine;
 
+// 3-13 무기 정리. 진행/판정은 CaseManager_3_13, 점수는 이 스크립트로 보고된다.
 public class Minigame3_13_remake : MiniGameBase, IPracticeDemoInput
 {
     // ===== 미니게임 기본 정보 =====
@@ -17,75 +17,117 @@ public class Minigame3_13_remake : MiniGameBase, IPracticeDemoInput
     public override float goodWindowOverride => 0.3f;
     public override float hitWindowOverride => 0.5f;
 
-
-    private bool finished = false;
-
-    private bool isDemoMode = false;
+    // 판정은 직접 하되, 점수는 Perfect / Good 등급 그대로 집계한다.
+    //  - 성공: AddJudgementCount(Perfect 또는 Good)
+    //  - 실패: 보고 안 함 → 정산 때 (총 개수 - 성공 수)가 Miss로 채워짐
+    //  - RhythmManager 판정(OnJudgement)은 무시
+    protected override bool UseRhythmJudgementScore => true;
+    [SerializeField] private int weaponCount = 4;
 
     [SerializeField] private CaseManager_3_13 caseManager;
 
-    public void SetDemoMode(bool isDemo)
+    private bool isDemoMode = false;
+    public new bool IsDemoMode => isDemoMode;
+
+    private bool started;
+    private bool finalized;
+    private float localTime;
+
+    // 노래 시간 (노래 시작 전 -1, 리듬매니저 없으면 로컬 시간)
+    public float SongTime
     {
+        get
+        {
+            if (rhythmManager is RhythmManager rm)
+                return rm.IsRunning ? (float)rm.SongTime : -1f;
+
+            return localTime;
+        }
+    }
+
+    public override void SetDemoMode(bool isDemo)
+    {
+        base.SetDemoMode(isDemo);
         isDemoMode = isDemo;
 
-        if (caseManager == null)
-            caseManager = FindObjectOfType<CaseManager_3_13>();
-
+        FindManager();
         if (caseManager != null)
             caseManager.SetDemoMode(isDemoMode);
 
         Debug.Log("[3-13] 데모 모드: " + isDemoMode);
     }
 
-    private void Start()
+    protected override void Awake()
     {
-        IsInputLocked = false;
-        Debug.Log("[3-13] Minigame3_13_remake 시작");
-        base.StartGame();
+        base.Awake();
+        FindManager();
     }
 
+    private void FindManager()
+    {
+        if (caseManager == null)
+            caseManager = GetComponentInChildren<CaseManager_3_13>(true);
+        if (caseManager == null)
+            caseManager = FindObjectOfType<CaseManager_3_13>();
+    }
+
+    public override void StartGame()
+    {
+        base.StartGame();
+        started = true;
+        finalized = false;
+        localTime = 0f;
+        IsInputLocked = false;
+
+        // 차트(3-13)에 판정 노트가 없으므로 총 개수를 직접 지정
+        SetRuntimeTotalNodeCount(weaponCount);
+
+        if (caseManager != null)
+            caseManager.SetDemoMode(isDemoMode);
+    }
+
+    private void Start()
+    {
+        // 외부에서 StartGame을 안 불러준 경우 대비
+        if (!started)
+            StartGame();
+    }
 
     private void Update()
     {
-        if (finished) return;
-        if (isDemoMode) return;
-
-        // 좌클릭 입력
-        if (Input.GetMouseButtonDown(0))
-        {
-            SubmitInput();
-        }
+        localTime += Time.deltaTime;
     }
 
-    public override void OnRhythmEvent(string action)
+    // CaseManager_3_13에서 호출
+    public void ReportHit(bool perfect)
     {
-        if (finished) return;
-
-        switch (action)
-        {
-
-
-            case "Input":
-                Debug.Log("[3-13] Input 이벤트 도착");
-                break;
-        }
+        AddJudgementCount(perfect ? JudgementResult.Perfect : JudgementResult.Good);
     }
 
-    public void SubmitInput()
+    public void ReportMiss()
     {
-        // 리듬매니저 입력 잠금이면 무시
-        //if (IsInputLocked) return;
-        Debug.Log("[3-13] SubmitInput 호출 - 입력 전달 준비");
-
-        // 입력을 리듬매니저로 전달
-        OnPlayerInput("Input");
+        // 정산 때 자동으로 Miss 처리됨 (AutoFillRemainingAsMiss)
     }
 
-    // ===== 리듬매니저 판정 결과 로그 =====
+    public override ScoreResult FinalizeScoreSession()
+    {
+        if (!finalized)
+        {
+            finalized = true;
+            if (caseManager != null)
+                caseManager.ResolveAllPending();
+        }
 
+        return base.FinalizeScoreSession();
+    }
 
     public override void OnJudgement(JudgementResult judgement)
     {
-        Debug.Log($"{judgement}");
+        // RhythmManager 판정은 쓰지 않는다
+    }
+
+    // 시범은 CaseManager_3_13이 도착 순간 직접 터치한다
+    public override void ExecutePracticeAction(int actionIndex, string actionType)
+    {
     }
 }

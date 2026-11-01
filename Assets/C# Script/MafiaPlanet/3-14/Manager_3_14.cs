@@ -73,6 +73,10 @@ public class Manager_3_14 : MonoBehaviour
 
     private Coroutine inputAutoCloseCoroutine;
 
+    // Input 노트 시각보다 먼저(박자 범위 안에서 일찍) 판정된 칸 수.
+    // 나중에 도착하는 Input 이벤트가 같은 칸을 다시 열지 않도록 건너뛴다.
+    private int earlyConsumed;
+
     private int CurrentStepCount
     {
         get
@@ -105,6 +109,7 @@ public class Manager_3_14 : MonoBehaviour
         goodCount = 0;
         missCount = 0;
         successMoveCount = 0;
+        earlyConsumed = 0;
 
         StopInputAutoClose();
         ClearAllRounds();
@@ -222,8 +227,15 @@ public class Manager_3_14 : MonoBehaviour
         if (ended) return;
         if (transitioning) return;
 
-        if (inputIndexInRound >= CurrentStepCount)
+        if (inputIndexInRound >= CurrentStepCount && earlyConsumed <= 0)
             return;
+
+        // 이 칸은 노트 시각 전에 이미 판정됨
+        if (earlyConsumed > 0)
+        {
+            earlyConsumed--;
+            return;
+        }
 
         activeInputStepIndex = inputIndexInRound;
         inputIndexInRound++;
@@ -237,17 +249,29 @@ public class Manager_3_14 : MonoBehaviour
             currentCells[targetCellIndex]?.SetInputReady();
     }
 
+    // 플레이어 입력. Input 노트 시각 전이라도 박자 범위 안이면 RhythmManager가 판정한다.
+    // (예전에는 노트 시각이 돼야 입력을 받아서, 박자보다 살짝 일찍 누르면 입력이 버려졌다)
     public void RequestMoveInput()
     {
         if (ended) return;
         if (transitioning) return;
-        if (!inputOpen) return;
-        if (awaitingJudge) return;
-        if (activeInputStepIndex < 0) return;
         if (minigame == null) return;
+        if (minigame.IsDemoMode) return;   // 시범 중 플레이어 입력 무시
 
-        awaitingJudge = true;
         minigame.SubmitPlayerInput("Input");
+    }
+
+    // 노트 시각 전에 판정이 온 경우: 다음 칸을 미리 열어서 그 칸으로 처리
+    private bool TakeEarlyStep()
+    {
+        if (activeInputStepIndex >= 0) return true;
+        if (transitioning) return false;
+        if (inputIndexInRound >= CurrentStepCount) return false;
+
+        activeInputStepIndex = inputIndexInRound;
+        inputIndexInRound++;
+        earlyConsumed++;
+        return true;
     }
 
     // =========================
@@ -256,7 +280,7 @@ public class Manager_3_14 : MonoBehaviour
     public void OnAccepted(JudgementResult judgement)
     {
         if (ended) return;
-        if (activeInputStepIndex < 0) return;
+        if (!TakeEarlyStep()) return;
 
         StopInputAutoClose();
 
@@ -287,10 +311,9 @@ public class Manager_3_14 : MonoBehaviour
     {
         if (ended) return;
 
-        int missedStep = activeInputStepIndex;
+        if (!TakeEarlyStep()) return;
 
-        if (missedStep < 0)
-            missedStep = Mathf.Clamp(inputIndexInRound - 1, 0, CurrentStepCount - 1);
+        int missedStep = activeInputStepIndex;
 
         RegisterMiss(missedStep);
     }
@@ -363,6 +386,7 @@ public class Manager_3_14 : MonoBehaviour
         currentRoundIndex++;
         showIndexInRound = 0;
         inputIndexInRound = 0;
+        earlyConsumed = 0;
 
         Transform newRoot = BuildRound(currentRoundIndex, new Vector3(roundEnterOffsetX, 0f, 0f));
         currentRoundRoot = newRoot;

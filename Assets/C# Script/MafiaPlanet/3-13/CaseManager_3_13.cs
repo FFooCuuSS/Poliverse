@@ -2,9 +2,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// 3-13 무기 정리 (모든 시각은 노래 시간 기준)
+// 무기 4개가 spawnInterval 간격으로 날아와 자기 케이스 자리에 도착한다. 도착 = 소환 + travelTime.
+// 판정(무기마다 1개, 총 4개):
+//  - 도착 ±goodWindow 안에 터치 → 수납 성공 (±perfectWindow면 Perfect)
+//  - 안 누르고 지나감 → 실패 (무기는 계속 날아가 화면 밖으로)
+//  - 어떤 무기 도착 범위에도 해당 안 되는 터치는 무시
+// 점수는 Minigame3_13_remake로 보고한다.
 public class CaseManager_3_13 : MonoBehaviour
 {
     private bool isDemoMode;
+
+    [Header("판정")]
+    [SerializeField] private Minigame3_13_remake minigame;   // 비우면 자동 탐색
+    [SerializeField] private float perfectWindow = 0.1f;
+    [SerializeField] private float goodWindow = 0.3f;
+    [SerializeField] private bool judgeLog = true;
+
+    private bool[] resolved;
+    private MovingObject_3_13[] spawnedByIndex;
+
+    public int TotalCount => shuffledObjectOrder.Count;
+    public float ArrivalTime(int i) => firstSpawnTime + i * spawnInterval + travelTime;
+
+    private void JudgeLog(string msg)
+    {
+        if (judgeLog) Debug.Log(msg);
+    }
 
     public void SetDemoMode(bool isDemo)
     {
@@ -186,6 +210,11 @@ public class CaseManager_3_13 : MonoBehaviour
 
     private void Awake()
     {
+        if (minigame == null)
+            minigame = GetComponentInParent<Minigame3_13_remake>();
+        if (minigame == null)
+            minigame = FindObjectOfType<Minigame3_13_remake>();
+
         InitializeCase1PositionData();
         InitializeCase2PositionData();
         if (case1Container != null)
@@ -211,10 +240,110 @@ public class CaseManager_3_13 : MonoBehaviour
             return;
         }
 
-        timer += Time.deltaTime;
+        // 노래 시간 기준 (노래 시작 전이면 대기)
+        if (minigame != null)
+        {
+            float song = minigame.SongTime;
+            if (song < 0f) return;
+            timer = song;
+        }
+        else
+        {
+            timer += Time.deltaTime;
+        }
 
         CheckSpawnTime();
         RemoveDestroyedObjects();
+        UpdateJudge(timer);
+    }
+
+    private void UpdateJudge(float t)
+    {
+        if (resolved == null) return;
+
+        if (isDemoMode)
+        {
+            // 시범: 무기가 도착하는 순간 터치
+            for (int i = 0; i < resolved.Length; i++)
+            {
+                if (!resolved[i] && i < spawnIndex && t >= ArrivalTime(i))
+                {
+                    HandleTouch(t);
+                    break;
+                }
+            }
+        }
+        else if (Input.GetMouseButtonDown(0) && (minigame == null || !minigame.IsInputLocked))
+        {
+            HandleTouch(t);
+        }
+
+        // 안 누르고 지나간 무기
+        for (int i = 0; i < resolved.Length; i++)
+        {
+            if (!resolved[i] && t > ArrivalTime(i) + goodWindow)
+                Resolve(i, false, "안 누르고 지나감");
+        }
+    }
+
+    private void HandleTouch(float t)
+    {
+        int best = -1;
+        float bestDiff = float.MaxValue;
+
+        for (int i = 0; i < resolved.Length; i++)
+        {
+            if (resolved[i]) continue;
+
+            float diff = t - ArrivalTime(i);
+            if (Mathf.Abs(diff) <= goodWindow && Mathf.Abs(diff) < Mathf.Abs(bestDiff))
+            {
+                best = i;
+                bestDiff = diff;
+            }
+        }
+
+        if (best < 0)
+        {
+            JudgeLog($"[3-13 Judge] 터치 무시 (도착 범위 아님) song={t:F3}");
+            return;
+        }
+
+        ObjectType type = shuffledObjectOrder[best];
+        MovingObject_3_13 obj = spawnedByIndex != null ? spawnedByIndex[best] : null;
+
+        if (obj != null)
+            obj.ProcessSuccess();
+
+        ShowSuccessObject(type);
+
+        if (clickSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
+            GameRoot.Instance.Audio.PlaySfx(clickSound);
+
+        bool perfect = Mathf.Abs(bestDiff) <= perfectWindow;
+        Resolve(best, true, $"diff={bestDiff * 1000:F0}ms → {(perfect ? "Perfect" : "Good")}", perfect);
+    }
+
+    private void Resolve(int i, bool success, string reason, bool perfect = false)
+    {
+        resolved[i] = true;
+
+        if (minigame != null)
+        {
+            if (success) minigame.ReportHit(perfect);
+            else minigame.ReportMiss();
+        }
+
+        JudgeLog($"[3-13 Judge] {i + 1}번째 {shuffledObjectOrder[i]} {(success ? "수납 성공" : "실패")} ({reason})");
+    }
+
+    // 미니게임이 중간에 끝날 때: 남은 무기는 실패
+    public void ResolveAllPending()
+    {
+        if (resolved == null) return;
+
+        for (int i = 0; i < resolved.Length; i++)
+            if (!resolved[i]) Resolve(i, false, "미니게임 종료");
     }
     private void ResetSuccessObjects()
     {
@@ -419,6 +548,9 @@ public class CaseManager_3_13 : MonoBehaviour
         SetContainerActive();
         MakeRandomObjectOrder();
         ResetDirectionList();
+
+        resolved = new bool[shuffledObjectOrder.Count];
+        spawnedByIndex = new MovingObject_3_13[shuffledObjectOrder.Count];
 
         Debug.Log(
             "[3-13] 케이스 게임 시작 / 선택된 케이스: " +
@@ -838,6 +970,9 @@ public class CaseManager_3_13 : MonoBehaviour
         );
 
         spawnedObjects.Add(movingObject);
+
+        if (spawnedByIndex != null && spawnIndex < spawnedByIndex.Length)
+            spawnedByIndex[spawnIndex] = movingObject;
 
         Debug.Log(
             "[3-13] 생성 #" +

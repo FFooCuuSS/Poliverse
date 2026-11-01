@@ -130,12 +130,25 @@ public class Minigame_3_12 : MiniGameBase, IPracticeDemoInput
     private Vector2Int Current => path[pathIndex];
     private bool HasForward => pathIndex + 1 < path.Length;
     private Vector2Int Forward => path[pathIndex + 1];
-    
+
     // 데모
     private bool isDemoMode;
 
-    public void SetDemoMode(bool isDemo)
+    public new bool IsDemoMode => isDemoMode;
+
+    [Header("Debug")]
+    [SerializeField] private bool judgeLog = true;
+
+    private void JudgeLog(string msg)
     {
+        if (judgeLog) Debug.Log(msg);
+    }
+
+    private float SongT => rhythmManager is RhythmManager rm && rm.IsRunning ? (float)rm.SongTime : -1f;
+
+    public override void SetDemoMode(bool isDemo)
+    {
+        base.SetDemoMode(isDemo);
         isDemoMode = isDemo;
 
         // 데모 중에는 플레이어 입력을 초기화
@@ -307,12 +320,15 @@ public class Minigame_3_12 : MiniGameBase, IPracticeDemoInput
             return;
         }
 
+        JudgeLog($"[3-12 Judge] 입력 {pendingDir.Value} → {judgement} song={SongT:F3}");
+
         Dir d = pendingDir.Value;
         pendingDir = null;
         countedNodes++;
 
         if (judgement == JudgementResult.Miss)
         {
+            JudgeLog("[3-12 Judge] → 박자 어긋남, 이동 안 함 (Miss)");
             BlockedFx();
             return;
         }
@@ -320,15 +336,19 @@ public class Minigame_3_12 : MiniGameBase, IPracticeDemoInput
         // 역방향, 벽 방향 → 이동 없이 Miss (base 미호출 = Miss로 남음)
         if (!HasForward || Current + DirVec[(int)d] != Forward)
         {
+            JudgeLog($"[3-12 Judge] → 길 아닌 방향 {d} (Miss)");
             BlockedFx();
             return;
         }
 
         if (IsInCone(Forward))
         {
+            JudgeLog($"[3-12 Judge] → 시야로 들어감, 발각 (Miss)");
             CaughtFx(Forward);
             return;
         }
+
+        JudgeLog($"[3-12 Judge] → 이동 {pathIndex + 1}/{path.Length - 1}");
 
         pathIndex++;
         MovePlayerFx();
@@ -344,6 +364,8 @@ public class Minigame_3_12 : MiniGameBase, IPracticeDemoInput
         bool legitRest = HasForward && IsInCone(Forward);
         if (!legitRest)
             countedNodes++;
+
+        JudgeLog($"[3-12 Judge] 입력 없음 → {(legitRest ? "정당한 쉼 (점수 제외)" : "Miss")} song={SongT:F3}");
     }
 
     private void Escape()
@@ -364,7 +386,7 @@ public class Minigame_3_12 : MiniGameBase, IPracticeDemoInput
         Success();
     }
 
-    // 데모 모드: 안전한 경우에만 다음 경로 칸으로 이동
+    // 데모 모드: 안전한 경우에만 다음 경로 칸으로 이동 (실제 입력과 같은 판정 경로 사용)
     public override void ExecutePracticeAction(
         int actionIndex,
         string actionType)
@@ -378,21 +400,13 @@ public class Minigame_3_12 : MiniGameBase, IPracticeDemoInput
         if (actionType != "Swipe" || !HasForward)
             return;
 
-        // 다음 칸이 경비원의 시야에 있으면 기다림
+        // 다음 칸이 경비원의 시야에 있으면 기다림 (정당한 쉼)
         if (IsInCone(Forward))
             return;
 
-        pathIndex++;
-        MovePlayerFx();
-
-        // 출구에 도착하면 데모 종료
-        if (pathIndex == path.Length - 1)
-        {
-            escaped = true;
-
-            foreach (var e in enemies)
-                HideGhost(e);
-        }
+        int i = System.Array.IndexOf(DirVec, Forward - Current);
+        if (i >= 0)
+            HandleInput((Dir)i);
     }
 
     // ───────── Input ─────────
