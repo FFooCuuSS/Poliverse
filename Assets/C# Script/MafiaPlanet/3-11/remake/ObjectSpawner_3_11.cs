@@ -52,8 +52,27 @@ public class ObjectSpawner_3_11 : MonoBehaviour
     [SerializeField] private float blockMinY = -5f;
     [SerializeField] private float blockMaxY = 5f;
 
-    // 게임 시작 후 흐른 시간
+    [Header("노래 시간 기준 (비우면 자동 탐색)")]
+    [SerializeField] private Minigame_3_11_remake minigame;
+
+    // 노래 시간 (소환 시각 계산용)
     private float timer;
+
+    // index별 생성된 오브젝트 (판정용)
+    private FlyingObject_3_11[] spawnedByIndex;
+
+    public int TotalSpawnCount => totalSpawnCount;
+    public int SpawnedCount => spawnIndex;
+    public float ArrivalTime(int index) => firstSpawnTime + index * spawnInterval + travelTime;
+    public bool IsBomb(int index) => GetBombPattern(index);
+    public FlyingObject_3_11 GetSpawned(int index) =>
+        spawnedByIndex != null && index >= 0 && index < spawnedByIndex.Length ? spawnedByIndex[index] : null;
+
+    private void Awake()
+    {
+        if (minigame == null)
+            minigame = GetComponentInParent<Minigame_3_11_remake>();
+    }
 
     // 지금까지 소환한 개수
     private int spawnIndex;
@@ -72,8 +91,18 @@ public class ObjectSpawner_3_11 : MonoBehaviour
             return;
         }
 
-        timer += Time.deltaTime;
-        
+        // 노래 시간 기준 (노래 시작 전이면 대기)
+        if (minigame != null)
+        {
+            float song = minigame.SongTime;
+            if (song < 0f) return;
+            timer = song;
+        }
+        else
+        {
+            timer += Time.deltaTime;
+        }
+
         CheckSpawnTime();
         RemoveDestroyedObjects();
     }
@@ -87,6 +116,7 @@ public class ObjectSpawner_3_11 : MonoBehaviour
         timer = 0f;
         spawnIndex = 0;
         isSpawning = true;
+        spawnedByIndex = new FlyingObject_3_11[Mathf.Max(0, totalSpawnCount)];
 
         ClearAllObjects();
 
@@ -242,6 +272,9 @@ public class ObjectSpawner_3_11 : MonoBehaviour
         );
 
         spawnedObjects.Add(flyingObject);
+
+        if (spawnedByIndex != null && index < spawnedByIndex.Length)
+            spawnedByIndex[index] = flyingObject;
 
         Debug.Log(
             "[3-11] " +

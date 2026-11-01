@@ -633,7 +633,7 @@ MonoBehaviour:
   firstSceneName: MainScene
   debugJumpEnabled: 1
   debugPlanetId: 3
-  debugMinigameNumber: 7
+  debugMinigameNumber: 14
   minigameSceneName: MinigameLoad
   returnSceneName: LobbyScene
   debugStartingLife: 4

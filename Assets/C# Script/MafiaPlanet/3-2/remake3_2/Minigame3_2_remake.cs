@@ -16,9 +16,10 @@ public class Minigame3_2remake : MiniGameBase, IPracticeDemoInput
         "타이밍에 맞춰 검은 가방을 잡으세요."
     };
 
-    // 수동 판정: 대상 1개
-    protected override bool UseRhythmJudgementScore => false;
-    protected override int ManualTotalNodeCount => 1;
+    // 판정은 직접 하되, 점수는 Perfect / Good 등급 그대로 집계 (대상 1개)
+    //  - 성공: AddJudgementCount(Perfect 또는 Good)
+    //  - 실패: 보고 안 함 → 정산 때 Miss로 채워짐
+    protected override bool UseRhythmJudgementScore => true;
 
     [Header("Hand")]
     [SerializeField] private HandController handController;
@@ -55,6 +56,9 @@ public class Minigame3_2remake : MiniGameBase, IPracticeDemoInput
     {
         base.StartGame();
         IsInputLocked = false;
+
+        // 차트(3-2)에 판정 노트가 없으므로 총 개수를 직접 지정
+        SetRuntimeTotalNodeCount(1);
 
         clicked = false;
         resolved = false;
@@ -130,16 +134,17 @@ public class Minigame3_2remake : MiniGameBase, IPracticeDemoInput
         JudgeLog($"[3-2 Judge] 클릭 song={SongTime:F3} diff={diff * 1000:F0}ms → {grade}");
 
         handController.StartGrabAction();
-        Resolve(abs <= goodWindow, grade);
+        Resolve(abs <= goodWindow, grade, abs <= perfectWindow);
     }
 
-    private void Resolve(bool success, string reason)
+    private void Resolve(bool success, string reason, bool perfect = false)
     {
         if (resolved) return;
         resolved = true;
 
-        if (success) ReportManualSuccess();
-        else ReportManualFail();
+        // 실패는 보고하지 않음 (정산 때 Miss로 채워짐)
+        if (success)
+            AddJudgementCount(perfect ? JudgementResult.Perfect : JudgementResult.Good);
 
         if (handController != null)
             handController.SetJudgeResult(success);

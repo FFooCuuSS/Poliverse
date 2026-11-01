@@ -12,7 +12,8 @@ public class Minigame_3_14 : MiniGameBase, IPracticeDemoInput
 
     public override float perfectWindowOverride => 0.1f;
     public override float goodWindowOverride => 0.3f;
-    public override float hitWindowOverride => 0.5f;
+    // 3라운드는 Input이 0.6초 간격이라 hitWindow를 반 박(0.3)으로 맞춰 노트 범위가 겹치지 않게 함
+    public override float hitWindowOverride => 0.3f;
 
     [Header("Refs")]
     [SerializeField] private Manager_3_14 manager;
@@ -22,10 +23,11 @@ public class Minigame_3_14 : MiniGameBase, IPracticeDemoInput
     private bool awaitingJudge;
 
     private bool isDemoMode = false;
-    public bool IsDemoMode => isDemoMode;
+    public new bool IsDemoMode => isDemoMode;
 
-    public void SetDemoMode(bool isDemo)
+    public override void SetDemoMode(bool isDemo)
     {
+        base.SetDemoMode(isDemo);
         isDemoMode = isDemo;
         Debug.Log($"[3-14] SetDemoMode = {isDemoMode}");
     }
@@ -128,20 +130,16 @@ public class Minigame_3_14 : MiniGameBase, IPracticeDemoInput
     {
         if (ended) return;
 
-        // 데모 모드가 아닐 때의 입력 잠금 체크
-        if (!isDemoMode)
-        {
-            if (!inputOpen) return;
-            if (awaitingJudge) return;
-        }
-        else
-        {
-            // 데모 모드에서는 이미 판정 대기 중이면 중복 실행 차단
-            if (awaitingJudge) return;
-        }
+        // 같은 입력이 판정 도중 다시 들어오는 것만 막는다.
+        // 노트 시각 전(inputOpen 전)이라도 박자 범위 안이면 RhythmManager가 판정한다.
+        if (awaitingJudge) return;
 
         awaitingJudge = true;
-        OnPlayerInput(action);
+        Debug.Log($"[3-14 Judge] 입력 song={(rhythmManager is RhythmManager rm && rm.IsRunning ? rm.SongTime : -1):F3}");
+        OnPlayerInput(action);   // 판정되면 OnJudgement가 동기로 호출됨
+
+        // 판정 가능한 노트가 없었으면(박자 밖) 그냥 무시
+        awaitingJudge = false;
     }
 
     // 판정 처리
