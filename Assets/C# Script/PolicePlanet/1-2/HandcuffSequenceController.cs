@@ -287,6 +287,12 @@ public class HandcuffSequenceController : MonoBehaviour
 
         if (playerSnapEnableObject != null)
             playerSnapEnableObject.SetActive(true);
+        Debug.Log($"[1-2] SNAP VISUAL+SFX on={name} clip={(handcuffSound != null ? handcuffSound.name : "NULL")} " +
+                  $"root={(GameRoot.Instance != null)} audio={(GameRoot.Instance != null && GameRoot.Instance.Audio != null)}");
+
+        if (handcuffSound == null)
+            Debug.LogWarning($"[1-2] handcuffSound not assigned on {name}", this);
+
         if (handcuffSound != null && GameRoot.Instance != null && GameRoot.Instance.Audio != null)
         {
             GameRoot.Instance.Audio.PlaySfx(handcuffSound);

@@ -129,6 +129,8 @@ public class HandcuffFitChecker : MonoBehaviour
         {
             prevAccept = true;
             preplaced = overlapping;
+            if (preplaced)
+                Debug.Log($"[1-2] PREPLACED {name}: cuff was already on hand when window opened -> no snap until release/re-enter");
         }
 
         // 한 번 손에서 벗어나면 다시 정상 판정
@@ -145,7 +147,7 @@ public class HandcuffFitChecker : MonoBehaviour
     {
         if (isSnapped) return;
         if (minigame == null || minigame.IsDemoMode) return;
-        if (!minigame.CanAcceptSnap) return;
+        if (!minigame.CanAcceptSnap) { Debug.Log($"[1-2] MOUSEUP {name} rejected (CanAcceptSnap=false)"); return; }
 
         if (TryFindOverlap(out CircleCollider2D hand))
             Snap(hand);
