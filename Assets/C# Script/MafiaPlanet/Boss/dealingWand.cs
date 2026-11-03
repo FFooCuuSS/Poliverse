@@ -2,6 +2,33 @@
 using System.Collections;
 using UnityEngine;
 using DG.Tweening;
+using System.Collections.Generic;
+
+public struct ThreatBox
+{
+    public Vector2 center;
+    public Vector2 hu;   // 박스의 반 길이 벡터 1
+    public Vector2 hv;   // 박스의 반 길이 벡터 2
+
+    public bool Overlaps(Bounds b)
+    {
+        Vector2 d = (Vector2)b.center - center;
+        Vector2 e = b.extents;
+
+        if (Mathf.Abs(d.x) > Mathf.Abs(hu.x) + Mathf.Abs(hv.x) + e.x) return false;
+        if (Mathf.Abs(d.y) > Mathf.Abs(hu.y) + Mathf.Abs(hv.y) + e.y) return false;
+        if (hu.sqrMagnitude > 1e-6f && Separated(d, hu.normalized, e)) return false;
+        if (hv.sqrMagnitude > 1e-6f && Separated(d, hv.normalized, e)) return false;
+        return true;
+    }
+
+    private bool Separated(Vector2 d, Vector2 a, Vector2 e)
+    {
+        float rBox = Mathf.Abs(Vector2.Dot(hu, a)) + Mathf.Abs(Vector2.Dot(hv, a));
+        float rAabb = e.x * Mathf.Abs(a.x) + e.y * Mathf.Abs(a.y);
+        return Mathf.Abs(Vector2.Dot(d, a)) > rBox + rAabb;
+    }
+}
 
 public class dealingWand : MonoBehaviour
 {
@@ -28,6 +55,58 @@ public class dealingWand : MonoBehaviour
     private Sequence introSeq;
     private GameObject tempEffect;
 
+    public static readonly List<dealingWand> Active = new();
+    public readonly List<ThreatBox> Threats = new();
+    public float ThreatEndTime { get; private set; }
+
+    private void BuildThreats(Vector2 position, Quaternion finalRot)
+    {
+        Threats.Clear();
+
+        Collider2D col = hitCollider != null ? hitCollider : GetComponentInChildren<Collider2D>(true);
+        var box = col as BoxCollider2D;
+        if (box == null)
+        {
+            Debug.LogWarning($"[dealingWand] {name}: BoxCollider2D가 아니라 위험 영역 계산 불가");
+            return;
+        }
+
+        // 현재 포즈와 무관한 형태로 저장 (회전만 제거)
+        Quaternion inv = Quaternion.Inverse(transform.rotation);
+        Vector3 worldCenter = box.transform.TransformPoint(box.offset);
+        Vector2 localCenter = inv * (worldCenter - transform.position);
+        Vector2 localHu = inv * box.transform.TransformVector(new Vector3(box.size.x * 0.5f, 0f, 0f));
+        Vector2 localHv = inv * box.transform.TransformVector(new Vector3(0f, box.size.y * 0.5f, 0f));
+
+        // 타임라인: Fire → (시퀀스) → FireRoutine → +moveDuration → 콜라이더 ON → activeTime 유지
+        float seqLen = Mathf.Max(moveDuration, rotateDuration);
+        float enableAt = seqLen + moveDuration;
+        ThreatEndTime = Time.time + enableAt + activeTime + 0.1f;
+
+        bool moves = (targetPos - position).sqrMagnitude > 0.0001f
+                  || Quaternion.Angle(finalRot, targetRot) > 0.1f;
+        int n = moves ? Mathf.Clamp(Mathf.CeilToInt(activeTime / 0.1f), 4, 40) : 1;
+
+        for (int i = 0; i <= n; i++)
+        {
+            // FireRoutine 시작 기준 경과 시간 (콜라이더 ON 구간)
+            float tau = moveDuration + activeTime * i / n;
+            float x = Mathf.Clamp01(tau / Mathf.Max(lifeTime, 0.01f));
+            float e = Mathf.Sin(x * Mathf.PI * 0.5f);              // Ease.OutSine
+
+            Vector2 pos = Vector2.Lerp(position, targetPos, e);
+            Quaternion rot = Quaternion.Slerp(finalRot, targetRot, e);
+
+            Threats.Add(new ThreatBox
+            {
+                center = pos + (Vector2)(rot * localCenter),
+                hu = (Vector2)(rot * localHu),
+                hv = (Vector2)(rot * localHv),
+            });
+        }
+    }
+
+
     private void Start()
     {
         if (hitCollider == null)
@@ -42,6 +121,7 @@ public class dealingWand : MonoBehaviour
 
     private void OnDestroy()
     {
+        Active.Remove(this);
         // 레이저 켜진 채로 파괴돼도 카운트가 꼬이지 않게
         SetLaser(false);
     }
@@ -67,6 +147,9 @@ public class dealingWand : MonoBehaviour
         targetRot = Quaternion.AngleAxis(finalAngle + angleOffsetDeg, Vector3.forward);
 
         transform.SetPositionAndRotation(spawnPos, startRot);
+
+        BuildThreats(position, finalRot);
+        if (!Active.Contains(this)) Active.Add(this);
 
         Vector2 control = Vector2.Lerp(spawnPos, position, 0.5f)
                          + (left * curveBend)

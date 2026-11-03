@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using UnityEngine;
 
@@ -12,12 +13,31 @@ public class secondGameCommand : MonoBehaviour
     private Mirror_3_15 mirror_3_15;
 
     private bool isDemoMode = false;
+    private bool demoSuccessReported = false;
+
+    private DragAndDrop[] mirrorDragComponents;
+    private PlayerDrag[] demoPlayers;
+
+    [SerializeField] private float demoMirrorMoveDuration = 0.2f;
+    [SerializeField] private float demoMirrorAbovePlayer = 1.5f;
 
     public void SetDemoMode(bool isDemo)
     {
         isDemoMode = isDemo;
+        ApplyMirrorInputMode();
     }
 
+    private void ApplyMirrorInputMode()
+    {
+        if (mirrorDragComponents == null)
+            return;
+
+        foreach (DragAndDrop drag in mirrorDragComponents)
+        {
+            if (drag != null)
+                drag.enabled = !isDemoMode;
+        }
+    }
 
     [System.Serializable]
     public struct WandPatternData
@@ -73,12 +93,29 @@ public class secondGameCommand : MonoBehaviour
 
         if (bossRenderer != null)
             bossDefaultSprite = bossRenderer.sprite;
+
+        if (mirror != null)
+        {
+            mirrorDragComponents =
+                mirror.GetComponentsInChildren<DragAndDrop>(true);
+        }
+
+        if (stage_3_15 != null)
+        {
+            demoPlayers =
+                stage_3_15.GetComponentsInChildren<PlayerDrag>(true);
+        }
+
+        ApplyMirrorInputMode();
     }
 
     public void StartPattern()
     {
         if (isStarted) return;
+
         isStarted = true;
+        demoSuccessReported = false;
+
         StartCoroutine(PatternRoutine());
     }
 
@@ -187,37 +224,86 @@ public class secondGameCommand : MonoBehaviour
             case 3:
                 lightRemaining = 99f;
                 wandRemaining = 99f;
+
                 for (int i = 0; i < 2; i++)
                 {
                     yield return new WaitForSeconds(3f);
+
                     for (int b = 0; b < burstCount[index - 1][i]; b++)
                     {
                         var p = pattern3[indexOfPatern + b];
 
                         if (i == 0)
                         {
-                            SpawnDealingWand().Fire(p.position, p.direction, lightRemaining, wandRemaining);
+                            SpawnDealingWand().Fire(
+                                p.position, p.direction,
+                                lightRemaining, wandRemaining
+                            );
+
                             mirror_3_15.SummonTo();
                         }
                         else
                         {
-                            EndingWand endingWand = SpawnEndingWand();
-                            endingWand.Fire(p.position, p.direction, lightRemaining, wandRemaining);
-
-                            float x = mirror.transform.position.x;
-                            if (x >= -1f && x <= 1f)
+                            // 데모에서는 거울을 플레이어 위치로 이동
+                            if (isDemoMode && demoPlayers != null &&
+                                demoPlayers.Length > 0 && demoPlayers[0] != null &&
+                                mirror != null)
                             {
-                                Invoke(nameof(delayedSuccess), 3f);
-                                mirror_3_15.SetChildActive();
-                                endingWand.EnableNotify(); // 플레이어 피격 OFF
+                                // 거울은 플레이어 x에 맞추고, y는 플레이어보다 위에 배치
+                                Vector3 pPos = demoPlayers[0].transform.position;
+                                Vector3 target = new Vector3(
+                                    pPos.x,
+                                    pPos.y + demoMirrorAbovePlayer,
+                                    mirror.transform.position.z);
+
+                                mirror.transform
+                                    .DOMove(target, demoMirrorMoveDuration)
+                                    .SetEase(Ease.OutQuad)
+                                    .SetLink(mirror);
+
+                                yield return new WaitForSeconds(demoMirrorMoveDuration);
                             }
-                            // 거울 실패 시: 레이저에 닿을 때마다 PlayerDrag 쿨다운 간격으로 Miss
+
+                            EndingWand endingWand = SpawnEndingWand();
+
+                            endingWand.Fire(
+                                p.position, p.direction,
+                                lightRemaining, wandRemaining
+                            );
+
+                            if (isDemoMode)
+                            {
+                                // 데모에서는 거울 반사 성공을 한 번만 처리
+                                if (!demoSuccessReported)
+                                {
+                                    demoSuccessReported = true;
+
+                                    Invoke(nameof(delayedSuccess), 3f);
+                                    mirror_3_15.SetChildActive();
+                                }
+
+                                // 데모에서는 플레이어가 레이저에 맞지 않도록 설정
+                                endingWand.EnableNotify();
+                            }
+                            else
+                            {
+                                // 일반 모드는 기존 거울 위치로 성공 판정
+                                float x = mirror.transform.position.x;
+
+                                if (x >= -1f && x <= 1f)
+                                {
+                                    Invoke(nameof(delayedSuccess), 3f);
+                                    mirror_3_15.SetChildActive();
+                                    endingWand.EnableNotify();
+                                }
+                            }
                         }
                     }
 
                     indexOfPatern += burstCount[index - 1][i];
                     yield return new WaitForSeconds(3f);
                 }
+
                 break;
         }
     }

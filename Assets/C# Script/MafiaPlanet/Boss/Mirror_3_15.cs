@@ -5,9 +5,12 @@ using DG.Tweening;
 public class Mirror_3_15 : MonoBehaviour
 {
     public float duration;   // 이동 시간
+    public bool disableSnap;
 
     void Update()
     {
+        if (disableSnap) return;
+
         float x = transform.position.x;
         
         if (x >= -1f && x <= 1f)

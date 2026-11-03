@@ -27,11 +27,7 @@ public class Minigame_3_10_remake : MiniGameBase, IPracticeDemoInput
 
     protected override string MinigameTitle => "안전 운전";
 
-    protected override string MinigameExplain => "장애물을 피해 자동차를 움직이세요.";
-    protected override string[] AdditionalMinigameExplains => new string[]
-    {
-        "장애물을 피해 위 아래로 움직이세요."
-    };
+    protected override string MinigameExplain => "장애물을 피해 위 아래로 움직이세요.";
 
     // 직접 판정. 총 개수는 실제 라운드 수로 정산할 때 정함
     protected override bool UseRhythmJudgementScore => false;
