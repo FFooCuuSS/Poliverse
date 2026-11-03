@@ -30,7 +30,12 @@ public class weapon_3_15 : MonoBehaviour
 
     private void OnMouseDown()
     {
+        if (manager != null && manager.IsDemoMode)
+            return;
+
         gameObject.SetActive(false);
-        if (manager != null) manager.OnWeaponClicked(isMagicWand);
+
+        if (manager != null)
+            manager.OnWeaponClicked(isMagicWand);
     }
 }

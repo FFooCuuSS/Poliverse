@@ -1,6 +1,7 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 public class manager_3_15 : MonoBehaviour
 {
@@ -30,10 +31,34 @@ public class manager_3_15 : MonoBehaviour
     private weaponSpawner_3_15[] spawners = new weaponSpawner_3_15[0];
 
     private bool isDemoMode = false;
+    private PlayerDrag[] playerDrags;
+
+    [Header("Demo Settings")]
+    [SerializeField] private float demoClickInterval = 0.5f;
+    [SerializeField] private float demoMagicWandClickDelay = 0.6f;
+
+    private readonly HashSet<weapon_3_15> pendingDemoClicks =
+        new HashSet<weapon_3_15>();
+
+    private float nextDemoClickTime;
+
+    public bool IsDemoMode => isDemoMode;
 
     public void SetDemoMode(bool isDemo)
     {
         isDemoMode = isDemo;
+
+        if (playerDrags != null)
+        {
+            foreach (PlayerDrag player in playerDrags)
+            {
+                if (player != null)
+                    player.SetDemoMode(isDemo);
+            }
+        }
+
+        if (sGC != null)
+            sGC.SetDemoMode(isDemo);
     }
 
     private void Awake()
@@ -53,16 +78,28 @@ public class manager_3_15 : MonoBehaviour
         if (gamePrefabs != null && gamePrefabs.Length >= 1 && gamePrefabs[0] != null)
             spawners = gamePrefabs[0].GetComponentsInChildren<weaponSpawner_3_15>(true);
 
+        if (gamePrefabs != null && gamePrefabs.Length >= 2 && gamePrefabs[1] != null)
+            playerDrags = gamePrefabs[1].GetComponentsInChildren<PlayerDrag>(true);
+
         // StartGame 전에는 스폰 금지
         SetSpawnersBanned(true);
+        SetDemoMode(isDemoMode);
     }
+
 
     private void Update()
     {
         if (!isDemoMode || state != State.MG1)
             return;
 
-        weapon_3_15[] weapons = FindObjectsOfType<weapon_3_15>();
+        if (Time.time < nextDemoClickTime)
+            return;
+
+        if (gamePrefabs == null || gamePrefabs.Length == 0 || gamePrefabs[0] == null)
+            return;
+
+        weapon_3_15[] weapons =
+            gamePrefabs[0].GetComponentsInChildren<weapon_3_15>();
 
         foreach (weapon_3_15 weapon in weapons)
         {
@@ -73,6 +110,7 @@ public class manager_3_15 : MonoBehaviour
                 continue;
 
             DemoClickMagicWand(weapon);
+            nextDemoClickTime = Time.time + demoClickInterval;
             break;
         }
     }
@@ -83,6 +121,8 @@ public class manager_3_15 : MonoBehaviour
         if (state != State.Idle) return;
 
         wandCount = 0;
+        nextDemoClickTime = Time.time;
+
         state = State.MG1;
         SetSpawnersBanned(false);
     }
@@ -114,7 +154,30 @@ public class manager_3_15 : MonoBehaviour
         if (!weapon.IsMagicWand)
             return;
 
+        // 이미 클릭 대기 중인 마법봉이면 중복 실행 방지
+        if (pendingDemoClicks.Contains(weapon))
+            return;
+
+        pendingDemoClicks.Add(weapon);
+
+        StartCoroutine(DemoClickMagicWandDelayed(weapon));
+    }
+
+    private IEnumerator DemoClickMagicWandDelayed(weapon_3_15 weapon)
+    {
+        // 마법봉이 화면에 보이도록 잠시 대기
+        yield return new WaitForSeconds(demoMagicWandClickDelay);
+
+        pendingDemoClicks.Remove(weapon);
+
+        if (!isDemoMode || state != State.MG1 || weapon == null)
+            yield break;
+
+        if (!weapon.gameObject.activeInHierarchy)
+            yield break;
+
         OnWeaponClicked(true);
+
         weapon.gameObject.SetActive(false);
     }
 
