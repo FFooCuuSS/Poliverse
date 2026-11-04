@@ -630,6 +630,8 @@ MonoBehaviour:
   panel: {fileID: 121695402}
   arrowIcon: {fileID: 967445963}
   moveDuration: 0.25
+  toggleButtonImage: {fileID: 967445965}
+  closedSprite: {fileID: 21300000, guid: ee1e290430a2231449090c11ad7fd403, type: 3}
 --- !u!1 &202120328
 GameObject:
   m_ObjectHideFlags: 0
@@ -1823,6 +1825,7 @@ MonoBehaviour:
   modeButton: {fileID: 1682868997}
   modeButtonText: {fileID: 207316112}
   nextButton: {fileID: 1857095495}
+  endPaddingSeconds: 1
   transitionPanel: {fileID: 581463140}
   titleFadeDuration: 0.35
   transitionFadeDuration: 0.4

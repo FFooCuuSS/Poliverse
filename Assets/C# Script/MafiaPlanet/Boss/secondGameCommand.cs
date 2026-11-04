@@ -20,6 +20,8 @@ public class secondGameCommand : MonoBehaviour
 
     [SerializeField] private float demoMirrorMoveDuration = 0.2f;
     [SerializeField] private float demoMirrorAbovePlayer = 1.5f;
+    [SerializeField] private float demoPlayerBelowMirror = 1.5f;
+    private float mirrorBaseY;
 
     public void SetDemoMode(bool isDemo)
     {
@@ -105,6 +107,9 @@ public class secondGameCommand : MonoBehaviour
             demoPlayers =
                 stage_3_15.GetComponentsInChildren<PlayerDrag>(true);
         }
+
+        if (mirror != null)
+            mirrorBaseY = mirror.transform.position.y;
 
         ApplyMirrorInputMode();
     }
@@ -222,6 +227,13 @@ public class secondGameCommand : MonoBehaviour
                 break;
 
             case 3:
+                if (isDemoMode && demoPlayers != null)
+                {
+                    float ceilingY = mirrorBaseY - demoPlayerBelowMirror;
+                    foreach (var pl in demoPlayers)
+                        if (pl != null) pl.SetDodgeCeiling(ceilingY);
+                }
+
                 lightRemaining = 99f;
                 wandRemaining = 99f;
 
@@ -249,15 +261,13 @@ public class secondGameCommand : MonoBehaviour
                                 demoPlayers.Length > 0 && demoPlayers[0] != null &&
                                 mirror != null)
                             {
-                                // 거울은 플레이어 x에 맞추고, y는 플레이어보다 위에 배치
-                                Vector3 pPos = demoPlayers[0].transform.position;
-                                Vector3 target = new Vector3(
-                                    pPos.x,
-                                    pPos.y + demoMirrorAbovePlayer,
-                                    mirror.transform.position.z);
+                                PlayerDrag player = demoPlayers[0];
+
+                                float playerY = mirrorBaseY - demoPlayerBelowMirror;
+                                player.DemoMoveTo(new Vector2(player.transform.position.x, playerY), demoMirrorMoveDuration);
 
                                 mirror.transform
-                                    .DOMove(target, demoMirrorMoveDuration)
+                                    .DOMoveX(player.transform.position.x, demoMirrorMoveDuration)
                                     .SetEase(Ease.OutQuad)
                                     .SetLink(mirror);
 

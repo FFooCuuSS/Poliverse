@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PracticePanelToggle :
     MonoBehaviour
@@ -12,6 +13,13 @@ public class PracticePanelToggle :
 
     [SerializeField, Min(0f)]
     private float moveDuration = 0.25f;
+
+    [Header("Closed State Sprite")]
+    [SerializeField]
+    private Image toggleButtonImage;   // 열고 닫는 버튼의 Image
+    [SerializeField]
+    private Sprite closedSprite;       // 패널이 닫혔을 때 쓸 이미지
+    private Sprite openedSprite;       // 원래 이미지 (자동 저장)
 
     private Vector2 openedPosition;
     private Vector2 closedPosition;
@@ -38,6 +46,9 @@ public class PracticePanelToggle :
             openedPosition +
             Vector2.left *
             panel.rect.width;
+
+        if (toggleButtonImage != null)
+            openedSprite = toggleButtonImage.sprite;
 
         initialized = true;
     }
@@ -142,14 +153,20 @@ public class PracticePanelToggle :
 
     private void UpdateArrow()
     {
-        if (arrowIcon == null)
-            return;
+    //if (arrowIcon != null)
+    //{
+    //    arrowIcon.localEulerAngles =
+    //        new Vector3(
+    //            0f,
+    //            0f,
+    //            isOpened ? 0f : 180f
+    //        );
+    //}
 
-        arrowIcon.localEulerAngles =
-            new Vector3(
-                0f,
-                0f,
-                isOpened ? 0f : 180f
-            );
+        if (toggleButtonImage != null && closedSprite != null)
+        {
+            toggleButtonImage.sprite =
+                isOpened ? openedSprite : closedSprite;
+        }
     }
 }

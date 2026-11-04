@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class PlayerDrag : DragAndDrop
 {
@@ -13,7 +14,15 @@ public class PlayerDrag : DragAndDrop
     [Header("Demo Dodge")]
     [SerializeField] private float dodgeSpeed = 20f;
     [SerializeField] private float dodgeMargin = 0.6f;
+    [SerializeField] private float dodgeLookAhead = 0.6f;
+    [SerializeField] private float planHorizon = 2f;
     [SerializeField] private float searchStep = 0.4f;
+    [SerializeField] private float dodgeCenterBias = 1.0f;    // 중앙에서 먼 칸일수록 불리하게 (클수록 가운데 선호)
+    [SerializeField] private float dodgeTightPenalty = 2.0f;  // 마진이 빠듯한 칸에 주는 페널티
+    private bool forcedMove;
+    private float dodgeCeilingY = float.PositiveInfinity;
+    // 패턴 3 등에서 플레이어가 이 y보다 위로 못 가게 제한
+    public void SetDodgeCeiling(float y) => dodgeCeilingY = y;
 
     private readonly List<ThreatBox> threats = new();
     private bool hasDodgeTarget;
@@ -44,6 +53,14 @@ public class PlayerDrag : DragAndDrop
         isDemoMode = isDemo;
         isDragging = false;
         nextScanTime = 0f;
+
+        // 데모가 아니면 제한/강제 이동 상태 초기화
+        if (!isDemo)
+        {
+            dodgeCeilingY = float.PositiveInfinity;
+            forcedMove = false;
+            hasDodgeTarget = false;
+        }
     }
 
     protected override void OnMouseDown()
@@ -78,43 +95,91 @@ public class PlayerDrag : DragAndDrop
 
     private void DemoDodge()
     {
+        if (forcedMove) return;
         if (playerCollider == null) return;
 
-        // 아직 유효한 모든 레이저의 위험 영역 수집 (발사 전 경고 구간 포함)
+        float now = Time.time;
+
+        // 앞으로 planHorizon초 안에 위험해지는 영역 수집
         threats.Clear();
         foreach (var w in dealingWand.Active)
         {
-            if (w != null && Time.time <= w.ThreatEndTime)
-                threats.AddRange(w.Threats);
+            if (w == null || now > w.ThreatEndTime) continue;
+            foreach (var t in w.Threats)
+                if (t.end >= now && t.start <= now + planHorizon)
+                    threats.Add(t);
         }
 
-        if (threats.Count == 0) { hasDodgeTarget = false; return; }
-
         Bounds pb = playerCollider.bounds;
-        pb.Expand(dodgeMargin * 2f);                      // 사방 dodgeMargin만큼 여유
-        Vector3 centerOffset = pb.center - transform.position;
-        Vector3 size = pb.size;
+        Vector3 co = pb.center - transform.position;
+        Vector3 baseSize = pb.size;
+        Vector2 cur = transform.position;
 
-        // 지금 위치가 안전하면 가만히 있음
-        if (CountOverlap(pb) == 0) { hasDodgeTarget = false; return; }
+        // 위험 영역이 없으면 천장보다 위에 있을 때만 아래로 복귀
+        if (threats.Count == 0)
+        {
+            hasDodgeTarget = false;
+            if (transform.position.y > dodgeCeilingY)
+            {
+                Vector3 down = new Vector3(transform.position.x, dodgeCeilingY, transform.position.z);
+                transform.position = Vector3.MoveTowards(transform.position, down, dodgeSpeed * Time.deltaTime);
+            }
+            return;
+        }
 
-        // 목표가 없거나 목표가 더 이상 안전하지 않을 때만 재탐색
-        if (!hasDodgeTarget || CountOverlapAt(dodgeTarget, centerOffset, size) > 0)
+        Vector3 sizeBig = baseSize + Vector3.one * dodgeMargin * 2f;
+        Vector3 sizeSmall = baseSize + Vector3.one * 0.05f * 2f;
+
+        // 지금 자리가 앞으로 dodgeLookAhead초 동안 안전하면 제자리
+        if (IsSafeAt(cur, co, sizeBig, now, now + dodgeLookAhead))
+        {
+            hasDodgeTarget = false;
+            return;
+        }
+
+        // 기존 목표가 아직 유효하면 유지
+        bool keep = hasDodgeTarget && IsPathSafe(cur, dodgeTarget, co, sizeSmall);
+
+        if (!keep)
         {
             float minX = -maxX + offsetX, maxX_ = maxX + offsetX;
-            float minY = -maxY + offsetY, maxY_ = maxY + offsetY;
+            float minY = -maxY + offsetY;
+            float maxY_ = Mathf.Min(maxY + offsetY, dodgeCeilingY);
 
-            float bestScore = float.MaxValue;
-            Vector2 best = transform.position;
+            bool found = false;
+            Vector2 best = cur;
 
-            for (float x = minX; x <= maxX_; x += searchStep)
+            // 1차: 경로까지 안전한 지점 / 2차(비상): 도착 지점만 안전한 지점
+            for (int pass = 0; pass < 2 && !found; pass++)
             {
-                for (float y = minY; y <= maxY_; y += searchStep)
+                bool needPath = pass == 0;
+                float bestScore = float.MaxValue;
+
+                for (float x = minX; x <= maxX_; x += searchStep)
                 {
-                    var p = new Vector2(x, y);
-                    int ov = CountOverlapAt(p, centerOffset, size);
-                    float score = ov * 1000f + Vector2.Distance(transform.position, p);
-                    if (score < bestScore) { bestScore = score; best = p; }
+                    for (float y = minY; y <= maxY_; y += searchStep)
+                    {
+                        var p = new Vector2(x, y);
+                        float dist = Vector2.Distance(cur, p);
+
+                        // 가까움 + 화면 중앙 선호
+                        float score = dist
+                                    + dodgeCenterBias * Mathf.Abs(x - offsetX)
+                                    + dodgeCenterBias * 0.5f * Mathf.Abs(y - offsetY);
+                        if (score >= bestScore) continue;
+
+                        float tArr = now + dist / dodgeSpeed;
+                        bool okSmall = needPath
+                            ? IsPathSafe(cur, p, co, sizeSmall)
+                            : IsSafeAt(p, co, sizeSmall, tArr, tArr + dodgeLookAhead);
+                        if (!okSmall) continue;
+
+                        // 큰 마진이 안 되면 탈락시키지 않고 페널티만
+                        if (needPath && !IsPathSafe(cur, p, co, sizeBig))
+                            score += dodgeTightPenalty;
+
+                        if (score < bestScore) { bestScore = score; best = p; found = true; }
+                    }
                 }
             }
 
@@ -129,18 +194,49 @@ public class PlayerDrag : DragAndDrop
             dodgeSpeed * Time.deltaTime);
     }
 
-    private int CountOverlapAt(Vector2 pos, Vector3 centerOffset, Vector3 size)
+    public void DemoMoveTo(Vector2 pos, float duration)
     {
-        var b = new Bounds(new Vector3(pos.x, pos.y, 0f) + centerOffset, size);
-        return CountOverlap(b);
+        forcedMove = true;
+        hasDodgeTarget = false;
+
+        Vector3 target = GetConstrainedPosition(
+            transform.position,
+            new Vector3(pos.x, pos.y, transform.position.z));
+
+        transform
+            .DOMove(target, duration)
+            .SetEase(Ease.OutQuad)
+            .SetLink(gameObject);
     }
 
-    private int CountOverlap(Bounds b)
+    private bool IsSafeAt(Vector2 pos, Vector3 co, Vector3 size, float t0, float t1)
     {
-        int c = 0;
+        var b = new Bounds(new Vector3(pos.x, pos.y, 0f) + co, size);
         for (int i = 0; i < threats.Count; i++)
-            if (threats[i].Overlaps(b)) c++;
-        return c;
+        {
+            var t = threats[i];
+            if (t.end < t0 || t.start > t1) continue;
+            if (t.Overlaps(b)) return false;
+        }
+        return true;
+    }
+
+    private bool IsPathSafe(Vector2 from, Vector2 to, Vector3 co, Vector3 size)
+    {
+        float now = Time.time;
+        float dist = Vector2.Distance(from, to);
+        int steps = Mathf.Max(1, Mathf.CeilToInt(dist / 0.3f));
+
+        for (int i = 1; i <= steps; i++)
+        {
+            float k = (float)i / steps;
+            Vector2 p = Vector2.Lerp(from, to, k);
+            float tArr = now + dist * k / dodgeSpeed;
+            if (!IsSafeAt(p, co, size, tArr - 0.1f, tArr + 0.1f)) return false;
+        }
+
+        float tEnd = now + dist / dodgeSpeed;
+        return IsSafeAt(to, co, size, tEnd, tEnd + dodgeLookAhead);
     }
 
     protected override Vector3 GetConstrainedPosition(

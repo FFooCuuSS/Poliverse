@@ -7,8 +7,10 @@ using System.Collections.Generic;
 public struct ThreatBox
 {
     public Vector2 center;
-    public Vector2 hu;   // 박스의 반 길이 벡터 1
-    public Vector2 hv;   // 박스의 반 길이 벡터 2
+    public Vector2 hu;
+    public Vector2 hv;
+    public float start;   // 이 박스가 위험한 시작 시각
+    public float end;     // 위험한 끝 시각
 
     public bool Overlaps(Bounds b)
     {
@@ -80,28 +82,33 @@ public class dealingWand : MonoBehaviour
 
         // 타임라인: Fire → (시퀀스) → FireRoutine → +moveDuration → 콜라이더 ON → activeTime 유지
         float seqLen = Mathf.Max(moveDuration, rotateDuration);
+        float fireTime = Time.time;
         float enableAt = seqLen + moveDuration;
-        ThreatEndTime = Time.time + enableAt + activeTime + 0.1f;
+        ThreatEndTime = fireTime + enableAt + activeTime + 0.1f;
 
         bool moves = (targetPos - position).sqrMagnitude > 0.0001f
                   || Quaternion.Angle(finalRot, targetRot) > 0.1f;
         int n = moves ? Mathf.Clamp(Mathf.CeilToInt(activeTime / 0.1f), 4, 40) : 1;
+        float dt = moves ? activeTime / n : activeTime;
 
         for (int i = 0; i <= n; i++)
         {
-            // FireRoutine 시작 기준 경과 시간 (콜라이더 ON 구간)
             float tau = moveDuration + activeTime * i / n;
             float x = Mathf.Clamp01(tau / Mathf.Max(lifeTime, 0.01f));
-            float e = Mathf.Sin(x * Mathf.PI * 0.5f);              // Ease.OutSine
+            float e = Mathf.Sin(x * Mathf.PI * 0.5f);
 
             Vector2 pos = Vector2.Lerp(position, targetPos, e);
             Quaternion rot = Quaternion.Slerp(finalRot, targetRot, e);
+
+            float t = fireTime + seqLen + tau;
 
             Threats.Add(new ThreatBox
             {
                 center = pos + (Vector2)(rot * localCenter),
                 hu = (Vector2)(rot * localHu),
                 hv = (Vector2)(rot * localHv),
+                start = t - dt,
+                end = t + dt,
             });
         }
     }
