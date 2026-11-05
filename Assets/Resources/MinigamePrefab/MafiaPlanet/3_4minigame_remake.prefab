@@ -93,7 +93,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1467613370018308958}
-  - component: {fileID: 1808182924075416169}
   - component: {fileID: 7665086538973811038}
   - component: {fileID: 3332264832003686633}
   - component: {fileID: 4399116653634980055}
@@ -119,27 +118,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5297281673859481058}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1808182924075416169
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1757052788091671613}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b1629188335d86498e88b45a43f1b1f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cardPrefab: {fileID: 5054586211692714608, guid: a3834cbea125f5d45af149077bb53958, type: 3}
-  spawnPositions:
-  - {fileID: 1940128934615994446}
-  - {fileID: 1940128934615994446}
-  - {fileID: 1940128934615994446}
-  - {fileID: 1940128934615994446}
-  - {fileID: 1940128934615994446}
-  suspiciousFace: {fileID: 639678927378424895}
-  normalFace: {fileID: 2532920688869223799}
 --- !u!114 &7665086538973811038
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,6 +175,15 @@ MonoBehaviour:
   - {fileID: 1940128934615994446}
   suspiciousFace: {fileID: 639678927378424895}
   normalFace: {fileID: 2532920688869223799}
+  firstCardTime: 0
+  cardInterval: 1.2
+  popDuration: 0.6
+  moveDuration: 0.6
+  deckPos: {x: 7, y: -1.8, z: 0}
+  firstCardX: -4
+  cardStepX: 2
+  cardY: -1.5
+  cardPopSize: 1.2
 --- !u!1 &2532920688869223799
 GameObject:
   m_ObjectHideFlags: 0
@@ -455,6 +442,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hand: {fileID: 2636000063274541822}
+  minigame: {fileID: 0}
+  startPos: {x: -6, y: 2, z: 0}
+  stepX: 2
+  stepCount: 5
+  appearTime: 6
+  firstMoveTime: 6.6
+  moveDuration: 0.6
+  stepInterval: 1.2
 --- !u!114 &1355846984851091619
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -667,9 +662,16 @@ MonoBehaviour:
   printScoreDebugOnEnd: 1
   handTransform: {fileID: 1744755312623485662}
   handMover: {fileID: 1355846984851091619}
+  drawCard: {fileID: 4399116653634980055}
   handStopX: 6
   expectedInputCount: 5
   requiredGoodOrPerfectCount: 1
+  firstCardTime: 7.2
+  cardInterval: 1.2
+  cardCount: 5
+  perfectWindow: 0.1
+  goodWindow: 0.3
+  judgeLog: 1
   arrow: {fileID: 2636000063274541822}
 --- !u!114 &689336450955789476
 MonoBehaviour:
