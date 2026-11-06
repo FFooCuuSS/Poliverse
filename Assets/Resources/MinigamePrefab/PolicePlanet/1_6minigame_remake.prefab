@@ -53,6 +53,7 @@ MonoBehaviour:
   useRhythmJudgementScore: 1
   manualTotalNodeCount: -1
   printScoreDebugOnEnd: 1
+  judgeLog: 1
   moveSound: {fileID: 8300000, guid: e3a4bd686a82a3444881ad9301d2af41, type: 3}
   containerPrefab: {fileID: 9195015715553350291}
   policePrefab: {fileID: 3903817570018427923}
@@ -75,7 +76,7 @@ MonoBehaviour:
   - -3
   containerXMin: -7
   containerXMax: 7
-  containerStartX: 12
+  containerStartX: 15
   containerMoveTime: 1
   policeStartX: 10
   travelTime: 1
