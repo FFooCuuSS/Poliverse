@@ -1,43 +1,43 @@
 ﻿minigame,time,type,index
-01월 01일,2,GuideText,1
-01월 02일,2,GuideText,1
-01월 03일,1.5,Action,0
-01월 03일,3,Action,1
-01월 03일,5.3,Action,2
-01월 03일,7,Action,3
-01월 03일,9,Action,4
-01월 03일,11,Action,5
-01월 03일,13,Action,6
-01월 03일,4,GuideText,1
+1-1,2,GuideText,1
+1-2,2,GuideText,1
+1-3,1.5,Action,0
+1-3,3,Action,1
+1-3,5.3,Action,2
+1-3,7,Action,3
+1-3,9,Action,4
+1-3,11,Action,5
+1-3,13,Action,6
+1-3,4,GuideText,1
 1-4,4,Action,0
 1-4,5,Action,1
 1-4,5.8,Action,2
 1-4,10,Action,3
 1-4,11,Action,4
 1-4,12,Action,5
-01월 04일,4,GuideText,1
-01월 05일,8,GuideText,2
-01월 06일,7,GuideText,1
-01월 09일,2.5,GuideText,1
-01월 10일,6,GuideText,1
-01월 10일,10,GuideText,2
-02월 01일,2,GuideText,1
-02월 02일,2,GuideText,1
-02월 03일,2,GuideText,1
-02월 04일,3,GuideText,1
-02월 05일,3,GuideText,1
-02월 06일,2.5,GuideText,1
-02월 12일,3,GuideText,1
-03월 02일,1.5,GuideText,1
-03월 04일,3,GuideText,1
-03월 05일,4,GuideText,1
-03월 06일,4,GuideText,1
-03월 07일,4,GuideText,1
-03월 08일,3,GuideText,1
-03월 09일,8,GuideText,1
-03월 11일,3,GuideText,1
-03월 12일,3,GuideText,1
-03월 13일,3,GuideText,1
-03월 14일,3,GuideText,1
-03월 15일,8,GuideText,1
-03월 15일,50,GuideText,2
+1-4,4,GuideText,1
+1-5,8,GuideText,2
+1-6,7,GuideText,1
+1-9,2.5,GuideText,1
+1-10,6,GuideText,1
+1-10,10,GuideText,2
+2-1,2,GuideText,1
+2-2,2,GuideText,1
+2-3,2,GuideText,1
+2-4,3,GuideText,1
+2-5,3,GuideText,1
+2-6,2.5,GuideText,1
+2-12,3,GuideText,1
+3-2,1.5,GuideText,1
+3-4,3,GuideText,1
+3-5,4,GuideText,1
+3-6,4,GuideText,1
+3-7,4,GuideText,1
+3-8,3,GuideText,1
+3-9,8,GuideText,1
+3-11,3,GuideText,1
+3-12,3,GuideText,1
+3-13,3,GuideText,1
+3-14,3,GuideText,1
+3-15,8,GuideText,1
+3-15,50,GuideText,2
