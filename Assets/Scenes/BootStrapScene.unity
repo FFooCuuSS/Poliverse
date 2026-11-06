@@ -631,7 +631,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firstSceneName: MainScene
-  debugJumpEnabled: 1
+  debugJumpEnabled: 0
   debugPlanetId: 3
   debugMinigameNumber: 4
   minigameSceneName: MinigameLoad
