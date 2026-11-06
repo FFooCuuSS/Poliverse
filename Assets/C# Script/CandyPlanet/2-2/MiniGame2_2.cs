@@ -96,21 +96,11 @@ public class MiniGame2_2 : MiniGameBase, IPracticeDemoInput
         if (actionType != "Input" && actionType != "PatternStart")
             return;
 
-        if (ended)
-            return;
+        if (ended) return;
 
-        Debug.Log($"[2-2 Demo] ExecutePracticeAction 호출 - Index={actionIndex}, Type={actionType}");
+        Debug.Log($"[2-2 Demo] Action Index={actionIndex}, Type={actionType}");
 
-        // 플레이어의 이동 스크립트를 찾아 데모 강제 이동 실행 (고드름 타이밍에 맞춰 회피 동작 수행)
-        PlayerMoveByClick playerMove = GetComponentInChildren<PlayerMoveByClick>(true);
-        if (playerMove != null)
-        {
-            playerMove.ForceMoveForDemo();
-        }
-        else
-        {
-            // 플레이어를 찾지 못한 경우 기본 입력 처리
-            base.OnPlayerInput("Input");
-        }
+        // 실제 이동은 Icicle의 beatCount == 2 시점에
+        // OnMoveAllowed 이벤트를 통해 실행한다.
     }
 }

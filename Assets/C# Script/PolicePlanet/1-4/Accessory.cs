@@ -26,6 +26,8 @@ public class Accessory : MonoBehaviour
     private Tween disableTween;
     private Tween[] fadeTweens;
 
+    private Tween slideTween;
+
     private void Awake()
     {
         drag = GetComponent<DragAndDrop>();
@@ -184,6 +186,7 @@ public class Accessory : MonoBehaviour
     {
         removeDelayTween?.Kill();
         disableTween?.Kill();
+        slideTween?.Kill(); // 추가
 
         if (fadeTweens != null)
         {
@@ -207,5 +210,31 @@ public class Accessory : MonoBehaviour
 
         if (blocked)
             LockInput();
+    }
+
+    // 데모 모드에서 악세서리를 좌우로 슬라이드한 뒤 제거
+    public void DemoSlideAndRemove(float direction)
+    {
+        if (IsRemoved) return;
+
+        IsRemoved = true;
+        IsInteractableNow = false;
+        LockInput();
+
+        KillTweens();
+
+        float slideDistance = 5f;
+        float slideDuration = 0.35f;
+
+        float targetX = transform.position.x
+                        + Mathf.Sign(direction) * slideDistance;
+
+        slideTween = transform.DOMoveX(targetX, slideDuration)
+            .SetEase(Ease.InQuad)
+            .OnComplete(() =>
+            {
+                if (this != null && gameObject != null)
+                    FadeOutAndDisable(0.15f);
+            });
     }
 }

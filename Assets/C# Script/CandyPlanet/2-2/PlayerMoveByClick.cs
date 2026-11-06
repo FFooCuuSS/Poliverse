@@ -34,8 +34,23 @@ public class PlayerMoveByClick : MonoBehaviour
         Icicle.OnMoveBlocked -= HandleMoveBlocked;
         Icicle.OnMoveAllowed -= HandleMoveAllowed;
     }
-    private void HandleMoveBlocked() => canMove = false;
-    private void HandleMoveAllowed() { canMove = true; hasMovedThisCycle = false; }
+
+    private void HandleMoveBlocked()
+    {
+        canMove = false;
+    }
+
+    private void HandleMoveAllowed()
+    {
+        canMove = true;
+        hasMovedThisCycle = false;
+
+        // 데모 모드에서는 고드름의 회피 가능 박자에 맞춰 자동 이동
+        if (minigame != null && minigame.IsDemoMode)
+        {
+            ForceMoveForDemo();
+        }
+    }
 
     void Update()
     {
@@ -91,18 +106,15 @@ public class PlayerMoveByClick : MonoBehaviour
     // 데모 모드 전용 강제 이동 함수 추가
     public void ForceMoveForDemo()
     {
-        if (isMoving) return;
+        if (isMoving || hasMovedThisCycle) return;
 
-        // 데모 모드일 때는 제약 조건(canMove 등)을 무시하고 강제로 이동 및 판정 실행
         targetPos = transform.position + Vector3.right * moveX;
+
         isMoving = true;
         hasMovedThisCycle = true;
         canMove = false;
 
         if (minigame != null)
-        {
-            // 성공 판정 및 리듬 입력 전달
             minigame.OnPlayerInput("Input");
-        }
     }
 }
