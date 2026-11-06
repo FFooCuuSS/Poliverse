@@ -77,7 +77,7 @@ public class Icicle : MonoBehaviour
         {
             beatCount = currentBeat;
             Debug.Log($"고드름 박자: {beatCount}");
-            if(beatCount == 2)
+            if(beatCount == 3)
             {
                 RaiseMoveAllowed();
             }

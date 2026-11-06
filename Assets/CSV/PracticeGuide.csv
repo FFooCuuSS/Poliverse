@@ -9,12 +9,12 @@
 01월 03일,11,Action,5
 01월 03일,13,Action,6
 01월 03일,4,GuideText,1
-01월 04일,4,Action,0
-01월 04일,5,Action,1
-01월 04일,5.8,Action,2
-01월 04일,10,Action,3
-01월 04일,11,Action,4
-01월 04일,12,Action,5
+1-4,4,Action,0
+1-4,5,Action,1
+1-4,5.8,Action,2
+1-4,10,Action,3
+1-4,11,Action,4
+1-4,12,Action,5
 01월 04일,4,GuideText,1
 01월 05일,8,GuideText,2
 01월 06일,7,GuideText,1
@@ -39,5 +39,5 @@
 03월 12일,3,GuideText,1
 03월 13일,3,GuideText,1
 03월 14일,3,GuideText,1
-3-15,8,GuideText,1
-3-15,50,GuideText,2
+03월 15일,8,GuideText,1
+03월 15일,50,GuideText,2

@@ -337,15 +337,15 @@ public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
         switch (roundLocalIndex)
         {
             case 0:
-                RemoveAccessoryByType(Accessory.AccessoryType.Hat);
+                RemoveAccessoryByType(Accessory.AccessoryType.Hat, -1f);
                 break;
 
             case 1:
-                RemoveAccessoryByType(Accessory.AccessoryType.Glasses);
+                RemoveAccessoryByType(Accessory.AccessoryType.Glasses, 1f);
                 break;
 
             case 2:
-                RemoveAccessoryByType(Accessory.AccessoryType.Mustache);
+                RemoveAccessoryByType(Accessory.AccessoryType.Mustache, -1f);
                 break;
 
             default:
@@ -357,15 +357,21 @@ public class Minigame_1_4 : MiniGameBase, IPracticeDemoInput
         CheckRoundEnd();
     }
 
-    private void RemoveAccessoryByType(Accessory.AccessoryType type)
+    private void RemoveAccessoryByType(
+    Accessory.AccessoryType type,
+    float direction)
     {
-        var targetAcc = orderedAccessories.Find(acc => acc != null && acc.Type == type && !acc.IsRemoved);
+        var targetAcc = orderedAccessories.Find(
+            acc => acc != null &&
+                   acc.Type == type &&
+                   !acc.IsRemoved
+        );
+
         if (targetAcc != null)
         {
-            targetAcc.SetInteractableNow(true);
-            targetAcc.RemoveWithDelay(0f);
-            targetAcc.SetInteractableNow(false);
-            Debug.Log($"[1-4 Demo] 악세서리 자동 제거: {type}");
+            targetAcc.DemoSlideAndRemove(direction);
+
+            Debug.Log($"[1-4 Demo] 악세서리 슬라이드 제거: {type}");
         }
     }
 }
