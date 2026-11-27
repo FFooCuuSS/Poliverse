@@ -1,15 +1,15 @@
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Minigame4_6 : MiniGameBase
 {
     [Header("Waste")]
-    public GameObject waste1Prefab;   // 1번 눌러야 부서지는 폐기물
-    public GameObject waste2Prefab;   // 2번 눌러야 부서지는 폐기물
+    public GameObject waste1Prefab;   // 1번 눌러야 부서지는 폐기물 (Show1)
+    public GameObject waste2Prefab;   // 2번 눌러야 부서지는 폐기물 (Show2)
     public Transform spawnPoint;      // 오른쪽 화면 밖
-    public Transform centerPoint;     // 프레스 아래
-
-    public float arriveDuration = 1f;
+    public Transform leftEndPoint;    // 왼쪽 끝 (여기에 닿으면 사라짐)
+    [Tooltip("Show 후 프레스 가운데에 도착하기까지 걸리는 시간(초)")]
+    public float travelTime = 2f;
 
     [Header("Press")]
     public SpriteRenderer pressRenderer;
@@ -18,22 +18,23 @@ public class Minigame4_6 : MiniGameBase
     [Tooltip("내려찍은 뒤 다음 클릭까지 막는 시간 (연타 방지)")]
     public float pressDelay = 0.3f;
 
-    [Header("Exit")]
-    public Transform exitPoint;      // 왼쪽 화면 밖 (CenterPoint와 같은 Y)
-    public float exitDuration = 0.5f;
-
     [Header("Sound")]
     public AudioSource audioSource;
     public AudioClip sfxPress;
 
-    [Header("Debug")]
-    [SerializeField] private bool timingLog = true;
-
-    // 판정이 안 눌린 채 오래 걸리지 않도록 판정 범위를 좁힌다 (Good 범위 0.3초보다 크게)
-    public override float hitWindowOverride => 0.4f;
-
     private bool pressReady = true;
-    private Waste4_6 lastSpawned;
+
+    [Header("Press Zone")]
+    [Tooltip("프레스 안쪽을 나타내는 Collider2D (Is Trigger 체크). 프레스의 자식에 두면 위치를 옮겨도 따라가요")]
+    public Collider2D pressZone;
+
+    private readonly List<Collider2D> hits = new List<Collider2D>();
+    private readonly HashSet<Waste4_6> hitWastes = new HashSet<Waste4_6>();
+
+
+    private readonly Queue<Waste4_6> waiting = new Queue<Waste4_6>();
+
+    private readonly Queue<Waste4_6> judging = new Queue<Waste4_6>();
 
     protected override float TimerDuration => 20f;
     protected override string MinigameTitle => "폐기물 처리";
@@ -43,17 +44,7 @@ public class Minigame4_6 : MiniGameBase
         "폐기물에 맞는 횟수만큼 타이밍에 맞춰 프레스를 누르세요."
     };
 
-    // 판정 단계에서 앞쪽 폐기물부터 차례로 판정을 받는다
-    private readonly Queue<Waste4_6> queue = new Queue<Waste4_6>();
-
-    public override void StartGame()
-    {
-        base.StartGame();
-        queue.Clear();
-        pressReady = true;
-        lastSpawned = null;
-        SetPressSprite(pressUpSprite);
-    }
+    public override float hitWindowOverride => 0.4f;
 
     public override void OnRhythmEvent(string action)
     {
@@ -66,51 +57,68 @@ public class Minigame4_6 : MiniGameBase
             case "Show2":
                 Spawn(waste2Prefab);
                 break;
-            case "Input":
-                LogGap();
+
+            case "Move":
+                ReleaseFront();
                 break;
         }
     }
 
     private void Spawn(GameObject prefab)
     {
-        if (prefab == null || spawnPoint == null || centerPoint == null) return;
+        if (prefab == null || spawnPoint == null || leftEndPoint == null) return;
 
         var go = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
         var w = go.GetComponent<Waste4_6>();
-        if (w == null) return;
-
-        w.Init(centerPoint.position, arriveDuration);
-        queue.Enqueue(w);
-        lastSpawned = w;
+        float stopX = pressZone.bounds.center.x;
+        float speed = (spawnPoint.position.x - stopX) / travelTime;
+        if (w != null) w.Init(speed, leftEndPoint.position.x, stopX);
+        if (w != null) waiting.Enqueue(w);
+        if (w != null) judging.Enqueue(w);
     }
+
+    public override void StartGame()
+    {
+        base.StartGame();
+        pressReady = true;
+        SetPressSprite(pressUpSprite);
+        judging.Clear();
+    }
+
+    [Header("Debug")]
+    public bool autoPlay;
+    public float autoOffset;
+    private Waste4_6 autoWaste;
+    private int autoIndex = -1;
 
     private void Update()
     {
         if (IsInputLocked || !pressReady) return;
-        if (!Input.GetMouseButtonDown(0)) return;
+        if (!Input.GetMouseButtonDown(0) && !AutoShouldPress()) return;
+        DoPress();
+    }
 
+    private bool AutoShouldPress()
+    {
+        if (!autoPlay || judging.Count == 0) return false;
+        var w = judging.Peek();
+        if (w == autoWaste && w.PressCount == autoIndex) return false;
+        float target = w.PressCount == 0 ? 1f : 1.5f;
+        if (AudioSettings.dspTime < w.ArriveDsp + target + autoOffset) return false;
+        autoWaste = w;
+        autoIndex = w.PressCount;
+        return true;
+    }
+
+    private void DoPress()
+    {
         pressReady = false;
         SetPressSprite(pressDownSprite);
         PlaySfx(sfxPress);
-        OnPlayerInput();
+        if (judging.Count > 0) OnPlayerInput();
 
         CancelInvoke(nameof(ReleasePress));
         Invoke(nameof(ReleasePress), pressDelay);
-    }
-
-    public override void OnJudgement(JudgementResult judgement)
-    {
-        base.OnJudgement(judgement);   // 점수 집계라서 반드시 호출
-        if (queue.Count == 0) return;
-
-        var w = queue.Peek();
-        if (w == null) { queue.Dequeue(); return; }
-        if (!w.AddJudgement(judgement)) return;
-
-        queue.Dequeue();
-        Vector3 exitPos = exitPoint != null ? exitPoint.position : w.transform.position + Vector3.left * 10f;
-        w.Resolve(exitPos, exitDuration);
     }
 
     private void ReleasePress()
@@ -129,10 +137,18 @@ public class Minigame4_6 : MiniGameBase
         if (audioSource != null && clip != null) audioSource.PlayOneShot(clip);
     }
 
-    // 도착~Input 간격이 기획서대로인지 확인하는 로그 (A는 1.00, B는 1.00과 1.50)
-    private void LogGap()
+    public override void OnJudgement(JudgementResult judgement)
     {
-        if (!timingLog || lastSpawned == null || !lastSpawned.Arrived) return;
-        Debug.Log($"[4-6] Input: 도착 후 {AudioSettings.dspTime - lastSpawned.ArrivedDsp:F2}초");
+        base.OnJudgement(judgement);
+        if (judging.Count == 0) return;
+
+        int points = judgement == JudgementResult.Perfect ? 2 : judgement == JudgementResult.Good ? 1 : 0;
+        if (judging.Peek().AddJudgement(points)) judging.Dequeue();
+    }
+
+    private void ReleaseFront()
+    {
+        Debug.Log($"[4-6] Move 신호, 대기 중 {waiting.Count}개");
+        if (waiting.Count > 0) waiting.Dequeue().Release();
     }
 }

@@ -1,99 +1,106 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Waste4_6 : MonoBehaviour
 {
-    [Tooltip("부수는 데 필요한 프레스 횟수 (1번용 프리팹은 1, 2번용은 2)")]
-    public int requiredPresses = 1;
+    public double ArriveDsp => startDsp + arriveTime;
+    public int PressCount => pressCount;
 
-    [Header("Sprites")]
-    public SpriteRenderer sr;
-    public Sprite normalSprite;    // 멀쩡한 상태
-    public Sprite damagedSprite;   // 약간 부서진 상태
-    public Sprite brokenSprite;    // 완전히 부서진 상태
+    [SerializeField] private int requiredPresses = 1;
+    private int pressCount;
+    private int score;
 
-    private enum Phase { Entering, Waiting, Exiting }
-    private Phase phase = Phase.Entering;
+    [SerializeField] private Sprite[] stageSprites;
 
+    private SpriteRenderer sr;
     private Vector3 startPos;
-    private Vector3 endPos;
-    private double phaseStartDsp;
-    private float duration = 1f;
-    private readonly List<MiniGameBase.JudgementResult> results = new List<MiniGameBase.JudgementResult>();
+    private double startDsp;
+    private float speed;
+    private float endX;
+    private float stopX;
+    private bool released;
+    private double releaseDsp;
+    private float arriveTime;
+    private float yOffset;
 
-    public bool Arrived => phase != Phase.Entering;
-    public double ArrivedDsp { get; private set; }
+    public int Stage { get; private set; }
 
     private void Awake()
     {
-        if (sr == null) sr = GetComponentInChildren<SpriteRenderer>();
+        sr = GetComponent<SpriteRenderer>();
     }
 
-    public void Init(Vector3 center, float arriveDuration)
+    public void Init(float moveSpeed, float leftEndX, float stopPointX)
     {
+        speed = moveSpeed;
+        endX = leftEndX;
+        stopX = stopPointX;
         startPos = transform.position;
-        endPos = center;
-        duration = Mathf.Max(0.01f, arriveDuration);
-        phaseStartDsp = AudioSettings.dspTime;
-        phase = Phase.Entering;
-        ApplySprite(normalSprite);
+        startDsp = AudioSettings.dspTime;
+        arriveTime = Mathf.Max(0f, (startPos.x - stopX) / speed);
+        Debug.Log($"[4-6] 도착까지 {arriveTime:F3}초");
+        Stage = 0;
+        ApplySprite();
+    }
+
+    public void Release()
+    {
+        if (released) return;
+        released = true;
+        releaseDsp = AudioSettings.dspTime;
+    }
+
+    public void AddStage()
+    {
+        Stage = Mathf.Min(Stage + 1, stageSprites.Length - 1);
+        ApplySprite();
+    }
+
+    private void ApplySprite()
+    {
+        Sprite s = stageSprites[Stage];
+        sr.sprite = s;
+        yOffset = (stageSprites[0].bounds.min.y - s.bounds.min.y) * sr.transform.lossyScale.y;
+        Debug.Log($"[4-6] 폐기물 결과: 점수 {score}/{requiredPresses * 2} → 상태 {Stage}");
     }
 
     private void Update()
     {
-        if (phase == Phase.Waiting) return;
-
-        float t = (float)((AudioSettings.dspTime - phaseStartDsp) / duration);
-
-        if (phase == Phase.Entering)
+        float t = (float)(AudioSettings.dspTime - startDsp);
+        float x;
+        if (t < arriveTime) x = startPos.x - speed * t;
+        else if (!released) x = stopX;
+        else
         {
-            if (t >= 1f) { transform.position = endPos; ArrivedDsp = phaseStartDsp + duration; phase = Phase.Waiting; return; }
-            transform.position = Vector3.Lerp(startPos, endPos, t);
-            return;
+            double leaveStart = System.Math.Max(releaseDsp, startDsp + arriveTime);
+            x = stopX - speed * (float)(AudioSettings.dspTime - leaveStart);
         }
 
-        // Exiting
-        if (t >= 1f) { Destroy(gameObject); return; }
-        transform.position = Vector3.Lerp(startPos, endPos, t);
+        Vector3 p = startPos;
+        p.x = x;
+        p.y += yOffset;
+        transform.position = p;
+
+        if (x <= endX) Destroy(gameObject);
     }
 
-    // 판정 하나를 받는다. 필요한 횟수가 다 모이면 true
-    public bool AddJudgement(MiniGameBase.JudgementResult result)
+    public bool AddJudgement(int points)
     {
-        results.Add(result);
-        return results.Count >= requiredPresses;
-    }
-
-    // 최종 상태 스프라이트를 정하고 왼쪽으로 내보낸다
-    public void Resolve(Vector3 exitPos, float exitDuration)
-    {
-        ApplySprite(GetFinalSprite());
-
-        startPos = transform.position;
-        endPos = exitPos;
-        duration = Mathf.Max(0.01f, exitDuration);
-        phaseStartDsp = AudioSettings.dspTime;
-        phase = Phase.Exiting;
-    }
-
-    private Sprite GetFinalSprite()
-    {
-        int perfect = 0;
-        int miss = 0;
-
-        foreach (var r in results)
+        pressCount++;
+        score += points;
+        if (pressCount < requiredPresses)
         {
-            if (r == MiniGameBase.JudgementResult.Perfect) perfect++;
-            else if (r == MiniGameBase.JudgementResult.Miss) miss++;
+            if (points > 0)
+            {
+                Stage = 1;
+                ApplySprite();
+            }
+            return false;
         }
 
-        if (perfect == results.Count) return brokenSprite;    // 전부 Perfect
-        if (miss == results.Count) return normalSprite;       // 전부 Miss
-        return damagedSprite;                                  // 나머지 조합
-    }
-
-    private void ApplySprite(Sprite s)
-    {
-        if (sr != null && s != null) sr.sprite = s;
+        if (score >= requiredPresses * 2) Stage = 2;
+        else if (score <= 0) Stage = 0;
+        else Stage = 1;
+        ApplySprite();
+        return true;
     }
 }
