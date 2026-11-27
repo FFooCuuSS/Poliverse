@@ -1,9 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class Minigame_4_2 : MiniGameBase
 {
+    [Header("Success Effect")]
+    public SpriteRenderer successEffect;
+    [Tooltip("효과가 최종적으로 커지는 배율 (1이면 크기 변화 없음)")]
+    public float effectEndScale = 1.3f;
+    public float effectDuration = 0.4f;
+
+    private Vector3 effectBaseScale;
+    private bool effectReady;
+
+    private DotMove_4_2 targetDot;
+
     [Header("Dot Prefabs")]
     public GameObject yellowDotPrefab;
     public GameObject redDotPrefab;
@@ -39,6 +51,8 @@ public class Minigame_4_2 : MiniGameBase
     {
         base.StartGame();
         inputOpen = false;
+        HideEffect();
+        targetDot = null;
     }
 
     public override void OnRhythmEvent(string action)
@@ -73,6 +87,8 @@ public class Minigame_4_2 : MiniGameBase
         base.OnJudgement(judgement);   // 점수 집계라서 반드시 호출
         inputOpen = false;
 
+        if (judgement != JudgementResult.Miss) PlaySuccessEffect();
+
         if (playerRenderer == null) return;
 
         Sprite s = judgement == JudgementResult.Miss ? damageSprite : attackSprite;
@@ -103,7 +119,10 @@ public class Minigame_4_2 : MiniGameBase
 
             // 도착 한 칸 전부터 입력을 연다
             if (d.Step == arriveStep - 1)
+            {
                 inputOpen = true;
+                targetDot = d;
+            }
         }
     }
 
@@ -123,5 +142,48 @@ public class Minigame_4_2 : MiniGameBase
             OnPlayerInput();
             inputOpen = false;
         }
+    }
+
+    private void PlaySuccessEffect()
+    {
+        if (successEffect == null) return;
+
+        if (!effectReady) { effectBaseScale = successEffect.transform.localScale; effectReady = true; }
+
+        Transform t = successEffect.transform;
+        t.DOKill();
+        successEffect.DOKill();
+
+        // 처음 상태로 맞추고 보이게 한 뒤, 커지면서 투명해진다
+        t.localScale = effectBaseScale;
+        SetEffectAlpha(1f);
+        if (targetDot != null)
+        {
+            Vector3 pos = targetDot.transform.position;
+            pos.z = t.position.z;
+            t.position = pos;
+        }
+        successEffect.gameObject.SetActive(true);
+
+        t.DOScale(effectBaseScale * effectEndScale, effectDuration).SetEase(Ease.OutQuad).SetLink(successEffect.gameObject);
+        successEffect.DOFade(0f, effectDuration).SetEase(Ease.InQuad).SetLink(successEffect.gameObject).OnComplete(HideEffect);
+    }
+
+    private void HideEffect()
+    {
+        if (successEffect == null) return;
+
+        successEffect.DOKill();
+        successEffect.transform.DOKill();
+
+        if (effectReady) successEffect.transform.localScale = effectBaseScale;
+        successEffect.gameObject.SetActive(false);
+    }
+
+    private void SetEffectAlpha(float a)
+    {
+        Color c = successEffect.color;
+        c.a = a;
+        successEffect.color = c;
     }
 }
